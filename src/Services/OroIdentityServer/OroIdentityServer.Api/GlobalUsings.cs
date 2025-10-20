@@ -4,3 +4,4 @@
 // See the LICENSE file in the project root for details.
 global using OroIdentityServer.BuildingBlocks.Loggers;
 global using OroIdentityServer.Services.OroIdentityServer.Infraestructure;
+global using OroCQRS.Core.Extensions;

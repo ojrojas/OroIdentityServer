@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.AddServiceDefaults();
-builder.AddBaseCqrsExtensions();
+builder.Services.AddCqrsHandlers();
 
 var app = builder.Build();
 

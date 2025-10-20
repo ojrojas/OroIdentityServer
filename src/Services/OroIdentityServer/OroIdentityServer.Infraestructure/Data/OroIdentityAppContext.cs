@@ -4,11 +4,20 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Infraestructure;
 
-public class OroIdentityAppContext(DbContextOptions<OroIdentityAppContext> options) : DbContext(options)
+public class OroIdentityAppContext: AuditableDbContext
 {
+    public OroIdentityAppContext(
+        DbContextOptions<OroIdentityAppContext> options, IOptions<UserInfo> optionsUser) 
+        : base(options, optionsUser)
+    {
+
+    }
     
     public DbSet<User> Users { get; set; }
     public DbSet<IdentificationType> IdentificationTypes { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<RoleClaim> RoleClaims { get; set; }
+    
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
