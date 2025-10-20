@@ -1,0 +1,17 @@
+@OroIdentityServer.Api_HostAddress = https://localhost:7280
+
+GET {{OroIdentityServer.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+
+POST {{OroIdentityServer.Api_HostAddress}}/api/users
+Content-Type: application/json 
+
+{
+    "name": "Jane Doe",
+    "email": "jane.doe@example.com"
+}
+
+###
