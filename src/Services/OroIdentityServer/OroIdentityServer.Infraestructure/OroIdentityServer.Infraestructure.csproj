@@ -11,5 +11,9 @@
     <ProjectReference Include="..\OroIdentityServer.Core\OroIdentityServer.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="OpenIddict.EntityFrameworkCore" />
+  </ItemGroup>
+
 
 </Project>

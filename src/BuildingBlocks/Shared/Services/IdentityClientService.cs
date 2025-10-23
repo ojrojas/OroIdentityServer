@@ -9,7 +9,7 @@ public class IdentityClientService(HttpClient httpClient, ILogger<IdentityClient
     private readonly HttpClient _httpClient = httpClient;
     private readonly ILogger<IdentityClientService> _logger = logger;
 
-    public async ValueTask<RoleInfo?> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default)
+    public async Task<RoleInfo?> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation($"Get role by id request to identity server {roleId}");
         var response = await _httpClient.GetAsync($"api/getrolebyid/{roleId}", cancellationToken);
@@ -20,7 +20,7 @@ public class IdentityClientService(HttpClient httpClient, ILogger<IdentityClient
         return roleInfo;
     }
 
-    public async ValueTask<UserInfo?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<UserInfo?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation($"Get user by id request to identity server {userId}");
 
@@ -32,7 +32,7 @@ public class IdentityClientService(HttpClient httpClient, ILogger<IdentityClient
         return userInfo;
     }
 
-    public async ValueTask<IEnumerable<Guid>> GetUserRoleIdsAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Guid>> GetUserRoleIdsAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation($"Get roles ids by id user request to identity server {userId}");
 

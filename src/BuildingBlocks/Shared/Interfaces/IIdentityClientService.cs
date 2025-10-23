@@ -12,7 +12,7 @@ public interface IIdentityClientService
     /// <param name="userId">User identifier.</param>
     /// <param name="cancellationToken">Token operation cancellation .</param>
     /// <returns>UserInfo: user related information</returns>
-    ValueTask<UserInfo?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<UserInfo?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get Roles ids by user id request
@@ -20,7 +20,7 @@ public interface IIdentityClientService
     /// <param name="userId">UserId</param>
     /// <param name="cancellationToken">Token operation cancellation</param>
     /// <returns>RoleId collection</returns>
-    ValueTask<IEnumerable<Guid>> GetUserRoleIdsAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Guid>> GetUserRoleIdsAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get role info by role id
@@ -28,5 +28,5 @@ public interface IIdentityClientService
     /// <param name="roleId">RoleId</param>
     /// <param name="cancellationToken">Token operation cancellation</param>
     /// <returns>Get Roleinfo</returns>
-    ValueTask<RoleInfo?> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default);
+    Task<RoleInfo?> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default);
 }

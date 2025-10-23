@@ -8,3 +8,7 @@ global using OroIdentityServer.Services.OroIdentityServer.Core.Models;
 global using OroIdentityServer.BuildingBlocks.Shared.Data;
 global using Microsoft.Extensions.Options;
 global using OroIdentityServer.BuildingBlocks.Shared.Options;
+global using OroIdentityServer.BuildingBlocks.Shared.Entities;
+global using System.Linq.Expressions;
+global using OroIdentityServer.BuildingBlocks.Shared.Enums;
+global using OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Interfaces;
