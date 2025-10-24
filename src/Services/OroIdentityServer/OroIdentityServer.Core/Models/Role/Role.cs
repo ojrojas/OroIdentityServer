@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class Role : BaseEntity<Role, Guid>, IAuditableEntity
+public class Role : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
 {
     private Role()
     {

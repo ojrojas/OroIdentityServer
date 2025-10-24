@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class IdentificationType : BaseEntity<IdentificationType, Guid>, IAuditableEntity
+public class IdentificationType : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
 {
     private IdentificationType()
     {

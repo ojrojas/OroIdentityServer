@@ -5,36 +5,50 @@
 
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
-public class IdentificationTypeRepository(DbContext context)
+public class IdentificationTypeRepository(
+    ILogger<IdentificationTypeRepository> logger, IRepository<IdentificationType> repository)
 : IIdentificationTypeRepository
 {
-    public Task AddAsync(Role entity)
+
+
+    public async Task AddIdentificationTypeAsync(IdentificationType identificationType, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering AddIdentificationTypeAsync");
+        await repository.AddAsync(identificationType, cancellationToken);
+        logger.LogInformation("Exiting AddIdentificationTypeAsync");
     }
 
-    public Task DeleteAsync(Role entity)
+    public async Task DeleteIdentificationTypeAsync(Guid id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering DeleteIdentificationTypeAsync with id: {Id}", id);
+        var identificationType = await repository.GetByIdAsync(id);
+        if (identificationType != null)
+        {
+            await repository.DeleteAsync(identificationType, cancellationToken);
+        }
+        logger.LogInformation("Exiting DeleteIdentificationTypeAsync");
     }
 
-    public Task<IEnumerable<Role>> FindAsync(Expression<Func<Role, bool>> predicate)
+    public async Task<IEnumerable<IdentificationType>> GetAllIdentificationTypesAsync()
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering GetAllIdentificationTypesAsync");
+        var result = await repository.GetAllAsync();
+        logger.LogInformation("Exiting GetAllIdentificationTypesAsync");
+        return result;
     }
 
-    public Task<IEnumerable<Role>> GetAllAsync()
+    public async Task<IdentificationType?> GetIdentificationTypeByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering GetIdentificationTypeByIdAsync with id: {Id}", id);
+        var result = await repository.GetByIdAsync(id);
+        logger.LogInformation("Exiting GetIdentificationTypeByIdAsync");
+        return result;
     }
 
-    public Task<Role?> GetByIdAsync(Guid id)
+    public async Task UpdateIdentificationTypeAsync(IdentificationType identificationType, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task UpdateAsync(Role entity)
-    {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering UpdateIdentificationTypeAsync");
+        await repository.UpdateAsync(identificationType, cancellationToken);
+        logger.LogInformation("Exiting UpdateIdentificationTypeAsync");
     }
 }

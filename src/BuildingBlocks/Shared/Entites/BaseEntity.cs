@@ -14,8 +14,3 @@ public abstract class BaseEntity<TId> where TId : struct, IEquatable<TId>
     public DateTimeOffset? ModifiedOn { get; set; }
     public EntityBaseState State { get; set; } = EntityBaseState.ACTIVE;
 }
-
-public abstract class BaseEntity<T, TId> where T : BaseEntity<T, TId>
-{
-    public TId Id { get; set; } = default!;
-}

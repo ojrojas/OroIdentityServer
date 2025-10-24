@@ -4,7 +4,11 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Interfaces;
 
-public interface IIdentificationTypeRepository: IRepository<Role>
+public interface IIdentificationTypeRepository
 {
-    
+    Task AddIdentificationTypeAsync(IdentificationType identificationType, CancellationToken cancellationToken);
+    Task UpdateIdentificationTypeAsync(IdentificationType identificationType, CancellationToken cancellationToken);
+    Task DeleteIdentificationTypeAsync(Guid id, CancellationToken cancellationToken);
+    Task<IdentificationType?> GetIdentificationTypeByIdAsync(Guid id);
+    Task<IEnumerable<IdentificationType>> GetAllIdentificationTypesAsync();
 }

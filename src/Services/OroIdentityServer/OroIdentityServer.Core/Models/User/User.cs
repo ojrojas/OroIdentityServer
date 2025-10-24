@@ -6,7 +6,7 @@ using OpenIddict.EntityFrameworkCore.Models;
 
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class User : BaseEntity<User, Guid>, IAuditableEntity
+public class User : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
 {
     public string Name { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;

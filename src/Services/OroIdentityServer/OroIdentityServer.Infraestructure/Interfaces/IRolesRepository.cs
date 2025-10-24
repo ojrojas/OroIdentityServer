@@ -6,4 +6,11 @@
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Interfaces;
 
 
-public interface IRolesRepository : IRepository<Role>{}
+public interface IRolesRepository
+{
+    Task AddRoleAsync(Role role, CancellationToken cancellationToken);
+    Task UpdateRoleAsync(Role role, CancellationToken cancellationToken);
+    Task DeleteRoleAsync(Guid id, CancellationToken cancellationToken);
+    Task<Role?> GetRoleByIdAsync(Guid id);
+    Task<IEnumerable<Role>> GetAllRolesAsync();
+}

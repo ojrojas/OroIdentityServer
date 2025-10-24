@@ -14,3 +14,4 @@ global using OroIdentityServer.BuildingBlocks.Shared.Options;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Logging;
 global using OroIdentityServer.BuildingBlocks.Shared.Interfaces;
+global using System.Linq.Expressions;

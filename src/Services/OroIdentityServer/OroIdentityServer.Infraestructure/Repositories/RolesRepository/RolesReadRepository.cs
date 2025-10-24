@@ -3,37 +3,50 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 
+
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
-public class RolesRepository :  IRolesRepository
+public class RolesRepository(
+    ILogger<RolesRepository> logger, IRepository<Role> repository) : IRolesRepository
 {
-    public Task AddAsync(Role entity)
+    public async Task AddRoleAsync(Role role, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering AddRoleAsync");
+        await repository.AddAsync(role, cancellationToken);
+        logger.LogInformation("Exiting AddRoleAsync");
     }
 
-    public Task DeleteAsync(Role entity)
+    public async Task DeleteRoleAsync(Guid id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering DeleteRoleAsync with id: {Id}", id);
+        var role = await repository.GetByIdAsync(id);
+        if (role != null)
+        {
+            await repository.DeleteAsync(role, cancellationToken);
+        }
+        logger.LogInformation("Exiting DeleteRoleAsync");
     }
 
-    public Task<IEnumerable<Role>> FindAsync(Expression<Func<Role, bool>> predicate)
+    public async Task<IEnumerable<Role>> GetAllRolesAsync()
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering GetAllRolesAsync");
+        var result = await repository.GetAllAsync();
+        logger.LogInformation("Exiting GetAllRolesAsync");
+        return result;
     }
 
-    public Task<IEnumerable<Role>> GetAllAsync()
+    public async Task<Role?> GetRoleByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering GetRoleByIdAsync with id: {Id}", id);
+        var result = await repository.GetByIdAsync(id);
+        logger.LogInformation("Exiting GetRoleByIdAsync");
+        return result;
     }
 
-    public Task<Role?> GetByIdAsync(Guid id)
+    public async Task UpdateRoleAsync(Role role, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task UpdateAsync(Role entity)
-    {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering UpdateRoleAsync");
+        await repository.UpdateAsync(role, cancellationToken);
+        logger.LogInformation("Exiting UpdateRoleAsync");
     }
 }
