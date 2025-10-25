@@ -14,3 +14,4 @@ global using OroIdentityServer.BuildingBlocks.Shared.Enums;
 global using OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Interfaces;
 global using OroIdentityServer.BuildingBlocks.Shared.Interfaces;
 global using Microsoft.Extensions.Logging;
+global using OroIdentityServer.Services.OroIdentityServer.Infraestructure;

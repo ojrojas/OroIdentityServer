@@ -4,3 +4,5 @@
 // See the LICENSE file in the project root for details.
 global using OroIdentityServer.BuildingBlocks.Shared.Entities;
 global using OroIdentityServer.BuildingBlocks.Shared.Interfaces;
+global using System.Security.Cryptography;
+global using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;

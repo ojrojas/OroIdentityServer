@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Interfaces;
 
-public interface IRepository<T>  where T : class, IAggregateRoot
+public interface IRepository<T> where T : BaseEntity<Guid>, IAggregateRoot
 {
   Task AddAsync(T entity, CancellationToken cancellationToken);
   Task UpdateAsync(T entity, CancellationToken cancellationToken);

@@ -6,10 +6,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public class IdentificationType : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
 {
-    private IdentificationType()
-    {
-        IdentificationTypeName = default!;
-    }
+    private IdentificationType() => IdentificationTypeName = default!;
 
     public IdentificationType(IdentificationTypeName identificationName)
     {

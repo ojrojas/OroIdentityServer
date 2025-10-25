@@ -2,15 +2,12 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class IdentificationTypeRepository(
     ILogger<IdentificationTypeRepository> logger, IRepository<IdentificationType> repository)
 : IIdentificationTypeRepository
 {
-
-
     public async Task AddIdentificationTypeAsync(IdentificationType identificationType, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering AddIdentificationTypeAsync");

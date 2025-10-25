@@ -4,8 +4,10 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
-public class Repository<T>(ILogger<Repository<T>> logger, DbContext context) 
-: IRepository<T> where T : class, IAggregateRoot
+public class Repository<T>(
+    ILogger<Repository<T>> logger,
+    OroIdentityAppContext context) 
+    : IRepository<T> where T : BaseEntity<Guid>, IAggregateRoot
 {
     public async Task<T?> GetByIdAsync(Guid id)
     {

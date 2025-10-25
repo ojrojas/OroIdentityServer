@@ -20,4 +20,5 @@ public class Role : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
 
     public RoleName RoleName { get; private set; }
     public string NormalizedName { get; init; }
+    public Guid ConcurrencyStamp { get; set; }
 }
