@@ -6,3 +6,6 @@ global using OroIdentityServer.BuildingBlocks.Shared.Entities;
 global using OroIdentityServer.BuildingBlocks.Shared.Interfaces;
 global using System.Security.Cryptography;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
+global using  Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.DependencyInjection;
+global using OroIdentityServer.Services.OroIdentityServer.Core.Services;
