@@ -7,3 +7,5 @@ global using OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.In
 global using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Models;
 global using Microsoft.Extensions.Logging;
+global using OroIdentityServer.Services.OroIdentityServer.Application.Shared;
+global using System.Collections.ObjectModel;
