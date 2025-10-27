@@ -9,12 +9,3 @@ public record GetUsersQuery() : IQuery<GetUsersQueryResponse>
 {
     public Guid CorrelationId => Guid.NewGuid();
 }
-
-
-public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, GetUsersQueryResponse>
-{
-    public ValueTask<GetUsersQueryResponse> HandleAsync(GetUsersQuery query, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-}

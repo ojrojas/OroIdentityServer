@@ -4,6 +4,6 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 
-public record GetUserByIdQueryResponse
+public record GetUserByIdQueryResponse: BaseResponse<IEnumerable<User>>
 {
 }
