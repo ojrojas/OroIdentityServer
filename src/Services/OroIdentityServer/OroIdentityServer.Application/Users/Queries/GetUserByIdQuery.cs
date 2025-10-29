@@ -14,5 +14,5 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 /// </remarks>
 public record GetUserByIdQuery(Guid Id) : IQuery<GetUserByIdQueryResponse>
 {
-    public Guid CorrelationId => Guid.NewGuid();
+    public Guid CorrelationId() => Guid.NewGuid();
 }

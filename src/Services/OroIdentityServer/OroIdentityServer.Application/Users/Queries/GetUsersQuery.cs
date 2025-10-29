@@ -7,5 +7,5 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 
 public record GetUsersQuery() : IQuery<GetUsersQueryResponse>
 {
-    public Guid CorrelationId => Guid.NewGuid();
+    public Guid CorrelationId() => Guid.NewGuid();
 }

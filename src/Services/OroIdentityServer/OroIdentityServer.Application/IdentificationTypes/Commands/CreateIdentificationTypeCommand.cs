@@ -7,5 +7,5 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 public record CreateIdentificationTypeCommand(IdentificationTypeName Name)
 : ICommand
 {
-    public Guid CorrelationId => Guid.NewGuid();
+    public Guid CorrelationId() => Guid.NewGuid();
 }

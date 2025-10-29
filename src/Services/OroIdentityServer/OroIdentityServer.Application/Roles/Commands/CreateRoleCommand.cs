@@ -17,5 +17,5 @@ public class CreateRoleCommand : ICommand
     /// <summary>
     /// Gets the unique correlation identifier for this command instance.
 /// </summary>
-    public Guid CorrelationId => Guid.NewGuid();
+    public Guid CorrelationId() => Guid.NewGuid();
 }

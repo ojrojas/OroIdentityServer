@@ -7,5 +7,5 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 public record DeleteIdentificationTypeCommand(Guid Id)
 : ICommand
 {
-    public Guid CorrelationId => Guid.NewGuid();
+    public Guid CorrelationId() => Guid.NewGuid();
 }

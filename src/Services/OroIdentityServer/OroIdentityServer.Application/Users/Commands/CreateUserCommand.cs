@@ -11,7 +11,7 @@ public class CreateUserCommand : ICommand
     public string Password { get; set; } = string.Empty;
     public Guid IdentificationTypeId { get; set; }
 
-    public Guid CorrelationId => Guid.NewGuid();
+    public Guid CorrelationId() => Guid.NewGuid();
 }
 
 

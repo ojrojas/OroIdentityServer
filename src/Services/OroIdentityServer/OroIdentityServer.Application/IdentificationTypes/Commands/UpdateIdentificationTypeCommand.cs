@@ -8,5 +8,5 @@ public record UpdateIdentificationTypeCommand(
     Guid Id, IdentificationTypeName Name, EntityBaseState State)
 : ICommand
 {
-    public Guid CorrelationId => Guid.NewGuid();
+    public Guid CorrelationId() => Guid.NewGuid();
 }
