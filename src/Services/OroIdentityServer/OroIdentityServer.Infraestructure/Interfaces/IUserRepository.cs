@@ -45,4 +45,11 @@ public interface IUserRepository
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of all user entities.</returns>
     Task<IEnumerable<User>> GetAllUsersAsync();
+
+    /// <summary>
+    /// Get user by email
+    /// </summary>
+    /// <param name="email">email to find user</param>
+    /// <returns>A task that represents the user</returns>
+    Task<User> GetUserByEmailAsync(string email);
 }

@@ -15,3 +15,4 @@ global using OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.In
 global using OroIdentityServer.BuildingBlocks.Shared.Interfaces;
 global using Microsoft.Extensions.Logging;
 global using OroIdentityServer.Services.OroIdentityServer.Infraestructure;
+global using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;

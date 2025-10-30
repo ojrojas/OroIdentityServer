@@ -9,6 +9,8 @@ public class Repository<T>(
     OroIdentityAppContext context) 
     : IRepository<T> where T : BaseEntity<Guid>, IAggregateRoot
 {
+    public DbSet<T> CurrentContext => context.Set<T>();
+
     public async Task<T?> GetByIdAsync(Guid id)
     {
         logger.LogInformation("Entering GetByIdAsync with id: {Id}", id);

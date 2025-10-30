@@ -23,22 +23,25 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 /// <param name="passwordHasher">The service used to hash user passwords securely.</param>
 public class CreateUserCommandHandler(
     ILogger<CreateUserCommandHandler> logger,
-    IUserRepository userRepository, 
-    IPasswordHasher passwordHasher) 
+    IUserRepository userRepository,
+    IPasswordHasher passwordHasher)
 : ICommandHandler<CreateUserCommand>
 {
     public async Task HandleAsync(CreateUserCommand command, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Handling CreateUserCommand for UserName: {UserName}", command.UserName);
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Handling CreateUserCommand for UserName: {UserName}", command.UserName);
 
         try
         {
             // Hash the password
-            logger.LogDebug("Hashing password for UserName: {UserName}", command.UserName);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Hashing password for UserName: {UserName}", command.UserName);
             var passwordHash = await passwordHasher.HashPassword(command.Password);
 
             // Create the User object
-            logger.LogDebug("Creating User object for UserName: {UserName}", command.UserName);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Creating User object for UserName: {UserName}", command.UserName);
             var user = new User
             {
                 UserName = command.UserName,
@@ -53,14 +56,18 @@ public class CreateUserCommandHandler(
             };
 
             // Add the user to the repository
-            logger.LogDebug("Adding User to repository for UserName: {UserName}", command.UserName);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Adding User to repository for UserName: {UserName}", command.UserName);
+
             await userRepository.AddUserAsync(user, cancellationToken);
 
-            logger.LogInformation("Successfully handled CreateUserCommand for UserName: {UserName}", command.UserName);
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("Successfully handled CreateUserCommand for UserName: {UserName}", command.UserName);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while handling CreateUserCommand for UserName: {UserName}", command.UserName);
+            if (logger.IsEnabled(LogLevel.Error))
+                logger.LogError(ex, "An error occurred while handling CreateUserCommand for UserName: {UserName}", command.UserName);
             throw;
         }
     }

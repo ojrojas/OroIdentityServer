@@ -2,6 +2,9 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
+using OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
+
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.UserRepository;
 
 public class UserRepository(
@@ -31,6 +34,15 @@ public class UserRepository(
         var result = await repository.GetAllAsync();
         logger.LogInformation("Exiting GetAllUsersAsync");
         return result;
+    }
+
+    public async Task<User> GetUserByEmailAsync(string email)
+    {
+        logger.LogInformation("handling request user by email {Email}", email);
+        var emailSpecification = new GetUserByEmailSpecification(email);
+        var user = await repository.CurrentContext.FirstOrDefaultAsync(emailSpecification.Criteria);
+        logger.LogInformation("finish request get user by email");
+        return user;
     }
 
     public async Task<User?> GetUserByIdAsync(Guid id)
