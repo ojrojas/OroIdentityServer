@@ -14,11 +14,13 @@ public class User : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
     public string LastName { get; set; } = string.Empty;
     public string MiddleName { get; set; } = string.Empty;
     public required string UserName { get; set; }
-    public string NormalizedUserName { get; set; } = string.Empty;
     public required string Email { get; set; }
-    public string NormalizedEmail { get; set; } = string.Empty;
+    public required string Identification {get;set;} = string.Empty;
     public Guid IdentificationTypeId { get; set; }
+    public string NormalizedEmail { get; set; } = string.Empty;
+    public string NormalizedUserName { get; set; } = string.Empty;
     public IdentificationType? IdentificationType { get; set; }
+
     public required SecurityUser SecurityUser {get;set;}
 }
 

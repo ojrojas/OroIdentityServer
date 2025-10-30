@@ -46,6 +46,10 @@ public class CreateUserCommandHandler(
             {
                 UserName = command.UserName,
                 Email = command.Email,
+                Name = command.Name,
+                MiddleName = command.MiddleName,
+                LastName = command.LastName,
+                Identification = command.Identification,
                 IdentificationTypeId = command.IdentificationTypeId,
                 SecurityUser = new SecurityUser
                 {
