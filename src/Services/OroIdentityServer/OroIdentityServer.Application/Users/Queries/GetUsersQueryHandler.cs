@@ -5,10 +5,17 @@
 
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 
-public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, GetUsersQueryResponse>
+public class GetUsersQueryHandler(
+    ILogger<GetUserByEmailQueryHandler> logger, 
+    IUserRepository repository
+) : IQueryHandler<GetUsersQuery, GetUsersQueryResponse>
 {
-    public ValueTask<GetUsersQueryResponse> HandleAsync(GetUsersQuery query, CancellationToken cancellationToken)
+    public async ValueTask<GetUsersQueryResponse> HandleAsync(GetUsersQuery query, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        GetUsersQueryResponse response = new();
+        logger.LogInformation("Handling GetUsersQuery");
+        response.Data = await repository.GetAllUsersAsync();
+        logger.LogInformation("Successfully handled GetUserByIdQuery");
+        return response;
     }
 }
