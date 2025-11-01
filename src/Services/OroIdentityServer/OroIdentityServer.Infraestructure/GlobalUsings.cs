@@ -16,3 +16,7 @@ global using OroIdentityServer.BuildingBlocks.Shared.Interfaces;
 global using Microsoft.Extensions.Logging;
 global using OroIdentityServer.Services.OroIdentityServer.Infraestructure;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
+global using OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;

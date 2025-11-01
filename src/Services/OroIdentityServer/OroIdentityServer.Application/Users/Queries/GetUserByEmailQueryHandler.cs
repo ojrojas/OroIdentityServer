@@ -9,7 +9,7 @@ public class GetUserByEmailQueryHandler(
     IUserRepository repository
 ) : IQueryHandler<GetUserByEmailQuery, User>
 {
-    public async ValueTask<User> HandleAsync(GetUserByEmailQuery query, CancellationToken cancellationToken)
+    public async Task<User> HandleAsync(GetUserByEmailQuery query, CancellationToken cancellationToken)
     {
         if(logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling GetUserByEmail with Email: {Email}", query.Email);

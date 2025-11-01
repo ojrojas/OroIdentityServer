@@ -17,7 +17,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 /// <seealso cref="CreateIdentificationTypeCommand"/>
 public class CreateIdentificationTypeHandler(
     ILogger<CreateIdentificationTypeHandler> logger,
-    IRepository<IdentificationType> repository
+    IIdentificationTypeRepository repository
 ) : ICommandHandler<CreateIdentificationTypeCommand>
 {
     public async Task HandleAsync(CreateIdentificationTypeCommand command, CancellationToken cancellationToken)
@@ -35,7 +35,7 @@ public class CreateIdentificationTypeHandler(
 
             // Add the IdentificationType to the repository
             logger.LogDebug("Adding IdentificationType to repository for Name: {IdentificationTypeName}", command.Name);
-            await repository.AddAsync(identificationType, cancellationToken);
+            await repository.AddIdentificationTypeAsync(identificationType, cancellationToken);
 
             logger.LogInformation("Successfully handled CreateIdentificationTypeCommand for IdentificationTypeName: {IdentificationTypeName}", command.Name);
         }

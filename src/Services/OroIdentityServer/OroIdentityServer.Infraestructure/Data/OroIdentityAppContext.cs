@@ -8,6 +8,7 @@ public class OroIdentityAppContext(
     DbContextOptions<OroIdentityAppContext> options, IOptions<UserInfo> optionsUser) : AuditableDbContext(options, optionsUser)
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<SecurityUser> SecurityUsers { get; set; }
     public DbSet<IdentificationType> IdentificationTypes { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<RoleClaim> RoleClaims { get; set; }

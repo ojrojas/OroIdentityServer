@@ -21,11 +21,12 @@ public class User : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
     public string NormalizedUserName { get; set; } = string.Empty;
     public IdentificationType? IdentificationType { get; set; }
 
-    public required SecurityUser SecurityUser {get;set;}
+    public SecurityUser SecurityUserId {get;set;}
+    public SecurityUser SecurityUser {get;set;}
 }
 
 
-public class SecurityUser
+public class SecurityUser : BaseEntity<Guid>
 {
     public required string PasswordHash { get; set; }
     public string SecurityStamp { get; set; } = string.Empty;

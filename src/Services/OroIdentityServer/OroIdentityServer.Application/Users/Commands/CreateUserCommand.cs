@@ -4,17 +4,17 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
-public class CreateUserCommand : ICommand
+public record CreateUserCommand(
+    string Name,
+    string MiddleName,
+    string LastName,
+    string UserName, 
+    string Email, 
+    string Password,
+    string Identification,
+    Guid IdentificationTypeId
+) : ICommand
 {
-    public string Name { get; set; } = string.Empty;
-    public string MiddleName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string UserName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string Identification {get;set;} = string.Empty;
-    public Guid IdentificationTypeId { get; set; }
-
     public Guid CorrelationId() => Guid.NewGuid();
 }
 

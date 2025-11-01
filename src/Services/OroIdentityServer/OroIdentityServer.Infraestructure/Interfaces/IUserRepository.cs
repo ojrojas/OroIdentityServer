@@ -52,4 +52,15 @@ public interface IUserRepository
     /// <param name="email">email to find user</param>
     /// <returns>A task that represents the user</returns>
     Task<User> GetUserByEmailAsync(string email);
+
+    /// <summary>
+    /// Change password user
+    /// </summary>
+    /// <param name="email">Email to find user</param>
+    /// <param name="currentPassword">Current password</param>
+    /// <param name="newPassword">New password</param>
+    /// <param name="confirmedPassword">Confirmed password</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests</param>
+    /// <returns>True if password has changed</returns>
+    Task<bool> ChangePasswordAsync(string email,string currentPassword, string newPassword, string confirmedPassword, CancellationToken cancellationToken);
 }

@@ -6,7 +6,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
 public class UpdateIdentificationTypeHandler(
     ILogger<UpdateIdentificationTypeHandler> logger,
-    IRepository<IdentificationType> repository
+    IIdentificationTypeRepository repository
 ) : ICommandHandler<UpdateIdentificationTypeCommand>
 {
     public Task HandleAsync(UpdateIdentificationTypeCommand command, CancellationToken cancellationToken)

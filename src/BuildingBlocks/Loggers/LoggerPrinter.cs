@@ -8,7 +8,7 @@ public static class LoggerPrinter
 {
     public static Serilog.ILogger CreateSerilogLogger(string key, string value, IConfiguration configuration)
     {
-        string? SeqEndpoint = configuration["Seq"];
+        string? SeqEndpoint = configuration["ConnectionStrings:Seq"];
         ArgumentNullException.ThrowIfNull(SeqEndpoint);
         var logger = new LoggerConfiguration()
               .MinimumLevel.Verbose()

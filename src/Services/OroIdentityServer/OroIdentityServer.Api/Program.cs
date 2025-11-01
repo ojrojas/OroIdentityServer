@@ -3,13 +3,27 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 
+using OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Extensions;
+using OroIdentityServer.Services.OroIdentityServer.Api.Endpoints;
+using OroIdentityServer.Services.OroIdentityServer.Application.Extensions;
+using OroIdentityServer.Services.OroIdentityServer.Core.Extensions;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
+
+IConfiguration configuration = builder.Configuration;
+
+Log.Logger = LoggerPrinter.CreateSerilogLogger("api", "OroIdentityServer", configuration);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.AddServicesWritersLogger(configuration);
 builder.AddServiceDefaults();
-builder.Services.AddCqrsHandlers();
+builder.AddApplicationExtensions(configuration);
+builder.AddApplicationExtensions(configuration);
+builder.AddInfraestructureExtensions(configuration);
+builder.AddCoreExtensions();
 
 var app = builder.Build();
 
@@ -21,26 +35,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-app.MapDefaultEndpoints();
+// Endpoints
+app.MapUsersEndpointsV1();
 
 app.Run();
 

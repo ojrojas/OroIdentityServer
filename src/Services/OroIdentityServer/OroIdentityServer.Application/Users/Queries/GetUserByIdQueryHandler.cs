@@ -15,10 +15,10 @@ using OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 /// <param name="repository">The repository instance used to access user data.</param>
 /// <seealso cref="IQueryHandler{GetUserByIdQuery, GetUserByIdQueryResponse}"/>
 public class GetUserByIdQueryHandler(
-    Logger<GetUserByIdQueryHandler> logger, IUserRepository repository) 
+    ILogger<GetUserByIdQueryHandler> logger, IUserRepository repository) 
     : IQueryHandler<GetUserByIdQuery, GetUserByIdQueryResponse>
 {
-    public async ValueTask<GetUserByIdQueryResponse> HandleAsync(GetUserByIdQuery query, CancellationToken cancellationToken)
+    public async Task<GetUserByIdQueryResponse> HandleAsync(GetUserByIdQuery query, CancellationToken cancellationToken)
     {
         GetUserByIdQueryResponse response = new();
         logger.LogInformation("Handling GetUserByIdQuery with Id: {Id}", query.Id.ToString());

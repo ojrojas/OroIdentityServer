@@ -10,7 +10,7 @@ public class GetUsersQueryHandler(
     IUserRepository repository
 ) : IQueryHandler<GetUsersQuery, GetUsersQueryResponse>
 {
-    public async ValueTask<GetUsersQueryResponse> HandleAsync(GetUsersQuery query, CancellationToken cancellationToken)
+    public async Task<GetUsersQueryResponse> HandleAsync(GetUsersQuery query, CancellationToken cancellationToken)
     {
         GetUsersQueryResponse response = new();
         logger.LogInformation("Handling GetUsersQuery");

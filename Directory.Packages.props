@@ -25,6 +25,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.10" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageVersion Include="OpenIddict.AspNetCore" Version="7.1.0" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.1.0" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />
     <PackageVersion Include="Serilog" Version="4.3.0" />

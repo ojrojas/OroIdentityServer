@@ -2,10 +2,7 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
-using OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
-
-namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.UserRepository;
+namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class UserRepository(
     ILogger<UserRepository> logger, IRepository<User> repository) : IUserRepository
@@ -15,6 +12,11 @@ public class UserRepository(
         logger.LogInformation("Entering AddUserAsync");
         await repository.AddAsync(user, cancellationToken);
         logger.LogInformation("Exiting AddUserAsync");
+    }
+
+    public Task<bool> ChangePasswordAsync(string email, string currentPassword, string newPassword, string confirmedPassword, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task DeleteUserAsync(Guid id, CancellationToken cancellationToken)

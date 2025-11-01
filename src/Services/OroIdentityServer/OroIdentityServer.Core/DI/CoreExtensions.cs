@@ -7,9 +7,9 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Extensions;
 /// <summary>
 /// Provides extension methods for configuring services in the application.
 /// </summary>
-public static class ExtensionsCore
+public static class CoreExtensions
 {
-    public static TBuilder AddServiceCore<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    public static TBuilder AddCoreExtensions<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
         return builder;

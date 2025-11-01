@@ -6,7 +6,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
 public class DeleteIdentificationTypeHandler(
     ILogger<DeleteIdentificationTypeHandler> logger,
-    IRepository<IdentificationType> repository
+    IIdentificationTypeRepository repository
 ) : ICommandHandler<DeleteIdentificationTypeCommand>
 {
     public Task HandleAsync(DeleteIdentificationTypeCommand command, CancellationToken cancellationToken)
