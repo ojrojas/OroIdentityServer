@@ -62,7 +62,7 @@ public class Repository<T>(
     {
         logger.LogInformation("Entering DeleteAsync");
         ArgumentNullException.ThrowIfNull(entity);
-        (entity as BaseEntity<Guid>).State = EntityBaseState.DELETED;
+        entity.State = EntityBaseState.DELETED;
         context.Set<T>().Update(entity);
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Exiting DeleteAsync");

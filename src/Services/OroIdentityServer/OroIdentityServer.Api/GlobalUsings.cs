@@ -15,3 +15,5 @@ global using OroIdentityServer.Services.OroIdentityServer.Api.Endpoints;
 global using OroIdentityServer.Services.OroIdentityServer.Application.Extensions;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Extensions;
 global using Serilog;
+global using OroIdentityServer.Services.OroIdentityServer.Application.Commands;
+global using Microsoft.AspNetCore.Routing.Constraints;

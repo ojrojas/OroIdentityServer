@@ -1,11 +1,33 @@
 @OroIdentityServer = https://localhost:7280
 
-GET  {{OroIdentityServer}}/getuserinfo/{{$guid}}
-Content-Type: application/json 
+### Endpoints de UserQueries
+GET  {{OroIdentityServer}}/getuserinfo/{id:guid}
+Content-Type: application/json
+
+###
+
+### Endpoints de UserCommands
+POST  {{OroIdentityServer}}/create
+Content-Type: application/json
 
 {
-    "name": "Jane Doe",
-    "email": "jane.doe@example.com"
+    "name": "John Doe",
+    "email": "john.doe@example.com"
 }
+
+###
+
+PATCH  {{OroIdentityServer}}/update
+Content-Type: application/json
+
+{
+    "name": "Updated Name",
+    "email": "updated.email@example.com"
+}
+
+###
+
+DELETE  {{OroIdentityServer}}/delete/{id:guid}
+Content-Type: application/json
 
 ###

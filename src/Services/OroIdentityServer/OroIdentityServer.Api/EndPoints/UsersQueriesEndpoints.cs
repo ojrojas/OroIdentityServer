@@ -4,13 +4,13 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Api.Endpoints;
 
-public static class UsersEndpoints
+public static class UsersQueriesEndpoints
 {
-    public static RouteGroupBuilder MapUsersEndpointsV1(this IEndpointRouteBuilder routeBuilder)
+    public static RouteGroupBuilder MapUsersQueriesEndpointsV1(this IEndpointRouteBuilder routeBuilder)
     {
         var api = routeBuilder.MapGroup(string.Empty);
 
-        api.MapGet("getuserinfo/{id:guid}", GetUserInfo);
+        api.MapGet("/getuserinfo/{id:guid}", GetUserInfo);
 
         return api;
     }

@@ -14,6 +14,8 @@ public static class InfraestructureExtensions
             options.UseNpgsql(connectionDatabase);
         });
 
+        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
         builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IRolesRepository, RolesRepository>();
