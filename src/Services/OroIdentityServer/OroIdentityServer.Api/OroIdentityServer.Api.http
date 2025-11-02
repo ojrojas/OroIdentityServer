@@ -12,7 +12,13 @@ Content-Type: application/json
 
 {
     "name": "John Doe",
-    "email": "john.doe@example.com"
+    "middleName": "Middle",
+    "lastName": "Doe",
+    "userName": "johndoe",
+    "email": "john.doe@example.com",
+    "password": "password123",
+    "identification": "123456789",
+    "identificationTypeId": "{{$guid}}"
 }
 
 ###
@@ -22,12 +28,18 @@ Content-Type: application/json
 
 {
     "name": "Updated Name",
-    "email": "updated.email@example.com"
+    "middleName": "Updated Middle",
+    "lastName": "Updated Last",
+    "userName": "updatedusername",
+    "email": "updated.email@example.com",
+    "password": "newpassword123",
+    "identification": "987654321",
+    "identificationTypeId": "{{$guid}}"
 }
 
 ###
 
-DELETE  {{OroIdentityServer}}/delete/{id:guid}
+DELETE  {{OroIdentityServer}}/delete/{{$guid}}
 Content-Type: application/json
 
 ###
