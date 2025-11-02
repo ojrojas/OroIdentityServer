@@ -7,18 +7,24 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-
 var configuration = builder.Configuration;
 
 var launchProfile = ShouldUseHttpForEndpoints(configuration) ? Constants.Http : Constants.Https;
 
 var seq = builder.AddSeq(Constants.Seq);
+var postgres = builder.AddPostgres("postgres")
+.WithImage("ankane/pgvector")
+    .WithImageTag("latest").WithPgAdmin();
+
+var identityDb = postgres.AddDatabase("identityDb");
 
 var identity = builder.AddProject<Projects.OroIdentityServer_Api>(Constants.IdentityApi, launchProfile);
 var identityWeb = builder.AddProject<Projects.OroIdentity_Web>(Constants.IdentityWeb, launchProfile);
 
 identity
+.WaitFor(identityDb)
 .WithReference(seq)
+.WithReference(identityDb)
 .WithExternalHttpEndpoints();
 
 

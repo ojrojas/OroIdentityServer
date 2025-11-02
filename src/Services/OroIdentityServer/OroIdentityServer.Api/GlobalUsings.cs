@@ -4,8 +4,14 @@
 // See the LICENSE file in the project root for details.
 global using OroIdentityServer.BuildingBlocks.Loggers;
 global using OroIdentityServer.Services.OroIdentityServer.Infraestructure;
-global using OroCQRS.Core.Extensions;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Http.HttpResults;
 global using OpenIddict.Validation.AspNetCore;
 global using OroIdentityServer.Services.OroIdentityServer.Application.Queries;
+global using OroCQRS.Core.Interfaces;
+global using Microsoft.AspNetCore.Mvc;
+global using OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Extensions;
+global using OroIdentityServer.Services.OroIdentityServer.Api.Endpoints;
+global using OroIdentityServer.Services.OroIdentityServer.Application.Extensions;
+global using OroIdentityServer.Services.OroIdentityServer.Core.Extensions;
+global using Serilog;

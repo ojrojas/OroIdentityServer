@@ -16,21 +16,8 @@ public class OroIdentityAppContext(
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(builder);
-
-        builder.Entity<IdentificationType>(config =>
-        {
-            config.ToTable(nameof(IdentificationTypes));
-            config.HasKey(x => x.Id);
-            config.OwnsOne(x => x.IdentificationTypeName, nv =>
-            {
-                nv.Property(p => p.Value)
-                //.HasColumnName("IdentificationTypeName")
-                .HasMaxLength(50)
-                .IsRequired();
-            });
-        });
-
-        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        builder.HasPostgresExtension("vector");
+        builder.ApplyConfiguration(new IdentificationTypeEntityConfiguration());
+        builder.ApplyConfiguration(new RoleEntityConfiguration());
     }
 }

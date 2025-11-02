@@ -8,7 +8,7 @@ public static class InfraestructureExtensions
 {
     public static void AddInfraestructureExtensions(this IHostApplicationBuilder builder, IConfiguration configuration)
     {
-        var connectionDatabase = configuration .GetConnectionString("");
+        var connectionDatabase = configuration.GetConnectionString("identityDb");
         builder.Services.AddDbContext<OroIdentityAppContext>(options =>
         {
             options.UseNpgsql(connectionDatabase);

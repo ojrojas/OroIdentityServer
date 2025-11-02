@@ -9,6 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="$(AspireVersion)" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="9.5.2" />
     <PackageVersion Include="Aspire.Hosting.Seq" Version="9.5.1" />
     <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.1" />
     <PackageVersion Include="Aspire.Seq" Version="9.5.1" />

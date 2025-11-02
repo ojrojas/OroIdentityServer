@@ -3,12 +3,6 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 
-using OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Extensions;
-using OroIdentityServer.Services.OroIdentityServer.Api.Endpoints;
-using OroIdentityServer.Services.OroIdentityServer.Application.Extensions;
-using OroIdentityServer.Services.OroIdentityServer.Core.Extensions;
-using Serilog;
-
 var builder = WebApplication.CreateBuilder(args);
 
 IConfiguration configuration = builder.Configuration;
@@ -33,14 +27,21 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+
+#if DEBUG
+var scope = app.Services.CreateScope();
+var service = scope.ServiceProvider;
+
+var context = service.GetRequiredService<OroIdentityAppContext>();
+ArgumentNullException.ThrowIfNull(context);
+await context.Database.EnsureDeletedAsync();
+await context.Database.EnsureCreatedAsync();
+
+#endif
+
 app.UseHttpsRedirection();
 
 // Endpoints
 app.MapUsersEndpointsV1();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

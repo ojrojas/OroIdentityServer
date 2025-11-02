@@ -2,8 +2,6 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-using OroCQRS.Core.Interfaces;
-
 namespace OroIdentityServer.Services.OroIdentityServer.Api.Endpoints;
 
 public static class UsersEndpoints
@@ -12,19 +10,17 @@ public static class UsersEndpoints
     {
         var api = routeBuilder.MapGroup(string.Empty);
 
-        api.MapGet("getuserinfo", GetUserInfo);
-
+        api.MapGet("getuserinfo/{id:guid}", GetUserInfo);
 
         return api;
     }
 
-    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
-    private static async Task<Results<Ok<GetUserByIdQueryResponse>,BadRequest<string>, ProblemHttpResult>> GetUserInfo(
-        GetUserByIdQuery request,
-        IQueryHandler<GetUserByIdQuery,GetUserByIdQueryResponse> handler,
+    private static async Task<Results<Ok<GetUserByIdQueryResponse>, BadRequest<string>, ProblemHttpResult>> GetUserInfo(
+        [FromRoute] Guid id,
+        [FromServices] ISender sender,
         CancellationToken cancellationToken
     )
     {
-        return TypedResults.Ok(await handler.HandleAsync(request, cancellationToken));
+        return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(id), cancellationToken));
     }
 }

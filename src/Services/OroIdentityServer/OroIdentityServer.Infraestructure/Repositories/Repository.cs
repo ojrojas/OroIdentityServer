@@ -6,17 +6,24 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class Repository<T>(
     ILogger<Repository<T>> logger,
-    OroIdentityAppContext context) 
+    OroIdentityAppContext context)
     : IRepository<T> where T : BaseEntity<Guid>, IAggregateRoot
 {
     public DbSet<T> CurrentContext => context.Set<T>();
 
     public async Task<T?> GetByIdAsync(Guid id)
     {
-        logger.LogInformation("Entering GetByIdAsync with id: {Id}", id);
-        var result = await context.Set<T>().FindAsync(id);
-        logger.LogInformation("Exiting GetByIdAsync");
-        return result;
+        try
+        {
+            logger.LogInformation("Entering GetByIdAsync with id: {Id}", id);
+            var result = await context.Set<T>().FindAsync(id);
+            logger.LogInformation("Exiting GetByIdAsync");
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message, ex);
+        }
     }
 
     public async Task<IEnumerable<T>> GetAllAsync()
