@@ -1,7 +1,22 @@
 @OroIdentityServer = https://localhost:7280
 
 ### Endpoints de UserQueries
-GET  {{OroIdentityServer}}/getuserinfo/{id:guid}
+GET  {{OroIdentityServer}}/getuserinfo
+Content-Type: application/json
+
+###
+
+GET  {{OroIdentityServer}}/users
+Content-Type: application/json
+
+###
+
+GET  {{OroIdentityServer}}/getuserbyemail/example@example.com
+Content-Type: application/json
+
+###
+
+GET  {{OroIdentityServer}}/getuserbyid/{{$guid}}
 Content-Type: application/json
 
 ###
@@ -39,7 +54,7 @@ Content-Type: application/json
 
 ###
 
-DELETE  {{OroIdentityServer}}/delete/{{$guid}}
+DELETE  {{OroIdentityServer}}/delete/{id:guid}
 Content-Type: application/json
 
 ###

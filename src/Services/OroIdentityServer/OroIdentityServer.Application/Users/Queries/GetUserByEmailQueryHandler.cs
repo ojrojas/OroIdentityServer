@@ -7,15 +7,18 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 public class GetUserByEmailQueryHandler(
     ILogger<GetUserByEmailQueryHandler> logger,
     IUserRepository repository
-) : IQueryHandler<GetUserByEmailQuery, User>
+) : IQueryHandler<GetUserByEmailQuery, GetUserByEmailResponse>
 {
-    public async Task<User> HandleAsync(GetUserByEmailQuery query, CancellationToken cancellationToken)
+    public async Task<GetUserByEmailResponse> HandleAsync(GetUserByEmailQuery query, CancellationToken cancellationToken)
     {
-        if(logger.IsEnabled(LogLevel.Information))
+        if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling GetUserByEmail with Email: {Email}", query.Email);
 
-        var user = await repository.GetUserByEmailAsync(query.Email);
+        GetUserByEmailResponse response = new();
+        response.Data = await repository.GetUserByEmailAsync(query.Email);
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Successful GetUserByEmail with Email: {Email}", query.Email);
 
-        throw new NotImplementedException();
+        return response;
     }
 }

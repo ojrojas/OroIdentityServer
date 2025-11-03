@@ -12,6 +12,7 @@ public static class InfraestructureExtensions
         builder.Services.AddDbContext<OroIdentityAppContext>(options =>
         {
             options.UseNpgsql(connectionDatabase);
+            options.UseOpenIddict();
         });
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();

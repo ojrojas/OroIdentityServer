@@ -1,17 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
       <RootNamespace>OroIdentityServer.Services.OroIdentityServer.Api</RootNamespace>
+    <UserSecretsId>1f7913b8-0298-4b89-9f7c-51a38a051adb</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="OpenIddict.AspNetCore" />
+    <PackageReference Include="OpenIddict.Quartz" />
     <PackageReference Include="OroCQRS" />
+    <PackageReference Include="Quartz.Extensions.Hosting" />
   </ItemGroup>
 
   <ItemGroup>

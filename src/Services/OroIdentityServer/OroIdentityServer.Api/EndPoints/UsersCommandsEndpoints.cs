@@ -6,18 +6,21 @@ namespace OroIdentityServer.Services.OroIdentityServer.Api.Endpoints;
 
 public static class UsersCommandsEndpoints
 {
-    public static RouteGroupBuilder MapUsersCommandsEndpointsV1(this IEndpointRouteBuilder routeBuilder)
+    extension(IEndpointRouteBuilder routeBuilder)
     {
-        var api = routeBuilder.MapGroup(string.Empty);
+        public RouteGroupBuilder MapUsersCommandsEndpointsV1()
+        {
+            var api = routeBuilder.MapGroup(string.Empty);
 
-        api.MapPost("/create", CreateUser);
-        api.MapPatch("/update", UpdateUser);
-        api.MapDelete("/delete/{id}", DeleteUser);
+            api.MapPost("/create", CreateUser);
+            api.MapPatch("/update", UpdateUser);
+            api.MapDelete("/delete/{id}", DeleteUser);
 
-        return api;
+            return api;
+        }
     }
 
-     private static async Task<Results<Ok, BadRequest<string>, ProblemHttpResult>> DeleteUser(
+    private static async Task<Results<Ok, BadRequest<string>, ProblemHttpResult>> DeleteUser(
         HttpContext context,
         [FromRoute] Guid id, 
         [FromServices] ISender sender,

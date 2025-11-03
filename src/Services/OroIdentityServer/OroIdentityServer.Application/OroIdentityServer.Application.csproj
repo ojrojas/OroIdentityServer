@@ -5,6 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="OpenIddict.Abstractions" />
     <PackageReference Include="OroCQRS" />
   </ItemGroup>
 

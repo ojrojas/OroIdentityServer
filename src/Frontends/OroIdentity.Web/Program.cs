@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for details.using OroIdentity.Web.Components;
 
 using OroIdentity.Web.Components;
+using OroIdentityServer.BuildingBlocks.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -15,9 +15,10 @@ builder.Services.AddOpenApi();
 builder.AddServicesWritersLogger(configuration);
 builder.AddServiceDefaults();
 builder.AddApplicationExtensions(configuration);
-builder.AddApplicationExtensions(configuration);
 builder.AddInfraestructureExtensions(configuration);
 builder.AddCoreExtensions();
+// builder.AddOpenIddictExtensions(configuration);
+builder.AddIdentityApiExtensions(configuration);
 
 builder.Services.Configure<RouteOptions>(options =>
 {
@@ -30,6 +31,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 
