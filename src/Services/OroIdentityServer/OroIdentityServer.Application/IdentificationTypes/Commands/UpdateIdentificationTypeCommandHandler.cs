@@ -4,8 +4,8 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
-public class UpdateIdentificationTypeHandler(
-    ILogger<UpdateIdentificationTypeHandler> logger,
+public class UpdateIdentificationTypeCommandHandler(
+    ILogger<UpdateIdentificationTypeCommandHandler> logger,
     IIdentificationTypeRepository repository
 ) : ICommandHandler<UpdateIdentificationTypeCommand>
 {

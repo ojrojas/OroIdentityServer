@@ -4,8 +4,8 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
-public class DeleteUserHanlderCommand(
-    ILogger<DeleteUserHanlderCommand> logger,
+public class DeleteUserCommandHander(
+    ILogger<DeleteUserCommandHander> logger,
     IUserRepository userRepository
 ) : ICommandHandler<DeleteUserCommand>
 {

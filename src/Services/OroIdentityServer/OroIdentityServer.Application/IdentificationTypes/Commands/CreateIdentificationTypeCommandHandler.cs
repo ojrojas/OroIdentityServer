@@ -15,8 +15,8 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 /// <param name="logger">The logger instance used to log information, debug messages, and errors.</param>
 /// <param name="repository">The repository instance used to persist the IdentificationType entity.</param>
 /// <seealso cref="CreateIdentificationTypeCommand"/>
-public class CreateIdentificationTypeHandler(
-    ILogger<CreateIdentificationTypeHandler> logger,
+public class CreateIdentificationTypeCommandHandler(
+    ILogger<CreateIdentificationTypeCommandHandler> logger,
     IIdentificationTypeRepository repository
 ) : ICommandHandler<CreateIdentificationTypeCommand>
 {

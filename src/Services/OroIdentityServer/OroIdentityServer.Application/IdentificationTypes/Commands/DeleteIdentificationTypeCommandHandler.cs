@@ -4,8 +4,8 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
-public class DeleteIdentificationTypeHandler(
-    ILogger<DeleteIdentificationTypeHandler> logger,
+public class DeleteIdentificationTypeCommandHandler(
+    ILogger<DeleteIdentificationTypeCommandHandler> logger,
     IIdentificationTypeRepository repository
 ) : ICommandHandler<DeleteIdentificationTypeCommand>
 {
