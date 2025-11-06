@@ -1,0 +1,29 @@
+// OroIdentityServer
+// Copyright (C) 2025 Oscar Rojas
+// Licensed under the GNU AGPL v3.0 or later.
+// See the LICENSE file in the project root for details.
+
+namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
+
+public class DeleteRoleCommandHandler(IRolesRepository roleRepository, ILogger<DeleteRoleCommandHandler> logger) : ICommandHandler<DeleteRoleCommand>
+{
+    private readonly IRolesRepository _roleRepository = roleRepository;
+    private readonly ILogger<DeleteRoleCommandHandler> _logger = logger;
+
+    public async Task HandleAsync(DeleteRoleCommand command, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Handling DeleteRoleCommand for RoleId: {RoleId}", command.Id);
+
+        try
+        {
+            await _roleRepository.DeleteRoleAsync(command.Id, cancellationToken);
+
+            _logger.LogInformation("Successfully deleted role with Id: {RoleId}", command.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while deleting the role with Id: {RoleId}", command.Id);
+            throw;
+        }
+    }
+}

@@ -12,10 +12,17 @@ public static class UsersQueriesEndpoints
         {
             var api = routeBuilder.MapGroup(string.Empty);
 
-            api.MapGet("/getuserinfo", GetUserInfo);
-            api.MapGet("/users", GetUsers);
-            api.MapGet("/getuserbyemail/{email}", GetUserByEmail);
-            api.MapGet("/getuserbyid/{id}", GetUserById);
+            api.MapGet("/getuserinfo", GetUserInfo)
+                .WithName("GetUserInfo");
+
+            api.MapGet("/users", GetUsers)
+                .WithName("GetUsers");
+
+            api.MapGet("/getuserbyemail/{email}", GetUserByEmail)
+                .WithName("GetUserByEmail");
+
+            api.MapGet("/getuserbyid/{id}", GetUserById)
+                .WithName("GetUserById");
 
 
             return api;

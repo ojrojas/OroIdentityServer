@@ -45,4 +45,42 @@ public interface IRolesRepository
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of roles.</returns>
     Task<IEnumerable<Role>> GetAllRolesAsync();
+
+    /// <summary>
+    /// Asynchronously adds a role claim to the repository.
+    /// </summary>
+    /// <param name="roleClaim">The role claim to add.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    Task AddRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Asynchronously retrieves a role claim by its identifier.
+    /// </summary>
+    /// <param name="roleClaimId">The unique identifier of the role claim to retrieve.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the role claim if found; otherwise, null.</returns>
+    Task<RoleClaim?> GetRoleClaimByIdAsync(Guid roleClaimId);
+
+    /// <summary>
+    /// Asynchronously updates an existing role claim in the repository.
+    /// </summary>
+    /// <param name="roleClaim">The role claim to update.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    Task UpdateRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Asynchronously deletes a role claim from the repository.
+    /// </summary>
+    /// <param name="roleClaim">The role claim to delete.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    Task DeleteRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Asynchronously retrieves all role claims associated with a specific role identifier.
+    /// </summary>
+    /// <param name="roleId">The unique identifier of the role whose claims are to be retrieved.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of role claims.</returns>
+    Task<IEnumerable<RoleClaim>> GetRoleClaimsByRoleIdAsync(Guid roleId);
 }

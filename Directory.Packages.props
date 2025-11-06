@@ -3,34 +3,35 @@
     <!-- Enable central package management,
     https://learn.microsoft.com/en-us/nuget/consume-packages/Central-Package-Management -->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <AspnetVersion>9.0.10</AspnetVersion>
+    <AspnetVersion>10.0.0-rc.2.25502.107</AspnetVersion>
     <AspireVersion>9.5.2</AspireVersion>
     <OpenTelemetryVersion>1.12.0</OpenTelemetryVersion>
+    <OpenIddictVersion>7.1.0</OpenIddictVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="$(AspireVersion)" />
-    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="9.5.2" />
-    <PackageVersion Include="Aspire.Hosting.Seq" Version="9.5.1" />
-    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.1" />
-    <PackageVersion Include="Aspire.Seq" Version="9.5.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="$(AspireVersion)" />
+    <PackageVersion Include="Aspire.Hosting.Seq" Version="$(AspireVersion)" />
+    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(AspireVersion)" />
+    <PackageVersion Include="Aspire.Seq" Version="$(AspireVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="$(AspnetVersion)">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(AspnetVersion)">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.10" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-    <PackageVersion Include="OpenIddict.Abstractions" Version="7.1.0" />
-    <PackageVersion Include="OpenIddict.AspNetCore" Version="7.1.0" />
-    <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.1.0" />
-    <PackageVersion Include="OpenIddict.Quartz" Version="7.1.0" />
-    <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="7.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-rc.2" />
+    <PackageVersion Include="OpenIddict.Abstractions" Version="$(OpenIddictVersion)" />
+    <PackageVersion Include="OpenIddict.AspNetCore" Version="$(OpenIddictVersion)" />
+    <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="$(OpenIddictVersion)" />
+    <PackageVersion Include="OpenIddict.Quartz" Version="$(OpenIddictVersion)" />
+    <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.9.0" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />
@@ -54,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Mix -->
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0-rc.2.25502.107" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="$(AspnetVersion)" />
   </ItemGroup>
   <!-- Own -->
   <ItemGroup>

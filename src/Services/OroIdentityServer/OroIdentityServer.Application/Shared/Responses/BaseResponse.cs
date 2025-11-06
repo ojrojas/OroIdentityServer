@@ -6,7 +6,8 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Shared;
 
 public abstract record BaseResponse<T> 
 {
-    public T Data { get; set; }
+    public T? Data { get; set; }
     public int StatusCode { get; set; } = 200;
     public string Message { get; set; } = "Response Ok";
+    public List<string> Errors { get; set; } = new();
 }

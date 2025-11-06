@@ -10,7 +10,8 @@ public static class RoleCommandsEndpoints
     {
         var api = routeBuilder.MapGroup("/roles");
 
-        api.MapPost("/create", CreateRole);
+        api.MapPost("/create", CreateRole)
+            .WithName("CreateRole");
 
         return api;
     }

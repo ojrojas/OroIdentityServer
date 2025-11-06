@@ -4,15 +4,39 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Api.Endpoints;
 
+using Microsoft.AspNetCore.Http.HttpResults;
+
 public static class RoleQueriesEndpoints
 {
-    extension(IEndpointRouteBuilder routeBuilder)
+    public static RouteGroupBuilder MapRoleQueriesEndpointsV1(this IEndpointRouteBuilder routeBuilder)
     {
-        public RouteGroupBuilder MapRoleQueriesEndpointsV1()
-        {
-            var api = routeBuilder.MapGroup(string.Empty);
+        var api = routeBuilder.MapGroup("/roles");
 
-            return api;
-        }
+        api.MapGet("/get/{id}", GetRoleById)
+            .WithName("GetRoleById");
+
+        api.MapGet("/getall", GetAllRoles)
+            .WithName("GetAllRoles");
+
+        return api;
+    }
+
+    private static async Task<Results<Ok<GetRoleByIdResponse>, NotFound>> GetRoleById(
+        HttpContext context,
+        [FromRoute] Guid id,
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetRoleByIdQuery(id), cancellationToken);
+        return result.Data != null ? TypedResults.Ok(result) : TypedResults.NotFound();
+    }
+
+    private static async Task<Results<Ok<GetRolesResponse>, ProblemHttpResult>> GetAllRoles(
+        HttpContext context,
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetRolesQuery(), cancellationToken);
+        return TypedResults.Ok(result);
     }
 }

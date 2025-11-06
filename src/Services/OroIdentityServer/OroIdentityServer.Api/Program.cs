@@ -17,7 +17,7 @@ builder.AddServiceDefaults();
 builder.AddApplicationExtensions(configuration);
 builder.AddInfraestructureExtensions(configuration);
 builder.AddCoreExtensions();
-// builder.AddOpenIddictExtensions(configuration);
+builder.AddOpenIddictExtensions(configuration);
 builder.AddIdentityApiExtensions(configuration);
 
 builder.Services.Configure<RouteOptions>(options =>
@@ -51,8 +51,28 @@ app.UseHttpsRedirection();
 // Endpoints
 app.MapUsersQueriesEndpointsV1()
 .WithTags("UserQueries");
-
 app.MapUsersCommandsEndpointsV1()
 .WithTags("UserCommands");
+
+app.MapIdentificationTypeQueriesEndpointsV1()
+.WithTags("IdentificationTypeQueries");
+app.MapIdentificationTypeCommandsEndpointsV1()
+.WithTags("IdentificationTypeCommands");
+
+app.MapRoleQueriesEndpointsV1()
+.WithTags("RoleQueries");
+app.MapRoleCommandsEndpointsV1()
+.WithTags("RoleCommands");
+
+app.MapScopeQueriesEndpointsV1()
+.WithTags("ScopeQueries");
+app.MapScopeCommandsEndpointsV1()
+.WithTags("ScopeCommands");
+
+app.MapApplicationQueriesEndpointsV1()
+.WithTags("ApplicationQueries");
+app.MapApplicationCommandsEndpointsV1()
+.WithTags("ApplicationCommands");
+
 
 app.Run();

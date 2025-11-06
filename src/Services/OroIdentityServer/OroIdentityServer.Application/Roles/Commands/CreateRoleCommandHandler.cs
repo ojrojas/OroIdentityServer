@@ -11,13 +11,25 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 /// This command handler is responsible for creating a new role and saving it to the repository.
 /// </remarks>
 /// <param name="roleRepository">The repository used to manage roles.</param>
-public class CreateRoleCommandHandler(IRolesRepository roleRepository) : ICommandHandler<CreateRoleCommand>
+public class CreateRoleCommandHandler(
+    ILogger<CreateRoleCommandHandler> logger, IRolesRepository roleRepository
+    ) : ICommandHandler<CreateRoleCommand>
 {
-    private readonly IRolesRepository _roleRepository = roleRepository;
-
     public async Task HandleAsync(CreateRoleCommand command, CancellationToken cancellationToken)
     {
-        var role = new Role(new RoleName(command.RoleName));
-        await _roleRepository.AddRoleAsync(role, cancellationToken);
+        logger.LogInformation("Handling CreateRoleCommand for RoleName: {RoleName}", command.RoleName);
+
+        try
+        {
+            var role = new Role(command.RoleName);
+            await roleRepository.AddRoleAsync(role, cancellationToken);
+
+            logger.LogInformation("Successfully created role with RoleName: {RoleName}", command.RoleName);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while creating the role with RoleName: {RoleName}", command.RoleName);
+            throw;
+        }
     }
 }

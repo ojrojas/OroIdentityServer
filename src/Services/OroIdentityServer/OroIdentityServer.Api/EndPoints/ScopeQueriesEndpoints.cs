@@ -10,7 +10,8 @@ public static class ScopeQueriesEndpoints
     {
         var api = routeBuilder.MapGroup("/scopes");
 
-        api.MapGet("/", GetScopes);
+        api.MapGet("/", GetScopes)
+            .WithName("GetScopes");
 
         return api;
     }

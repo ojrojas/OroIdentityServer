@@ -12,7 +12,17 @@ public static class IdentificationTypeQueriesEndpoints
         {
             var api = routeBuilder.MapGroup(string.Empty);
 
+            api.MapGet("/getall", GetAllIdentificationTypes)
+            .WithName("GetAllIdentificationTypes");
+
             return api;
         }
+    }
+
+    private static async Task<IResult> GetAllIdentificationTypes(ISender sender, CancellationToken cancellationToken)
+    {
+        var query = new GetIdentificationTypesQuery();
+        var result = await sender.Send(query, cancellationToken);
+        return Results.Ok(result);
     }
 }

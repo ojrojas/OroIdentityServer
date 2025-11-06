@@ -10,9 +10,14 @@ public static class IdentificationTypeCommandsEndpoints
     {
         var api = routeBuilder.MapGroup("/identificationtypes");
 
-        api.MapPost("/create", CreateIdentificationType);
-        api.MapDelete("/delete/{id}", DeleteIdentificationType);
-        api.MapPatch("/update", UpdateIdentificationType);
+        api.MapPost("/create", CreateIdentificationType)
+            .WithName("CreateIdentificationType");
+
+        api.MapDelete("/delete/{id}", DeleteIdentificationType)
+            .WithName("DeleteIdentificationType");
+
+        api.MapPatch("/update", UpdateIdentificationType)
+            .WithName("UpdateIdentificationType");
 
         return api;
     }

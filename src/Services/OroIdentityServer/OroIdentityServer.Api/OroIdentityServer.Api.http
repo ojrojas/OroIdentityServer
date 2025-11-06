@@ -1,36 +1,36 @@
 @OroIdentityServer = https://localhost:7280
 
 ### Endpoints de UserQueries
-GET  {{OroIdentityServer}}/getuserinfo
+GET  https://localhost:7280/getuserinfo
 Content-Type: application/json
 
 ###
 
-GET  {{OroIdentityServer}}/users
+GET  https://localhost:7280/users
 Content-Type: application/json
 
 ###
 
-GET  {{OroIdentityServer}}/getuserbyemail/example@example.com
+GET  https://localhost:7280/getuserbyemail/{email}
 Content-Type: application/json
 
 ###
 
-GET  {{OroIdentityServer}}/getuserbyid/{{$guid}}
+GET  https://localhost:7280/getuserbyid/{id:guid}
 Content-Type: application/json
 
 ###
 
 ### Endpoints de UserCommands
-POST  {{OroIdentityServer}}/create
+POST  https://localhost:7280/create
 Content-Type: application/json
 
 {
-    "name": "John Doe",
-    "middleName": "Middle",
-    "lastName": "Doe",
-    "userName": "johndoe",
-    "email": "john.doe@example.com",
+    "name": "John",
+    "middleName": "Doe",
+    "lastName": "Smith",
+    "userName": "johnsmith",
+    "email": "john.smith@example.com",
     "password": "password123",
     "identification": "123456789",
     "identificationTypeId": "{{$guid}}"
@@ -38,7 +38,7 @@ Content-Type: application/json
 
 ###
 
-PATCH  {{OroIdentityServer}}/update
+PATCH  https://localhost:7280/update
 Content-Type: application/json
 
 {
@@ -54,7 +54,173 @@ Content-Type: application/json
 
 ###
 
-DELETE  {{OroIdentityServer}}/delete/{id:guid}
+DELETE  https://localhost:7280/delete/{id:guid}
+Content-Type: application/json
+
+###
+
+### Endpoints de RoleQueries
+GET  {{OroIdentityServer}}/roles/get/{id:guid}
+Content-Type: application/json
+
+###
+
+GET  {{OroIdentityServer}}/roles/getall
+Content-Type: application/json
+
+###
+
+### Endpoints de RoleCommands
+POST  {{OroIdentityServer}}/roles/create
+Content-Type: application/json
+
+{
+    "name": "Admin",
+    "description": "Administrator role"
+}
+
+###
+
+### Endpoints de RoleClaims
+GET  {{OroIdentityServer}}/roleclaims/get/{id:guid}
+Content-Type: application/json
+
+###
+
+GET  {{OroIdentityServer}}/roleclaims/getbyrole/{roleId:guid}
+Content-Type: application/json
+
+###
+
+POST  {{OroIdentityServer}}/roleclaims/associate
+Content-Type: application/json
+
+{
+    "roleId": "{{$guid}}",
+    "claimType": "Permission",
+    "claimValue": "Read"
+}
+
+###
+
+PUT  {{OroIdentityServer}}/roleclaims/update
+Content-Type: application/json
+
+{
+    "id": "{{$guid}}",
+    "claimType": "Permission",
+    "claimValue": "Write"
+}
+
+###
+
+DELETE  {{OroIdentityServer}}/roleclaims/delete/{id:guid}
+Content-Type: application/json
+
+###
+
+### Endpoints de IdentificationTypeCommands
+POST  {{OroIdentityServer}}/identificationtypes/create
+Content-Type: application/json
+
+{
+    "name": "Passport"
+}
+
+###
+
+PATCH  {{OroIdentityServer}}/identificationtypes/update
+Content-Type: application/json
+
+{
+    "id": "{{$guid}}",
+    "name": "Driver License"
+}
+
+###
+
+DELETE  {{OroIdentityServer}}/identificationtypes/delete/{id:guid}
+Content-Type: application/json
+
+###
+
+### Endpoints de IdentificationTypeQueries
+GET  {{OroIdentityServer}}/identificationtypes/getall
+Content-Type: application/json
+
+###
+
+### Endpoints de ScopeCommands
+POST  {{OroIdentityServer}}/scopes/create
+Content-Type: application/json
+
+{
+    "name": "api.read",
+    "description": "Read access to API"
+}
+
+###
+
+PUT  {{OroIdentityServer}}/scopes/update
+Content-Type: application/json
+
+{
+    "name": "api.write",
+    "description": "Write access to API"
+}
+
+###
+
+DELETE  {{OroIdentityServer}}/scopes/delete/{name}
+Content-Type: application/json
+
+###
+
+### Endpoints de ScopeQueries
+GET  {{OroIdentityServer}}/scopes
+Content-Type: application/json
+
+###
+
+### Endpoints de ApplicationQueries
+GET  {{OroIdentityServer}}/applications
+Content-Type: application/json
+
+###
+
+GET  {{OroIdentityServer}}/applications/{clientId}
+Content-Type: application/json
+
+###
+
+### Endpoints de ApplicationCommands
+POST  {{OroIdentityServer}}/applications/create
+Content-Type: application/json
+
+{
+    "descriptor": {
+        "clientId": "client-id",
+        "clientSecret": "client-secret",
+        "permissions": ["permission1", "permission2"]
+    }
+}
+
+###
+
+PUT  {{OroIdentityServer}}/applications/update
+Content-Type: application/json
+
+{
+    "descriptor": {
+        "clientId": "updated-client-id",
+        "clientSecret": "updated-client-secret",
+        "permissions": ["updated-permission1", "updated-permission2"]
+    }
+}
+
+###
+
+DELETE  {{OroIdentityServer}}/applications/delete/{clientId}
 Content-Type: application/json
 
 ###

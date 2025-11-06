@@ -11,8 +11,11 @@ public static class ApplicationQueriesEndpoints
     {
         var api = routeBuilder.MapGroup("/applications");
 
-        api.MapGet("/", GetApplications);
-        api.MapGet("/{clientId}", GetApplicationByClientId);
+        api.MapGet("/", GetApplications)
+            .WithName("GetApplications");
+
+        api.MapGet("/{clientId}", GetApplicationByClientId)
+            .WithName("GetApplicationByClientId");
 
         return api;
     }

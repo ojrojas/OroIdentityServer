@@ -11,9 +11,14 @@ public static class ApplicationCommandsEndpoints
     {
         var api = routeBuilder.MapGroup("/applications");
 
-        api.MapPost("/create", CreateApplication);
-        api.MapPut("/update", UpdateApplication);
-        api.MapDelete("/delete/{clientId}", DeleteApplication);
+        api.MapPost("/create", CreateApplication)
+            .WithName("CreateApplication");
+
+        api.MapPut("/update", UpdateApplication)
+            .WithName("UpdateApplication");
+
+        api.MapDelete("/delete/{clientId}", DeleteApplication)
+            .WithName("DeleteApplication");
 
         return api;
     }
