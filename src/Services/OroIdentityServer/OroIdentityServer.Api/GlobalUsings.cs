@@ -29,3 +29,7 @@ global using OpenIddict.Server.AspNetCore;
 global using OroIdentityServer.Services.OroIdentityServer.Api.Enums;
 global using Microsoft.AspNetCore.Authentication;
 global using OroIdentityServer.Services.OroIdentityServer.Api.Models;
+global using Microsoft.AspNetCore;
+global using Microsoft.AspNetCore.Identity;
+global using OroIdentityServer.Services.OroIdentityServer.Api.Adapters;
+global using OroIdentityServer.Services.OroIdentityServer.Core.Models;

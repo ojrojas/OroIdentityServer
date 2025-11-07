@@ -10,36 +10,36 @@ public static class AuthorizedEndpoints
     {
         var api = routeBuilder.MapGroup(string.Empty);
 
-        // api.MapMethods("/connect/authorize", [HttpMethods.Get, HttpMethods.Post], AuthorizeApp);
-        // api.MapPost("/connect/token", GetToken);
-        // api.MapGet("/connect/logout", Logout);
+        api.MapMethods("/connect/authorize", [HttpMethods.Get, HttpMethods.Post], AuthorizeApp);
+        api.MapPost("/connect/token", GetToken);
+        api.MapGet("/connect/logout", Logout);
 
         return api;
     }
 
-    // [IgnoreAntiforgeryToken]
-    // private static async ValueTask<IResult> Logout(
-    //        HttpContext context,
-    //        IAuthorizationService service,
-    //        CancellationToken cancellationToken)
-    // {
-    //     return await service.LogoutAsync(new(context), cancellationToken);
-    // }
+    [IgnoreAntiforgeryToken]
+    private static async ValueTask<IResult> Logout(
+           HttpContext context,
+          Services.IAuthorizationService service,
+           CancellationToken cancellationToken)
+    {
+        return await service.LogoutAsync(new(context), cancellationToken);
+    }
 
-    // private static async ValueTask<IResult> GetToken(
-    //     HttpContext context,
-    //     IAuthorizationService service,
-    //     CancellationToken cancellationToken)
-    // {
-    //     return await service.GetTokenAsync(new(context), cancellationToken);
-    // }
+    private static async ValueTask<LoginResponse> GetToken(
+        HttpContext context,
+        Services.IAuthorizationService service,
+        CancellationToken cancellationToken)
+    {
+        return await service.GetTokenAsync(new(context), cancellationToken);
+    }
 
-    // [IgnoreAntiforgeryToken]
-    // private static async ValueTask<IResult> AuthorizeApp(
-    //       HttpContext context,
-    //       IAuthorizationService service,
-    //       CancellationToken cancellationToken)
-    // {
-    //     return await service.AuthorizedAsync(new(context), cancellationToken);
-    // }
+    [IgnoreAntiforgeryToken]
+    private static async ValueTask<LoginResponse> AuthorizeApp(
+          HttpContext context,
+          Services.IAuthorizationService service,
+          CancellationToken cancellationToken)
+    {
+        return await service.AuthorizedAsync(new(context), cancellationToken);
+    }
 }

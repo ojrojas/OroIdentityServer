@@ -19,7 +19,7 @@ public class User : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
     public string NormalizedUserName { get; set; } = string.Empty;
     public IdentificationType? IdentificationType { get; set; }
 
-    public SecurityUser SecurityUserId {get;set;}
+    public Guid SecurityUserId {get;set;}
     public SecurityUser SecurityUser {get;set;}
 }
 

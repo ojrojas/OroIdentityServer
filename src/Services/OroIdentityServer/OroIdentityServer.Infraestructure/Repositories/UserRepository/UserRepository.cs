@@ -61,4 +61,25 @@ public class UserRepository(
         await repository.UpdateAsync(user, cancellationToken);
         logger.LogInformation("Exiting UpdateUserAsync");
     }
+
+    public async Task<bool> ValidateUserCanLoginAsync(string email, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Validating if user can login with email: {Email}", email);
+        var user = await GetUserByEmailAsync(email);
+
+        if (user == null)
+        {
+            logger.LogWarning("User not found with email: {Email}", email);
+            return false;
+        }
+
+        if (user.SecurityUser.LockoutEnabled && user.SecurityUser.LockoutEnd.HasValue && user.SecurityUser.LockoutEnd.Value > DateTime.UtcNow)
+        {
+            logger.LogWarning("User is locked out until {LockoutEnd}", user.SecurityUser.LockoutEnd);
+            return false;
+        }
+
+        logger.LogInformation("User is allowed to login");
+        return true;
+    }
 }

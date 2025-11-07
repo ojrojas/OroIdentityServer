@@ -7,7 +7,7 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Inter
 /// <summary>
 /// Represents a repository interface for managing user entities.
 /// </summary>
-public interface IUserRepository 
+public interface IUserRepository
 {
     /// <summary>
     /// Asynchronously adds a new user to the repository.
@@ -62,5 +62,12 @@ public interface IUserRepository
     /// <param name="confirmedPassword">Confirmed password</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests</param>
     /// <returns>True if password has changed</returns>
-    Task<bool> ChangePasswordAsync(string email,string currentPassword, string newPassword, string confirmedPassword, CancellationToken cancellationToken);
+    Task<bool> ChangePasswordAsync(string email, string currentPassword, string newPassword, string confirmedPassword, CancellationToken cancellationToken);
+
+    /// Validates whether a user with the specified email is allowed to log in.
+    /// </summary>
+    /// <param name="email">The email address of the user to validate.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result is <c>true</c> if the user can log in; otherwise, <c>false</c>.</returns>
+    Task<bool> ValidateUserCanLoginAsync(string email, CancellationToken cancellationToken);
 }
