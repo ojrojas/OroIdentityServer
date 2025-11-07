@@ -6,11 +6,9 @@ namespace OroIdentityServer.BuildingBlocks.Shared.Services;
 
 public class ClaimsUserInfoService(IHttpContextAccessor contextAccessor) : IPostConfigureOptions<UserInfo>
 {
-    private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-
     public void PostConfigure(string? name, UserInfo options)
     {
-        var claims = _contextAccessor?.HttpContext?.User.Claims;
+        var claims = contextAccessor?.HttpContext?.User.Claims;
 
         _ = int.TryParse(claims?.First(x => x.Type == "").Value, out int state);
         options.State = (EntityBaseState)state;

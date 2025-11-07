@@ -36,19 +36,26 @@ if (app.Environment.IsDevelopment())
 
 
 #if DEBUG
-var scope = app.Services.CreateScope();
+using var scope = app.Services.CreateScope();
 var service = scope.ServiceProvider;
 
 var context = service.GetRequiredService<OroIdentityAppContext>();
 ArgumentNullException.ThrowIfNull(context);
 await context.Database.EnsureDeletedAsync();
 await context.Database.EnsureCreatedAsync();
+var seedDataPath = Path.Combine(
+    Directory.GetCurrentDirectory(), 
+    "bin", "Debug", "net10.0", "Data", "seedData.json");
+await DatabaseSeeder.SeedAsync(context, seedDataPath);
 
 #endif
 
 app.UseHttpsRedirection();
 
 // Endpoints
+app.MapAuthorizeEndpoints()
+.WithTags("AuthorizationEndpoints");
+
 app.MapUsersQueriesEndpointsV1()
 .WithTags("UserQueries");
 app.MapUsersCommandsEndpointsV1()

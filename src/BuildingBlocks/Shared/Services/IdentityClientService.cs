@@ -6,13 +6,10 @@ namespace OroIdentityServer.BuildingBlocks.Shared.Services;
 
 public class IdentityClientService(HttpClient httpClient, ILogger<IdentityClientService> logger) : IIdentityClientService
 {
-    private readonly HttpClient _httpClient = httpClient;
-    private readonly ILogger<IdentityClientService> _logger = logger;
-
     public async Task<RoleInfo?> GetRoleByIdAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation($"Get role by id request to identity server {roleId}");
-        var response = await _httpClient.GetAsync($"api/getrolebyid/{roleId}", cancellationToken);
+        logger.LogInformation($"Get role by id request to identity server {roleId}");
+        var response = await httpClient.GetAsync($"api/getrolebyid/{roleId}", cancellationToken);
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync(cancellationToken);
         var roleInfo = JsonSerializer.Deserialize<RoleInfo>(stringResponse);
@@ -22,9 +19,9 @@ public class IdentityClientService(HttpClient httpClient, ILogger<IdentityClient
 
     public async Task<UserInfo?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation($"Get user by id request to identity server {userId}");
+        logger.LogInformation($"Get user by id request to identity server {userId}");
 
-        var response = await _httpClient.GetAsync($"api/getuserbyid/{userId}", cancellationToken);
+        var response = await httpClient.GetAsync($"api/getuserbyid/{userId}", cancellationToken);
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync(cancellationToken);
         var userInfo = JsonSerializer.Deserialize<UserInfo>(stringResponse);
@@ -34,9 +31,9 @@ public class IdentityClientService(HttpClient httpClient, ILogger<IdentityClient
 
     public async Task<IEnumerable<Guid>> GetUserRoleIdsAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation($"Get roles ids by id user request to identity server {userId}");
+        logger.LogInformation($"Get roles ids by id user request to identity server {userId}");
 
-        var response = await _httpClient.GetAsync($"api/getrolesidbyuserid/{userId}", cancellationToken);
+        var response = await httpClient.GetAsync($"api/getrolesidbyuserid/{userId}", cancellationToken);
         response.EnsureSuccessStatusCode();
         var stringResponse = await response.Content.ReadAsStringAsync(cancellationToken);
         var roleIds = JsonSerializer.Deserialize<IEnumerable<Guid>>(stringResponse);
