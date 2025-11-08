@@ -2,15 +2,15 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
-
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Data;
 
 public static class DatabaseSeeder
 {
-    public static async Task SeedAsync(OroIdentityAppContext context, 
-    IOpenIddictApplicationManager applicationManager,
-    string jsonFilePath)
+    public static async Task SeedAsync(
+        OroIdentityAppContext context, 
+        IOpenIddictApplicationManager applicationManager,
+        string jsonFilePath,
+        IPasswordHasher passwordHasher)
     {
         Guid userCreateId  = Guid.CreateVersion7();
         if (!File.Exists(jsonFilePath))
@@ -43,8 +43,9 @@ public static class DatabaseSeeder
                 IdentificationTypeId = context.IdentificationTypes.FirstOrDefault()!.Id,
                 SecurityUser = new SecurityUser
                 {
-                    PasswordHash = user.PasswordHash,
-                    SecurityStamp = Guid.NewGuid().ToString()
+                    PasswordHash = await passwordHasher.HashPassword(user.PasswordHash),
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    ConcurrencyStamp = Guid.NewGuid()
                 },
                 CreatedBy = userCreateId
             });

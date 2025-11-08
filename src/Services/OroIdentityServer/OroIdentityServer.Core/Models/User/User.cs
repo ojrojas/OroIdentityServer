@@ -4,8 +4,6 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-[Index(nameof(Email), IsUnique = true)]
-[Index(nameof(UserName), IsUnique = true)]
 public class User : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
 {
     public string Name { get; set; } = string.Empty;
@@ -21,15 +19,4 @@ public class User : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
 
     public Guid SecurityUserId {get;set;}
     public SecurityUser SecurityUser {get;set;}
-}
-
-
-public class SecurityUser : BaseEntity<Guid>
-{
-    public required string PasswordHash { get; set; }
-    public string SecurityStamp { get; set; } = string.Empty;
-    public Guid ConcurrencyStamp { get; set; }
-    public DateTime? LockoutEnd { get; set; }
-    public bool LockoutEnabled { get; set; } = true;
-    public int AccessFailedCount { get; set; } = 0;
 }

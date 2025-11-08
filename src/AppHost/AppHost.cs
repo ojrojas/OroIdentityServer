@@ -14,7 +14,10 @@ var launchProfile = ShouldUseHttpForEndpoints(configuration) ? Constants.Http : 
 var seq = builder.AddSeq(Constants.Seq);
 var postgres = builder.AddPostgres("postgres")
 .WithImage("ankane/pgvector")
-    .WithImageTag("latest").WithPgAdmin();
+    .WithImageTag("latest").WithPgAdmin(config =>
+    {
+        config.WithImageTag("latest");
+    });
 
 var identityDb = postgres.AddDatabase("identityDb");
 

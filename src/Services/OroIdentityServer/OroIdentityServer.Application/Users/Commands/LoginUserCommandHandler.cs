@@ -2,9 +2,6 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-
-using Microsoft.Extensions.Logging;
-
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
 public class LoginUserCommandHandler(
@@ -19,11 +16,40 @@ public class LoginUserCommandHandler(
         {
             var user = await userRepository.GetUserByEmailAsync(command.Username);
 
-            if (user == null || !await passwordHasher.VerifyPassword(command.Password, user.SecurityUser.PasswordHash))
+            if (user == null)
             {
                 logger.LogWarning("Invalid login attempt for user {Username}", command.Username);
                 throw new UnauthorizedAccessException("Invalid username or password.");
             }
+
+            // Check if the account is locked out
+            if (user.SecurityUser.LockoutEnabled && user.SecurityUser.LockoutEnd.HasValue && user.SecurityUser.LockoutEnd.Value > DateTime.UtcNow)
+            {
+                logger.LogWarning("User {Username} is locked out until {LockoutEnd}", command.Username, user.SecurityUser.LockoutEnd);
+                throw new UnauthorizedAccessException("Account is locked. Please try again later.");
+            }
+
+            // Verify the password
+            if (!await passwordHasher.VerifyPassword(command.Password, user.SecurityUser.PasswordHash))
+            {
+                // Increment failed access count
+                user.SecurityUser.AccessFailedCount++;
+
+                if (user.SecurityUser.AccessFailedCount >= 5) // Threshold for failed attempts
+                {
+                    user.SecurityUser.LockoutEnd = DateTime.UtcNow.AddMinutes(15); // Lock the account for 15 minutes
+                    logger.LogWarning("User {Username} account locked until {LockoutEnd}", command.Username, user.SecurityUser.LockoutEnd);
+                }
+
+                await userRepository.UpdateUserAsync(user, cancellationToken);
+                logger.LogWarning("Invalid login attempt for user {Username}", command.Username);
+                throw new UnauthorizedAccessException("Invalid username or password.");
+            }
+
+            // Reset failed access count on successful login
+            user.SecurityUser.AccessFailedCount = 0;
+            user.SecurityUser.LockoutEnd = null;
+            await userRepository.UpdateUserAsync(user, cancellationToken);
 
             logger.LogInformation("User {Username} logged in successfully.", command.Username);
         }
