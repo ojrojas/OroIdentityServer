@@ -1,8 +1,16 @@
+// OroIdentityServer
+// Copyright (C) 2025 Oscar Rojas
+// Licensed under the GNU AGPL v3.0 or later.
+// See the LICENSE file in the project root for details.
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
+
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Data;
 
 public static class DatabaseSeeder
 {
-    public static async Task SeedAsync(OroIdentityAppContext context, string jsonFilePath)
+    public static async Task SeedAsync(OroIdentityAppContext context, 
+    IOpenIddictApplicationManager applicationManager,
+    string jsonFilePath)
     {
         Guid userCreateId  = Guid.CreateVersion7();
         if (!File.Exists(jsonFilePath))
@@ -20,6 +28,8 @@ public static class DatabaseSeeder
                 });
         }
 
+        await context.SaveChangesAsync();
+
         if (!context.Users.Any())
         {
             foreach (var user in seedData.Users)
@@ -30,7 +40,7 @@ public static class DatabaseSeeder
                 UserName = user.UserName,
                 Email = user.Email,
                 Identification = user.Identification,
-                IdentificationTypeId = Guid.NewGuid(), // Replace with actual ID if needed
+                IdentificationTypeId = context.IdentificationTypes.FirstOrDefault()!.Id,
                 SecurityUser = new SecurityUser
                 {
                     PasswordHash = user.PasswordHash,
@@ -46,22 +56,31 @@ public static class DatabaseSeeder
             {
                 var newRole = new Role(new RoleName(role.Name))
                 {
-                    ConcurrencyStamp = Guid.NewGuid(),
+                    ConcurrencyStamp = Guid.CreateVersion7(),
                     CreatedBy = userCreateId
                 };
 
-                foreach (var roleClaim in role.RoleClaims)
-                {
-                    context.RoleClaims.Add(new RoleClaim
-                    {
-                        RoleId = newRole.Id,
-                        ClaimType = roleClaim.ClaimType,
-                        ClaimValue = roleClaim.ClaimValue,
-                        CreatedBy = userCreateId
-                    });
-                }
-
                 context.Roles.Add(newRole);
+            }
+
+            await context.SaveChangesAsync(); // Save roles first to generate IDs
+
+            foreach (var role in seedData.Roles)
+            {
+                var dbRole = context.Roles.FirstOrDefault(r => r.RoleName.Value == role.Name);
+                if (dbRole != null)
+                {
+                    foreach (var roleClaim in role.RoleClaims)
+                    {
+                        context.RoleClaims.Add(new RoleClaim
+                        {
+                            RoleId = dbRole.Id,
+                            ClaimType = roleClaim.ClaimType,
+                            ClaimValue = roleClaim.ClaimValue,
+                            CreatedBy = userCreateId
+                        });
+                    }
+                }
             }
         }
 
@@ -80,7 +99,8 @@ public static class DatabaseSeeder
                     context.Set<UserRoles>().Add(new UserRoles
                     {
                         UserId = pepe.Id,
-                        RoleId = adminRole.Id
+                        RoleId = adminRole.Id,
+                        CreatedBy = userCreateId
                     });
                 }
 
@@ -89,10 +109,35 @@ public static class DatabaseSeeder
                     context.Set<UserRoles>().Add(new UserRoles
                     {
                         UserId = maria.Id,
-                        RoleId = userRole.Id
+                        RoleId = userRole.Id,
+                        CreatedBy = userCreateId
                     });
                 }
             }
+        }
+
+        // Register OpenIddict application
+        if (await applicationManager.FindByClientIdAsync("OroIdentityServer.Web") == null)
+        {
+            await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
+            {
+                ClientId = "OroIdentityServer.Web",
+                DisplayName = "OroIdentityServer Web Application",
+                ApplicationType = OpenIddictConstants.ApplicationTypes.Web,
+                ConsentType = OpenIddictConstants.ConsentTypes.Explicit,
+                Permissions =
+                {
+                    OpenIddictConstants.Permissions.Endpoints.Authorization,
+                    OpenIddictConstants.Permissions.Endpoints.Token,
+                    OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                    OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                    OpenIddictConstants.Permissions.Scopes.Email,
+                    OpenIddictConstants.Permissions.Scopes.Profile,
+                    OpenIddictConstants.Permissions.Scopes.Roles
+                },
+                RedirectUris = { new Uri("https://localhost:5001/signin-oidc") },
+                PostLogoutRedirectUris = { new Uri("https://localhost:5001/signout-callback-oidc") }
+            });
         }
 
         await context.SaveChangesAsync();
@@ -102,8 +147,8 @@ public static class DatabaseSeeder
 public class SeedData
 {
     public string IdentificationType { get; set; } = string.Empty;
-    public List<SeedUser> Users { get; set; } = new();
-    public List<SeedRole> Roles { get; set; } = new();
+    public List<SeedUser> Users { get; set; } = [];
+    public List<SeedRole> Roles { get; set; } = [];
 }
 
 public class SeedUser
@@ -120,7 +165,7 @@ public class SeedRole
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public List<SeedRoleClaim> RoleClaims { get; set; } = new();
+    public List<SeedRoleClaim> RoleClaims { get; set; } = [];
 }
 
 public class SeedRoleClaim

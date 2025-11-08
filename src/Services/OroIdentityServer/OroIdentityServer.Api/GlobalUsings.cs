@@ -2,6 +2,7 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+global using System.Diagnostics.CodeAnalysis;
 global using System.Security.Claims;
 global using Microsoft.AspNetCore;
 global using Microsoft.AspNetCore.Authentication;
@@ -14,6 +15,7 @@ global using Microsoft.IdentityModel.Tokens;
 global using OpenIddict.Abstractions;
 global using OpenIddict.Server.AspNetCore;
 global using OroCQRS.Core.Interfaces;
+global using OroIdentityServer.Application.Queries;
 global using OroIdentityServer.BuildingBlocks.Loggers;
 global using OroIdentityServer.BuildingBlocks.ServiceDefaults;
 global using OroIdentityServer.OroIdentityServer.Infraestructure.Data;
@@ -23,6 +25,7 @@ global using OroIdentityServer.Services.OroIdentityServer.Api.Endpoints;
 global using OroIdentityServer.Services.OroIdentityServer.Api.Enums;
 global using OroIdentityServer.Services.OroIdentityServer.Api.Extensions;
 global using OroIdentityServer.Services.OroIdentityServer.Api.Models;
+global using OroIdentityServer.Services.OroIdentityServer.Api.Services;
 global using OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 global using OroIdentityServer.Services.OroIdentityServer.Application.Extensions;
 global using OroIdentityServer.Services.OroIdentityServer.Application.Queries;
@@ -32,3 +35,5 @@ global using Quartz;
 global using Scalar.AspNetCore;
 global using Serilog;
 global using static OpenIddict.Abstractions.OpenIddictConstants;
+
+

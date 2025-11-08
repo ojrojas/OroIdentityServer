@@ -5,12 +5,14 @@
 global using System.Linq.Expressions;
 global using System.Text.Json;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Infrastructure;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
+global using OpenIddict.Abstractions;
 global using OroIdentityServer.BuildingBlocks.Shared.Data;
 global using OroIdentityServer.BuildingBlocks.Shared.Entities;
 global using OroIdentityServer.BuildingBlocks.Shared.Enums;

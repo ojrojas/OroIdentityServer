@@ -13,7 +13,6 @@ class IdentificationTypeEntityConfiguration : IEntityTypeConfiguration<Identific
         builder.OwnsOne(x => x.IdentificationTypeName, nv =>
         {
             nv.Property(p => p.Value)
-            //.HasColumnName("IdentificationTypeName")
             .HasMaxLength(50)
             .IsRequired();
         });

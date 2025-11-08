@@ -13,7 +13,6 @@ class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
         builder.OwnsOne(x => x.RoleName, nv =>
         {
             nv.Property(p => p.Value)
-            //.HasColumnName("RolName")
             .HasMaxLength(50)
             .IsRequired();
         });

@@ -14,6 +14,7 @@ builder.Services.AddOpenApi();
 
 builder.AddServicesWritersLogger(configuration);
 builder.AddServiceDefaults();
+builder.AddAppExtensions();
 builder.AddApplicationExtensions(configuration);
 builder.AddInfraestructureExtensions(configuration);
 builder.AddCoreExtensions();
@@ -40,13 +41,15 @@ using var scope = app.Services.CreateScope();
 var service = scope.ServiceProvider;
 
 var context = service.GetRequiredService<OroIdentityAppContext>();
+var applicationManager = service.GetRequiredService<IOpenIddictApplicationManager>();
+
 ArgumentNullException.ThrowIfNull(context);
 await context.Database.EnsureDeletedAsync();
 await context.Database.EnsureCreatedAsync();
 var seedDataPath = Path.Combine(
-    Directory.GetCurrentDirectory(), 
+    Directory.GetCurrentDirectory(),
     "bin", "Debug", "net10.0", "Data", "seedData.json");
-await DatabaseSeeder.SeedAsync(context, seedDataPath);
+await DatabaseSeeder.SeedAsync(context, applicationManager, seedDataPath);
 
 #endif
 

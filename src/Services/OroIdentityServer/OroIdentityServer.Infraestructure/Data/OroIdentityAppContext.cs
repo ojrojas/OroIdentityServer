@@ -2,6 +2,8 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.OroIdentityServer.Infraestructure.Data.EntityConfigurations;
+
 namespace OroIdentityServer.Services.OroIdentityServer.Infraestructure;
 
 public class OroIdentityAppContext(
@@ -18,6 +20,10 @@ public class OroIdentityAppContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.HasPostgresExtension("vector");
+        builder.ApplyConfiguration(new UserEntityConfiguration());
+        builder.ApplyConfiguration(new RoleEntityConfiguration());
+        builder.ApplyConfiguration(new UserRolesEntityConfiguration());
+        builder.ApplyConfiguration(new RoleClaimEntityConfiguration());
         builder.ApplyConfiguration(new IdentificationTypeEntityConfiguration());
         builder.ApplyConfiguration(new RoleEntityConfiguration());
     }
