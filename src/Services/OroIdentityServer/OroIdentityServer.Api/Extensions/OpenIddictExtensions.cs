@@ -31,6 +31,7 @@ public static class OpenIddictExtensions
             // Mark the "email", "profile" and "roles" scopes as supported scopes.
             config.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles);
 
+            // Configure encryption and signing of tokens.  testing phrase tokens ORO_IDENTITY_SERVER_PROJECT_0001
             config.AddEncryptionKey(new SymmetricSecurityKey(                                         
                 Convert.FromBase64String(configuration.GetSection("SymmetricSecurityKey").Value)));
 

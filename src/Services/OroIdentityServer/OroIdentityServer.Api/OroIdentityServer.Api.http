@@ -224,3 +224,48 @@ DELETE  {{OroIdentityServer}}/applications/delete/{clientId}
 Content-Type: application/json
 
 ###
+
+### Endpoints de OpenIddict
+# Authorize Endpoint
+GET  {{OroIdentityServer}}/connect/authorize
+Content-Type: application/x-www-form-urlencoded
+?client_id=OroIdentityServer.Web
+&redirect_uri=https://your-redirect-uri
+&response_type=code
+&scope=openid profile email
+&state=your_state_value
+###
+# Token Endpoint
+POST  {{OroIdentityServer}}/connect/token
+Content-Type: application/x-www-form-urlencoded
+grant_type=authorization_code
+&code=authorization_code_received
+&redirect_uri=https://your-redirect-uri
+&client_id=your_client_id
+&client_secret=your_client_secret
+###
+# UserInfo Endpoint
+GET  {{OroIdentityServer}}/connect/userinfo
+Content-Type: application/json
+Authorization: Bearer <your_actual_access_token>
+###
+# Revocation Endpoint
+POST  {{OroIdentityServer}}/connect/revocation
+Content-Type: application/x-www-form-urlencoded
+token=token_to_revoke
+&token_type_hint=access_token
+###
+# Introspection Endpoint
+POST  {{OroIdentityServer}}/connect/introspect
+Content-Type: application/x-www-form-urlencoded
+token=token_to_introspect
+&token_type_hint=access_token
+
+### Endpoints de Consentimientos
+GET  {{OroIdentityServer}}/consents/getbyuser/{userId:guid}
+Content-Type: application/json
+###
+DELETE  {{OroIdentityServer}}/consents/revoke/{consentId:guid}
+Content-Type: application/json
+###
+

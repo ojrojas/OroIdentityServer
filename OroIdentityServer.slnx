@@ -1,0 +1,25 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/AppHost/AppHost.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/Loggers/Loggers.csproj" />
+    <Project Path="src/BuildingBlocks/ServiceDefaults/ServiceDefaults.csproj" />
+    <Project Path="src/BuildingBlocks/Shared/Shared.csproj" />
+  </Folder>
+  <Folder Name="/src/Frontends/">
+    <Project Path="src/Frontends/OroIdentity.Web/OroIdentity.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/OroIdentityServer/">
+    <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Api/OroIdentityServer.Api.csproj" />
+    <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Application/OroIdentityServer.Application.csproj" />
+    <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Core/OroIdentityServer.Core.csproj" />
+    <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Infraestructure/OroIdentityServer.Infraestructure.csproj" />
+  </Folder>
+</Solution>
