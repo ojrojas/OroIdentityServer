@@ -18,7 +18,7 @@ public static class AuthorizedEndpoints
     }
 
     [IgnoreAntiforgeryToken]
-    private static async Task<IResult> Logout(
+    private static async ValueTask<IResult> Logout(
            HttpContext context,
           [FromServices] IAuthorizationService service,
            CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ public static class AuthorizedEndpoints
         return await service.LogoutAsync(new(context), cancellationToken);
     }
 
-    private static async Task<LoginResponse> GetToken(
+    private static async ValueTask<LoginResponse> GetToken(
         HttpContext context,
         [FromServices] IAuthorizationService service,
         CancellationToken cancellationToken)
@@ -35,7 +35,7 @@ public static class AuthorizedEndpoints
     }
 
     [IgnoreAntiforgeryToken]
-    private static async Task<LoginResponse> AuthorizeApp(
+    private static async ValueTask<LoginResponse> AuthorizeApp(
           HttpContext context,
           [FromServices] IAuthorizationService service,
           CancellationToken cancellationToken)

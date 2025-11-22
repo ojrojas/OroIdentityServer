@@ -8,12 +8,14 @@ public static class IdentityApiExtensions
 {
     public static void AddIdentityApiExtensions(this IHostApplicationBuilder builder, IConfiguration configuration)
     {
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        });
+        // builder.Services.AddAuthentication(options =>
+        // {
+        //     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        //     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        //     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        // });
+
+        builder.Services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
 
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy("CookieAuthenticationPolicy", builder =>
