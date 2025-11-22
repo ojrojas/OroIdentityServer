@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Request</title>
+    <script>
+        async function generateCodeChallenge(verifier) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(verifier);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return btoa(String.fromCharCode(...new Uint8Array(hash)))
+                .replace(/=/g, '')
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_');
+        }
+
+        function generateRandomString(length) {
+            const array = new Uint8Array(length);
+            crypto.getRandomValues(array);
+            return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join('');
+        }
+
+        async function submitForm(event) {
+            event.preventDefault();
+
+            const codeVerifier = generateRandomString(64);
+            const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+            const form = document.getElementById('authForm');
+            const inputCodeChallenge = document.createElement('input');
+            inputCodeChallenge.type = 'hidden';
+            inputCodeChallenge.name = 'code_challenge';
+            inputCodeChallenge.value = codeChallenge;
+
+            const inputCodeChallengeMethod = document.createElement('input');
+            inputCodeChallengeMethod.type = 'hidden';
+            inputCodeChallengeMethod.name = 'code_challenge_method';
+            inputCodeChallengeMethod.value = 'S256';
+
+            form.appendChild(inputCodeChallenge);
+            form.appendChild(inputCodeChallengeMethod);
+
+            // Store the code_verifier for later use during token exchange
+            localStorage.setItem('code_verifier', codeVerifier);
+
+            form.submit();
+        }
+    </script>
+</head>
+<body>
+    <h1>Login Request</h1>
+    <form id="authForm" action="https://localhost:7280/connect/authorize" method="get" onsubmit="submitForm(event)">
+        <label for="client_id">Client ID:</label>
+        <input type="text" id="client_id" name="client_id" value="OroIdentityServer.Web" readonly><br><br>
+
+        <label for="response_type">Response Type:</label>
+        <input type="text" id="response_type" name="response_type" value="code" readonly><br><br>
+
+        <label for="scope">Scope:</label>
+        <input type="text" id="scope" name="scope" value="openid profile email roles"><br><br>
+
+        <label for="redirect_uri">Redirect URI:</label>
+        <input type="text" id="redirect_uri" name="redirect_uri" value="https://localhost:5001/signin-oidc"><br><br>
+
+        <label for="consent_type">Consent Type:</label>
+        <input type="text" id="consent_type" name="consent_type" value="explicit" readonly><br><br>
+
+        <label for="state">State:</label>
+        <input type="text" id="state" name="state" value="xyz123"><br><br>
+
+        <label for="nonce">Nonce:</label>
+        <input type="text" id="nonce" name="nonce" value="abc456"><br><br>
+
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>

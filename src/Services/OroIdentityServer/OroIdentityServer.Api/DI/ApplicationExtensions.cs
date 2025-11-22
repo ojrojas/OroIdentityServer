@@ -13,7 +13,9 @@ public static class ApplicationExtensions
         
         builder.AddNpgsqlDbContext<OroIdentityAppContext>("identitydb", configureDbContextOptions: config =>
         {
-           
+           config.UseNpgsql();
+           config.EnableDetailedErrors(); // Consider disabling in production for performance reasons
+           config.EnableSensitiveDataLogging(); // Consider disabling in production for security reasons
         });
 
         return builder;

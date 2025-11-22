@@ -63,6 +63,10 @@ await DatabaseSeeder.SeedAsync(
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseRouting();
+app.UseAuthorization();
+
 // Endpoints
 app.MapAuthorizeEndpoints()
 .WithTags("AuthorizationEndpoints");

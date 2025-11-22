@@ -9,6 +9,7 @@ public static class AppExtensions
     public static void AddAppExtensions(this IHostApplicationBuilder builder)
     {
         builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
         builder.Services.AddScoped<IIdentityRedirectService,IdentityRedirectService>();
     }
 }

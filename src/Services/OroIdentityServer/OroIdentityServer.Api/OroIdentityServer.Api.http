@@ -227,13 +227,16 @@ Content-Type: application/json
 
 ### Endpoints de OpenIddict
 # Authorize Endpoint
-GET  {{OroIdentityServer}}/connect/authorize
+POST https://localhost:7280/connect/authorize
 Content-Type: application/x-www-form-urlencoded
-?client_id=OroIdentityServer.Web
-&redirect_uri=https://your-redirect-uri
-&response_type=code
-&scope=openid profile email
-&state=your_state_value
+
+["client_id=OroIdentityServer.Web",
+"response_type=code",
+"scope=openid profile",
+"redirect_uri=https://localhost:7280/callback",
+"consent_type=explicit",
+"state=xyz123",
+"nonce=abc456"].join('&')
 ###
 # Token Endpoint
 POST  {{OroIdentityServer}}/connect/token
