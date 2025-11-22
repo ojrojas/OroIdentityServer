@@ -13,3 +13,4 @@ global using Microsoft.Extensions.Configuration;
 global using OroCQRS.Core.Extensions;
 global using OpenIddict.Abstractions;
 global using static OpenIddict.Abstractions.OpenIddictConstants;
+global using OroIdentityServer.BuildingBlocks.Shared.Enums;

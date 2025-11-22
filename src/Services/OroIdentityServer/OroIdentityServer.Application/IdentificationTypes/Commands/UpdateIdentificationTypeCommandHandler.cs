@@ -9,8 +9,33 @@ public class UpdateIdentificationTypeCommandHandler(
     IIdentificationTypeRepository repository
 ) : ICommandHandler<UpdateIdentificationTypeCommand>
 {
-    public Task HandleAsync(UpdateIdentificationTypeCommand command, CancellationToken cancellationToken)
+    public async Task HandleAsync(UpdateIdentificationTypeCommand command, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            logger.LogInformation("Starting update process for IdentificationType with ID {Id}", command.Id);
+
+            var identificationTypeExist = await repository.GetIdentificationTypeByIdAsync(command.Id);
+            if (identificationTypeExist == null)
+            {
+                logger.LogWarning("IdentificationType with ID {Id} not found", command.Id);
+                throw new KeyNotFoundException($"IdentificationType with ID {command.Id} not found.");
+            }
+
+            var identificationType = new IdentificationType(command.Name)
+            {
+                Id = command.Id,
+                State = command.State,
+            };
+
+            await repository.UpdateIdentificationTypeAsync(identificationType, cancellationToken);
+
+            logger.LogInformation("Successfully updated IdentificationType with ID {Id}", command.Id);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while updating IdentificationType with ID {Id}", command.Id);
+            throw;
+        }
     }
 }

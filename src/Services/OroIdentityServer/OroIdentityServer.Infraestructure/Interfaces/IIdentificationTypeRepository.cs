@@ -45,4 +45,11 @@ public interface IIdentificationTypeRepository
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of all identification types.</returns>
     Task<IEnumerable<IdentificationType>> GetAllIdentificationTypesAsync();
+
+    /// <summary>
+    /// Retrieves an identification type by its name asynchronously.
+    /// </summary>
+    /// <param name="name">The name of the identification type to retrieve.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the identification type if found; otherwise, null.</returns>
+    Task<IdentificationType?> GetIdentificationTypeByNameAsync(IdentificationTypeName name);
 }

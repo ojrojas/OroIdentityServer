@@ -18,5 +18,5 @@ public class User : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
     public IdentificationType? IdentificationType { get; set; }
 
     public Guid SecurityUserId {get;set;}
-    public SecurityUser SecurityUser {get;set;}
+    public SecurityUser? SecurityUser {get;set;}
 }

@@ -14,9 +14,34 @@ public class UserRepository(
         logger.LogInformation("Exiting AddUserAsync");
     }
 
-    public Task<bool> ChangePasswordAsync(string email, string currentPassword, string newPassword, string confirmedPassword, CancellationToken cancellationToken)
+    public async Task<bool> ChangePasswordAsync(string email, string currentPassword, string newPassword, string confirmedPassword, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Entering ChangePasswordAsync for email: {Email}", email);
+
+        if (newPassword != confirmedPassword)
+        {
+            logger.LogWarning("New password and confirmed password do not match for email: {Email}", email);
+            return false;
+        }
+
+        var user = await GetUserByEmailAsync(email);
+        if (user == null)
+        {
+            logger.LogWarning("User not found with email: {Email}", email);
+            return false;
+        }
+
+        if (!user.SecurityUser.PasswordHash.Equals(currentPassword))
+        {
+            logger.LogWarning("Current password is incorrect for email: {Email}", email);
+            return false;
+        }
+
+        user.SecurityUser.PasswordHash = newPassword;
+        await repository.UpdateAsync(user, cancellationToken);
+
+        logger.LogInformation("Password successfully changed for email: {Email}", email);
+        return true;
     }
 
     public async Task DeleteUserAsync(Guid id, CancellationToken cancellationToken)

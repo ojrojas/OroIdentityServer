@@ -42,6 +42,15 @@ public class IdentificationTypeRepository(
         return result;
     }
 
+    public async Task<IdentificationType?> GetIdentificationTypeByNameAsync(IdentificationTypeName name)
+    {
+        logger.LogInformation("Entering GetIdentificationTypeByNameAsync with name: {Name}", name.Value);
+        var identificationTypeSpecification = new GetIdentificationTypeByNameSpecification(name.Value);
+        var result = await repository.CurrentContext.FirstOrDefaultAsync(identificationTypeSpecification.Criteria);
+        logger.LogInformation("Exiting GetIdentificationTypeByNameAsync");
+        return result;
+    }
+
     public async Task UpdateIdentificationTypeAsync(IdentificationType identificationType, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering UpdateIdentificationTypeAsync");

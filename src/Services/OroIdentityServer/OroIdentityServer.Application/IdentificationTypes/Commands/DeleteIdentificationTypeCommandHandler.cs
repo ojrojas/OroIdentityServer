@@ -9,8 +9,27 @@ public class DeleteIdentificationTypeCommandHandler(
     IIdentificationTypeRepository repository
 ) : ICommandHandler<DeleteIdentificationTypeCommand>
 {
-    public Task HandleAsync(DeleteIdentificationTypeCommand command, CancellationToken cancellationToken)
+    public async Task HandleAsync(DeleteIdentificationTypeCommand command, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+         try
+        {
+            logger.LogInformation("Starting delete process for IdentificationType with ID {Id}", command.Id);
+
+            var identificationTypeExist = await repository.GetIdentificationTypeByIdAsync(command.Id);
+            if (identificationTypeExist == null)
+            {
+                logger.LogWarning("IdentificationType with ID {Id} not found", command.Id);
+                throw new KeyNotFoundException($"IdentificationType with ID {command.Id} not found.");
+            }
+
+            await repository.DeleteIdentificationTypeAsync(command.Id, cancellationToken);
+
+            logger.LogInformation("Successfully deleted IdentificationType with ID {Id}", command.Id);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while deleting IdentificationType with ID {Id}", command.Id);
+            throw;
+        }
     }
 }
