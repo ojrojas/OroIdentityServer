@@ -30,7 +30,7 @@
     </PackageVersion>
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(AspnetVersion)" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-rc.2" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="OpenIddict.Abstractions" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="OpenIddict.AspNetCore" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="$(OpenIddictVersion)" />
