@@ -5,12 +5,7 @@
 
 namespace OroIdentityServer.Services.OroIdentityServer.Api.Models;
 
-public class SimpleRequest
+public class SimpleRequest(HttpContext context)
 {
-    public HttpContext Context { get; set; }
-
-    public SimpleRequest(HttpContext context)
-    {
-        Context = context;
-    }
+    public HttpContext Context { get; set; } = context;
 }

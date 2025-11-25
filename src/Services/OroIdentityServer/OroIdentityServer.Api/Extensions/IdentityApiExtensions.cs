@@ -15,7 +15,12 @@ public static class IdentityApiExtensions
         //     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         // });
 
-        builder.Services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+        builder.Services.AddAuthentication(
+            CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(config =>
+            {
+                config.LoginPath = "";
+            });
 
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy("CookieAuthenticationPolicy", builder =>
