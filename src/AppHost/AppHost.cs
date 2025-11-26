@@ -21,7 +21,7 @@ var postgres = builder.AddPostgres("postgres")
 var identityDb = postgres.AddDatabase("identityDb");
 
 var identity = builder.AddProject<Projects.OroIdentityServer_Api>(Constants.IdentityApi, launchProfile);
-var identityWeb = builder.AddProject<Projects.OroIdentity_Web>(Constants.IdentityWeb, launchProfile);
+var identityWeb = builder.AddProject<Projects.OroIdentity_Web_Server>(Constants.IdentityWeb, launchProfile);
 
 identity
 .WaitFor(identityDb)

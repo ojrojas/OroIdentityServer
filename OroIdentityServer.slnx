@@ -12,8 +12,10 @@
     <Project Path="src/BuildingBlocks/ServiceDefaults/ServiceDefaults.csproj" />
     <Project Path="src/BuildingBlocks/Shared/Shared.csproj" />
   </Folder>
-  <Folder Name="/src/Frontends/">
-    <Project Path="src/Frontends/OroIdentity.Web/OroIdentity.Web.csproj" />
+  <Folder Name="/src/Frontends/" />
+  <Folder Name="/src/Frontends/OroIdentity.Web/">
+    <Project Path="src/Frontends/OroIdentity.Web/OroIdentity.Web.Client/OroIdentity.Web.Client.csproj" />
+    <Project Path="src/Frontends/OroIdentity.Web/OroIdentity.Web.Server/OroIdentity.Web.Server.csproj" />
   </Folder>
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/OroIdentityServer/">
