@@ -27,10 +27,15 @@ identity
 .WaitFor(identityDb)
 .WithReference(seq)
 .WithReference(identityDb)
+.WithReference(identityWeb)
+.WithEnvironment("IdentityWeb__Url", identityWeb.GetEndpoint(launchProfile))
 .WithExternalHttpEndpoints();
 
 identityWeb
+.WaitFor(identity)
 .WithReference(seq)
+.WithReference(identity)
+.WithEnvironment("Identity__Url", identity.GetEndpoint(launchProfile))
 .WithExternalHttpEndpoints();
 
 builder.Build().Run();

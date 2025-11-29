@@ -1,13 +1,28 @@
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentity.Web.Server.Components;
+using OroIdentity.Web.Server.Components.Pages.Account;
+using OroIdentity.Web.Server.Extensiones;
 
 var builder = WebApplication.CreateBuilder(args);
 
+IConfiguration configuration = builder.Configuration;
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
+    .AddAuthenticationStateSerialization(
+        options => options.SerializeAllClaims = true)
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 builder.Services.AddFluentUIComponents();
+
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthenticationStateDeserialization();
+
+builder.Services.AddScoped<IdentityRedirectManager>();
+
+builder.AddOroIdentityWebExtensions();
+builder.Services.AddDIOpenIddictApplication(configuration);
 
 var app = builder.Build();
 
@@ -19,13 +34,18 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-app.UseAntiforgery();
-
 app.MapStaticAssets();
 app.UseStaticFiles();
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()

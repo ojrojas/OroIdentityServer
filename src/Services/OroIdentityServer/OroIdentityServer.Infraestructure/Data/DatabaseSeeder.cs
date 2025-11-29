@@ -7,12 +7,13 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Data;
 public static class DatabaseSeeder
 {
     public static async Task SeedAsync(
-        OroIdentityAppContext context, 
+        OroIdentityAppContext context,
         IOpenIddictApplicationManager applicationManager,
         string jsonFilePath,
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher,
+        IConfiguration configuration)
     {
-        Guid userCreateId  = Guid.CreateVersion7();
+        Guid userCreateId = Guid.CreateVersion7();
         if (!File.Exists(jsonFilePath))
         {
             throw new FileNotFoundException($"Seed data file not found: {jsonFilePath}");
@@ -23,7 +24,8 @@ public static class DatabaseSeeder
         if (!context.IdentificationTypes.Any())
         {
             context.IdentificationTypes.Add(
-                new IdentificationType(new (seedData.IdentificationType)){
+                new IdentificationType(new(seedData.IdentificationType))
+                {
                     CreatedBy = userCreateId
                 });
         }
@@ -33,22 +35,22 @@ public static class DatabaseSeeder
         if (!context.Users.Any())
         {
             foreach (var user in seedData.Users)
-            context.Users.Add(new User
-            {
-                Name = user.Name,
-                LastName = user.LastName,
-                UserName = user.UserName,
-                Email = user.Email,
-                Identification = user.Identification,
-                IdentificationTypeId = context.IdentificationTypes.FirstOrDefault()!.Id,
-                SecurityUser = new SecurityUser
+                context.Users.Add(new User
                 {
-                    PasswordHash = await passwordHasher.HashPassword(user.PasswordHash),
-                    SecurityStamp = Guid.NewGuid().ToString(),
-                    ConcurrencyStamp = Guid.NewGuid()
-                },
-                CreatedBy = userCreateId
-            });
+                    Name = user.Name,
+                    LastName = user.LastName,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    Identification = user.Identification,
+                    IdentificationTypeId = context.IdentificationTypes.FirstOrDefault()!.Id,
+                    SecurityUser = new SecurityUser
+                    {
+                        PasswordHash = await passwordHasher.HashPassword(user.PasswordHash),
+                        SecurityStamp = Guid.NewGuid().ToString(),
+                        ConcurrencyStamp = Guid.NewGuid()
+                    },
+                    CreatedBy = userCreateId
+                });
         }
 
         if (!context.Roles.Any())
@@ -140,8 +142,8 @@ public static class DatabaseSeeder
                 {
                     OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange
                 },
-                RedirectUris = { new Uri("https://localhost:5001/signin-oidc") },
-                PostLogoutRedirectUris = { new Uri("https://localhost:5001/signout-callback-oidc") }
+                RedirectUris = { new Uri($"{configuration["IdentityWeb:Url"]}/signin-oidc") },
+                PostLogoutRedirectUris = { new Uri($"{configuration["IdentityWeb:Url"]}/signout-callback-oidc") }
             });
         }
 

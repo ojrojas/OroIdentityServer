@@ -57,7 +57,8 @@ await DatabaseSeeder.SeedAsync(
     context, 
     applicationManager, 
     seedDataPath, 
-    passwordHasher);
+    passwordHasher,
+    configuration);
 
 #endif
 

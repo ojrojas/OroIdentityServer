@@ -17,10 +17,7 @@ public static class IdentityApiExtensions
 
         builder.Services.AddAuthentication(
             CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(config =>
-            {
-                config.LoginPath = "";
-            });
+            .AddIdentityCookies();
 
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy("CookieAuthenticationPolicy", builder =>
