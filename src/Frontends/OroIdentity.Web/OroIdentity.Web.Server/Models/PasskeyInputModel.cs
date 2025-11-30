@@ -1,4 +1,4 @@
-namespace OroIdentity.Web.Server.Components.Pages.Account;
+namespace OroIdentity.Web.Server.Models;
 
 public class PasskeyInputModel
 {

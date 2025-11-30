@@ -2,6 +2,7 @@ using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentity.Web.Server.Components;
 using OroIdentity.Web.Server.Components.Pages.Account;
 using OroIdentity.Web.Server.Extensiones;
+using OroIdentity.Web.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,13 +25,23 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.AddOroIdentityWebExtensions();
 builder.Services.AddDIOpenIddictApplication(configuration);
 
+builder.Services.AddAntiforgery();
+
+
+var identityUri = configuration.GetSection("Identity:Url").Value;
+
+builder.Services.AddHttpClient<LoginService>(configClient =>
+{
+    configClient.BaseAddress = new Uri(identityUri!);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-     app.UseWebAssemblyDebugging();
+    app.UseWebAssemblyDebugging();
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
