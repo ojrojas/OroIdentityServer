@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class SecurityUser : BaseEntity<Guid>, IAuditableEntity
+public class SecurityUser : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
 {
     public required string PasswordHash { get; set; }
     public string SecurityStamp { get; set; } = string.Empty;

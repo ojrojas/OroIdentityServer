@@ -4,5 +4,5 @@ namespace OroIdentity.Web.Server.Services;
 
 public interface ILoginService
 {
-    Task LoginRequest(LoginInputModel loginModel);
+    Task<HttpResponseMessage> LoginRequest(LoginInputModel loginModel);
 }

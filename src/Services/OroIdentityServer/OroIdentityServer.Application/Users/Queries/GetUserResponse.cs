@@ -4,9 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 
-public record GetUserByEmailQuery(string Email) : IQuery<GetUserByEmailResponse>
+public record GetUserPasswordValidResponse: BaseResponse<bool>
 {
-    public Guid CorrelationId() => Guid.NewGuid();
+    
 }
-
-

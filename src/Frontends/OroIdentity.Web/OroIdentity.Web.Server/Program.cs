@@ -33,7 +33,15 @@ var identityUri = configuration.GetSection("Identity:Url").Value;
 builder.Services.AddHttpClient<LoginService>(configClient =>
 {
     configClient.BaseAddress = new Uri(identityUri!);
-});
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+    {
+        Console.WriteLine($"Certificate error: {errors}");
+        return true; 
+    }
+});;
 
 var app = builder.Build();
 

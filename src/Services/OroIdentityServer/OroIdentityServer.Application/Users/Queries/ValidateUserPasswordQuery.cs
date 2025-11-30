@@ -2,11 +2,10 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 
-public record GetUserByEmailQuery(string Email) : IQuery<GetUserByEmailResponse>
+public record ValidateUserPasswordQuery(string Email, string Password): IQuery<GetUserPasswordValidResponse>
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }
-
-

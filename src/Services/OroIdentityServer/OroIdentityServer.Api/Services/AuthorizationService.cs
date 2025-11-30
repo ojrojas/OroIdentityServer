@@ -194,8 +194,26 @@ public class AuthorizationService(
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation("login user application request");
+
+        var validateUserCanLogin = await sender.Send(new ValidateUserToLoginQuery(request.UserName), cancellationToken);
+
+        if(!validateUserCanLogin)
+        {
+            var properties = new AuthenticationProperties(new Dictionary<string, string?>
+            {
+                [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                                "The user cannot log in to the application."
+            });
+
+            return new LoginResponse(ResultTypes.Forbid, new(), properties, [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+        }
+
         var user = await sender.Send(new GetUserByEmailQuery(request.UserName), cancellationToken);
-        if (user == null || user.Data?.SecurityUser.PasswordHash != request.Password)
+
+        var securityUser = await sender.Send(new ValidateUserPasswordQuery(request.UserName, request.Password), cancellationToken);
+
+        if (user == null || !securityUser.Data)
         {
             var properties = new AuthenticationProperties(new Dictionary<string, string?>
             {
@@ -204,7 +222,7 @@ public class AuthorizationService(
                                 "The username/password couple is invalid."
             });
 
-            return new LoginResponse(ResultTypes.Forbid, new(), properties, [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+            return new LoginResponse(ResultTypes.Unauthorized, new(), properties, [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
         }
 
         logger.LogInformation("Credentials user validate successful");

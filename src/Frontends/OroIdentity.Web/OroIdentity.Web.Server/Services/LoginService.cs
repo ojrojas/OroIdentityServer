@@ -11,21 +11,21 @@ public class LoginService(
     IHttpContextAccessor context) : ILoginService
 {
     private readonly string UrlBase = "account/login";
-    public async Task LoginRequest(LoginInputModel loginModel)
+    public async Task<HttpResponseMessage> LoginRequest(LoginInputModel loginModel)
     {
         try
         {
-            
-            antiforgery.ValidateRequestAsync(context.HttpContext);
+            ArgumentNullException.ThrowIfNull(context.HttpContext);
+            antiforgery?.ValidateRequestAsync(context.HttpContext);
             logger.LogInformation("Request login to identityserver");
             var requestLogin = new
             {
                 UserName= loginModel.Email,
-                Password = loginModel.Password
+                loginModel.Password
             };
             var response = await client.PostAsJsonAsync(UrlBase, requestLogin);
             logger.LogInformation("response to identityserver : {}", JsonSerializer.Serialize(response));
-            await Task.CompletedTask;
+            return response;
         }
         catch (Exception ex)
         {

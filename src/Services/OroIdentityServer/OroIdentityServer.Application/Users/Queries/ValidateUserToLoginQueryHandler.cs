@@ -9,13 +9,11 @@ public class ValidateUserToLoginQueryHandler(
     IUserRepository userRepository
 ) : IQueryHandler<ValidateUserToLoginQuery, bool>
 {
-
-
-    public async Task<bool> Handle(ValidateUserToLoginQuery request, CancellationToken cancellationToken)
+    public async Task<bool> HandleAsync(ValidateUserToLoginQuery query, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Handling ValidateUserToLoginQuery for email: {Email}", request.Email);
+        logger.LogInformation("Handling ValidateUserToLoginQuery for email: {Email}", query.Email);
 
-        if (string.IsNullOrWhiteSpace(request.Email))
+        if (string.IsNullOrWhiteSpace(query.Email))
         {
             logger.LogWarning("Validation failed: Email is null or empty.");
             return false;
@@ -23,28 +21,23 @@ public class ValidateUserToLoginQueryHandler(
 
         try
         {
-            var canLogin = await userRepository.ValidateUserCanLoginAsync(request.Email, cancellationToken);
+            var canLogin = await userRepository.ValidateUserCanLoginAsync(query.Email, cancellationToken);
 
             if (!canLogin)
             {
-                logger.LogWarning("User with email {Email} cannot login due to lockout or other restrictions.", request.Email);
+                logger.LogWarning("User with email {Email} cannot login due to lockout or other restrictions.", query.Email);
             }
             else
             {
-                logger.LogInformation("User with email {Email} is allowed to login.", request.Email);
+                logger.LogInformation("User with email {Email} is allowed to login.", query.Email);
             }
 
             return canLogin;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while validating user login for email: {Email}", request.Email);
+            logger.LogError(ex, "An error occurred while validating user login for email: {Email}", query.Email);
             throw;
         }
-    }
-
-    public Task<bool> HandleAsync(ValidateUserToLoginQuery query, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }

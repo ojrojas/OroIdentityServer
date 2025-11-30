@@ -41,21 +41,6 @@
                 <FluentCheckbox Name="Input.RememberMe" @bind-Value="Input.RememberMe" Label="Remember me" />
                 <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Log in
                 </FluentButton>
-                @* <div>
-                    <p>
-                        <FluentAnchor Appearance="Appearance.Hypertext" Href="Account/ForgotPassword">Forgot your
-                            password?</FluentAnchor>
-                    </p>
-                    <p>
-                        <FluentAnchor Appearance="Appearance.Hypertext"
-                            Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
-                            Register as a new user</FluentAnchor>
-                    </p>
-                    <p>
-                        <FluentAnchor Appearance="Appearance.Hypertext" Href="Account/ResendEmailConfirmation">Resend
-                            email confirmation</FluentAnchor>
-                    </p>
-                </div> *@
             </FluentStack>
         </EditForm>
     </FluentCard>
@@ -90,35 +75,21 @@
     public async Task LoginUser()
     {
 
-        await loginService.LoginRequest(Input);
+       var response = await loginService.LoginRequest(Input);
 
-        @* if (!string.IsNullOrEmpty(Input.Passkey?.Error))
-        {
-            errorMessage = $"Error: {Input.Passkey.Error}";
-            return;
-        } *@
+       if(response is null)
+       {
+        errorMessage = "Request to login badrequest or invalid";
+       }
 
-        @* SignInResult result = default;
-       
-        if (result.Succeeded)
+       if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+       {
+        errorMessage = "Email or Password invalid or unauthorized";
+       }
+
+        if(response.StatusCode == System.Net.HttpStatusCode.OK)
         {
-            Logger.LogInformation("User logged in.");
             RedirectManager.RedirectTo(ReturnUrl);
         }
-        else if (result.RequiresTwoFactor)
-        {
-            RedirectManager.RedirectTo(
-                "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
-        }
-        else if (result.IsLockedOut)
-        {
-            Logger.LogWarning("User account locked out.");
-            RedirectManager.RedirectTo("Account/Lockout");
-        }
-        else
-        {
-            errorMessage = "Error: Invalid login attempt.";
-        } *@
     }
 }

@@ -26,8 +26,11 @@ public record LoginResponse(
             case ResultTypes.BadRequest:
                 result = Results.BadRequest(Schemes);
                 break;
-             case ResultTypes.Challenge:
+            case ResultTypes.Challenge:
                 result = Results.Challenge(Properties, Schemes);
+                break;
+            case ResultTypes.Unauthorized:
+                result = Results.Unauthorized();
                 break;
             default:
                 result = Results.Forbid(Properties, Schemes);

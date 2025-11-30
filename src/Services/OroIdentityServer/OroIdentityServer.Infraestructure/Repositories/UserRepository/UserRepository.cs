@@ -5,7 +5,9 @@
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class UserRepository(
-    ILogger<UserRepository> logger, IRepository<User> repository) : IUserRepository
+    ILogger<UserRepository> logger, 
+    IRepository<User> repository,
+    ISecurityUserRepository securityUserRepository) : IUserRepository
 {
     public async Task AddUserAsync(User user, CancellationToken cancellationToken)
     {
@@ -98,13 +100,16 @@ public class UserRepository(
             return false;
         }
 
-        if (user.SecurityUser.LockoutEnabled && user.SecurityUser.LockoutEnd.HasValue && user.SecurityUser.LockoutEnd.Value > DateTime.UtcNow)
+        var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId, cancellationToken);
+
+        if (securityUser.LockoutEnabled && securityUser.LockoutEnd.HasValue && securityUser.LockoutEnd.Value > DateTime.UtcNow)
         {
-            logger.LogWarning("User is locked out until {LockoutEnd}", user.SecurityUser.LockoutEnd);
+            logger.LogWarning("User is locked out until {LockoutEnd}", securityUser.LockoutEnd);
             return false;
         }
 
         logger.LogInformation("User is allowed to login");
         return true;
     }
+
 }

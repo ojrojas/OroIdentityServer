@@ -38,10 +38,12 @@ public static class OpenIddictExtensions
             // Note: the sample uses the code and refresh token flows but you can enable
             // the other flows if you need to support implicit, password or client credentials.
             config.AllowAuthorizationCodeFlow()
-             .RequireProofKeyForCodeExchange()
             .AllowClientCredentialsFlow()
             .AllowPasswordFlow()
+            .AllowImplicitFlow()
             .AllowRefreshTokenFlow();
+
+            config.RequireProofKeyForCodeExchange();
 
             // Register the signing and encryption credentials.
             config.AddDevelopmentEncryptionCertificate()
