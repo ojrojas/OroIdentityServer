@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Logging;
+using Polly;
 
 namespace OroIdentity.Web.Server.Extensiones;
 
@@ -14,10 +15,21 @@ public static class OroIdentityWebExtensions
             .AddCookie(
                 config =>
             {
-                config.LoginPath="/Account/Login";
+                config.LoginPath = "/Account/Login";
             }
             );
-        builder.Services.AddAuthorization();
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy("CanAccess", policy =>
+            {
+                policy.RequireAuthenticatedUser()
+                .RequireRole("Administrator","User").Build();
+            })
+            .AddPolicy("CanSeeError", policy =>
+            {
+                policy.RequireAuthenticatedUser()
+                 .RequireRole("Administrator","User").Build();
+            });
+
 
         IdentityModelEventSource.ShowPII = true;
 

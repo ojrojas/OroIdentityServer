@@ -1,6 +1,6 @@
 @page "/account/login"
 
-@inherits LoginLayout
+@layout LoginLayout
 @attribute [AllowAnonymous]
 
 @using System.ComponentModel.DataAnnotations
@@ -28,10 +28,10 @@
             <hr />
             <FluentValidationSummary class="text-danger" role="alert" />
             <FluentStack Orientation="Orientation.Vertical">
-                <FluentTextField Name="Input.Email" @bind-Value="Input.Email" AutoComplete="username" Required="true"
+                <FluentTextField Id="email" Name="Input.Email" @bind-Value="Input.Email" AutoComplete="username" Required="true"
                     Placeholder="name@example.com" Label="Email" Style="width: 100%" />
                 <FluentValidationMessage For="() => Input.Email" class="text-danger" />
-                <FluentTextField type="password" Name="Input.Password" @bind-Value="Input.Password"
+                <FluentTextField Id="password" type="password" Name="Input.Password" @bind-Value="Input.Password"
                     AutoComplete="current-password" Required="true" Placeholder="password" Label="Password"
                     Style="width: 100%" />
                 <FluentValidationMessage For="() => Input.Password" class="text-danger" />

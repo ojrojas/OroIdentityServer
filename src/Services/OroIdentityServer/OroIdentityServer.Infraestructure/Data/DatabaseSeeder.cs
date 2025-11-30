@@ -126,6 +126,8 @@ public static class DatabaseSeeder
             {
                 ClientId = "OroIdentityServer.Web",
                 DisplayName = "OroIdentityServer Web Application",
+                ClientSecret = "a2344152-e928-49e7-bb3c-ee54acc96c8c",
+                ClientType = OpenIddictConstants.ClientTypes.Confidential,
                 ApplicationType = OpenIddictConstants.ApplicationTypes.Web,
                 ConsentType = OpenIddictConstants.ConsentTypes.Explicit,
                 Permissions =
