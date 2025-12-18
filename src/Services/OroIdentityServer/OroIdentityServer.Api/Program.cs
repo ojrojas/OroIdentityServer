@@ -37,7 +37,6 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-
 #if DEBUG
 using var scope = app.Services.CreateScope();
 var service = scope.ServiceProvider;

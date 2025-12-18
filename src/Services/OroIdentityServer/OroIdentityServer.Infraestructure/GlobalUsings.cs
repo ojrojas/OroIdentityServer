@@ -22,3 +22,4 @@ global using OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Models;
 global using OroIdentityServer.Services.OroIdentityServer.Infraestructure;
+global using OroIdentityServer.OroIdentityServer.Infraestructure.Data.EntityConfigurations;
