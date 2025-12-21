@@ -6,7 +6,7 @@ namespace OroIdentityServer.BuildingBlocks.Shared.Entities;
 
 public abstract record BaseValueObject : IEquatable<BaseValueObject>
 {
-    protected abstract IEnumerable<object> GetEquatibilityComponents();
+    protected abstract IEnumerable<object?> GetEquatibilityComponents();
 
     public override int GetHashCode()
     {

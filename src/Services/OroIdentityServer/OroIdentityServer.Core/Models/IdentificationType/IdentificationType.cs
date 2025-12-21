@@ -6,15 +6,15 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public class IdentificationType : AggregateRoot<IdentificationTypeId>, IAuditableEntity
 {
-    public bool IsActive { get; private set; }
-    public IdentificationType(IdentificationTypeId Id, IdentificationTypeName Name) : base(Id)
+    public IdentificationType(IdentificationTypeId id, IdentificationTypeName name) : base(id)
     {
-        IdentificationTypeName = Name;
+        Name = name;
         IsActive = true;
         RaiseDomainEvent(new IdentificationTypeCreateEvent(Id));
     }
 
-    public IdentificationTypeName IdentificationTypeName { get; private set; }
+    public IdentificationTypeName Name { get; private set; }
+    public bool IsActive { get; private set; }
 
     public void Deactive()
     {

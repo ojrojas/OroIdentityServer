@@ -4,15 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public record RoleName(string Value) : BaseValueObject
+public record RoleId(Guid Value) : BaseValueObject
 {
-
-    public static RoleName Create(string Value)
-    {
-        ArgumentNullException.ThrowIfNull(Value);
-        return new RoleName(Value);
-    }
-
+    public static RoleId New() => new(Guid.CreateVersion7());
     protected override IEnumerable<object> GetEquatibilityComponents()
     {
         yield return Value;

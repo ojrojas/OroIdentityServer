@@ -21,6 +21,8 @@ public class User : AggregateRoot<Guid>, IAuditableEntity
     public string NormalizedUserName { get; set; } = string.Empty;
     public IdentificationType? IdentificationType { get; set; }
 
+    public readonly ICollection<UserRole
+
     public Guid SecurityUserId {get;set;}
     public SecurityUser? SecurityUser {get;set;}
 }

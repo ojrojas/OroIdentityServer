@@ -4,10 +4,10 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Entities;
 
-public abstract class BaseEntity<TId>(TId id) : IEquatable<BaseEntity<TId>>
+public abstract class BaseEntity<TId> : IEquatable<BaseEntity<TId>>
 {
     [Key]
-    public TId Id { get; protected set; } = id;
+    public TId Id { get; protected set; } = default!;
 
     // public TId CreatedBy { get; protected set; }
     // public DateTimeOffset CreatedOn { get; set; } = DateTimeOffset.Now.ToUniversalTime();

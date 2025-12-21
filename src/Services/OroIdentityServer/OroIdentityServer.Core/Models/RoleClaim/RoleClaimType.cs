@@ -4,8 +4,10 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class UserRoles: BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
+public sealed record RoleClaimType(string Value) : BaseValueObject
 {
-    public Guid UserId { get; set; }
-    public Guid RoleId { get; set; }
+    protected override IEnumerable<object?> GetEquatibilityComponents()
+    {
+        yield return Value;
+    }
 }

@@ -4,17 +4,23 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Infraestructure;
 
-class IdentificationTypeEntityConfiguration : IEntityTypeConfiguration<IdentificationType>
+public class IdentificationTypeEntityConfiguration : IEntityTypeConfiguration<IdentificationType>
 {
     public void Configure(EntityTypeBuilder<IdentificationType> builder)
     {
         builder.ToTable("IdentificationTypes");
-        builder.HasKey(x => x.Id);
-        builder.OwnsOne(x => x.IdentificationTypeName, nv =>
+        builder.HasKey(x=> x.Id);
+
+        builder.Property(x=> x.Id)
+            .HasConversion(id => id.Value, value => new IdentificationTypeId(value));
+
+        builder.OwnsOne(x => x.Name, name =>
         {
-            nv.Property(p => p.Value)
-            .HasMaxLength(50)
-            .IsRequired();
+            name.Property(n => n.Value)
+                .HasColumnName("Name")
+                .HasMaxLength(100)
+                .IsRequired();
         });
+        
     }
 }

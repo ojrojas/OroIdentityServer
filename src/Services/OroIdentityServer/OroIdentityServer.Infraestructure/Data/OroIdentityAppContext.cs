@@ -8,10 +8,9 @@ public class OroIdentityAppContext(
     DbContextOptions<OroIdentityAppContext> options, IOptions<UserInfo> optionsUser) : AuditableDbContext(options, optionsUser)
 {
     public DbSet<User> Users { get; set; }
-    public DbSet<UserRoles> UserRoles { get; set; }
+    public DbSet<Role> Roles { get; set; }
     public DbSet<SecurityUser> SecurityUsers { get; set; }
     public DbSet<IdentificationType> IdentificationTypes { get; set; }
-    public DbSet<Role> Roles { get; set; }
     public DbSet<RoleClaim> RoleClaims { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -19,8 +18,6 @@ public class OroIdentityAppContext(
         builder.HasPostgresExtension("vector");
         builder.ApplyConfiguration(new UserEntityConfiguration());
         builder.ApplyConfiguration(new RoleEntityConfiguration());
-        builder.ApplyConfiguration(new UserRolesEntityConfiguration());
-        builder.ApplyConfiguration(new RoleClaimEntityConfiguration());
         builder.ApplyConfiguration(new IdentificationTypeEntityConfiguration());
         builder.ApplyConfiguration(new RoleEntityConfiguration());
     }

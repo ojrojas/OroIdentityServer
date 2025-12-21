@@ -36,9 +36,4 @@ public class SecurityUser : AggregateRoot<Guid>, IAuditableEntity
     {
         LockoutEnd = lockoutEnd;
     }
-
-    public void ClearDomainEvents()
-    {
-        throw new NotImplementedException();
-    }
 }

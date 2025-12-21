@@ -4,13 +4,13 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Interfaces;
 
-public interface IRepository<T> where T : BaseEntity<Guid>, IAggregateRoot
+public interface IRepository<TAggregate, TId> where TAggregate : class, IAggregateRoot
 {
-  DbSet<T> CurrentContext {get;}
-  Task AddAsync(T entity, CancellationToken cancellationToken);
-  Task UpdateAsync(T entity, CancellationToken cancellationToken);
-  Task DeleteAsync(T entity, CancellationToken cancellationToken);
-  Task<T?> GetByIdAsync(Guid id);
-  Task<IEnumerable<T>> GetAllAsync();
-  Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
+  DbSet<TAggregate> CurrentContext { get; }
+  Task AddAsync(TAggregate entity, CancellationToken cancellationToken);
+  Task UpdateAsync(TAggregate entity, CancellationToken cancellationToken);
+  Task DeleteAsync(TAggregate entity, CancellationToken cancellationToken);
+  Task<TAggregate?> GetByIdAsync(Guid id);
+  Task<IEnumerable<TAggregate>> GetAllAsync();
+  Task<IEnumerable<TAggregate>> FindAsync(Expression<Func<TAggregate, bool>> predicate);
 }

@@ -4,10 +4,15 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class RoleClaim : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
+public class RoleClaim
 {
-    public Role? Role { get; set; }
-    public Guid RoleId { get; set; }
-    public required string ClaimType { get; set; }
-    public required string ClaimValue { get; set; }
+    public RoleClaim(RoleClaimType claimType, RoleClaimValue claimValue)
+    {
+        ClaimType = claimType;
+        ClaimValue = claimValue;
+    }
+
+    public RoleClaimType ClaimType { get; }
+    public RoleClaimValue ClaimValue { get; }
+    public bool IsActive { get; private set; } = true;
 }
