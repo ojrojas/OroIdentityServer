@@ -4,38 +4,12 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Entities;
 
-public abstract class BaseValueObject<TClassProperty> where TClassProperty : struct, IEquatable<TClassProperty>
+public abstract record BaseValueObject : IEquatable<BaseValueObject>
 {
-}
-
-public abstract class BaseValueObject<TClassProperty, TProperty> where TClassProperty :
-BaseValueObject<TClassProperty, TProperty>
-{
-    public TProperty Value { get; } = default!;
-
-    public BaseValueObject(TProperty value)
-    {
-        if (string.IsNullOrEmpty(nameof(value)))
-        {
-            throw new ArgumentNullException(nameof(value), "NullOrEmpty");
-        }
-
-        Value = value;
-    }
-
-    public bool Equals(TClassProperty? other)
-    {
-        return other is not null && StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is TClassProperty prop && Equals(prop);
-    }
+    protected abstract IEnumerable<object> GetEquatibilityComponents();
 
     public override int GetHashCode()
     {
-        ArgumentNullException.ThrowIfNull(Value);
-        return StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
+        return GetEquatibilityComponents().Aggregate(1, HashCode.Combine);
     }
 }

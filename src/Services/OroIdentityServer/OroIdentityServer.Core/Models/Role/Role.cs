@@ -4,19 +4,23 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class Role : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
+public class Role : AggregateRoot<RoleId>, IAuditableEntity
 {
-    private Role()
+    public Role(RoleId Id) : base(Id)
     {
-        RoleName = default!;
-        NormalizedName = string.Empty;
     }
 
-    public Role(RoleName RoleName)
-    {
-        this.RoleName = RoleName;
-        NormalizedName = RoleName.Value;
-    }
+    // private Role()
+    // {
+    //     RoleName = default!;
+    //     NormalizedName = string.Empty;
+    // }
+
+    // public Role(RoleName RoleName)
+    // {
+    //     this.RoleName = RoleName;
+    //     NormalizedName = RoleName.Value;
+    // }
 
     public RoleName RoleName { get; private set; }
     public string NormalizedName { get; init; }

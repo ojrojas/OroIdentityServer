@@ -4,8 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Interfaces;
 
-public interface IAggregateRoot
+public interface IDomainEvent
 {
-	IReadOnlyCollection<IDomainEvent> DomainEvents {get;}
-    void ClearDomainEvents();
+    DateTime OcurredOn { get; }
 }

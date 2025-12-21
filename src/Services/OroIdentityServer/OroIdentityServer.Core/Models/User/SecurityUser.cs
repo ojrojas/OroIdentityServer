@@ -4,8 +4,12 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class SecurityUser : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
+public class SecurityUser : AggregateRoot<Guid>, IAuditableEntity 
 {
+    public SecurityUser(Guid Id) : base(Id)
+    {
+    }
+
     public required string PasswordHash { get; set; }
     public string SecurityStamp { get; set; } = string.Empty;
     public Guid ConcurrencyStamp { get; set; }
@@ -31,5 +35,10 @@ public class SecurityUser : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
     public void LockUntil(DateTime lockoutEnd)
     {
         LockoutEnd = lockoutEnd;
+    }
+
+    public void ClearDomainEvents()
+    {
+        throw new NotImplementedException();
     }
 }

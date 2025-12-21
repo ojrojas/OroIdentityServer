@@ -4,14 +4,26 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class IdentificationType : BaseEntity<Guid>, IAuditableEntity, IAggregateRoot
+public class IdentificationType : AggregateRoot<IdentificationTypeId>, IAuditableEntity
 {
-    private IdentificationType() => IdentificationTypeName = default!;
-
-    public IdentificationType(IdentificationTypeName identificationName)
+    public bool IsActive { get; private set; }
+    public IdentificationType(IdentificationTypeId Id, IdentificationTypeName Name) : base(Id)
     {
-        IdentificationTypeName = identificationName;
+        IdentificationTypeName = Name;
+        IsActive = true;
+        RaiseDomainEvent(new IdentificationTypeCreateEvent(Id));
     }
-    
+
     public IdentificationTypeName IdentificationTypeName { get; private set; }
+
+    public void Deactive()
+    {
+        if(!IsActive) return;
+
+        IsActive = false;
+        RaiseDomainEvent(new IdentificationTypeDeactiveEvent(Id));
+    }
 }
+
+public sealed record IdentificationTypeCreateEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;
+public sealed record IdentificationTypeDeactiveEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;

@@ -7,7 +7,6 @@ using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
 IConfiguration configuration = builder.Configuration;
-
 Log.Logger = LoggerPrinter.CreateSerilogLogger("api", "OroIdentityServer", configuration);
 
 // Add services to the container.

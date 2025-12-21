@@ -1,6 +1,9 @@
+// OroIdentityServer
+// Copyright (C) 2025 Oscar Rojas
+// Licensed under the GNU AGPL v3.0 or later.
+// See the LICENSE file in the project root for details.
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Logging;
-using Polly;
 
 namespace OroIdentity.Web.Server.Extensiones;
 
