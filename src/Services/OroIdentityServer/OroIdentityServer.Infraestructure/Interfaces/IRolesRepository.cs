@@ -31,20 +31,20 @@ public interface IRolesRepository
     /// <param name="id">The unique identifier of the role to delete.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task DeleteRoleAsync(Guid id, CancellationToken cancellationToken);
+    Task DeleteRoleAsync(RoleId id, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously retrieves a role by its identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the role to retrieve.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the role if found; otherwise, null.</returns>
-    Task<Role?> GetRoleByIdAsync(Guid id);
+    Task<Role?> GetRoleByIdAsync(RoleId id, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously retrieves all roles from the repository.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of roles.</returns>
-    Task<IEnumerable<Role>> GetAllRolesAsync();
+    Task<IEnumerable<Role>> GetAllRolesAsync(CancellationToken cancellationToken);
 
     // /// <summary>
     // /// Asynchronously adds a role claim to the repository.

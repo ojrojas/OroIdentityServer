@@ -18,6 +18,7 @@ public class UpdateUserCommandHandler(
 
         try
         {
+            var userToUpdate = await userRepository.GetUserByIdAsync(command.UserId, cancellationToken);
             // Hash the password
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("Hashing password for UserName: {UserName}", command.UserName);
@@ -25,16 +26,16 @@ public class UpdateUserCommandHandler(
             // Create the User object
             if (logger.IsEnabled(LogLevel.Debug))
                 logger.LogDebug("Mapping User object for UserName: {UserName}", command.UserName);
-            var user = new User
-            {
-                UserName = command.UserName,
-                Email = command.Email,
-                Name = command.Name,
-                MiddleName = command.MiddleName,
-                LastName = command.LastName,
-                Identification = command.Identification,
-                IdentificationTypeId = command.IdentificationTypeId,
-            };
+            var user = new User(
+                command.UserId,
+                command.Name,
+                command.MiddleName,
+                command.LastName,
+                command.UserName,
+                command.Email,
+                command.Identification,
+                command.IdentificationTypeId
+            );
 
             // Add the user to the repository
             if (logger.IsEnabled(LogLevel.Debug))

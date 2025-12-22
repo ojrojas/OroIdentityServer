@@ -6,6 +6,7 @@
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
 public record UpdateUserCommand(
+    UserId UserId,
     string Name,
     string MiddleName,
     string LastName,
@@ -13,7 +14,7 @@ public record UpdateUserCommand(
     string Email, 
     string Password,
     string Identification,
-    Guid IdentificationTypeId
+    IdentificationTypeId IdentificationTypeId
 ) : ICommand<UpdateUserResponse>
 {
     public Guid CorrelationId() => Guid.NewGuid();

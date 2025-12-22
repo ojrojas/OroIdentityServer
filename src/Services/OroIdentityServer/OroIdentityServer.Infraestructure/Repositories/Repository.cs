@@ -11,12 +11,12 @@ public class Repository<TAggregate, TId>(
 {
     public DbSet<TAggregate> CurrentContext => context.Set<TAggregate>();
 
-    public async Task<TAggregate?> GetByIdAsync(Guid id)
+    public async Task<TAggregate?> GetByIdAsync(TId id, CancellationToken cancellationToken)
     {
         try
         {
             logger.LogInformation("Entering GetByIdAsync with id: {Id}", id);
-            var result = await context.Set<TAggregate>().FindAsync(id);
+            var result = await context.Set<TAggregate>().FindAsync(new object?[] { id, cancellationToken }, cancellationToken: cancellationToken);
             logger.LogInformation("Exiting GetByIdAsync");
             return result;
         }
@@ -26,18 +26,18 @@ public class Repository<TAggregate, TId>(
         }
     }
 
-    public async Task<IEnumerable<TAggregate>> GetAllAsync()
+    public async Task<IEnumerable<TAggregate>> GetAllAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetAllAsync");
-        var result = await context.Set<TAggregate>().ToListAsync();
+        var result = await context.Set<TAggregate>().ToListAsync(cancellationToken: cancellationToken);
         logger.LogInformation("Exiting GetAllAsync");
         return result;
     }
 
-    public async Task<IEnumerable<TAggregate>> FindAsync(Expression<Func<TAggregate, bool>> predicate)
+    public async Task<IEnumerable<TAggregate>> FindAsync(Expression<Func<TAggregate, bool>> predicate, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering FindAsync");
-        var result = await context.Set<TAggregate>().Where(predicate).ToListAsync();
+        var result = await context.Set<TAggregate>().Where(predicate).ToListAsync(cancellationToken: cancellationToken);
         logger.LogInformation("Exiting FindAsync");
         return result;
     }

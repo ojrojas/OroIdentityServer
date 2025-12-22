@@ -31,27 +31,27 @@ public interface IUserRepository
     /// <param name="id">The unique identifier of the user to delete.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task DeleteUserAsync(Guid id, CancellationToken cancellationToken);
+    Task DeleteUserAsync(UserId id, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously retrieves a user from the repository by their unique identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the user to retrieve.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the user entity if found; otherwise, null.</returns>
-    Task<User?> GetUserByIdAsync(Guid id);
+    Task<User?> GetUserByIdAsync(UserId id, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously retrieves all users from the repository.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of all user entities.</returns>
-    Task<IEnumerable<User>> GetAllUsersAsync();
+    Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Get user by email
     /// </summary>
     /// <param name="email">email to find user</param>
     /// <returns>A task that represents the user</returns>
-    Task<User> GetUserByEmailAsync(string email);
+    Task<User> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
 
     /// <summary>
     /// Change password user

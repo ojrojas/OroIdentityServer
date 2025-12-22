@@ -10,7 +10,7 @@ public interface IRepository<TAggregate, TId> where TAggregate : class, IAggrega
   Task AddAsync(TAggregate entity, CancellationToken cancellationToken);
   Task UpdateAsync(TAggregate entity, CancellationToken cancellationToken);
   Task DeleteAsync(TAggregate entity, CancellationToken cancellationToken);
-  Task<TAggregate?> GetByIdAsync(Guid id);
-  Task<IEnumerable<TAggregate>> GetAllAsync();
-  Task<IEnumerable<TAggregate>> FindAsync(Expression<Func<TAggregate, bool>> predicate);
+  Task<TAggregate?> GetByIdAsync(TId id, CancellationToken cancellationToken);
+  Task<IEnumerable<TAggregate>> GetAllAsync(CancellationToken cancellationToken);
+  Task<IEnumerable<TAggregate>> FindAsync(Expression<Func<TAggregate, bool>> predicate, CancellationToken cancellationToken);
 }

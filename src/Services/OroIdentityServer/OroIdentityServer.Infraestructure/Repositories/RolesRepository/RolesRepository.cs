@@ -15,10 +15,10 @@ public class RolesRepository(
         logger.LogInformation("Exiting AddRoleAsync");
     }
 
-    public async Task DeleteRoleAsync(Guid id, CancellationToken cancellationToken)
+    public async Task DeleteRoleAsync(RoleId id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering DeleteRoleAsync with id: {Id}", id);
-        var role = await repository.GetByIdAsync(id);
+        var role = await repository.GetByIdAsync(id, cancellationToken);
         if (role != null)
         {
             await repository.DeleteAsync(role, cancellationToken);
@@ -26,18 +26,18 @@ public class RolesRepository(
         logger.LogInformation("Exiting DeleteRoleAsync");
     }
 
-    public async Task<IEnumerable<Role>> GetAllRolesAsync()
+    public async Task<IEnumerable<Role>> GetAllRolesAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetAllRolesAsync");
-        var result = await repository.GetAllAsync();
+        var result = await repository.GetAllAsync(cancellationToken);
         logger.LogInformation("Exiting GetAllRolesAsync");
         return result;
     }
 
-    public async Task<Role?> GetRoleByIdAsync(Guid id)
+    public async Task<Role?> GetRoleByIdAsync(RoleId id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetRoleByIdAsync with id: {Id}", id);
-        var result = await repository.GetByIdAsync(id);
+        var result = await repository.GetByIdAsync(id, cancellationToken);
         logger.LogInformation("Exiting GetRoleByIdAsync");
         return result;
     }

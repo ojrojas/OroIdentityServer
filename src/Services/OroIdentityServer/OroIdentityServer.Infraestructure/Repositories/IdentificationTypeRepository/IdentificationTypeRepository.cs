@@ -15,10 +15,10 @@ public class IdentificationTypeRepository(
         logger.LogInformation("Exiting AddIdentificationTypeAsync");
     }
 
-    public async Task DeleteIdentificationTypeAsync(Guid id, CancellationToken cancellationToken)
+    public async Task DeleteIdentificationTypeAsync(IdentificationTypeId id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering DeleteIdentificationTypeAsync with id: {Id}", id);
-        var identificationType = await repository.GetByIdAsync(id);
+        var identificationType = await repository.GetByIdAsync(id, cancellationToken);
         if (identificationType != null)
         {
             await repository.DeleteAsync(identificationType, cancellationToken);
@@ -26,27 +26,27 @@ public class IdentificationTypeRepository(
         logger.LogInformation("Exiting DeleteIdentificationTypeAsync");
     }
 
-    public async Task<IEnumerable<IdentificationType>> GetAllIdentificationTypesAsync()
+    public async Task<IEnumerable<IdentificationType>> GetAllIdentificationTypesAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetAllIdentificationTypesAsync");
-        var result = await repository.GetAllAsync();
+        var result = await repository.GetAllAsync(cancellationToken);
         logger.LogInformation("Exiting GetAllIdentificationTypesAsync");
         return result;
     }
 
-    public async Task<IdentificationType?> GetIdentificationTypeByIdAsync(Guid id)
+    public async Task<IdentificationType?> GetIdentificationTypeByIdAsync(IdentificationTypeId id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetIdentificationTypeByIdAsync with id: {Id}", id);
-        var result = await repository.GetByIdAsync(id);
+        var result = await repository.GetByIdAsync(id,cancellationToken);
         logger.LogInformation("Exiting GetIdentificationTypeByIdAsync");
         return result;
     }
 
-    public async Task<IdentificationType?> GetIdentificationTypeByNameAsync(IdentificationTypeName name)
+    public async Task<IdentificationType?> GetIdentificationTypeByNameAsync(IdentificationTypeName name, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetIdentificationTypeByNameAsync with name: {Name}", name.Value);
         var identificationTypeSpecification = new GetIdentificationTypeByNameSpecification(name.Value);
-        var result = await repository.CurrentContext.FirstOrDefaultAsync(identificationTypeSpecification.Criteria);
+        var result = await repository.CurrentContext.FirstOrDefaultAsync(identificationTypeSpecification.Criteria, cancellationToken: cancellationToken);
         logger.LogInformation("Exiting GetIdentificationTypeByNameAsync");
         return result;
     }

@@ -26,7 +26,7 @@ public class UserRepository(
             return false;
         }
 
-        var user = await GetUserByEmailAsync(email);
+        var user = await GetUserByEmailAsync(email, cancellationToken);
         if (user == null)
         {
             logger.LogWarning("User not found with email: {Email}", email);
@@ -46,10 +46,10 @@ public class UserRepository(
         return true;
     }
 
-    public async Task DeleteUserAsync(Guid id, CancellationToken cancellationToken)
+    public async Task DeleteUserAsync(UserId id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering DeleteUserAsync with id: {Id}", id);
-        var user = await repository.GetByIdAsync(id);
+        var user = await repository.GetByIdAsync(id,cancellationToken);
         if (user != null)
         {
             await repository.DeleteAsync(user, cancellationToken);
@@ -57,15 +57,15 @@ public class UserRepository(
         logger.LogInformation("Exiting DeleteUserAsync");
     }
 
-    public async Task<IEnumerable<User>> GetAllUsersAsync()
+    public async Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetAllUsersAsync");
-        var result = await repository.GetAllAsync();
+        var result = await repository.GetAllAsync(cancellationToken);
         logger.LogInformation("Exiting GetAllUsersAsync");
         return result;
     }
 
-    public async Task<User> GetUserByEmailAsync(string email)
+    public async Task<User> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
     {
         logger.LogInformation("handling request user by email {Email}", email);
         var emailSpecification = new GetUserByEmailSpecification(email);
@@ -74,10 +74,10 @@ public class UserRepository(
         return user;
     }
 
-    public async Task<User?> GetUserByIdAsync(Guid id)
+    public async Task<User?> GetUserByIdAsync(UserId id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetUserByIdAsync with id: {Id}", id);
-        var result = await repository.GetByIdAsync(id);
+        var result = await repository.GetByIdAsync(id, cancellationToken);
         logger.LogInformation("Exiting GetUserByIdAsync");
         return result;
     }
@@ -92,7 +92,7 @@ public class UserRepository(
     public async Task<bool> ValidateUserCanLoginAsync(string email, CancellationToken cancellationToken)
     {
         logger.LogInformation("Validating if user can login with email: {Email}", email);
-        var user = await GetUserByEmailAsync(email);
+        var user = await GetUserByEmailAsync(email, cancellationToken);
 
         if (user == null)
         {
