@@ -6,8 +6,14 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public class SecurityUser : AggregateRoot<Guid>, IAuditableEntity 
 {
-    public SecurityUser(Guid Id) : base(Id)
+    public SecurityUser(Guid id, string passwordHash, string securityStamp, Guid concurrencyStamp, DateTime? lockoutEnd, bool lockoutEnabled, int accessFailedCount) : base(id)
     {
+        PasswordHash = passwordHash;
+        SecurityStamp = securityStamp;
+        ConcurrencyStamp = concurrencyStamp;
+        LockoutEnd = lockoutEnd;
+        LockoutEnabled = lockoutEnabled;
+        AccessFailedCount = accessFailedCount;
     }
 
     public string PasswordHash { get; private set; }
