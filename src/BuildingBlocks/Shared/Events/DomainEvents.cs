@@ -2,8 +2,11 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-namespace OroIdentityServer.BuildingBlocks.Shared.Entities;
+namespace OroIdentityServer.BuildingBlocks.Shared.Events;
 
+/// <summary>
+/// Domain event entities 
+/// </summary>
 public abstract record DomainEvent : IDomainEvent
 {
     public DateTime OcurredOn { get; } = DateTime.UtcNow;

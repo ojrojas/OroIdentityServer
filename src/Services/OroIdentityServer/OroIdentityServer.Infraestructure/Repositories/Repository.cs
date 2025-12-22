@@ -4,19 +4,19 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
-public class Repository<T>(
-    ILogger<Repository<T>> logger,
+public class Repository<TAggregate, TId>(
+    ILogger<Repository<TAggregate, TId>> logger,
     OroIdentityAppContext context)
-    : IRepository<T> where T : BaseEntity<Guid>, IAggregateRoot
+    : IRepository<TAggregate, TId> where TAggregate : BaseEntity<Guid>, IAggregateRoot
 {
-    public DbSet<T> CurrentContext => context.Set<T>();
+    public DbSet<TAggregate> CurrentContext => context.Set<TAggregate>();
 
-    public async Task<T?> GetByIdAsync(Guid id)
+    public async Task<TAggregate?> GetByIdAsync(Guid id)
     {
         try
         {
             logger.LogInformation("Entering GetByIdAsync with id: {Id}", id);
-            var result = await context.Set<T>().FindAsync(id);
+            var result = await context.Set<TAggregate>().FindAsync(id);
             logger.LogInformation("Exiting GetByIdAsync");
             return result;
         }
@@ -26,44 +26,43 @@ public class Repository<T>(
         }
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync()
+    public async Task<IEnumerable<TAggregate>> GetAllAsync()
     {
         logger.LogInformation("Entering GetAllAsync");
-        var result = await context.Set<T>().ToListAsync();
+        var result = await context.Set<TAggregate>().ToListAsync();
         logger.LogInformation("Exiting GetAllAsync");
         return result;
     }
 
-    public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+    public async Task<IEnumerable<TAggregate>> FindAsync(Expression<Func<TAggregate, bool>> predicate)
     {
         logger.LogInformation("Entering FindAsync");
-        var result = await context.Set<T>().Where(predicate).ToListAsync();
+        var result = await context.Set<TAggregate>().Where(predicate).ToListAsync();
         logger.LogInformation("Exiting FindAsync");
         return result;
     }
 
-    public async Task AddAsync(T entity, CancellationToken cancellationToken)
+    public async Task AddAsync(TAggregate entity, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering AddAsync");
-        await context.Set<T>().AddAsync(entity, cancellationToken);
+        await context.Set<TAggregate>().AddAsync(entity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Exiting AddAsync");
     }
 
-    public async Task UpdateAsync(T entity, CancellationToken cancellationToken)
+    public async Task UpdateAsync(TAggregate entity, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering UpdateAsync");
-        context.Set<T>().Update(entity);
+        context.Set<TAggregate>().Update(entity);
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Exiting UpdateAsync");
     }
 
-    public async Task DeleteAsync(T entity, CancellationToken cancellationToken)
+    public async Task DeleteAsync(TAggregate entity, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering DeleteAsync");
         ArgumentNullException.ThrowIfNull(entity);
-        entity.State = EntityBaseState.DELETED;
-        context.Set<T>().Update(entity);
+        context.Set<TAggregate>().Update(entity);
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Exiting DeleteAsync");
     }

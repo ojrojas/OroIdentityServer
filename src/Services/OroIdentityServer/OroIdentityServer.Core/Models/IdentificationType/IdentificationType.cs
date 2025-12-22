@@ -23,6 +23,13 @@ public class IdentificationType : AggregateRoot<IdentificationTypeId>, IAuditabl
         IsActive = false;
         RaiseDomainEvent(new IdentificationTypeDeactiveEvent(Id));
     }
+
+    // Add validation logic to IdentificationType
+    public void Validate()
+    {
+        if (Name == null || string.IsNullOrWhiteSpace(Name.Value))
+            throw new ArgumentException("Identification type name cannot be empty.");
+    }
 }
 
 public sealed record IdentificationTypeCreateEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;

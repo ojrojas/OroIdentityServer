@@ -26,9 +26,24 @@ public sealed class Role : AggregateRoot<RoleId>, IAuditableEntity
         _claims.Add(claim);
         RaiseDomainEvent(new RoleClaimAddedEvent(Id, claim.ClaimType, claim.ClaimValue));
     }
+
+    public void Validate()
+    {
+        if (Name == null || string.IsNullOrWhiteSpace(Name.Value))
+            throw new ArgumentException("Role name cannot be empty.");
+    }
 }
 
 public sealed record RoleClaimAddedEvent(RoleId RoleId, RoleClaimType ClaimType, RoleClaimValue ClaimValue) : DomainEvent;
 
 public sealed record RoleCreateEvent(RoleId RoleId) : DomainEvent;
 public sealed record RoleDeactiveEvent(RoleId RoleId) : DomainEvent;
+
+// Add repository interface for Role
+public interface IRoleRepository
+{
+    Role? GetById(RoleId id);
+    void Add(Role role);
+    void Update(Role role);
+    void Remove(Role role);
+}

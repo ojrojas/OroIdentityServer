@@ -10,12 +10,12 @@ public class SecurityUser : AggregateRoot<Guid>, IAuditableEntity
     {
     }
 
-    public required string PasswordHash { get; set; }
-    public string SecurityStamp { get; set; } = string.Empty;
-    public Guid ConcurrencyStamp { get; set; }
-    public DateTime? LockoutEnd { get; set; }
-    public bool LockoutEnabled { get; set; } = true;
-    public int AccessFailedCount { get; set; } = 0;
+    public string PasswordHash { get; private set; }
+    public string SecurityStamp { get; private set; } = string.Empty;
+    public Guid ConcurrencyStamp { get; private set; }
+    public DateTime? LockoutEnd { get; private set; }
+    public bool LockoutEnabled { get; private set; } = true;
+    public int AccessFailedCount { get; private set; } = 0;
 
     public bool IsLockedOut()
     {

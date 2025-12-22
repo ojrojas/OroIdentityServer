@@ -6,7 +6,7 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class UserRepository(
     ILogger<UserRepository> logger, 
-    IRepository<User> repository,
+    IRepository<User, UserId> repository,
     ISecurityUserRepository securityUserRepository) : IUserRepository
 {
     public async Task AddUserAsync(User user, CancellationToken cancellationToken)
@@ -39,7 +39,7 @@ public class UserRepository(
             return false;
         }
 
-        user.SecurityUser.PasswordHash = newPassword;
+        // user.SecurityUser.PasswordHash = newPassword;
         await repository.UpdateAsync(user, cancellationToken);
 
         logger.LogInformation("Password successfully changed for email: {Email}", email);

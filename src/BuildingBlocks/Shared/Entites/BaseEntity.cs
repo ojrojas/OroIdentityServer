@@ -4,16 +4,10 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Entities;
 
-public abstract class BaseEntity<TId> : IEquatable<BaseEntity<TId>>
+public abstract class BaseEntity<TId>(TId Id) : IEquatable<BaseEntity<TId>>
 {
     [Key]
-    public TId Id { get; protected set; } = default!;
-
-    // public TId CreatedBy { get; protected set; }
-    // public DateTimeOffset CreatedOn { get; set; } = DateTimeOffset.Now.ToUniversalTime();
-    // public TId? ModifiedBy { get; protected set; }
-    // public DateTimeOffset? ModifiedOn { get; set; }
-    // public EntityBaseState State { get; set; } = EntityBaseState.ACTIVE;
+    public TId Id { get; protected set; } = Id;
 
     public bool Equals(BaseEntity<TId>? obj)
     {
@@ -23,5 +17,5 @@ public abstract class BaseEntity<TId> : IEquatable<BaseEntity<TId>>
     public override int GetHashCode()
        => HashCode.Combine(Id);
 
-    public override bool Equals(object obj) => Equals(obj as BaseEntity<TId>);
+    public override bool Equals(object? obj) => Equals(obj as BaseEntity<TId>);
 }

@@ -49,40 +49,40 @@ public class RolesRepository(
         logger.LogInformation("Exiting UpdateRoleAsync");
     }
 
-    public async Task<RoleClaim?> GetRoleClaimByIdAsync(Guid roleClaimId)
-    {
-        logger.LogInformation("Entering GetRoleClaimByIdAsync with id: {Id}", roleClaimId);
-        var result = await roleClaimRepository.GetByIdAsync(roleClaimId);
-        logger.LogInformation("Exiting GetRoleClaimByIdAsync");
-        return result;
-    }
+    // public async Task<RoleClaim?> GetRoleClaimByIdAsync(Guid roleClaimId)
+    // {
+    //     logger.LogInformation("Entering GetRoleClaimByIdAsync with id: {Id}", roleClaimId);
+    //     var result = await roleClaimRepository.GetByIdAsync(roleClaimId);
+    //     logger.LogInformation("Exiting GetRoleClaimByIdAsync");
+    //     return result;
+    // }
 
-    public async Task UpdateRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Entering UpdateRoleClaimAsync");
-        await roleClaimRepository.UpdateAsync(roleClaim, cancellationToken);
-        logger.LogInformation("Exiting UpdateRoleClaimAsync");
-    }
+    // public async Task UpdateRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
+    // {
+    //     logger.LogInformation("Entering UpdateRoleClaimAsync");
+    //     await roleClaimRepository.UpdateAsync(roleClaim, cancellationToken);
+    //     logger.LogInformation("Exiting UpdateRoleClaimAsync");
+    // }
 
-    public async Task AddRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Entering AddRoleClaimAsync");
-        await roleClaimRepository.AddAsync(roleClaim, cancellationToken);
-        logger.LogInformation("Exiting AddRoleClaimAsync");
-    }
+    // public async Task AddRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
+    // {
+    //     logger.LogInformation("Entering AddRoleClaimAsync");
+    //     await roleClaimRepository.AddAsync(roleClaim, cancellationToken);
+    //     logger.LogInformation("Exiting AddRoleClaimAsync");
+    // }
 
-    public async Task DeleteRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Entering DeleteRoleClaimAsync");
-        await roleClaimRepository.DeleteAsync(roleClaim, cancellationToken);
-        logger.LogInformation("Exiting DeleteRoleClaimAsync");
-    }
+    // public async Task DeleteRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
+    // {
+    //     logger.LogInformation("Entering DeleteRoleClaimAsync");
+    //     await roleClaimRepository.DeleteAsync(roleClaim, cancellationToken);
+    //     logger.LogInformation("Exiting DeleteRoleClaimAsync");
+    // }
 
-    public async Task<IEnumerable<RoleClaim>> GetRoleClaimsByRoleIdAsync(Guid roleId)
-    {
-        logger.LogInformation("Entering GetRoleClaimsByRoleIdAsync with RoleId: {RoleId}", roleId);
-        var result = await roleClaimRepository.CurrentContext.Where(rc => rc.RoleId == roleId).ToListAsync();
-        logger.LogInformation("Exiting GetRoleClaimsByRoleIdAsync");
-        return result;
-    }
+    // public async Task<IEnumerable<RoleClaim>> GetRoleClaimsByRoleIdAsync(Guid roleId)
+    // {
+    //     logger.LogInformation("Entering GetRoleClaimsByRoleIdAsync with RoleId: {RoleId}", roleId);
+    //     var result = await roleClaimRepository.CurrentContext.Where(rc => rc.RoleId == roleId).ToListAsync();
+    //     logger.LogInformation("Exiting GetRoleClaimsByRoleIdAsync");
+    //     return result;
+    // }
 }

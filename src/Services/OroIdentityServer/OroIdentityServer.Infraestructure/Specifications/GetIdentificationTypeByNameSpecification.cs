@@ -6,5 +6,5 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
 
 public sealed class GetIdentificationTypeByNameSpecification(string criteria) : ISpecification<IdentificationType>
 {
-    public Expression<Func<IdentificationType, bool>> Criteria { get; } = x => EF.Functions.Like(x.IdentificationTypeName.Value, $"%{criteria}%");
+    public Expression<Func<IdentificationType, bool>> Criteria { get; } = x => EF.Functions.Like(x.Name.Value, $"%{criteria}%");
 }

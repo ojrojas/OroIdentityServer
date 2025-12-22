@@ -9,17 +9,21 @@ public sealed class Tenant : AggregateRoot<TenantId>, IAuditableEntity
     public string Name { get; private set; }
     public bool IsActive { get; private set; }
 
-    private Tenant()
+    public Tenant(TenantId tenantId, string name)
+    : base(tenantId)
     {
-        Id = new TenantId(Guid.Empty);
-        Name = string.Empty;
-    }
-    private Tenant(TenantId tenantId, string name)
-    {
+        Id = new TenantId(Guid.CreateVersion7());
         Name = name;
         IsActive = true;
-
         RaiseDomainEvent(new TenantCreateEvent(tenantId, name));
+    }
+
+    public void Deactive()
+    {
+        if(!IsActive) return;
+
+        IsActive = false;
+        RaiseDomainEvent(new TenantDeactiveEvent(Id, Name));
     }
 
     public static Tenant CreateTenant(string name)
@@ -27,6 +31,22 @@ public sealed class Tenant : AggregateRoot<TenantId>, IAuditableEntity
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         return new Tenant(new TenantId(Guid.CreateVersion7()), name);
     }
+
+    public void Validate()
+    {
+        if (string.IsNullOrWhiteSpace(Name))
+            throw new ArgumentException("Tenant name cannot be empty.");
+    }
+}
+
+// Add repository interface for Tenant
+public interface ITenantRepository
+{
+    Tenant? GetById(TenantId id);
+    void Add(Tenant tenant);
+    void Update(Tenant tenant);
+    void Remove(Tenant tenant);
 }
 
 public record TenantCreateEvent(TenantId TenantId, string Name): DomainEvent;
+public record TenantDeactiveEvent(TenantId TenantId, string Name): DomainEvent;

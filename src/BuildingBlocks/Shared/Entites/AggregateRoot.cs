@@ -4,9 +4,12 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Entities;
 
-public abstract class AggregateRoot<TId>(TId Id) : BaseEntity<TId>(Id), IAggregateRoot where TId : IEquatable<TId>
+public abstract class AggregateRoot<TId>(TId Id) 
+: BaseEntity<TId>(Id), IAggregateRoot where TId : IEquatable<TId>
 {
     private readonly IList<IDomainEvent> _domainEvents = [];
+
+    [NotMapped]
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
     
     protected void RaiseDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
