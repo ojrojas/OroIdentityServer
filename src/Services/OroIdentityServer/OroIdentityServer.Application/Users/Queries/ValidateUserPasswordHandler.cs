@@ -17,7 +17,7 @@ public class ValidateUserPasswordHandler(
         logger.LogInformation("Validating password for user with email: {Email}", query.Email);
 
         // Retrieve the user by email
-        var user = await repository.GetUserByEmailAsync(query.Email);
+        var user = await repository.GetUserByEmailAsync(query.Email, cancellationToken);
         var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId, cancellationToken);
 
         if (securityUser == null)

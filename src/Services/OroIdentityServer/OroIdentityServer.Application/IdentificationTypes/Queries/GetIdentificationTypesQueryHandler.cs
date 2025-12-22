@@ -15,7 +15,7 @@ public class GetIdentificationTypesQueryHandler(
 
         try
         {
-            var identificationTypes = await identificationTypeRepository.GetAllIdentificationTypesAsync();
+            var identificationTypes = await identificationTypeRepository.GetAllIdentificationTypesAsync(cancellationToken);
 
             logger.LogInformation("Successfully retrieved identification types");
 

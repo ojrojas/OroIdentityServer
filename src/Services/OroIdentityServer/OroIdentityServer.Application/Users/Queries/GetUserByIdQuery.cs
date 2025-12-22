@@ -12,7 +12,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 /// This query implements the <see cref="IQuery{TResponse}"/> interface, where the response type is <see cref="GetUserByIdQueryResponse"/>.
 /// A new correlation ID is generated for each instance of this query.
 /// </remarks>
-public record GetUserByIdQuery(Guid Id) : IQuery<GetUserByIdQueryResponse>
+public record GetUserByIdQuery(UserId Id) : IQuery<GetUserByIdQueryResponse>
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }

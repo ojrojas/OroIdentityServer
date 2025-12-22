@@ -11,7 +11,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 /// <param name="Id">User identifier.</param>
 /// <returns>A new instance of the <see cref="DeleteUserCommand"/> class.</returns>
 public record DeleteUserCommand(
-  Guid Id
+  UserId Id
 ) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();

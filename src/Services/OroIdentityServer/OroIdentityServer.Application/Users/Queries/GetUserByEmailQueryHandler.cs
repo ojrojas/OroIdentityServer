@@ -16,7 +16,7 @@ public class GetUserByEmailQueryHandler(
 
         GetUserByEmailResponse response = new()
         {
-            Data = await repository.GetUserByEmailAsync(query.Email)
+            Data = await repository.GetUserByEmailAsync(query.Email, cancellationToken)
         };
 
         if (logger.IsEnabled(LogLevel.Information))

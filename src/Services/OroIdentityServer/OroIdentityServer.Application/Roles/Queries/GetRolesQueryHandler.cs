@@ -19,7 +19,7 @@ public class GetRolesQueryHandler(
 
         try
         {
-            var roles = await _roleRepository.GetAllRolesAsync();
+            var roles = await _roleRepository.GetAllRolesAsync(cancellationToken);
 
             _logger.LogInformation("Successfully retrieved roles");
 

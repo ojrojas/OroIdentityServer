@@ -5,7 +5,7 @@
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
 public record UpdateIdentificationTypeCommand(
-    Guid Id, IdentificationTypeName Name, EntityBaseState State)
+    IdentificationTypeId Id, IdentificationTypeName Name, EntityBaseState State)
 : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();
