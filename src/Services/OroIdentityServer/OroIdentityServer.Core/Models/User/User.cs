@@ -26,6 +26,16 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
         IdentificationTypeId = identificationTypeId;
         NormalizedEmail = email.ToUpperInvariant();
         NormalizedUserName = userName.ToUpperInvariant();
+
+        RaiseDomainEvent(new UserCreateEvent(
+            id, 
+            name,
+            middleName,
+            lastName,
+            userName,
+            email,
+            identification,
+            identificationTypeId));
     }
 
     private readonly IList<UserRole> _roles = [];
@@ -80,3 +90,13 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
             throw new ArgumentException("Email must be valid.");
     }
 }
+
+public sealed record UserCreateEvent(
+        UserId Id,
+        string Name,
+        string MiddleName,
+        string LastName,
+        string UserName,
+        string Email,
+        string Identification,
+        IdentificationTypeId IdentificationTypeId) : DomainEvent;
