@@ -105,6 +105,40 @@ The project includes several reusable building blocks that encapsulate common fu
   - **Services**: Implements services like `ClaimsUserInfoService.cs` and `IdentityClientService.cs`.
 - **Purpose**: Provide shared entities, interfaces, and services across different modules.
 
+## Domain-Driven Design (DDD) Updates
+
+The project has been updated to follow Domain-Driven Design (DDD) principles. Below are the key changes:
+
+### 1. **Aggregate Roots**
+- Introduced `AggregateRoot<T>` base class to manage domain events.
+- Added `RaiseDomainEvent` method to handle domain events within aggregates.
+
+### 2. **Value Objects**
+- Implemented value objects like `RoleClaimId`, `RoleId`, and `UserId` to encapsulate identity logic.
+- Added `TryParse` methods to enable seamless integration with ASP.NET endpoints.
+
+### 3. **Repositories**
+- Updated repository interfaces (e.g., `IRolesRepository`) to align with aggregate boundaries.
+- Implemented methods for managing role claims and user roles.
+
+### 4. **CQRS Enhancements**
+- Refined command and query handlers to work with value objects and aggregates.
+- Ensured separation of concerns between read and write operations.
+
+### 5. **Shared Kernel**
+- Centralized shared logic in the `Shared` project.
+- Added base classes like `BaseEntity`, `BaseValueObject`, and interfaces like `IAggregateRoot`.
+
+### 6. **Null Safety**
+- Addressed null reference issues across the codebase.
+- Added null checks and improved error handling in repositories and services.
+
+### 7. **Type Safety**
+- Replaced `Guid` with strongly-typed identifiers (e.g., `RoleClaimId`, `RoleId`) for better type safety.
+- Updated endpoints and handlers to use these types.
+
+These changes improve the maintainability, scalability, and robustness of the system while adhering to DDD principles.
+
 ## Technologies Used
 - **ASP.NET Core**: Main framework for the API.
 - **OpenIddict**: Implementation of OpenID Connect and OAuth2.
