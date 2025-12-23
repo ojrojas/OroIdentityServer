@@ -8,7 +8,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 /// <summary>
 /// Represents a command to delete a role by its ID.
 /// </summary>
-public record DeleteRoleCommand(Guid Id) : ICommand
+public record DeleteRoleCommand(RoleId Id) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }

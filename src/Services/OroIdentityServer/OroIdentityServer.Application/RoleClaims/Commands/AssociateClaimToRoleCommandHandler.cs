@@ -2,10 +2,12 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
-public class AssociateClaimToRoleCommandHandler(IRolesRepository roleRepository, ILogger<AssociateClaimToRoleCommandHandler> logger) : ICommandHandler<AssociateClaimToRoleCommand>
+public class AssociateClaimToRoleCommandHandler(
+    ILogger<AssociateClaimToRoleCommandHandler> logger,
+    IRolesRepository roleRepository) 
+    : ICommandHandler<AssociateClaimToRoleCommand>
 {
     private readonly IRolesRepository _roleRepository = roleRepository;
     private readonly ILogger<AssociateClaimToRoleCommandHandler> _logger = logger;
@@ -16,7 +18,7 @@ public class AssociateClaimToRoleCommandHandler(IRolesRepository roleRepository,
 
         try
         {
-            var role = await _roleRepository.GetRoleByIdAsync(command.RoleId);
+            var role = await _roleRepository.GetRoleByIdAsync(command.RoleId, cancellationToken);
 
             if (role == null)
             {
@@ -24,12 +26,7 @@ public class AssociateClaimToRoleCommandHandler(IRolesRepository roleRepository,
                 throw new KeyNotFoundException("Role not found.");
             }
 
-            var roleClaim = new RoleClaim
-            {
-                RoleId = command.RoleId,
-                ClaimType = command.ClaimType,
-                ClaimValue = command.ClaimValue
-            };
+            var roleClaim = new RoleClaim(command.ClaimType, command.ClaimValue);
 
             await _roleRepository.AddRoleClaimAsync(roleClaim, cancellationToken);
 

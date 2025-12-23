@@ -37,7 +37,7 @@ public class IdentificationTypeRepository(
     public async Task<IdentificationType?> GetIdentificationTypeByIdAsync(IdentificationTypeId id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetIdentificationTypeByIdAsync with id: {Id}", id);
-        var result = await repository.GetByIdAsync(id,cancellationToken);
+        var result = await repository.GetByIdAsync(id, cancellationToken);
         logger.LogInformation("Exiting GetIdentificationTypeByIdAsync");
         return result;
     }

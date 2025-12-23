@@ -24,7 +24,7 @@ public record CreateUserCommand(
     string Email, 
     string Password,
     string Identification,
-    Guid IdentificationTypeId
+    IdentificationTypeId IdentificationTypeId
 ) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();

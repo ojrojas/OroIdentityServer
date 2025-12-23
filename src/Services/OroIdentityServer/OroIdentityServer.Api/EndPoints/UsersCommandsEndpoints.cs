@@ -31,7 +31,7 @@ public static class UsersCommandsEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        await sender.Send(new DeleteUserCommand(id), cancellationToken);
+        await sender.Send(new DeleteUserCommand(new(id)), cancellationToken);
         return TypedResults.Ok();
     }
 

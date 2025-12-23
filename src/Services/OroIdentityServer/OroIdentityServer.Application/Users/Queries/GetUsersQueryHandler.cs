@@ -14,7 +14,7 @@ public class GetUsersQueryHandler(
     {
         GetUsersQueryResponse response = new();
         logger.LogInformation("Handling GetUsersQuery");
-        response.Data = await repository.GetAllUsersAsync();
+        response.Data = await repository.GetAllUsersAsync(cancellationToken);
         logger.LogInformation("Successfully handled GetUserByIdQuery");
         return response;
     }

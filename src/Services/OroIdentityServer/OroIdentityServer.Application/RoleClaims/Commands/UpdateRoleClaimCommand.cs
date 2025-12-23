@@ -8,7 +8,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 /// <summary>
 /// Represents a command to update a role claim.
 /// </summary>
-public record UpdateRoleClaimCommand(Guid RoleClaimId, string ClaimType, string ClaimValue) : ICommand
+public record UpdateRoleClaimCommand(RoleClaimId RoleClaimId, string ClaimType, string ClaimValue) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }

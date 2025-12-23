@@ -22,13 +22,9 @@ public class UpdateIdentificationTypeCommandHandler(
                 throw new KeyNotFoundException($"IdentificationType with ID {command.Id} not found.");
             }
 
-            var identificationType = new IdentificationType(command.Name)
-            {
-                Id = command.Id,
-                State = command.State,
-            };
+            identificationTypeExist.UpdateName(command.Name);
 
-            await repository.UpdateIdentificationTypeAsync(identificationType, cancellationToken);
+            await repository.UpdateIdentificationTypeAsync(identificationTypeExist, cancellationToken);
 
             logger.LogInformation("Successfully updated IdentificationType with ID {Id}", command.Id);
         }

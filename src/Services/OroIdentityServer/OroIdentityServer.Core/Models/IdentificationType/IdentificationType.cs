@@ -30,7 +30,40 @@ public class IdentificationType : AggregateRoot<IdentificationTypeId>, IAuditabl
         if (Name == null || string.IsNullOrWhiteSpace(Name.Value))
             throw new ArgumentException("Identification type name cannot be empty.");
     }
+
+    // Add method to update the name
+    public void UpdateName(IdentificationTypeName newName)
+    {
+        if (newName == null || string.IsNullOrWhiteSpace(newName.Value))
+            throw new ArgumentException("New name cannot be null or empty.");
+
+        if (Name.Equals(newName)) return; // Avoid unnecessary updates
+
+        Name = newName;
+        RaiseDomainEvent(new IdentificationTypeUpdatedEvent(Id, newName));
+    }
+
+    // Add method to activate the entity
+    public void Activate()
+    {
+        if (IsActive) return; // Avoid unnecessary updates
+
+        IsActive = true;
+        RaiseDomainEvent(new IdentificationTypeActivatedEvent(Id));
+    }
+
+    // Update Deactive method to ensure consistency
+    public void Deactivate()
+    {
+        if (!IsActive) return; // Avoid unnecessary updates
+
+        IsActive = false;
+        RaiseDomainEvent(new IdentificationTypeDeactivatedEvent(Id));
+    }
 }
 
 public sealed record IdentificationTypeCreateEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;
 public sealed record IdentificationTypeDeactiveEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;
+public sealed record IdentificationTypeUpdatedEvent(IdentificationTypeId IdentificationTypeId, IdentificationTypeName NewName) : DomainEvent;
+public sealed record IdentificationTypeActivatedEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;
+public sealed record IdentificationTypeDeactivatedEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;

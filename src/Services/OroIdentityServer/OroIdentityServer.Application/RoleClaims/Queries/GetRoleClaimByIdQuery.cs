@@ -9,7 +9,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 /// Query to retrieve a RoleClaim by its identifier.
 /// </summary>
 /// <param name="Id">The unique identifier of the RoleClaim.</param>
-public record GetRoleClaimByIdQuery(Guid Id) : IQuery<GetRoleClaimByIdResponse>
+public record GetRoleClaimByIdQuery(RoleClaimId Id) : IQuery<GetRoleClaimByIdResponse>
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }

@@ -38,7 +38,7 @@ public static class IdentificationTypeCommandsEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        await sender.Send(new DeleteIdentificationTypeCommand(id), cancellationToken);
+        await sender.Send(new DeleteIdentificationTypeCommand(new(id)), cancellationToken);
         return TypedResults.Ok();
     }
 

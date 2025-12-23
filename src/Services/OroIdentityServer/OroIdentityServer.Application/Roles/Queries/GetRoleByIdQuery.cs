@@ -8,7 +8,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 /// <summary>
 /// Represents a query to retrieve a role by its ID.
 /// </summary>
-public record GetRoleByIdQuery(Guid Id) : IQuery<GetRoleByIdResponse>
+public record GetRoleByIdQuery(RoleId Id) : IQuery<GetRoleByIdResponse>
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }

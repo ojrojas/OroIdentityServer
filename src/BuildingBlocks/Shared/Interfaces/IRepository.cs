@@ -13,4 +13,5 @@ public interface IRepository<TAggregate, TId> where TAggregate : class, IAggrega
   Task<TAggregate?> GetByIdAsync(TId id, CancellationToken cancellationToken);
   Task<IEnumerable<TAggregate>> GetAllAsync(CancellationToken cancellationToken);
   Task<IEnumerable<TAggregate>> FindAsync(Expression<Func<TAggregate, bool>> predicate, CancellationToken cancellationToken);
+  Task<TAggregate?> FindSingleAsync(Expression<Func<TAggregate, bool>> predicate, CancellationToken cancellationToken);
 }

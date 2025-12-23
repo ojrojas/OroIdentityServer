@@ -42,6 +42,14 @@ public class Repository<TAggregate, TId>(
         return result;
     }
 
+    public async Task<TAggregate?> FindSingleAsync(Expression<Func<TAggregate, bool>> predicate, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering FindSingleAsync");
+        var result = await context.Set<TAggregate>().FirstOrDefaultAsync(predicate, cancellationToken);
+        logger.LogInformation("Exiting FindSingleAsync");
+        return result;
+    }
+
     public async Task AddAsync(TAggregate entity, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering AddAsync");

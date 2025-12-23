@@ -2,6 +2,8 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using System.Net;
+
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
 public class UpdateUserCommandHandler(
@@ -12,22 +14,17 @@ public class UpdateUserCommandHandler(
     public async Task<UpdateUserResponse> HandleAsync(UpdateUserCommand command, CancellationToken cancellationToken)
     {
         if (logger.IsEnabled(LogLevel.Information))
-            logger.LogInformation("Handling CreateUserCommand for UserName: {UserName}", command.UserName);
-
-        UpdateUserResponse userResponse = new();
+            logger.LogInformation("Handling UpdateUserCommand for UserId: {UserId}", command.UserId);
 
         try
         {
-            var userToUpdate = await userRepository.GetUserByIdAsync(command.UserId, cancellationToken);
-            // Hash the password
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Hashing password for UserName: {UserName}", command.UserName);
-          
-            // Create the User object
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Mapping User object for UserName: {UserName}", command.UserName);
-            var user = new User(
-                command.UserId,
+            // Retrieve the existing user
+            var user = await userRepository.GetUserByIdAsync(command.UserId, cancellationToken);
+            if (user == null)
+                throw new InvalidOperationException("User not found.");
+
+            // Update user details
+            user.UpdateDetails(
                 command.Name,
                 command.MiddleName,
                 command.LastName,
@@ -37,24 +34,15 @@ public class UpdateUserCommandHandler(
                 command.IdentificationTypeId
             );
 
-            // Add the user to the repository
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Update User to repository for UserName: {UserName}", command.UserName);
+            // Persist changes
+            await userRepository.UpdateUserAsync(user, cancellationToken);
 
-           await userRepository.UpdateUserAsync(user, cancellationToken);
-
-            if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("Successfully handled UpdateUserCommand for UserName: {UserName}", command.UserName);
-            
-           userResponse.Data = user;
-           userResponse.Message = "Updated user successful";
-            
-           return userResponse;
+            logger.LogInformation("Successfully updated user with UserId: {UserId}", command.UserId);
+            return new UpdateUserResponse { StatusCode = (int)HttpStatusCode.OK, Data = user };
         }
         catch (Exception ex)
         {
-            if (logger.IsEnabled(LogLevel.Error))
-                logger.LogError(ex, "An error occurred while handling UpdateUserCommand for UserName: {UserName}", command.UserName);
+            logger.LogError(ex, "An error occurred while updating the user with UserId: {UserId}", command.UserId);
             throw;
         }
     }

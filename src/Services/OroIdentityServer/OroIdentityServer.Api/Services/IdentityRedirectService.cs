@@ -29,7 +29,7 @@ internal sealed class IdentityRedirectService(IHttpContextAccessor context) : II
 
         // During static rendering, NavigateTo throws a NavigationException which is handled by the framework as a redirect.
         // So as long as this is called from a statically rendered Identity component, the InvalidOperationException is never thrown.
-        context.HttpContext.Response.Redirect(uri);
+        context?.HttpContext?.Response.Redirect(uri);
         throw new InvalidOperationException($"{nameof(IdentityRedirectService)} can only be used during static rendering.");
     }
 }

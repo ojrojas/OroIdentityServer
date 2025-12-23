@@ -5,35 +5,34 @@
 
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
-public class UpdateRoleClaimCommandHandler(IRolesRepository roleRepository, ILogger<UpdateRoleClaimCommandHandler> logger) : ICommandHandler<UpdateRoleClaimCommand>
+public class UpdateRoleClaimCommandHandler(
+    ILogger<UpdateRoleClaimCommandHandler> logger,
+    IRolesRepository roleRepository
+    ) : ICommandHandler<UpdateRoleClaimCommand>
 {
-    private readonly IRolesRepository _roleRepository = roleRepository;
-    private readonly ILogger<UpdateRoleClaimCommandHandler> _logger = logger;
-
     public async Task HandleAsync(UpdateRoleClaimCommand command, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Handling UpdateRoleClaimCommand for RoleClaimId: {RoleClaimId}", command.RoleClaimId);
+        logger.LogInformation("Handling UpdateRoleClaimCommand for RoleClaimId: {RoleClaimId}", command.RoleClaimId);
 
         try
         {
-            var roleClaim = await _roleRepository.GetRoleClaimByIdAsync(command.RoleClaimId);
+            var roleClaim = await roleRepository.GetRoleClaimByIdAsync(command.RoleClaimId.Value, cancellationToken);
 
             if (roleClaim == null)
             {
-                _logger.LogWarning("RoleClaim not found for Id: {RoleClaimId}", command.RoleClaimId);
+                logger.LogWarning("RoleClaim not found for Id: {RoleClaimId}", command.RoleClaimId);
                 throw new KeyNotFoundException("RoleClaim not found.");
             }
 
-            roleClaim.ClaimType = command.ClaimType;
-            roleClaim.ClaimValue = command.ClaimValue;
+            roleClaim.UpdateClaim(new RoleClaimType(command.ClaimType), new RoleClaimValue(command.ClaimValue));
 
-            await _roleRepository.UpdateRoleClaimAsync(roleClaim, cancellationToken);
+            await roleRepository.UpdateRoleClaimAsync(roleClaim, cancellationToken);
 
-            _logger.LogInformation("Successfully updated RoleClaim with Id: {RoleClaimId}", command.RoleClaimId);
+            logger.LogInformation("Successfully updated RoleClaim with Id: {RoleClaimId}", command.RoleClaimId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while updating the RoleClaim with Id: {RoleClaimId}", command.RoleClaimId);
+            logger.LogError(ex, "An error occurred while updating the RoleClaim with Id: {RoleClaimId}", command.RoleClaimId);
             throw;
         }
     }

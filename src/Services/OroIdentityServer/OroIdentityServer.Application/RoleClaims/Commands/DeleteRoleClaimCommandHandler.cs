@@ -16,7 +16,7 @@ public class DeleteRoleClaimCommandHandler(ILogger<DeleteRoleClaimCommandHandler
 
         try
         {
-            var roleClaim = await _roleRepository.GetRoleClaimByIdAsync(command.RoleClaimId);
+            var roleClaim = await _roleRepository.GetRoleClaimByIdAsync(command.RoleClaimId.Value, cancellationToken);
 
             if (roleClaim == null)
             {
@@ -24,7 +24,7 @@ public class DeleteRoleClaimCommandHandler(ILogger<DeleteRoleClaimCommandHandler
                 throw new KeyNotFoundException("RoleClaim not found.");
             }
 
-            await _roleRepository.DeleteRoleClaimAsync(roleClaim, cancellationToken);
+            await _roleRepository.DeleteRoleClaimAsync(roleClaim.Id, cancellationToken);
 
             _logger.LogInformation("Successfully deleted RoleClaim with Id: {RoleClaimId}", command.RoleClaimId);
         }

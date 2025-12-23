@@ -12,9 +12,10 @@ public class RoleClaim
         ClaimValue = claimValue;
     }
 
-    public RoleClaimType ClaimType { get; }
-    public RoleClaimValue ClaimValue { get; }
+    public RoleClaimType ClaimType { get; private set; }
+    public RoleClaimValue ClaimValue { get; private set; }
     public bool IsActive { get; private set; } = true;
+    public Guid Id { get; set; } // Added property to represent the unique identifier of the RoleClaim
 
     // Add validation logic to RoleClaim
     public void Validate()
@@ -23,5 +24,11 @@ public class RoleClaim
             throw new ArgumentException("Claim type cannot be empty.");
         if (ClaimValue == null || string.IsNullOrWhiteSpace(ClaimValue.Value))
             throw new ArgumentException("Claim value cannot be empty.");
+    }
+
+    public void UpdateClaim(RoleClaimType claimType, RoleClaimValue claimValue)
+    {
+        ClaimType = claimType;
+        ClaimValue = claimValue;
     }
 }

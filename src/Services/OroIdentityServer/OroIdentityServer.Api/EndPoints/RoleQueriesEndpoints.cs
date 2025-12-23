@@ -27,7 +27,7 @@ public static class RoleQueriesEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetRoleByIdQuery(id), cancellationToken);
+        var result = await sender.Send(new GetRoleByIdQuery(new(id)), cancellationToken);
         return result.Data != null ? TypedResults.Ok(result) : TypedResults.NotFound();
     }
 

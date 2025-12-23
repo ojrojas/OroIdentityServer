@@ -10,13 +10,15 @@ public class GetIdentificationTypeByIdQueryHandler(
     IIdentificationTypeRepository identificationTypeRepository
 ) : IQueryHandler<GetIdentificationTypeByIdQuery, GetIdentificationTypeByIdResponse>
 {
-    public async Task<GetIdentificationTypeByIdResponse> HandleAsync(GetIdentificationTypeByIdQuery query, CancellationToken cancellationToken)
+    public async Task<GetIdentificationTypeByIdResponse> HandleAsync(
+        GetIdentificationTypeByIdQuery query, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling GetIdentificationTypeByIdQuery for Id: {Id}", query.Id);
 
         try
         {
-            var identificationType = await identificationTypeRepository.GetIdentificationTypeByIdAsync(query.Id);
+            var identificationType = await identificationTypeRepository.GetIdentificationTypeByIdAsync(
+                query.Id, cancellationToken);
 
             if (identificationType == null)
             {

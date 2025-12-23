@@ -49,40 +49,49 @@ public class RolesRepository(
         logger.LogInformation("Exiting UpdateRoleAsync");
     }
 
-    // public async Task<RoleClaim?> GetRoleClaimByIdAsync(Guid roleClaimId)
-    // {
-    //     logger.LogInformation("Entering GetRoleClaimByIdAsync with id: {Id}", roleClaimId);
-    //     var result = await roleClaimRepository.GetByIdAsync(roleClaimId);
-    //     logger.LogInformation("Exiting GetRoleClaimByIdAsync");
-    //     return result;
-    // }
+    public async Task<RoleClaim?> GetRoleClaimByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering GetRoleClaimByIdAsync with id: {Id}", id);
+        // Implementation for fetching a RoleClaim by ID
+        logger.LogInformation("Exiting GetRoleClaimByIdAsync");
+        return null; // Replace with actual implementation
+    }
 
-    // public async Task UpdateRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
-    // {
-    //     logger.LogInformation("Entering UpdateRoleClaimAsync");
-    //     await roleClaimRepository.UpdateAsync(roleClaim, cancellationToken);
-    //     logger.LogInformation("Exiting UpdateRoleClaimAsync");
-    // }
+    public async Task<IEnumerable<RoleClaim>> GetRoleClaimsByRoleIdAsync(RoleId roleId, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering GetRoleClaimsByRoleIdAsync with roleId: {RoleId}", roleId);
+        // Implementation for fetching RoleClaims by RoleId
+        logger.LogInformation("Exiting GetRoleClaimsByRoleIdAsync");
+        return Enumerable.Empty<RoleClaim>(); // Replace with actual implementation
+    }
 
-    // public async Task AddRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
-    // {
-    //     logger.LogInformation("Entering AddRoleClaimAsync");
-    //     await roleClaimRepository.AddAsync(roleClaim, cancellationToken);
-    //     logger.LogInformation("Exiting AddRoleClaimAsync");
-    // }
+    public async Task AddRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering AddRoleClaimAsync");
+        // Implementation for adding a RoleClaim
+        logger.LogInformation("Exiting AddRoleClaimAsync");
+    }
 
-    // public async Task DeleteRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
-    // {
-    //     logger.LogInformation("Entering DeleteRoleClaimAsync");
-    //     await roleClaimRepository.DeleteAsync(roleClaim, cancellationToken);
-    //     logger.LogInformation("Exiting DeleteRoleClaimAsync");
-    // }
+    public async Task DeleteRoleClaimAsync(Guid id, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering DeleteRoleClaimAsync with id: {Id}", id);
+        // Implementation for deleting a RoleClaim
+        logger.LogInformation("Exiting DeleteRoleClaimAsync");
+    }
 
-    // public async Task<IEnumerable<RoleClaim>> GetRoleClaimsByRoleIdAsync(Guid roleId)
-    // {
-    //     logger.LogInformation("Entering GetRoleClaimsByRoleIdAsync with RoleId: {RoleId}", roleId);
-    //     var result = await roleClaimRepository.CurrentContext.Where(rc => rc.RoleId == roleId).ToListAsync();
-    //     logger.LogInformation("Exiting GetRoleClaimsByRoleIdAsync");
-    //     return result;
-    // }
+    public async Task UpdateRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering UpdateRoleClaimAsync");
+        // Implementation for updating a RoleClaim
+        logger.LogInformation("Exiting UpdateRoleClaimAsync");
+    }
+
+    public async Task<Role?> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering GetRoleByNameAsync with roleName: {RoleName}", roleName);
+        // Implementation for fetching a Role by Name
+        var role = await repository.FindSingleAsync(r => r.Name.Value == roleName, cancellationToken);
+        logger.LogInformation("Exiting GetRoleByNameAsync");
+        return role;
+    }
 }

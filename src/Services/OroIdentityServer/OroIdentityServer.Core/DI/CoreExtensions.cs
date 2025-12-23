@@ -12,6 +12,7 @@ public static class CoreExtensions
     public static TBuilder AddCoreExtensions<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
+        builder.Services.AddTransient(typeof(IAggregateRoot), typeof(AggregateRoot<>));
         return builder;
     }
 

@@ -36,7 +36,7 @@ public static class UsersQueriesEndpoints
         CancellationToken cancellationToken
         )
     {
-        return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(id), cancellationToken));
+        return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(new(id)), cancellationToken));
     }
 
     private static async Task<Results<Ok<GetUserByEmailResponse>, BadRequest<string>, ProblemHttpResult>> GetUserByEmail(

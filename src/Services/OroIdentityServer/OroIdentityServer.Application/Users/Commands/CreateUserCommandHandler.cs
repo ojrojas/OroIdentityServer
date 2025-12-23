@@ -4,23 +4,6 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
-/// <summary>
-/// Handles the creation of a new user by processing the <see cref="CreateUserCommand"/>.
-/// </summary>
-/// <remarks>
-/// This command handler performs the following steps:
-/// <list type="bullet">
-/// <item><description>Logs the initiation of the command handling process.</description></item>
-/// <item><description>Hashes the provided password using the <see cref="IPasswordHasher"/>.</description></item>
-/// <item><description>Creates a new <see cref="User"/> object with the provided details and hashed password.</description></item>
-/// <item><description>Adds the created user to the repository using the <see cref="IUserRepository"/>.</description></item>
-/// <item><description>Logs the successful handling of the command.</description></item>
-/// </list>
-/// If an error occurs during the process, it is logged, and the exception is rethrown.
-/// </remarks>
-/// <param name="logger">The logger instance for logging information, debug messages, and errors.</param>
-/// <param name="userRepository">The repository interface for user-related data operations.</param>
-/// <param name="passwordHasher">The service used to hash user passwords securely.</param>
 public class CreateUserCommandHandler(
     ILogger<CreateUserCommandHandler> logger,
     IUserRepository userRepository,
@@ -34,44 +17,35 @@ public class CreateUserCommandHandler(
 
         try
         {
-            // Hash the password
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Hashing password for UserName: {UserName}", command.UserName);
-            var passwordHash = await passwordHasher.HashPassword(command.Password);
+            // Validate if user already exists
+            var existingUser = await userRepository.GetUserByEmailAsync(command.Email, cancellationToken);
+            if (existingUser != null)
+                throw new InvalidOperationException("User with the given email already exists.");
 
             // Create the User object
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Creating User object for UserName: {UserName}", command.UserName);
-            var user = new User
-            {
-                UserName = command.UserName,
-                Email = command.Email,
-                Name = command.Name,
-                MiddleName = command.MiddleName,
-                LastName = command.LastName,
-                Identification = command.Identification,
-                IdentificationTypeId = command.IdentificationTypeId,
-                SecurityUser = new SecurityUser
-                {
-                    PasswordHash = passwordHash,
-                    SecurityStamp = Guid.NewGuid().ToString(),
-                    ConcurrencyStamp = Guid.NewGuid()
-                }
-            };
+            var user = User.Create(
+                command.UserName,
+                command.Email,
+                command.Name,
+                command.MiddleName,
+                command.LastName,
+                command.Identification,
+                command.IdentificationTypeId
+            );
+
+            // Assign SecurityUser
+            user.AssignSecurityUser(SecurityUser.Create(
+                await passwordHasher.HashPassword(command.Password)
+            ));
 
             // Add the user to the repository
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Adding User to repository for UserName: {UserName}", command.UserName);
-
             await userRepository.AddUserAsync(user, cancellationToken);
 
-            if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("Successfully handled CreateUserCommand for UserName: {UserName}", command.UserName);
+            logger.LogInformation("Successfully handled CreateUserCommand for UserName: {UserName}", command.UserName);
         }
         catch (Exception ex)
         {
-            if (logger.IsEnabled(LogLevel.Error))
-                logger.LogError(ex, "An error occurred while handling CreateUserCommand for UserName: {UserName}", command.UserName);
+            logger.LogError(ex, "An error occurred while handling CreateUserCommand for UserName: {UserName}", command.UserName);
             throw;
         }
     }

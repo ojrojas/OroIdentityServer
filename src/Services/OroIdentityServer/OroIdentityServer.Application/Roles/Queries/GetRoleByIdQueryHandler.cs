@@ -16,7 +16,7 @@ public class GetRoleByIdQueryHandler(
 
         try
         {
-            var role = await roleRepository.GetRoleByIdAsync(query.Id);
+            var role = await roleRepository.GetRoleByIdAsync(query.Id, cancellationToken);
 
             if (role == null)
             {

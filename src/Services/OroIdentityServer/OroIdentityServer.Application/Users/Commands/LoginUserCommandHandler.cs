@@ -14,11 +14,17 @@ public class LoginUserCommandHandler(
     {
         try
         {
-            var user = await userRepository.GetUserByEmailAsync(command.Username);
+            var user = await userRepository.GetUserByEmailAsync(command.Username, cancellationToken);
 
             if (user == null)
             {
                 logger.LogWarning("Invalid login attempt for user {Username}", command.Username);
+                throw new UnauthorizedAccessException("Invalid username or password.");
+            }
+
+            if (user?.SecurityUser == null)
+            {
+                logger.LogWarning("User or SecurityUser is null for {Username}", command.Username);
                 throw new UnauthorizedAccessException("Invalid username or password.");
             }
 
@@ -33,11 +39,11 @@ public class LoginUserCommandHandler(
             if (!await passwordHasher.VerifyPassword(command.Password, user.SecurityUser.PasswordHash))
             {
                 // Increment failed access count
-                user.SecurityUser.AccessFailedCount++;
+                user.SecurityUser.IncrementAccessFailedCount();
 
                 if (user.SecurityUser.AccessFailedCount >= 5) // Threshold for failed attempts
                 {
-                    user.SecurityUser.LockoutEnd = DateTime.UtcNow.AddMinutes(15); // Lock the account for 15 minutes
+                    user.SecurityUser.LockUntil(DateTime.UtcNow.AddMinutes(15)); // Lock the account for 15 minutes
                     logger.LogWarning("User {Username} account locked until {LockoutEnd}", command.Username, user.SecurityUser.LockoutEnd);
                 }
 
@@ -47,8 +53,8 @@ public class LoginUserCommandHandler(
             }
 
             // Reset failed access count on successful login
-            user.SecurityUser.AccessFailedCount = 0;
-            user.SecurityUser.LockoutEnd = null;
+            user.SecurityUser.ResetAccessFailedCount();
+            user.SecurityUser.LockUntil(DateTime.UtcNow); // Clear any lockout
             await userRepository.UpdateUserAsync(user, cancellationToken);
 
             logger.LogInformation("User {Username} logged in successfully.", command.Username);

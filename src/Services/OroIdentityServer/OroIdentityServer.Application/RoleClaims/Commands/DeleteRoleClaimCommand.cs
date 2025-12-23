@@ -9,7 +9,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 /// Command to delete a RoleClaim by its identifier.
 /// </summary>
 /// <param name="RoleClaimId">The unique identifier of the RoleClaim to delete.</param>
-public record DeleteRoleClaimCommand(Guid RoleClaimId) : ICommand
+public record DeleteRoleClaimCommand(RoleClaimId RoleClaimId) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }

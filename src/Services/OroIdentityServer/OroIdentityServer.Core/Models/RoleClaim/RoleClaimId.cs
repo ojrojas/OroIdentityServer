@@ -11,4 +11,15 @@ public record RoleClaimId(Guid Value) : BaseValueObject
     {
         yield return Value;
     }
+
+    public static bool TryParse(string? input, IFormatProvider? formatProvider, out RoleClaimId result)
+    {
+        if (Guid.TryParse(input, out var guid))
+        {
+            result = new RoleClaimId(guid);
+            return true;
+        }
+        result = null;
+        return false;
+    }
 }

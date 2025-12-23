@@ -15,7 +15,7 @@ public class DeleteIdentificationTypeCommandHandler(
         {
             logger.LogInformation("Starting delete process for IdentificationType with ID {Id}", command.Id);
 
-            var identificationTypeExist = await repository.GetIdentificationTypeByIdAsync(command.Id);
+            var identificationTypeExist = await repository.GetIdentificationTypeByIdAsync(command.Id, cancellationToken);
             if (identificationTypeExist == null)
             {
                 logger.LogWarning("IdentificationType with ID {Id} not found", command.Id);

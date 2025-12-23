@@ -7,7 +7,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 public sealed record RoleName : BaseValueObject
 {
     public string Value {get;}
-    private RoleName(string value)
+    public RoleName(string value)
     {
         Value = value;
     }

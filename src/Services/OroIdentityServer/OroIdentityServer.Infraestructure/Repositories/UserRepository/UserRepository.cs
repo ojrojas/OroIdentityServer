@@ -33,9 +33,9 @@ public class UserRepository(
             return false;
         }
 
-        if (!user.SecurityUser.PasswordHash.Equals(currentPassword))
+        if (user?.SecurityUser?.PasswordHash == null || !user.SecurityUser.PasswordHash.Equals(currentPassword))
         {
-            logger.LogWarning("Current password is incorrect for email: {Email}", email);
+            logger.LogWarning("Current password is incorrect or user is null for email: {Email}", email);
             return false;
         }
 
@@ -71,7 +71,7 @@ public class UserRepository(
         var emailSpecification = new GetUserByEmailSpecification(email);
         var user = await repository.CurrentContext.FirstOrDefaultAsync(emailSpecification.Criteria);
         logger.LogInformation("finish request get user by email");
-        return user;
+        return user ?? throw new InvalidOperationException("User cannot be null.");
     }
 
     public async Task<User?> GetUserByIdAsync(UserId id, CancellationToken cancellationToken)

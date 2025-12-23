@@ -11,24 +11,24 @@ public class DeleteUserCommandHander(
 {
     public async Task HandleAsync(DeleteUserCommand command, CancellationToken cancellationToken)
     {
-         if (logger.IsEnabled(LogLevel.Information))
+        if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling DeleteUserCommand for Id: {Id}", command.Id);
 
         try
         {
-            // Delete the User object
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Delete User object for Id: {Id}", command.Id);
+            // Validate if user exists
+            var user = await userRepository.GetUserByIdAsync(command.Id, cancellationToken);
+            if (user == null)
+                throw new InvalidOperationException("User not found.");
 
-            await userRepository.DeleteUserAsync(command.Id,cancellationToken );
+            // Delete the user
+            await userRepository.DeleteUserAsync(command.Id, cancellationToken);
 
-            if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("Successfully handled DeleteUserCommand for Id: {Id}", command.Id);
+            logger.LogInformation("Successfully handled DeleteUserCommand for Id: {Id}", command.Id);
         }
         catch (Exception ex)
         {
-            if (logger.IsEnabled(LogLevel.Error))
-                logger.LogError(ex, "An error occurred while handling DeleteUserCommand for Id: {Id}", command.Id);
+            logger.LogError(ex, "An error occurred while handling DeleteUserCommand for Id: {Id}", command.Id);
             throw;
         }
     }

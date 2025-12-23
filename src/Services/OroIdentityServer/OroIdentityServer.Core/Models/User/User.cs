@@ -24,9 +24,8 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
         Email = email;
         Identification = identification;
         IdentificationTypeId = identificationTypeId;
-        NormalizedEmail = email.ToUpperInvariant();
-        NormalizedUserName = userName.ToUpperInvariant();
-
+        NormalizedEmail = NormalizedEmailFrom(email);
+        NormalizedUserName = NormalizedUserNameFrom(userName);
         RaiseDomainEvent(new UserCreateEvent(
             id, 
             name,
@@ -36,6 +35,17 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
             email,
             identification,
             identificationTypeId));
+    }
+
+    public static string NormalizedEmailFrom(string email){
+        if(string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email cannot be null or empty.");
+        return email.ToUpperInvariant();    
+    }
+    public static string NormalizedUserNameFrom(string userName) {
+        if(string.IsNullOrWhiteSpace(userName))
+            throw new ArgumentException("UserName cannot be null or empty.");
+        return userName.ToUpperInvariant();    
     }
 
     private readonly IList<UserRole> _roles = [];
@@ -56,7 +66,6 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
     public Guid SecurityUserId { get; set; }
     public SecurityUser? SecurityUser { get; set; }
 
-    // Add repository interface for User
     public interface IUserRepository
     {
         User? GetById(UserId id);
@@ -65,7 +74,6 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
         void Remove(User user);
     }
 
-    // Add domain logic to User
     public void AddRole(UserRole role)
     {
         if (_roles.Any(r => r.RoleId == role.RoleId))
@@ -89,6 +97,50 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
         if (!Email.Contains("@"))
             throw new ArgumentException("Email must be valid.");
     }
+
+    public void AssignSecurityUser(SecurityUser securityUser)
+    {
+        if (securityUser == null)
+            throw new ArgumentNullException(nameof(securityUser), "SecurityUser cannot be null.");
+
+        if (SecurityUser != null)
+            throw new InvalidOperationException("SecurityUser is already assigned.");
+
+        SecurityUser = securityUser;
+        SecurityUserId = securityUser.Id.Value;
+
+        RaiseDomainEvent(new SecurityUserAssignedEvent(Id, securityUser.Id));
+    }
+
+    // Add Create method
+    public static User Create(string userName, string email, string name, string middleName, string lastName, string identification, IdentificationTypeId identificationTypeId)
+    {
+        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("UserName and Email cannot be null or empty.");
+
+        return new User(
+            new UserId(Guid.NewGuid()),
+            name,
+            middleName,
+            lastName,
+            userName,
+            email,
+            identification,
+            identificationTypeId
+        );
+    }
+
+    // Add UpdateDetails method
+    public void UpdateDetails(string name, string middleName, string lastName, string userName, string email, string identification, IdentificationTypeId identificationTypeId)
+    {
+        Name = name;
+        MiddleName = middleName;
+        LastName = lastName;
+        UserName = userName;
+        Email = email;
+        Identification = identification;
+        IdentificationTypeId = identificationTypeId;
+    }
 }
 
 public sealed record UserCreateEvent(
@@ -100,3 +152,8 @@ public sealed record UserCreateEvent(
         string Email,
         string Identification,
         IdentificationTypeId IdentificationTypeId) : DomainEvent;
+
+public sealed record SecurityUserAssignedEvent(UserId UserId, SecurityUserId SecurityUserId) : DomainEvent;
+
+// Add UserDeletedEvent
+public sealed record UserDeletedEvent(UserId UserId) : DomainEvent;

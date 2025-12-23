@@ -8,7 +8,10 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 /// <summary>
 /// Represents a command to associate a claim to a role.
 /// </summary>
-public record AssociateClaimToRoleCommand(Guid RoleId, string ClaimType, string ClaimValue) : ICommand
+public record AssociateClaimToRoleCommand(
+    RoleId RoleId, 
+    RoleClaimType ClaimType, 
+    RoleClaimValue ClaimValue) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }

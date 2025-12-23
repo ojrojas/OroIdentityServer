@@ -45,7 +45,7 @@ public class AuthorizationService(
 
         ArgumentNullException.ThrowIfNull(userId);
 
-        var user = await sender.Send(new GetUserByIdQuery(Guid.Parse(userId)), cancellationToken);
+        var user = await sender.Send(new GetUserByIdQuery(new(Guid.Parse(userId))), cancellationToken);
         if (user == null)
         {
             return new LoginResponse(ResultTypes.Challenge, null, new AuthenticationProperties
@@ -88,7 +88,7 @@ public class AuthorizationService(
                     nameType: Claims.Name,
                     roleType: Claims.Role);
 
-                identity.SetClaim(Claims.Subject, user.Data.Id)
+                identity.SetClaim(Claims.Subject, user.Data.Id.Value)
                         .SetClaim(Claims.Email, user.Data.Email)
                         .SetClaim(Claims.Name, user.Data.UserName)
                         .SetClaim(Claims.PreferredUsername, user.Data.UserName)
@@ -138,7 +138,7 @@ public class AuthorizationService(
             // Retrieve the user profile corresponding to the authorization code/refresh token.
             var userId = Guid.Parse(result.Principal!.GetClaim(Claims.Subject));
             ArgumentNullException.ThrowIfNull(userId);
-             var user = await sender.Send(new GetUserByIdQuery(userId), cancellationToken);
+             var user = await sender.Send(new GetUserByIdQuery(new(userId)), cancellationToken);
             if (user is null)
             {
                 return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -165,7 +165,7 @@ public class AuthorizationService(
 
             // Override the user claims present in the principal in case they
             // changed since the authorization code/refresh token was issued.
-            identity.SetClaim(Claims.Subject, user.Data.Id)
+            identity.SetClaim(Claims.Subject, user.Data.Id.Value)
                 .SetClaim(Claims.Email, user.Data.Email)
                 .SetClaim(Claims.Name, user.Data.UserName)
                 .SetClaim(Claims.PreferredUsername, user.Data.UserName)
@@ -231,7 +231,7 @@ public class AuthorizationService(
         nameType: Claims.Name,
         roleType: Claims.Role);
 
-        identity.SetClaim(Claims.Subject, user.Data.Id)
+        identity.SetClaim(Claims.Subject, user.Data.Id.Value)
                 .SetClaim(Claims.Email, user.Data.Email)
                 .SetClaim(Claims.Name, user.Data.UserName)
                 .SetClaim(Claims.PreferredUsername, user.Data.UserName)
