@@ -27,7 +27,7 @@ public class CreateRoleCommandHandler(
                 throw new InvalidOperationException("Role with the given name already exists.");
 
             // Create the Role object
-            var role = Role.Create(command.RoleName.Value);
+            var role = new Role(command.RoleName);
 
             // Add the role to the repository
             await roleRepository.AddRoleAsync(role, cancellationToken);

@@ -4,25 +4,17 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public sealed class Tenant : AggregateRoot<TenantId>, IAuditableEntity
+public sealed class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregateRoot
 {
-    // Constructor vacío requerido por EF Core
-    private Tenant() : base(null!)
-    {
-        // Constructor vacío para EF Core
-        // Las propiedades se establecerán por reflexión
-    }
-
-    public string? Name { get; private set; }
+    public TenantName? Name { get; private set; }
     public bool IsActive { get; private set; }
 
-    public Tenant(TenantId tenantId, string name)
-    : base(tenantId)
+    public Tenant(TenantName name)
     {
         Id = new TenantId(Guid.CreateVersion7());
         Name = name;
         IsActive = true;
-        RaiseDomainEvent(new TenantCreateEvent(tenantId, name));
+        RaiseDomainEvent(new TenantCreateEvent(Id, name));
     }
 
     public void Deactive()
@@ -33,15 +25,15 @@ public sealed class Tenant : AggregateRoot<TenantId>, IAuditableEntity
         RaiseDomainEvent(new TenantDeactiveEvent(Id, Name));
     }
 
-    public static Tenant CreateTenant(string name)
+    public static Tenant CreateTenant(TenantName name)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        return new Tenant(new TenantId(Guid.CreateVersion7()), name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(name?.Value);
+        return new Tenant(name);
     }
 
     public void Validate()
     {
-        if (string.IsNullOrWhiteSpace(Name))
+        if (string.IsNullOrWhiteSpace(Name?.Value))
             throw new ArgumentException("Tenant name cannot be empty.");
     }
 }
@@ -54,6 +46,3 @@ public interface ITenantRepository
     void Update(Tenant tenant);
     void Remove(Tenant tenant);
 }
-
-public record TenantCreateEvent(TenantId TenantId, string Name): DomainEvent;
-public record TenantDeactiveEvent(TenantId TenantId, string Name): DomainEvent;

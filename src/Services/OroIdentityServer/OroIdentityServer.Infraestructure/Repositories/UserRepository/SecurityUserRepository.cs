@@ -6,7 +6,7 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class SecurityUserRepository(
     ILogger<SecurityUserRepository> logger,
-    IRepository<SecurityUser, SecurityUserId> repository) : ISecurityUserRepository
+    IRepository<SecurityUser> repository) : ISecurityUserRepository
 {
     public async Task<SecurityUser> GetSecurityUserAsync(Guid securityId, CancellationToken cancellationToken)
     {

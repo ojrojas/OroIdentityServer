@@ -4,18 +4,18 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public sealed record RoleName : BaseValueObject
+public record TenantName : BaseValueObject
 {
     public string Value {get;}
-    public RoleName(string value)
+    public TenantName(string value)
     {
         Value = value;
     }
 
-    public static RoleName Create(string value)
+    public static TenantName Create(string value)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(value, "Role name value is null or empty");
-        return new RoleName(value);
+        ArgumentException.ThrowIfNullOrWhiteSpace(value, "Tenant name value is null or empty");
+        return new TenantName(value);
 
     }
 

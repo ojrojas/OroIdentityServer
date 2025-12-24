@@ -4,15 +4,8 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class User : AggregateRoot<UserId>, IAuditableEntity
+public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
 {
-    // Constructor vacío requerido por EF Core
-    private User() : base(null!)
-    {
-        // Constructor vacío para EF Core
-        // Las propiedades se establecerán por reflexión
-    }
-
     public User(
         UserId id,
         string name,
@@ -21,7 +14,7 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
         string userName,
         string email,
         string identification,
-        IdentificationTypeId identificationTypeId) : base(id)
+        IdentificationTypeId identificationTypeId) 
     {
         Id = id;
         Name = name;
@@ -149,18 +142,3 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
         IdentificationTypeId = identificationTypeId;
     }
 }
-
-public sealed record UserCreateEvent(
-        UserId Id,
-        string Name,
-        string MiddleName,
-        string LastName,
-        string UserName,
-        string Email,
-        string Identification,
-        IdentificationTypeId IdentificationTypeId) : DomainEvent;
-
-public sealed record SecurityUserAssignedEvent(UserId UserId, SecurityUserId SecurityUserId) : DomainEvent;
-
-// Add UserDeletedEvent
-public sealed record UserDeletedEvent(UserId UserId) : DomainEvent;

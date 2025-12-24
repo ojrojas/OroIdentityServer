@@ -14,7 +14,6 @@ public class OroIdentityAppContext(
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        builder.HasPostgresExtension("vector");
         builder.ApplyConfiguration(new UserEntityConfiguration());
         builder.ApplyConfiguration(new RoleEntityConfiguration());
         builder.ApplyConfiguration(new IdentificationTypeEntityConfiguration());

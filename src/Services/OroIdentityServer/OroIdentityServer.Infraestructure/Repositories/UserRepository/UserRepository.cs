@@ -6,7 +6,7 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class UserRepository(
     ILogger<UserRepository> logger, 
-    IRepository<User, UserId> repository,
+    IRepository<User> repository,
     ISecurityUserRepository securityUserRepository) : IUserRepository
 {
     public async Task AddUserAsync(User user, CancellationToken cancellationToken)

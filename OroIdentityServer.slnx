@@ -10,7 +10,6 @@
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/Loggers/Loggers.csproj" />
     <Project Path="src/BuildingBlocks/ServiceDefaults/ServiceDefaults.csproj" />
-    <Project Path="src/BuildingBlocks/Shared/Shared.csproj" />
   </Folder>
   <Folder Name="/src/Frontends/" />
   <Folder Name="/src/Frontends/OroIdentity.Web/">

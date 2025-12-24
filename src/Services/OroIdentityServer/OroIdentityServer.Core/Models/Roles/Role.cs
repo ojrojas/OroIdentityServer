@@ -4,20 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public sealed class Role : AggregateRoot<RoleId>, IAuditableEntity
+public sealed class Role : BaseEntity<Role, RoleId>, IAuditableEntity, IAggregateRoot
 {
     private readonly IList<RoleClaim> _claims = [];
-
-    private Role() : base(null!)
-    {
-    }
-
-    public Role(RoleId id, RoleName roleName) : base(id)
-    {
-        IsActive = true;
-        Name = roleName;
-        RaiseDomainEvent(new RoleCreateEvent(Id));
-    }
 
     public bool IsActive { get; private set; }
     public RoleName? Name { get; private set; }
@@ -47,26 +36,28 @@ public sealed class Role : AggregateRoot<RoleId>, IAuditableEntity
             throw new ArgumentException("Role name cannot be empty.");
     }
 
-    // Add Create method
-    public static Role Create(string roleName)
-    {
-        if (string.IsNullOrWhiteSpace(roleName))
-            throw new ArgumentException("RoleName cannot be null or empty.");
-
-        return new Role(new RoleId(Guid.NewGuid()), new RoleName(roleName));
-    }
-
-    public static Role Create(RoleName roleName)
+    public Role(RoleName roleName)
     {
         if (roleName == null || string.IsNullOrWhiteSpace(roleName.Value))
             throw new ArgumentException("RoleName cannot be null or empty.");
 
-        return new Role(new RoleId(Guid.NewGuid()), roleName);
+        Id = new RoleId(Guid.CreateVersion7());
+        Name = roleName;
+        IsActive = true;
+        Validate();
+        RaiseDomainEvent(new RoleCreateEvent(Id));
+    }
+
+    public void Deactive()
+    {
+        if(!IsActive) return;
+
+        IsActive = false;
+        RaiseDomainEvent(new RoleDeactiveEvent(Id));
+    }
+
+    public void Delete()
+    {
+        RaiseDomainEvent(new RoleDeletedEvent(Id));
     }
 }
-
-public sealed record RoleUpdatedEvent(RoleId RoleId, RoleName NewName) : DomainEvent;
-public sealed record RoleClaimAddedEvent(RoleId RoleId, RoleClaimType ClaimType, RoleClaimValue ClaimValue) : DomainEvent;
-public sealed record RoleCreateEvent(RoleId RoleId) : DomainEvent;
-public sealed record RoleDeactiveEvent(RoleId RoleId) : DomainEvent;
-public sealed record RoleDeletedEvent(RoleId RoleId) : DomainEvent;

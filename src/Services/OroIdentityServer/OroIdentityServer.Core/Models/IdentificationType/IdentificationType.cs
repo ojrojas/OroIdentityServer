@@ -4,17 +4,21 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class IdentificationType : AggregateRoot<IdentificationTypeId>, IAuditableEntity
+public class IdentificationType :
+BaseEntity<IdentificationType, IdentificationTypeId>, IAuditableEntity, IAggregateRoot
 {
-    private IdentificationType() : base(null!)
-    {
-    }
-
-    public IdentificationType(IdentificationTypeId id, IdentificationTypeName name) : base(id)
+    public IdentificationType(IdentificationTypeName name) : base()
     {
         Name = name;
         IsActive = true;
         RaiseDomainEvent(new IdentificationTypeCreateEvent(Id));
+    }
+
+    public static IdentificationType Create(IdentificationTypeName name)
+    {
+        var identificationType = new IdentificationType(name);
+        identificationType.Validate();
+        return identificationType;
     }
 
     public IdentificationTypeName? Name { get; private set; }
@@ -22,7 +26,7 @@ public class IdentificationType : AggregateRoot<IdentificationTypeId>, IAuditabl
 
     public void Deactive()
     {
-        if(!IsActive) return;
+        if (!IsActive) return;
 
         IsActive = false;
         RaiseDomainEvent(new IdentificationTypeDeactiveEvent(Id));
@@ -65,9 +69,3 @@ public class IdentificationType : AggregateRoot<IdentificationTypeId>, IAuditabl
         RaiseDomainEvent(new IdentificationTypeDeactivatedEvent(Id));
     }
 }
-
-public sealed record IdentificationTypeCreateEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;
-public sealed record IdentificationTypeDeactiveEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;
-public sealed record IdentificationTypeUpdatedEvent(IdentificationTypeId IdentificationTypeId, IdentificationTypeName NewName) : DomainEvent;
-public sealed record IdentificationTypeActivatedEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;
-public sealed record IdentificationTypeDeactivatedEvent(IdentificationTypeId IdentificationTypeId) : DomainEvent;

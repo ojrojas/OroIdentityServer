@@ -4,22 +4,17 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class SecurityUser : AggregateRoot<SecurityUserId>, IAuditableEntity 
+public partial class SecurityUser : 
+    BaseEntity<SecurityUser, SecurityUserId>, IAuditableEntity, IAggregateRoot
 {
-    // Constructor vacío requerido por EF Core
-    private SecurityUser() : base(null!)
+    public SecurityUser(string passwordHash, string securityStamp, Guid concurrencyStamp)
     {
-        // Constructor vacío para EF Core
-        // Las propiedades se establecerán por reflexión
-    }
-
-    public SecurityUser(SecurityUserId id, string passwordHash, string securityStamp, Guid concurrencyStamp) : base(id)
-    {
+        Id = new(Guid.CreateVersion7());
         PasswordHash = passwordHash;
         SecurityStamp = securityStamp;
         ConcurrencyStamp = concurrencyStamp;
 
-        RaiseDomainEvent(new SecurityUserCreatedEvent(id));
+        RaiseDomainEvent(new SecurityUserCreatedEvent(Id));
     }
 
     public string? PasswordHash { get; private set; }
@@ -70,17 +65,9 @@ public class SecurityUser : AggregateRoot<SecurityUserId>, IAuditableEntity
             throw new ArgumentException("PasswordHash cannot be null or empty.");
 
         return new SecurityUser(
-            new SecurityUserId(Guid.NewGuid()),
             passwordHash,
             Guid.NewGuid().ToString(),
             Guid.NewGuid()
         );
     }
-
-    // Add domain events
-    public sealed record SecurityUserCreatedEvent(SecurityUserId SecurityUserId) : DomainEvent;
-    public sealed record AccessFailedIncrementedEvent(SecurityUserId SecurityUserId, int FailedCount) : DomainEvent;
-    public sealed record AccessFailedResetEvent(SecurityUserId SecurityUserId) : DomainEvent;
-    public sealed record UserLockedEvent(SecurityUserId SecurityUserId, DateTime LockoutEnd) : DomainEvent;
-    public sealed record LockoutEnabledChangedEvent(SecurityUserId SecurityUserId, bool Enabled) : DomainEvent;
 }

@@ -11,13 +11,12 @@ public static class InfraestructureExtensions
         var connectionDatabase = configuration.GetConnectionString("identityDb");
         builder.Services.AddDbContext<OroIdentityAppContext>(options =>
         {
-            options.UseNpgsql(connectionDatabase);
             options.UseOpenIddict();
         });
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-        builder.Services.AddTransient(typeof(IRepository<,>), typeof(Repository<,>));
+        builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IRolesRepository, RolesRepository>();
         builder.Services.AddScoped<IIdentificationTypeRepository, IdentificationTypeRepository>();

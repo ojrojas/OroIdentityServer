@@ -6,7 +6,7 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class RolesRepository(
     ILogger<RolesRepository> logger, 
-    IRepository<Role, RoleId> repository) : IRolesRepository
+    IRepository<Role> repository) : IRolesRepository
 {
     public async Task AddRoleAsync(Role role, CancellationToken cancellationToken)
     {
