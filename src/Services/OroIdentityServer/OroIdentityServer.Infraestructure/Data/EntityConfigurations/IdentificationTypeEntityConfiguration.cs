@@ -9,18 +9,31 @@ public class IdentificationTypeEntityConfiguration : IEntityTypeConfiguration<Id
     public void Configure(EntityTypeBuilder<IdentificationType> builder)
     {
         builder.ToTable("IdentificationTypes");
-        builder.HasKey(x=> x.Id);
 
-        builder.Property(x=> x.Id)
-            .HasConversion(id => id.Value, value => new IdentificationTypeId(value));
+        builder.HasKey(it => it.Id);
+        builder.Property(it => it.Id)
+            .HasConversion(id => id.Value, value => new IdentificationTypeId(value))
+            .HasColumnName("Id");
 
-        builder.OwnsOne(x => x.Name, name =>
+        builder.Property(it => it.IsActive)
+            .HasColumnName("IsActive")
+            .IsRequired();
+
+        builder.OwnsOne(it => it.Name, name =>
         {
             name.Property(n => n.Value)
                 .HasColumnName("Name")
                 .HasMaxLength(100)
                 .IsRequired();
+
+            name.HasIndex(n => n.Value)
+                .HasDatabaseName("IX_IdentificationTypes_Name")
+                .IsUnique();
         });
-        
+
+        builder.HasIndex(it => it.IsActive)
+            .HasDatabaseName("IX_IdentificationTypes_IsActive");
+
+        builder.HasQueryFilter(it => it.IsActive);
     }
 }

@@ -6,6 +6,13 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public class SecurityUser : AggregateRoot<SecurityUserId>, IAuditableEntity 
 {
+    // Constructor vacío requerido por EF Core
+    private SecurityUser() : base(null!)
+    {
+        // Constructor vacío para EF Core
+        // Las propiedades se establecerán por reflexión
+    }
+
     public SecurityUser(SecurityUserId id, string passwordHash, string securityStamp, Guid concurrencyStamp) : base(id)
     {
         PasswordHash = passwordHash;
@@ -15,9 +22,9 @@ public class SecurityUser : AggregateRoot<SecurityUserId>, IAuditableEntity
         RaiseDomainEvent(new SecurityUserCreatedEvent(id));
     }
 
-    public string PasswordHash { get; private set; }
-    public string SecurityStamp { get; private set; } = string.Empty;
-    public Guid ConcurrencyStamp { get; private set; }
+    public string? PasswordHash { get; private set; }
+    public string? SecurityStamp { get; private set; } = string.Empty;
+    public Guid? ConcurrencyStamp { get; private set; }
     public DateTime? LockoutEnd { get; private set; } = DateTime.UtcNow;
     public bool LockoutEnabled { get; private set; } = false;
     public int AccessFailedCount { get; private set; } = 0;

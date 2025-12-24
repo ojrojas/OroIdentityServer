@@ -4,8 +4,10 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Interfaces;
 
+/// <summary>
+/// Aggregate root interface
+/// </summary>
 public interface IAggregateRoot
 {
-	IReadOnlyCollection<IDomainEvent> DomainEvents {get;}
-    void ClearDomainEvents();
+    
 }

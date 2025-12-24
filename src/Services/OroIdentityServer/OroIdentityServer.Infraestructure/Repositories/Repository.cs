@@ -7,7 +7,7 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 public class Repository<TAggregate, TId>(
     ILogger<Repository<TAggregate, TId>> logger,
     OroIdentityAppContext context)
-    : IRepository<TAggregate, TId> where TAggregate : BaseEntity<Guid>, IAggregateRoot
+    : IRepository<TAggregate, TId> where TAggregate : BaseEntity<TId>, IAggregateRoot<TId>
 {
     public DbSet<TAggregate> CurrentContext => context.Set<TAggregate>();
 

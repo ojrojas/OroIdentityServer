@@ -4,6 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Interfaces;
 
+/// <summary>
+/// Identity Client Service interface
+/// </summary>
 public interface IIdentityClientService
 {
     /// <summary>

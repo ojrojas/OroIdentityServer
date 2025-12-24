@@ -7,7 +7,15 @@ namespace OroIdentityServer.BuildingBlocks.Shared.Events;
 /// <summary>
 /// Domain event entities 
 /// </summary>
-public abstract record DomainEvent : IDomainEvent
+public abstract record DomainEventBase : IDomainEvent
 {
+    /// <summary>
+    /// Date and time when the event occurred
+    /// </summary>
     public DateTime OcurredOn { get; } = DateTime.UtcNow;
+    /// <summary>
+    /// Correlation identifier
+    /// </summary>
+    /// <returns>Correlation identifier</returns>
+    public Guid CorrelationId() => Guid.NewGuid();
 }

@@ -17,4 +17,6 @@ public sealed record IdentificationTypeName(string Value) :
         if(string.IsNullOrWhiteSpace(Value)) throw new ArgumentNullException("Email is required");
         return new IdentificationTypeName(Value);
     }
+
+    public static IdentificationTypeName Empty => new(string.Empty);
 }

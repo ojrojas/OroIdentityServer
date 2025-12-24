@@ -19,7 +19,7 @@ public record RoleClaimId(Guid Value) : BaseValueObject
             result = new RoleClaimId(guid);
             return true;
         }
-        result = null;
+        result = null!;
         return false;
     }
 }

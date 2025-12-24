@@ -18,9 +18,9 @@ builder.AddServiceDefaults();
 builder.AddAppExtensions();
 builder.AddApplicationExtensions(configuration);
 builder.AddInfraestructureExtensions(configuration);
-builder.AddCoreExtensions();
 builder.AddOpenIddictExtensions(configuration);
 builder.AddIdentityApiExtensions(configuration);
+builder.AddCoreExtensions();
 
 builder.Services.Configure<RouteOptions>(options =>
 {
@@ -43,7 +43,6 @@ var service = scope.ServiceProvider;
 var context = service.GetRequiredService<OroIdentityAppContext>();
 var applicationManager = service.GetRequiredService<IOpenIddictApplicationManager>();
 var passwordHasher = service.GetRequiredService<IPasswordHasher>();
-
 
 ArgumentNullException.ThrowIfNull(context);
 await context.Database.EnsureDeletedAsync();

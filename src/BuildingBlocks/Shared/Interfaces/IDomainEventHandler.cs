@@ -4,13 +4,6 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Interfaces;
 
-/// <summary>
-/// Domain event interface
-/// </summary>
-public interface IDomainEvent : INotification
+public interface IDomainEventHandler<T>: INotificationHandler<T> where T : IDomainEvent
 {
-    /// <summary>
-    /// Date and time when the event occurred
-    /// </summary>
-    DateTime OcurredOn { get; }
 }

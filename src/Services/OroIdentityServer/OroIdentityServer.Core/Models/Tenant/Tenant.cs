@@ -6,7 +6,14 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public sealed class Tenant : AggregateRoot<TenantId>, IAuditableEntity
 {
-    public string Name { get; private set; }
+    // Constructor vacío requerido por EF Core
+    private Tenant() : base(null!)
+    {
+        // Constructor vacío para EF Core
+        // Las propiedades se establecerán por reflexión
+    }
+
+    public string? Name { get; private set; }
     public bool IsActive { get; private set; }
 
     public Tenant(TenantId tenantId, string name)

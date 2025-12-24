@@ -6,12 +6,18 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public class UserRole
 {
-    public UserId UserId { get; }
-    public RoleId RoleId { get; }
+    // Constructor vacío requerido por EF Core
+    private UserRole()
+    {
+        // Constructor vacío para EF Core
+    }
 
     public UserRole(UserId userId, RoleId roleId)
     {
         UserId = userId;
         RoleId = roleId;
     }
+
+    public UserId? UserId { get; private set; }
+    public RoleId? RoleId { get; private set; }
 }

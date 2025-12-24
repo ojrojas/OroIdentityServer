@@ -8,6 +8,9 @@ public sealed class Role : AggregateRoot<RoleId>, IAuditableEntity
 {
     private readonly IList<RoleClaim> _claims = [];
 
+    private Role() : base(null!)
+    {
+    }
 
     public Role(RoleId id, RoleName roleName) : base(id)
     {
@@ -17,7 +20,7 @@ public sealed class Role : AggregateRoot<RoleId>, IAuditableEntity
     }
 
     public bool IsActive { get; private set; }
-    public RoleName Name { get; private set; }
+    public RoleName? Name { get; private set; }
 
     public IReadOnlyCollection<RoleClaim> Claims => _claims.AsReadOnly();
 
@@ -32,7 +35,7 @@ public sealed class Role : AggregateRoot<RoleId>, IAuditableEntity
         if (newName == null || string.IsNullOrWhiteSpace(newName.Value))
             throw new ArgumentException("New name cannot be null or empty.");
 
-        if (Name.Equals(newName)) return; // Avoid unnecessary updates
+        if (Name != null && Name.Equals(newName)) return; // Avoid unnecessary updates
 
         Name = newName;
         RaiseDomainEvent(new RoleUpdatedEvent(Id, newName));

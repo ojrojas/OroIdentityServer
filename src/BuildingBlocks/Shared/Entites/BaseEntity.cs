@@ -4,18 +4,38 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Entities;
 
-public abstract class BaseEntity<TId>(TId Id) : IEquatable<BaseEntity<TId>>
+/// <summary>
+/// Base entity with a Guid identifier
+/// </summary>
+public abstract class BaseEntity : WithDomainEventBase
 {
-    [Key]
-    public TId Id { get; protected set; } = Id;
+    /// <summary>
+    /// Unique identifier
+    /// </summary>
+    public Guid Id { get; set; } = Guid.CreateVersion7();
+}
 
-    public bool Equals(BaseEntity<TId>? obj)
-    {
-        return obj is BaseEntity<TId> other && EqualityComparer<TId>.Default.Equals(Id, other.Id);
-    }
+/// <summary>
+/// Base entity with a typed identifier
+/// </summary>
+/// <typeparam name="TId">Tid Identifier</typeparam>
+public abstract class BaseEntity<TId> : WithDomainEventBase where TId : struct, IEquatable<TId>
+{
+    /// <summary>
+    /// Unique identifier
+    /// </summary>
+    public TId Id { get; set; } = default!;
+}
 
-    public override int GetHashCode()
-       => HashCode.Combine(Id);
-
-    public override bool Equals(object? obj) => Equals(obj as BaseEntity<TId>);
+/// <summary>
+/// Base entity with a typed identifier and self-referencing generic type
+/// </summary>
+/// <typeparam name="T">T entity type</typeparam>
+/// <typeparam name="TId">TId identifier</typeparam>
+public abstract class BaseEntity<T, TId> : WithDomainEventBase where T : BaseEntity<T, TId>
+{
+    /// <summary>
+    /// Unique identifier
+    /// </summary>
+    public TId Id { get; set; } = default!;
 }

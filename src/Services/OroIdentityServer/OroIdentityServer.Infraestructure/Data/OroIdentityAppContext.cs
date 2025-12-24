@@ -11,7 +11,6 @@ public class OroIdentityAppContext(
     public DbSet<Role> Roles { get; set; }
     public DbSet<SecurityUser> SecurityUsers { get; set; }
     public DbSet<IdentificationType> IdentificationTypes { get; set; }
-    public DbSet<RoleClaim> RoleClaims { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -19,6 +18,7 @@ public class OroIdentityAppContext(
         builder.ApplyConfiguration(new UserEntityConfiguration());
         builder.ApplyConfiguration(new RoleEntityConfiguration());
         builder.ApplyConfiguration(new IdentificationTypeEntityConfiguration());
-        builder.ApplyConfiguration(new RoleEntityConfiguration());
+        builder.ApplyConfiguration(new UserRoleEntityConfiguration());
+
     }
 }

@@ -6,6 +6,10 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public class IdentificationType : AggregateRoot<IdentificationTypeId>, IAuditableEntity
 {
+    private IdentificationType() : base(null!)
+    {
+    }
+
     public IdentificationType(IdentificationTypeId id, IdentificationTypeName name) : base(id)
     {
         Name = name;
@@ -13,7 +17,7 @@ public class IdentificationType : AggregateRoot<IdentificationTypeId>, IAuditabl
         RaiseDomainEvent(new IdentificationTypeCreateEvent(Id));
     }
 
-    public IdentificationTypeName Name { get; private set; }
+    public IdentificationTypeName? Name { get; private set; }
     public bool IsActive { get; private set; }
 
     public void Deactive()
@@ -37,7 +41,7 @@ public class IdentificationType : AggregateRoot<IdentificationTypeId>, IAuditabl
         if (newName == null || string.IsNullOrWhiteSpace(newName.Value))
             throw new ArgumentException("New name cannot be null or empty.");
 
-        if (Name.Equals(newName)) return; // Avoid unnecessary updates
+        if (Name != null && Name.Equals(newName)) return; // Avoid unnecessary updates
 
         Name = newName;
         RaiseDomainEvent(new IdentificationTypeUpdatedEvent(Id, newName));

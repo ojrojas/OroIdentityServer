@@ -12,9 +12,14 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.UserName).IsUnique();
         builder.HasIndex(u => u.Identification).IsUnique();
 
+        builder.HasOne(u => u.IdentificationType)
+            .WithMany() 
+            .HasForeignKey(u => u.IdentificationTypeId)
+            .OnDelete(DeleteBehavior.Restrict); 
+
         builder.HasOne(u => u.SecurityUser)
-        .WithOne()
-        .HasForeignKey<User>(u => u.SecurityUserId)
-        .OnDelete(DeleteBehavior.Cascade);
+            .WithOne()
+            .HasForeignKey<User>(u => u.SecurityUserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

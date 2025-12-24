@@ -4,15 +4,38 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Data;
 
-public abstract class AuditableDbContext(DbContextOptions options, IOptions<UserInfo> optionsUser) : DbContext(options)
+/// <summary>
+/// Auditable database context
+/// </summary>
+/// <param name="options">Database context options</param>
+/// <param name="optionsUser">User information options</param>
+public abstract class AuditableDbContext(
+    DbContextOptions options, IOptions<UserInfo> optionsUser) : DbContext(options)
 {
+    /// <summary>
+    /// First index constant
+    /// </summary>
     private const int First = 0;
+    /// <summary>
+    /// User information
+    /// </summary>
     private readonly UserInfo _userInfo = optionsUser.Value;
 
     // Audit tables
+    /// <summary>
+    /// Audit entries table
+    /// </summary>
     public DbSet<AuditEntry> AuditEntries { get; set; }
+    /// <summary>
+    /// Audit entry properties table
+    /// </summary>
     public DbSet<AuditEntryProperty> AuditEntryProperties { get; set; }
 
+    /// <summary>
+    /// Saves all changes made in this context to the database asynchronously, with auditing.
+    /// </summary>
+    /// <param name="cancellationToken"> Cancellation token </param>
+    /// <returns> Number of state entries written to the database </returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var auditEntries = OnBeforeSaveChanges();
@@ -22,6 +45,10 @@ public abstract class AuditableDbContext(DbContextOptions options, IOptions<User
         return result;
     }
 
+    /// <summary>
+    /// On before save changes, to track audit entries
+    /// </summary>
+    /// <returns>List of audit entries</returns>
     private List<AuditEntry> OnBeforeSaveChanges()
     {
         ChangeTracker.DetectChanges();
@@ -82,6 +109,11 @@ public abstract class AuditableDbContext(DbContextOptions options, IOptions<User
         return auditEntries;
     }
 
+    /// <summary>
+    /// On after save changes, to finalize audit entries
+    /// </summary>
+    /// <param name="auditEntries">List of audit entries</param>
+    /// <returns>Task</returns>
     private async Task OnAfterSaveChanges(List<AuditEntry> auditEntries)
     {
         if (auditEntries == null || auditEntries.Count == 0) return;

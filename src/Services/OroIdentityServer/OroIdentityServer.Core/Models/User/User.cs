@@ -6,6 +6,13 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public class User : AggregateRoot<UserId>, IAuditableEntity
 {
+    // Constructor vacío requerido por EF Core
+    private User() : base(null!)
+    {
+        // Constructor vacío para EF Core
+        // Las propiedades se establecerán por reflexión
+    }
+
     public User(
         UserId id,
         string name,
@@ -50,15 +57,15 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
 
     private readonly IList<UserRole> _roles = [];
 
-    public string Name { get; private set; } = string.Empty;
-    public string LastName { get; private set; } = string.Empty;
-    public string MiddleName { get; set; } = string.Empty;
-    public string UserName { get; private set; }
-    public string Email { get; private set; }
-    public string Identification { get; private set; } = string.Empty;
-    public IdentificationTypeId IdentificationTypeId { get; private set; }
-    public string NormalizedEmail { get; set; } = string.Empty;
-    public string NormalizedUserName { get; set; } = string.Empty;
+    public string? Name { get; private set; } = string.Empty;
+    public string? LastName { get; private set; } = string.Empty;
+    public string? MiddleName { get; set; } = string.Empty;
+    public string? UserName { get; private set; }
+    public string? Email { get; private set; }
+    public string? Identification { get; private set; } = string.Empty;
+    public IdentificationTypeId? IdentificationTypeId { get; private set; }
+    public string? NormalizedEmail { get; set; } = string.Empty;
+    public string? NormalizedUserName { get; set; } = string.Empty;
     public IdentificationType? IdentificationType { get; set; }
 
     public IReadOnlyCollection<UserRole> Roles => _roles.AsReadOnly();

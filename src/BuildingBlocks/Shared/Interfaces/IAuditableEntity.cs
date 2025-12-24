@@ -4,6 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.BuildingBlocks.Shared.Interfaces;
 
+/// <summary>
+/// Auditable entity interface
+/// </summary>
 public interface IAuditableEntity
 {
 

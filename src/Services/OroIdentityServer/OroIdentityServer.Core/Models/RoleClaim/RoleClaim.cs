@@ -6,16 +6,22 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public class RoleClaim
 {
+    private RoleClaim()
+    {
+    }
+
     public RoleClaim(RoleClaimType claimType, RoleClaimValue claimValue)
     {
         ClaimType = claimType;
         ClaimValue = claimValue;
+        IsActive = true;
+        Id = Guid.CreateVersion7();
     }
 
-    public RoleClaimType ClaimType { get; private set; }
-    public RoleClaimValue ClaimValue { get; private set; }
+    public RoleClaimType? ClaimType { get; private set; }
+    public RoleClaimValue? ClaimValue { get; private set; }
     public bool IsActive { get; private set; } = true;
-    public Guid Id { get; set; } // Added property to represent the unique identifier of the RoleClaim
+    public Guid Id { get; private set; }
 
     // Add validation logic to RoleClaim
     public void Validate()
