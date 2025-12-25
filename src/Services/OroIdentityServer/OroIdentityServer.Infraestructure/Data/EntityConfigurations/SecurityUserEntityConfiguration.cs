@@ -10,6 +10,9 @@ class SecurityUserEntityConfiguration : IEntityTypeConfiguration<SecurityUser>
     {
         builder.ToTable("SecurityUsers");
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id)
+            .HasConversion(id => id.Value, value => new SecurityUserId(value))
+            .HasColumnName("Id");
         builder.Property(x => x.SecurityStamp).IsConcurrencyToken();
     }
 }

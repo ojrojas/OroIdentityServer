@@ -17,7 +17,6 @@ global using OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Models;
 global using OroIdentityServer.Services.OroIdentityServer.Infraestructure;
-global using OroIdentityServer.OroIdentityServer.Infraestructure.Data.EntityConfigurations;
 global using OroKernel.Shared.Options;
 global using OroKernel.Shared.Interfaces;
 global using OroKernel.Shared.Events;

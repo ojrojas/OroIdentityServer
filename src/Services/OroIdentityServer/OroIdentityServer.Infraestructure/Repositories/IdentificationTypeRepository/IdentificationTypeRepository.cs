@@ -5,7 +5,8 @@
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class IdentificationTypeRepository(
-    ILogger<IdentificationTypeRepository> logger, IRepository<IdentificationType> repository)
+    ILogger<IdentificationTypeRepository> logger, 
+    IRepository<IdentificationType> repository)
 : IIdentificationTypeRepository
 {
     public async Task AddIdentificationTypeAsync(IdentificationType identificationType, CancellationToken cancellationToken)

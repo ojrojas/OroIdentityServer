@@ -18,6 +18,7 @@ public class OroIdentityAppContext(
         builder.ApplyConfiguration(new RoleEntityConfiguration());
         builder.ApplyConfiguration(new IdentificationTypeEntityConfiguration());
         builder.ApplyConfiguration(new UserRoleEntityConfiguration());
+        builder.ApplyConfiguration(new SecurityUserEntityConfiguration());
 
     }
 }
