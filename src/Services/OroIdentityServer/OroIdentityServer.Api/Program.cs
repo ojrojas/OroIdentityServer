@@ -94,5 +94,4 @@ app.MapApplicationQueriesEndpointsV1()
 app.MapApplicationCommandsEndpointsV1()
 .WithTags("ApplicationCommands");
 
-
 app.Run();
