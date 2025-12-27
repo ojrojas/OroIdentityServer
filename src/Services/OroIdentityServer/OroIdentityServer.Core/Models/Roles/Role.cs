@@ -19,6 +19,14 @@ public sealed class Role : BaseEntity<Role, RoleId>, IAuditableEntity, IAggregat
         RaiseDomainEvent(new RoleClaimAddedEvent(Id, claim.ClaimType, claim.ClaimValue));
     }
 
+    public void RemoveClaim(RoleClaim claim)
+    {
+        if (_claims.Remove(claim))
+        {
+            RaiseDomainEvent(new RoleClaimRemovedEvent(Id, claim.ClaimType, claim.ClaimValue));
+        }
+    }
+
     public void UpdateName(RoleName newName)
     {
         if (newName == null || string.IsNullOrWhiteSpace(newName.Value))
@@ -36,17 +44,19 @@ public sealed class Role : BaseEntity<Role, RoleId>, IAuditableEntity, IAggregat
             throw new ArgumentException("Role name cannot be empty.");
     }
 
-    public Role(RoleName roleName)
+    public Role(string roleName)
     {
-        if (roleName == null || string.IsNullOrWhiteSpace(roleName.Value))
+        if (string.IsNullOrWhiteSpace(roleName))
             throw new ArgumentException("RoleName cannot be null or empty.");
 
-        Id = new RoleId(Guid.CreateVersion7());
-        Name = roleName;
+        Id = RoleId.New();
+        Name = new RoleName(roleName);
         IsActive = true;
         Validate();
         RaiseDomainEvent(new RoleCreateEvent(Id));
     }
+
+    private Role() { }
 
     public void Deactive()
     {

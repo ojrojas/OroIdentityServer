@@ -4,18 +4,21 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public sealed record IdentificationTypeName(string Value) :
-    BaseValueObject
+public sealed class IdentificationTypeName : BaseValueObject
 {
+    public string Value { get; private set; }
+
+    public IdentificationTypeName(string value) => Value = value;
+
     protected override IEnumerable<object> GetEquatibilityComponents()
     {
         yield return Value;
     }
 
-    public static IdentificationTypeName Create(string Value)
+    public static IdentificationTypeName Create(string value)
     {
-        if(string.IsNullOrWhiteSpace(Value)) throw new ArgumentNullException("Email is required");
-        return new IdentificationTypeName(Value);
+        if(string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException("Email is required");
+        return new IdentificationTypeName(value);
     }
 
     public static IdentificationTypeName Empty => new(string.Empty);

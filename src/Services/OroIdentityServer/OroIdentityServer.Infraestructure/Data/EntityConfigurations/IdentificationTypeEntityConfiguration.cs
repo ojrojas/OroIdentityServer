@@ -25,11 +25,14 @@ public class IdentificationTypeEntityConfiguration : IEntityTypeConfiguration<Id
                 .HasColumnName("Name")
                 .HasMaxLength(100)
                 .IsRequired();
+            name.HasIndex(n => n.Value)
+                .IsUnique()
+                .HasDatabaseName("IX_IdentificationTypes_Name");
         });
 
-        builder.HasIndex(it => it.Name.Value)
-            .HasDatabaseName("IX_IdentificationTypes_Name")
-            .IsUnique();
+        // builder.HasIndex(it => it.Name.Value)
+        //     .HasDatabaseName("IX_IdentificationTypes_Name")
+        //     .IsUnique();
 
         builder.HasIndex(it => it.IsActive)
             .HasDatabaseName("IX_IdentificationTypes_IsActive");

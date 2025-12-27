@@ -7,21 +7,25 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 public class IdentificationType :
 BaseEntity<IdentificationType, IdentificationTypeId>, IAuditableEntity, IAggregateRoot
 {
-    public IdentificationType(IdentificationTypeName name) : base()
+    public IdentificationType(string name) : base()
     {
-        Name = name;
+        Id = IdentificationTypeId.New();
+        Name = new IdentificationTypeName(name);
         IsActive = true;
         RaiseDomainEvent(new IdentificationTypeCreateEvent(Id));
     }
 
-    public static IdentificationType Create(IdentificationTypeName name)
+    private IdentificationType() { }
+
+    public static IdentificationType Create(string name)
     {
+
         var identificationType = new IdentificationType(name);
         identificationType.Validate();
         return identificationType;
     }
 
-    public IdentificationTypeName? Name { get; private set; }
+    public IdentificationTypeName Name { get; private set; }
     public bool IsActive { get; private set; }
 
     public void Deactive()

@@ -24,6 +24,10 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(u => u.IdentificationTypeId)
             .OnDelete(DeleteBehavior.Restrict); 
 
+        builder.Property(u => u.SecurityUserId)
+            .HasConversion(id => id.Value, value => new SecurityUserId(value))
+            .HasColumnName("SecurityUserId");
+
         builder.HasOne(u => u.SecurityUser)
             .WithOne()
             .HasForeignKey<User>(u => u.SecurityUserId)

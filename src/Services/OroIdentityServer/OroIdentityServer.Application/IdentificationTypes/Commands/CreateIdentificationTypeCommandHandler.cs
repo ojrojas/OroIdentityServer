@@ -28,7 +28,7 @@ public class CreateIdentificationTypeCommandHandler(
         {
             // Create the IdentificationType object
             logger.LogDebug("Creating IdentificationType object for Name: {IdentificationTypeName}", command.Name);
-            var identificationType = new IdentificationType(command.Name);
+            var identificationType = new IdentificationType(command.Name.Value);
 
             // Add the IdentificationType to the repository
             logger.LogDebug("Adding IdentificationType to repository for Name: {IdentificationTypeName}", command.Name);

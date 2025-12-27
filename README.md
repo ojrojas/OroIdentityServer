@@ -1,53 +1,241 @@
 # OroIdentityServer
 
-OroIdentityServer is an identity and authentication management system based on ASP.NET Core. This project implements an identity server using OpenIddict, supporting authentication, authorization, and management of users, roles, applications, and scopes.
+OroIdentityServer is a modern identity and authentication management system built with ASP.NET Core, implementing Domain-Driven Design (DDD) principles. This project provides a robust identity server using OpenIddict for OAuth2 and OpenID Connect, with full support for user, role, application, and scope management.
 
 ## Key Features
 
 ### 1. **Authentication and Authorization**
-- Implementation of authentication and authorization flows using OpenIddict.
-- Minimal endpoints for authorization (`/connect/authorize`, `/connect/token`, `/connect/logout`).
-- Support for OAuth2 and OpenID Connect authorization flows.
+- Complete OAuth2 and OpenID Connect implementation using OpenIddict
+- Support for authorization code, implicit, and client credentials flows
+- JWT token generation and validation
+- Secure logout and token revocation
 
 ### 2. **User Management**
-- Full CRUD for users.
-- Commands and queries for operations such as creating, updating, deleting, and retrieving users.
-- Password verification and user authentication handling.
+- Full CRUD operations for users with DDD aggregates
+- Secure password hashing and verification
+- User profile management with identification types
+- Multi-tenant support with tenant entities
 
-### 3. **Role Management**
-- Full CRUD for roles.
-- Endpoints for assigning and managing user roles.
+### 3. **Role-Based Access Control**
+- Hierarchical role management with claims
+- User-role assignments with many-to-many relationships
+- Role claims for fine-grained permissions
 
-### 4. **Application Management**
-- CRUD for applications registered in OpenIddict.
-- Endpoints for creating, updating, deleting, and listing applications.
+### 4. **Application and Scope Management**
+- Dynamic client application registration
+- Scope definition and management
+- Consent handling for delegated access
 
-### 5. **Scope Management**
-- CRUD for OpenIddict scopes.
-- Endpoints for creating, updating, deleting, and listing scopes.
+### 5. **Domain-Driven Design (DDD)**
+- Clean Architecture with separated concerns
+- Aggregate roots with domain events
+- Value objects for type safety
+- Repository pattern with specifications
 
-### 6. **Modular Architecture**
-- Separation of responsibilities into projects:
-  - **OroIdentityServer.Api**: Contains minimal endpoints and API configuration.
-  - **OroIdentityServer.Application**: Implements business logic with commands and queries (CQRS).
-  - **OroIdentityServer.Core**: Defines shared interfaces and models.
-  - **OroIdentityServer.Infraestructure**: Implements repositories and data access.
+### 6. **Modern .NET Stack**
+- Built on .NET 10.0 with latest features
+- Entity Framework Core with PostgreSQL
+- CQRS with MediatR for command/query separation
+- Serilog for structured logging
+
+### 7. **Container Orchestration**
+- Aspire for distributed application orchestration
+- Docker containers for PostgreSQL, pgAdmin, and Seq
+- Easy local development setup
 
 ## Project Structure
 
 ```
 OroIdentityServer/
 ├── src/
-│   ├── Services/
-│   │   ├── OroIdentityServer.Api/          # Endpoints and API configuration
-│   │   ├── OroIdentityServer.Application/  # Business logic (CQRS)
-│   │   ├── OroIdentityServer.Core/         # Shared interfaces and models
-│   │   ├── OroIdentityServer.Infraestructure/ # Repositories and data access
-│   └── ...
+│   ├── AppHost/                          # Aspire orchestration
+│   ├── BuildingBlocks/
+│   │   ├── Loggers/                      # Logging infrastructure
+│   │   └── ServiceDefaults/              # Common service extensions
+│   ├── Frontends/
+│   │   └── OroIdentity.Web/              # Blazor WebAssembly frontend
+│   └── Services/
+│       ├── OroIdentityServer.Api/        # Minimal API endpoints
+│       ├── OroIdentityServer.Application/# CQRS handlers
+│       ├── OroIdentityServer.Core/       # Domain models and interfaces
+│       └── OroIdentityServer.Infraestructure/ # EF Core and repositories
+├── nupkgs/                               # Local NuGet packages
+├── index.html                            # Development index
 ├── README.md
 ├── LICENSE
-└── OroIdentityServer.sln
+└── OroIdentityServer.slnx
 ```
+
+## Technologies Used
+
+- **.NET 10.0**: Latest .NET runtime with performance improvements
+- **ASP.NET Core**: Web framework for APIs and hosting
+- **OpenIddict**: Open-source OAuth2/OpenID Connect server
+- **Entity Framework Core**: ORM with PostgreSQL via Npgsql
+- **MediatR**: In-process messaging for CQRS
+- **Aspire**: .NET distributed application framework
+- **PostgreSQL**: Robust relational database
+- **Serilog**: Structured logging
+- **Docker**: Containerization for development
+
+## Domain-Driven Design Implementation
+
+The project fully embraces DDD principles with the following components:
+
+### Aggregate Roots
+- `User`, `Role`, `SecurityUser`, `Tenant` as aggregate roots
+- Domain events for cross-aggregate communication
+- Encapsulation of business rules within aggregates
+
+### Value Objects
+- `UserId`, `RoleId`, `SecurityUserId`, `TenantId` for identity
+- `UserName`, `Email`, `RoleName`, `TenantName` for domain values
+- `RoleClaimType`, `RoleClaimValue` for claims
+- Owned types in EF Core for complex value objects
+
+### Repositories and Specifications
+- Generic `IRepository<T>` interface
+- Specific repositories for each aggregate
+- Specification pattern for complex queries
+
+### CQRS Pattern
+- Commands for write operations (create, update, delete)
+- Queries for read operations
+- Separate handlers with MediatR
+
+### Shared Kernel (OroKernel.Shared)
+- `BaseEntity<TId>` for auditable entities
+- `BaseValueObject` for value objects
+- `IAggregateRoot` interface
+- `AuditableDbContext` for EF Core base context
+
+## Getting Started
+
+### Prerequisites
+- .NET 10.0 SDK
+- Docker and Docker Compose
+- Podman (alternative to Docker)
+
+### Local Development Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/ojrojas/OroIdentityServer.git
+   cd OroIdentityServer
+   ```
+
+2. **Restore dependencies:**
+   ```bash
+   dotnet restore
+   ```
+
+3. **Start with Aspire (recommended):**
+   ```bash
+   dotnet run --project src/AppHost/AppHost.csproj
+   ```
+   This will start:
+   - PostgreSQL database
+   - pgAdmin for database management
+   - Seq for log aggregation
+   - The identity server API
+   - Blazor frontend
+
+4. **Access the applications:**
+   - **Aspire Dashboard:** http://localhost:15888
+   - **Identity Server API:** http://localhost:5000
+   - **Blazor Frontend:** http://localhost:5001
+   - **pgAdmin:** http://localhost:45027
+   - **Seq Logs:** http://localhost:42963
+
+### Manual Setup (without Aspire)
+
+1. **Start PostgreSQL:**
+   ```bash
+   podman run -d --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 postgres:15
+   ```
+
+2. **Run database migrations:**
+   ```bash
+   dotnet ef database update --project src/Services/OroIdentityServer/OroIdentityServer.Infraestructure
+   ```
+
+3. **Run the API:**
+   ```bash
+   dotnet run --project src/Services/OroIdentityServer/OroIdentityServer.Api
+   ```
+
+## Configuration
+
+Key configuration files:
+- `appsettings.json`: Application settings
+- `Directory.Build.props`: Shared build properties
+- `Directory.Packages.props`: Centralized package versions
+
+Database connection and OpenIddict settings are configured in `appsettings.json`.
+
+## API Endpoints
+
+### Authentication
+- `POST /connect/token` - Token endpoint
+- `GET /connect/authorize` - Authorization endpoint
+- `POST /connect/logout` - Logout endpoint
+
+### Users
+- `POST /users/create` - Create user
+- `GET /users` - List users
+- `GET /users/{id}` - Get user by ID
+
+### Roles
+- `POST /roles/create` - Create role
+- `GET /roles` - List roles
+
+### Applications
+- `POST /applications/create` - Register application
+- `GET /applications` - List applications
+
+## Database Schema
+
+The system uses PostgreSQL with the following main tables:
+- `Users` - User accounts
+- `SecurityUsers` - Security-related user data
+- `Roles` - Role definitions
+- `RoleClaims` - Role permissions (owned by Roles)
+- `UserRoles` - User-role assignments
+- `IdentificationTypes` - User identification types
+- `Tenants` - Multi-tenant support
+
+OpenIddict tables for OAuth2/OpenID Connect:
+- `OpenIddictApplications`
+- `OpenIddictScopes`
+- `OpenIddictTokens`
+- `OpenIddictAuthorizations`
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+## License
+
+Licensed under GNU AGPL v3.0. See [LICENSE](./LICENSE) for details.
+
+## Recent Updates
+
+### v1.0.0 (Latest)
+- ✅ Full DDD implementation with OroKernel.Shared
+- ✅ EF Core integration with owned types and value objects
+- ✅ Aspire orchestration for local development
+- ✅ PostgreSQL with Npgsql provider
+- ✅ OpenIddict for identity management
+- ✅ CQRS with MediatR
+- ✅ Blazor WebAssembly frontend
+- ✅ Comprehensive seed data setup
+- ✅ Containerized development environment
+
+For more details, check the [changelog](CHANGELOG.md) or issues.
 
 ## Endpoints
 
@@ -107,69 +295,89 @@ The project includes several reusable building blocks that encapsulate common fu
 
 ## Domain-Driven Design (DDD) Updates
 
-The project has been updated to follow Domain-Driven Design (DDD) principles. Below are the key changes:
+The project has been fully updated to follow Domain-Driven Design (DDD) principles with OroKernel.Shared integration:
 
-### 1. **Aggregate Roots**
-- Introduced `AggregateRoot<T>` base class to manage domain events.
-- Added `RaiseDomainEvent` method to handle domain events within aggregates.
+### 1. **Aggregate Roots & Entities**
+- `User`, `SecurityUser`, `Role`, `Tenant` as aggregate roots
+- Domain events for business logic decoupling
+- Auditable entities with `BaseEntity<TId>`
 
 ### 2. **Value Objects**
-- Implemented value objects like `RoleClaimId`, `RoleId`, and `UserId` to encapsulate identity logic.
-- Added `TryParse` methods to enable seamless integration with ASP.NET endpoints.
+- Strongly-typed IDs: `UserId`, `RoleId`, `SecurityUserId`, `TenantId`
+- Domain values: `UserName`, `Email`, `RoleName`, `TenantName`
+- Owned types in EF Core: `RoleClaimType`, `RoleClaimValue`
+- Proper equality and validation
 
-### 3. **Repositories**
-- Updated repository interfaces (e.g., `IRolesRepository`) to align with aggregate boundaries.
-- Implemented methods for managing role claims and user roles.
+### 3. **Repositories & Specifications**
+- Generic `IRepository<T>` with `IAggregateRoot` constraint
+- Specific repositories for domain operations
+- EF Core configurations with owned types and indexes
 
-### 4. **CQRS Enhancements**
-- Refined command and query handlers to work with value objects and aggregates.
-- Ensured separation of concerns between read and write operations.
+### 4. **CQRS with MediatR**
+- Commands for write operations with validation
+- Queries for read operations
+- Separate handlers with dependency injection
 
-### 5. **Shared Kernel**
-- Centralized shared logic in the `Shared` project.
-- Added base classes like `BaseEntity`, `BaseValueObject`, and interfaces like `IAggregateRoot`.
+### 5. **EF Core Integration**
+- PostgreSQL with Npgsql
+- Owned types for complex value objects
+- Constructor binding fixes for aggregates
+- Global query filters and soft deletes
 
-### 6. **Null Safety**
-- Addressed null reference issues across the codebase.
-- Added null checks and improved error handling in repositories and services.
+### 6. **Shared Kernel**
+- OroKernel.Shared for reusable DDD components
+- `AuditableDbContext` for audit trails
+- Common interfaces and base classes
 
-### 7. **Type Safety**
-- Replaced `Guid` with strongly-typed identifiers (e.g., `RoleClaimId`, `RoleId`) for better type safety.
-- Updated endpoints and handlers to use these types.
+### 7. **Clean Architecture**
+- Core: Domain models and business rules
+- Application: Use cases and CQRS
+- Infrastructure: EF Core and external services
+- API: Minimal endpoints and hosting
 
-These changes improve the maintainability, scalability, and robustness of the system while adhering to DDD principles.
+These updates ensure type safety, maintainability, and scalability while following DDD best practices.
 
 ## Technologies Used
 - **ASP.NET Core**: Main framework for the API.
 - **OpenIddict**: Implementation of OpenID Connect and OAuth2.
-- **Entity Framework Core**: ORM for data access.
+- **Entity Framework Core**: ORM for data access with PostgreSQL.
 - **CQRS**: Design pattern for separating commands and queries.
+- **MediatR**: In-process messaging library.
+- **Aspire**: Distributed application orchestration.
+- **PostgreSQL**: Relational database.
+- **Serilog**: Logging framework.
+- **Docker/Podman**: Containerization.
 
 ## Installation and Configuration
 
+### Quick Start with Aspire
 1. Clone the repository:
    ```bash
    git clone https://github.com/ojrojas/OroIdentityServer.git
-   ```
-
-2. Navigate to the project directory:
-   ```bash
    cd OroIdentityServer
    ```
 
-3. Restore dependencies:
+2. Run with Aspire:
    ```bash
-   dotnet restore
+   dotnet run --project src/AppHost/AppHost.csproj
    ```
 
-4. Configure the database in `appsettings.json`.
+3. Open Aspire dashboard at http://localhost:15888
 
-5. Apply migrations:
+### Manual Setup
+1. Start PostgreSQL:
    ```bash
-   dotnet ef database update
+   podman run -d --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 postgres:15
    ```
 
-6. Run the project:
+2. Configure connection string in `appsettings.json`
+
+3. Run migrations:
+   ```bash
+   dotnet ef database update --project src/Services/OroIdentityServer/OroIdentityServer.Infraestructure
+   ```
+
+4. Run the API:
    ```bash
    dotnet run --project src/Services/OroIdentityServer/OroIdentityServer.Api
    ```

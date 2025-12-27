@@ -4,8 +4,17 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public sealed record SecurityUserId(Guid Value) : BaseValueObject
+public sealed class SecurityUserId : BaseValueObject
 {
+    public Guid Value { get; private set; }
+
+    public SecurityUserId(Guid value)
+    {
+        Value = value;
+    }
+
+    public static SecurityUserId New() => new(Guid.CreateVersion7());
+
     protected override IEnumerable<object?> GetEquatibilityComponents()
     {
         yield return Value;

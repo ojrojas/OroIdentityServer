@@ -9,13 +9,15 @@ public sealed class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAg
     public TenantName? Name { get; private set; }
     public bool IsActive { get; private set; }
 
-    public Tenant(TenantName name)
+    public Tenant(string name)
     {
-        Id = new TenantId(Guid.CreateVersion7());
-        Name = name;
+        Id = TenantId.New();
+        Name = new TenantName(name);
         IsActive = true;
-        RaiseDomainEvent(new TenantCreateEvent(Id, name));
+        RaiseDomainEvent(new TenantCreateEvent(Id, Name));
     }
+
+    private Tenant() { }
 
     public void Deactive()
     {
@@ -28,7 +30,7 @@ public sealed class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAg
     public static Tenant CreateTenant(TenantName name)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name?.Value);
-        return new Tenant(name);
+        return new Tenant(name.Value);
     }
 
     public void Validate()

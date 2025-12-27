@@ -18,7 +18,7 @@ var postgres = builder.AddPostgres("postgres")
         config.WithImageTag("latest");
     });
 
-var identityDb = postgres.AddDatabase("identityDb");
+var identityDb = postgres.AddDatabase("identitydb");
 
 var identity = builder.AddProject<Projects.OroIdentityServer_Api>(Constants.IdentityApi, launchProfile);
 var identityWeb = builder.AddProject<Projects.OroIdentity_Web_Server>(Constants.IdentityWeb, launchProfile);

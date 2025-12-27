@@ -61,12 +61,14 @@ public interface IRolesRepository
     Task<IEnumerable<RoleClaim>> GetRoleClaimsByRoleIdAsync(RoleId roleId, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Asynchronously adds a new role claim to the repository.
+    /// Asynchronously adds a new role claim to a specific role.
     /// </summary>
-    /// <param name="roleClaim">The role claim to add.</param>
+    /// <param name="roleId">The unique identifier of the role to add the claim to.</param>
+    /// <param name="claimType">The type of the claim.</param>
+    /// <param name="claimValue">The value of the claim.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task AddRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken);
+    Task AddRoleClaimAsync(RoleId roleId, RoleClaimType claimType, RoleClaimValue claimValue, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously deletes a role claim from the repository by its identifier.
@@ -79,10 +81,12 @@ public interface IRolesRepository
     /// <summary>
     /// Asynchronously updates an existing role claim in the repository.
     /// </summary>
-    /// <param name="roleClaim">The role claim to update.</param>
+    /// <param name="claimId">The unique identifier of the role claim to update.</param>
+    /// <param name="newClaimType">The new type of the claim.</param>
+    /// <param name="newClaimValue">The new value of the claim.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task UpdateRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken);
+    Task UpdateRoleClaimAsync(Guid claimId, RoleClaimType newClaimType, RoleClaimValue newClaimValue, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously retrieves a role by its name.

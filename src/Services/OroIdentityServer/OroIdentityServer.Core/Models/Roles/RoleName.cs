@@ -4,9 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public sealed record RoleName : BaseValueObject
+public sealed class RoleName : BaseValueObject
 {
-    public string Value {get;}
+    public string Value { get; private set; }
     public RoleName(string value)
     {
         Value = value;

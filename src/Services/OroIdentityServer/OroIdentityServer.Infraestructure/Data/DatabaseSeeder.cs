@@ -21,103 +21,73 @@ public static class DatabaseSeeder
 
         var jsonData = await File.ReadAllTextAsync(jsonFilePath);
         var seedData = JsonSerializer.Deserialize<SeedData>(jsonData) ?? throw new InvalidOperationException("Failed to deserialize seed data.");
-        // if (!context.IdentificationTypes.Any())
-        // {
-        //     context.IdentificationTypes.Add(
-        //         new IdentificationType(new(seedData.IdentificationType))
-        //         {
-        //             CreatedBy = userCreateId
-        //         });
-        // }
+        if (!context.IdentificationTypes.Any())
+        {
+            context.IdentificationTypes.Add(
+                new IdentificationType(new(seedData.IdentificationType)));
+        }
 
-        // await context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        // if (!context.Users.Any())
-        // {
-        //     foreach (var user in seedData.Users)
-        //         context.Users.Add(new User
-        //         {
-        //             Name = user.Name,
-        //             LastName = user.LastName,
-        //             UserName = user.UserName,
-        //             Email = user.Email,
-        //             Identification = user.Identification,
-        //             IdentificationTypeId = context.IdentificationTypes.FirstOrDefault()!.Id,
-        //             SecurityUser = new SecurityUser
-        //             {
-        //                 PasswordHash = await passwordHasher.HashPassword(user.PasswordHash),
-        //                 SecurityStamp = Guid.NewGuid().ToString(),
-        //                 ConcurrencyStamp = Guid.NewGuid()
-        //             },
-        //             CreatedBy = userCreateId
-        //         });
-        // }
+        if (!context.Users.Any())
+        {
+            foreach (var user in seedData.Users)
+            {
+                var securityUser = SecurityUser.Create(await passwordHasher.HashPassword(user.PasswordHash));
+                context.SecurityUsers.Add(securityUser);
+                await context.SaveChangesAsync();
 
-        // if (!context.Roles.Any())
-        // {
-        //     foreach (var role in seedData.Roles)
-        //     {
-        //         var newRole = new Role(new RoleName(role.Name))
-        //         {
-        //             ConcurrencyStamp = Guid.CreateVersion7(),
-        //             CreatedBy = userCreateId
-        //         };
+                var newUser = new User(
+                    new UserId(Guid.CreateVersion7()),
+                    user.Name,
+                    "", // middleName
+                    user.LastName,
+                    user.UserName,
+                    user.Email,
+                    user.Identification,
+                    context.IdentificationTypes.First().Id
+                );
+                newUser.AssignSecurityUser(securityUser);
+                context.Users.Add(newUser);
+            }
+            await context.SaveChangesAsync();
+        }
 
-        //         context.Roles.Add(newRole);
-        //     }
+        if (!context.Roles.Any())
+        {
+            foreach (var role in seedData.Roles)
+            {
+                var newRole = new Role(role.Name);
+                foreach (var roleClaim in role.RoleClaims)
+                {
+                    newRole.AddClaim(new RoleClaim(new RoleClaimType(roleClaim.ClaimType), new RoleClaimValue(roleClaim.ClaimValue)));
+                }
+                context.Roles.Add(newRole);
+            }
+            await context.SaveChangesAsync();
+        }
 
-        //     await context.SaveChangesAsync(); // Save roles first to generate IDs
+        if (!context.UserRoles.Any())
+        {
+            var adminRole = context.Roles.FirstOrDefault(r => r.Name != null && r.Name.Value == "Administrator");
+            var userRole = context.Roles.FirstOrDefault(r => r.Name != null && r.Name.Value == "User");
 
-        //     foreach (var role in seedData.Roles)
-        //     {
-        //         var dbRole = context.Roles.FirstOrDefault(r => r.RoleName.Value == role.Name);
-        //         if (dbRole != null)
-        //         {
-        //             foreach (var roleClaim in role.RoleClaims)
-        //             {
-        //                 context.RoleClaims.Add(new RoleClaim
-        //                 {
-        //                     RoleId = dbRole.Id,
-        //                     ClaimType = roleClaim.ClaimType,
-        //                     ClaimValue = roleClaim.ClaimValue,
-        //                     CreatedBy = userCreateId
-        //                 });
-        //             }
-        //         }
-        //     }
-        // }
+            if (adminRole != null && userRole != null)
+            {
+                var pepe = context.Users.FirstOrDefault(u => u.Email == "pepe@example.com");
+                var maria = context.Users.FirstOrDefault(u => u.Email == "maria@example.com");
 
-        // if (!context.Set<UserRoles>().Any())
-        // {
-        //     var adminRole = context.Roles.FirstOrDefault(r => r.RoleName.Value == "Administrator");
-        //     var userRole = context.Roles.FirstOrDefault(r => r.RoleName.Value == "User");
+                if (pepe != null)
+                {
+                    context.UserRoles.Add(new UserRole(pepe.Id, adminRole.Id));
+                }
 
-        //     if (adminRole != null && userRole != null)
-        //     {
-        //         var pepe = context.Users.FirstOrDefault(u => u.Email == "pepe@example.com");
-        //         var maria = context.Users.FirstOrDefault(u => u.Email == "maria@example.com");
-
-        //         if (pepe != null)
-        //         {
-        //             context.Set<UserRoles>().Add(new UserRoles
-        //             {
-        //                 UserId = pepe.Id,
-        //                 RoleId = adminRole.Id,
-        //                 CreatedBy = userCreateId
-        //             });
-        //         }
-
-        //         if (maria != null)
-        //         {
-        //             context.Set<UserRoles>().Add(new UserRoles
-        //             {
-        //                 UserId = maria.Id,
-        //                 RoleId = userRole.Id,
-        //                 CreatedBy = userCreateId
-        //             });
-        //         }
-        //     }
-        // }
+                if (maria != null)
+                {
+                    context.UserRoles.Add(new UserRole(maria.Id, userRole.Id));
+                }
+            }
+        }
 
         // Register OpenIddict application
         if (await applicationManager.FindByClientIdAsync("OroIdentityServer.Web") == null)

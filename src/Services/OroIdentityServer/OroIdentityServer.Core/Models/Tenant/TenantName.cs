@@ -4,9 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public record TenantName : BaseValueObject
+public class TenantName : BaseValueObject
 {
-    public string Value {get;}
+    public string Value { get; private set; }
     public TenantName(string value)
     {
         Value = value;

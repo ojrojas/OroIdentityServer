@@ -26,9 +26,7 @@ public class AssociateClaimToRoleCommandHandler(
                 throw new KeyNotFoundException("Role not found.");
             }
 
-            var roleClaim = new RoleClaim(command.ClaimType, command.ClaimValue);
-
-            await _roleRepository.AddRoleClaimAsync(roleClaim, cancellationToken);
+            await _roleRepository.AddRoleClaimAsync(command.RoleId, command.ClaimType, command.ClaimValue, cancellationToken);
 
             _logger.LogInformation("Successfully associated claim to role with RoleId: {RoleId}", command.RoleId);
         }

@@ -11,9 +11,32 @@ public class OroIdentityAppContext(
     public DbSet<Role> Roles { get; set; }
     public DbSet<SecurityUser> SecurityUsers { get; set; }
     public DbSet<IdentificationType> IdentificationTypes { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        // Owned types are configured in their respective entity configurations
+        // builder.Owned<IdentificationTypeName>(b =>
+        // {
+        //     b.Property(n => n.Value).HasColumnName("Name").HasMaxLength(100).IsRequired();
+        // });
+        // builder.Owned<RoleName>(b =>
+        // {
+        //     b.Property(n => n.Value).HasColumnName("Name").HasMaxLength(100).IsRequired();
+        // });
+        // builder.Owned<TenantName>(b =>
+        // {
+        //     b.Property(n => n.Value).HasColumnName("Name").HasMaxLength(100).IsRequired();
+        // });
+        // builder.Owned<RoleClaimType>(b =>
+        // {
+        //     b.Property(n => n.Value).HasColumnName("ClaimType").HasMaxLength(100).IsRequired();
+        // });
+        // builder.Owned<RoleClaimValue>(b =>
+        // {
+        //     b.Property(n => n.Value).HasColumnName("ClaimValue").HasMaxLength(500).IsRequired();
+        // });
+
         builder.ApplyConfiguration(new UserEntityConfiguration());
         builder.ApplyConfiguration(new RoleEntityConfiguration());
         builder.ApplyConfiguration(new IdentificationTypeEntityConfiguration());

@@ -24,9 +24,7 @@ public class UpdateRoleClaimCommandHandler(
                 throw new KeyNotFoundException("RoleClaim not found.");
             }
 
-            roleClaim.UpdateClaim(new RoleClaimType(command.ClaimType), new RoleClaimValue(command.ClaimValue));
-
-            await roleRepository.UpdateRoleClaimAsync(roleClaim, cancellationToken);
+            await roleRepository.UpdateRoleClaimAsync(command.RoleClaimId.Value, new RoleClaimType(command.ClaimType), new RoleClaimValue(command.ClaimValue), cancellationToken);
 
             logger.LogInformation("Successfully updated RoleClaim with Id: {RoleClaimId}", command.RoleClaimId);
         }

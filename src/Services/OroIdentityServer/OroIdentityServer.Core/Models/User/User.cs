@@ -16,7 +16,7 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
         string identification,
         IdentificationTypeId identificationTypeId) 
     {
-        Id = id;
+        Id = id ?? UserId.New();
         Name = name;
         MiddleName = middleName;
         LastName = lastName;
@@ -63,7 +63,7 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
 
     public IReadOnlyCollection<UserRole> Roles => _roles.AsReadOnly();
 
-    public Guid SecurityUserId { get; set; }
+    public SecurityUserId? SecurityUserId { get; set; }
     public SecurityUser? SecurityUser { get; set; }
 
     public interface IUserRepository
@@ -107,7 +107,7 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
             throw new InvalidOperationException("SecurityUser is already assigned.");
 
         SecurityUser = securityUser;
-        SecurityUserId = securityUser.Id.Value;
+        SecurityUserId = securityUser.Id;
 
         RaiseDomainEvent(new SecurityUserAssignedEvent(Id, securityUser.Id));
     }

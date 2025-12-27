@@ -45,8 +45,13 @@ var applicationManager = service.GetRequiredService<IOpenIddictApplicationManage
 var passwordHasher = service.GetRequiredService<IPasswordHasher>();
 
 ArgumentNullException.ThrowIfNull(context);
+Console.WriteLine("Deleting database...");
 await context.Database.EnsureDeletedAsync();
+Console.WriteLine("Creating database...");
 await context.Database.EnsureCreatedAsync();
+Console.WriteLine("Database created successfully.");
+Console.WriteLine($"Database path: {context.Database.GetDbConnection().Database}");
+Console.WriteLine($"Tables: {string.Join(", ", context.Model.GetEntityTypes().Select(t => t.GetTableName()))}");
 var seedDataPath = Path.Combine(
     Directory.GetCurrentDirectory(),
     "bin", "Debug", "net10.0", "Data", "seedData.json");

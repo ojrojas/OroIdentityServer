@@ -7,19 +7,19 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 public partial class SecurityUser : 
     BaseEntity<SecurityUser, SecurityUserId>, IAuditableEntity, IAggregateRoot
 {
-    public SecurityUser(string passwordHash, string securityStamp, Guid concurrencyStamp)
+    public SecurityUser(string passwordHash, string securityStamp, string ConcurrencyStamp)
     {
         Id = new(Guid.CreateVersion7());
         PasswordHash = passwordHash;
         SecurityStamp = securityStamp;
-        ConcurrencyStamp = concurrencyStamp;
+        this.ConcurrencyStamp = ConcurrencyStamp;
 
         RaiseDomainEvent(new SecurityUserCreatedEvent(Id));
     }
 
     public string? PasswordHash { get; private set; }
     public string? SecurityStamp { get; private set; } = string.Empty;
-    public Guid? ConcurrencyStamp { get; private set; }
+    public string? ConcurrencyStamp { get; private set; }
     public DateTime? LockoutEnd { get; private set; } = DateTime.UtcNow;
     public bool LockoutEnabled { get; private set; } = false;
     public int AccessFailedCount { get; private set; } = 0;
@@ -67,7 +67,7 @@ public partial class SecurityUser :
         return new SecurityUser(
             passwordHash,
             Guid.NewGuid().ToString(),
-            Guid.NewGuid()
+            Guid.NewGuid().ToString()
         );
     }
 }

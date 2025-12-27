@@ -7,4 +7,6 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
 public sealed class GetUserByEmailSpecification(string criteria) : ISpecification<User>
 {
     public Expression<Func<User, bool>> Criteria { get; } = x => EF.Functions.Like(x.Email, $"%{criteria}%");
+    public List<Expression<Func<User, object>>> Includes { get; } = [];
+    public List<string> IncludeStrings { get; } = [];
 }

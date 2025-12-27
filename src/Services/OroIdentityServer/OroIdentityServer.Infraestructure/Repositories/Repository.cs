@@ -9,7 +9,7 @@ namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 public class Repository<T>(
     ILogger<Repository<T>> logger,
     OroIdentityAppContext context)
-    : IRepository<T> where T : BaseEntity, IAggregateRoot
+    : IRepository<T> where T : class, IAggregateRoot
 {
     public DbSet<T> CurrentContext => context.Set<T>();
 

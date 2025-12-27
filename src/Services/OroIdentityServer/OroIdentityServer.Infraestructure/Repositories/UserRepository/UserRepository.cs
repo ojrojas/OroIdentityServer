@@ -100,7 +100,7 @@ public class UserRepository(
             return false;
         }
 
-        var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId, cancellationToken);
+        var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId.Value, cancellationToken);
 
         if (securityUser.LockoutEnabled && securityUser.LockoutEnd.HasValue && securityUser.LockoutEnd.Value > DateTime.UtcNow)
         {

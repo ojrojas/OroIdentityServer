@@ -4,8 +4,12 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public record RoleId(Guid Value) : BaseValueObject
+public class RoleId : BaseValueObject
 {
+    public Guid Value { get; private set; }
+
+    public RoleId(Guid value) => Value = value;
+
     public static RoleId New() => new(Guid.CreateVersion7());
     protected override IEnumerable<object> GetEquatibilityComponents()
     {
