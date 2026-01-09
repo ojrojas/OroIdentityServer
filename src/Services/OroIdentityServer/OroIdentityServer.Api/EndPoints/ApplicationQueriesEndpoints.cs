@@ -17,6 +17,11 @@ public static class ApplicationQueriesEndpoints
         api.MapGet("/{clientId}", GetApplicationByClientId)
             .WithName("GetApplicationByClientId");
 
+        api.RequireAuthorization([new AuthorizeAttribute
+        {
+            AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+        }]);
+
         return api;
     }
 

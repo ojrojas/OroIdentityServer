@@ -13,7 +13,12 @@ public static class RoleCommandsEndpoints
         api.MapPost("/create", CreateRole)
             .WithName("CreateRole");
 
+        api.RequireAuthorization([new AuthorizeAttribute
+        {
+            AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+        }]);
         return api;
+        
     }
 
     private static async Task<Results<Ok, BadRequest<string>, ProblemHttpResult>> CreateRole(

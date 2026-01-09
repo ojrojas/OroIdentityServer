@@ -13,8 +13,14 @@ public static class ScopeQueriesEndpoints
         api.MapGet("/", GetScopes)
             .WithName("GetScopes");
 
+        api.RequireAuthorization([new AuthorizeAttribute
+        {
+            AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+        }]);
+
         return api;
     }
+
 
      private static async Task<Results<Ok<IEnumerable<OpenIddictScopeDescriptor>>, BadRequest<string>, ProblemHttpResult>> GetScopes(
         HttpContext context,

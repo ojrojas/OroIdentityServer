@@ -20,6 +20,11 @@ public static class ApplicationCommandsEndpoints
         api.MapDelete("/delete/{clientId}", DeleteApplication)
             .WithName("DeleteApplication");
 
+        api.RequireAuthorization([new AuthorizeAttribute
+        {
+            AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+        }]);
+
         return api;
     }
 

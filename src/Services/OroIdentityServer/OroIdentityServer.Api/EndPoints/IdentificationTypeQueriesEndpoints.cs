@@ -6,7 +6,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Api.Endpoints;
 
 public static class IdentificationTypeQueriesEndpoints
 {
-      extension(IEndpointRouteBuilder routeBuilder)
+    extension(IEndpointRouteBuilder routeBuilder)
     {
         public RouteGroupBuilder MapIdentificationTypeQueriesEndpointsV1()
         {
@@ -14,6 +14,11 @@ public static class IdentificationTypeQueriesEndpoints
 
             api.MapGet("/getall", GetAllIdentificationTypes)
             .WithName("GetAllIdentificationTypes");
+
+            api.RequireAuthorization([new AuthorizeAttribute
+        {
+            AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+        }]);
 
             return api;
         }

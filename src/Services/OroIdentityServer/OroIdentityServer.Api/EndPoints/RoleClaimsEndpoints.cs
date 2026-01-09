@@ -28,6 +28,11 @@ public static class RoleClaimsEndpoints
         api.MapDelete("/delete/{id}", DeleteRoleClaim)
             .WithName("DeleteRoleClaim");
 
+        api.RequireAuthorization([new AuthorizeAttribute
+        {
+            AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+        }]);
+
         return api;
     }
 
@@ -38,7 +43,7 @@ public static class RoleClaimsEndpoints
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> GetRoleClaimsByRoleId(Guid  roleId, ISender sender, CancellationToken cancellationToken)
+    private static async Task<IResult> GetRoleClaimsByRoleId(Guid roleId, ISender sender, CancellationToken cancellationToken)
     {
         var query = new GetRoleClaimsByRoleIdQuery(new(roleId));
         var result = await sender.Send(query, cancellationToken);

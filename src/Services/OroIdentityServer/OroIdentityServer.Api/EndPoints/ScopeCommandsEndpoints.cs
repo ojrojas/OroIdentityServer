@@ -20,6 +20,11 @@ public static class ScopeCommandsEndpoints
         api.MapDelete("/delete/{name}", DeleteScope)
             .WithName("DeleteScope");
 
+ api.RequireAuthorization([new AuthorizeAttribute
+        {
+            AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+        }]);
+
         return api;
     }
 

@@ -12,5 +12,6 @@ public enum ResultTypes
     BadRequest,
     Challenge, 
     OK,
-    Unauthorized
+    Unauthorized, 
+    Redirect
 }

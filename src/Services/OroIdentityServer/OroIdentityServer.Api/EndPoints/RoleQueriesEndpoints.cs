@@ -17,6 +17,11 @@ public static class RoleQueriesEndpoints
 
         api.MapGet("/getall", GetAllRoles)
             .WithName("GetAllRoles");
+        
+        api.RequireAuthorization([new AuthorizeAttribute
+        {
+            AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+        }]);
 
         return api;
     }

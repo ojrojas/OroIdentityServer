@@ -19,6 +19,11 @@ public static class IdentificationTypeCommandsEndpoints
         api.MapPatch("/update", UpdateIdentificationType)
             .WithName("UpdateIdentificationType");
 
+        api.RequireAuthorization([new AuthorizeAttribute
+        {
+            AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+        }]);
+
         return api;
     }
 

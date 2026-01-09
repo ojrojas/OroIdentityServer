@@ -31,10 +31,14 @@ public static class OpenIddictExtensions
             // Mark the "email", "profile" and "roles" scopes as supported scopes.
             config.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles);
 
+            var signingKey = configuration.GetSection("SymmetricSecurityKey").Value;
+
+            ArgumentException.ThrowIfNullOrEmpty(signingKey, "SymmetricSecurityKey configuration is missing");
+
             // Configure encryption and signing of tokens.  testing phrase tokens ORO_IDENTITY_SERVER_PROJECT_0001
             config.AddEncryptionKey(new SymmetricSecurityKey(                                         
-                Convert.FromBase64String(configuration.GetSection("SymmetricSecurityKey").Value)));
-
+                Convert.FromBase64String(signingKey)));
+    
             // Note: the sample uses the code and refresh token flows but you can enable
             // the other flows if you need to support implicit, password or client credentials.
             config.AllowAuthorizationCodeFlow()

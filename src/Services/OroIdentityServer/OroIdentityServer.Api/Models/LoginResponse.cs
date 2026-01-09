@@ -32,6 +32,9 @@ public record LoginResponse(
             case ResultTypes.Unauthorized:
                 result = Results.Unauthorized();
                 break;
+            case ResultTypes.Redirect:
+                result = Results.Redirect(Properties?.RedirectUri ?? "/");
+                break;
             default:
                 result = Results.Forbid(Properties, Schemes);
                 break;
