@@ -127,18 +127,23 @@ public class AuthorizationService(
 
     public async Task<LoginResponse> GetTokenAsync(SimpleRequest requested, CancellationToken cancellationToken)
     {
-       var request = requested.Context.GetOpenIddictServerRequest() ??
-           throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
+        var request = requested.Context.GetOpenIddictServerRequest() ??
+            throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
 
         if (request.IsAuthorizationCodeGrantType() || request.IsRefreshTokenGrantType())
         {
             // Retrieve the claims principal stored in the authorization code/refresh token.
             var result = await requested.Context.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-
+            if (result is not { Succeeded: true })
+            {
+                throw new InvalidOperationException("The token is no longer valid.");
+            }
             // Retrieve the user profile corresponding to the authorization code/refresh token.
-            var userId = Guid.Parse(result.Principal!.GetClaim(Claims.Subject));
-            ArgumentNullException.ThrowIfNull(userId);
-             var user = await sender.Send(new GetUserByIdQuery(new(userId)), cancellationToken);
+            var valueId = result.Principal.GetClaim(Claims.Subject);
+            ArgumentNullException.ThrowIfNull(valueId);
+
+            var userId = Guid.Parse(valueId);
+            var user = await sender.Send(new GetUserByIdQuery(new(userId)), cancellationToken);
             if (user is null)
             {
                 return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -197,7 +202,7 @@ public class AuthorizationService(
 
         var validateUserCanLogin = await sender.Send(new ValidateUserToLoginQuery(request.UserName), cancellationToken);
 
-        if(!validateUserCanLogin)
+        if (!validateUserCanLogin)
         {
             var properties = new AuthenticationProperties(new Dictionary<string, string?>
             {

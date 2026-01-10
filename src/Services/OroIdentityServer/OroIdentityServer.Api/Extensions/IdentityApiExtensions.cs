@@ -6,23 +6,16 @@ namespace OroIdentityServer.Services.OroIdentityServer.Api.Extensions;
 
 public static class IdentityApiExtensions
 {
-    public static void AddIdentityApiExtensions(this IHostApplicationBuilder builder, IConfiguration configuration)
+    public static void AddIdentityApiExtensions(
+        this IHostApplicationBuilder builder, IConfiguration configuration)
     {
-        // builder.Services.AddAuthentication(options =>
-        // {
-        //     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        //     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        //     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        // });
-
-        builder.Services.AddAuthentication(
-            CookieAuthenticationDefaults.AuthenticationScheme)
+        builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)
             .AddIdentityCookies();
 
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy("CookieAuthenticationPolicy", builder =>
         {
-            builder.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
+            builder.AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
             builder.RequireAuthenticatedUser();
         });
 
