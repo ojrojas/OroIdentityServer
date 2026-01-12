@@ -8,6 +8,8 @@ public class RoleClaim
 {
     private RoleClaim()
     {
+        ClaimType = null!;
+        ClaimValue = null!;
     }
 
     public RoleClaim(RoleClaimType claimType, RoleClaimValue claimValue)
@@ -18,8 +20,8 @@ public class RoleClaim
         Id = Guid.CreateVersion7();
     }
 
-    public RoleClaimType? ClaimType { get; private set; }
-    public RoleClaimValue? ClaimValue { get; private set; }
+    public RoleClaimType ClaimType { get; private set; }
+    public RoleClaimValue ClaimValue { get; private set; }
     public bool IsActive { get; private set; } = true;
     public Guid Id { get; private set; }
 

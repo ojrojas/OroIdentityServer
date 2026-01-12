@@ -55,7 +55,7 @@ public class AuthorizationService(
             }, []);
         }
 
-        var application = await applicationManager.FindByClientIdAsync(request.ClientId!) ??
+        var application = await applicationManager.FindByClientIdAsync(request.ClientId!, cancellationToken: cancellationToken) ??
             throw new InvalidOperationException("Details concerning the calling client application cannot be found.");
 
         var authorizations = await authorizationManager.FindAsync(

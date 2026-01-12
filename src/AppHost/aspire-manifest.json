@@ -18,6 +18,29 @@
         }
       }
     },
+    "postgres": {
+      "type": "container.v0",
+      "connectionString": "Host={postgres.bindings.tcp.host};Port={postgres.bindings.tcp.port};Username=postgres;Password={postgres-password.value}",
+      "image": "docker.io/ankane/pgvector:latest",
+      "env": {
+        "POSTGRES_HOST_AUTH_METHOD": "scram-sha-256",
+        "POSTGRES_INITDB_ARGS": "--auth-host=scram-sha-256 --auth-local=scram-sha-256",
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_PASSWORD": "{postgres-password.value}"
+      },
+      "bindings": {
+        "tcp": {
+          "scheme": "tcp",
+          "protocol": "tcp",
+          "transport": "tcp",
+          "targetPort": 5432
+        }
+      }
+    },
+    "identitydb": {
+      "type": "value.v0",
+      "connectionString": "{postgres.connectionString};Database=identitydb"
+    },
     "identity-api": {
       "type": "project.v0",
       "path": "../Services/OroIdentityServer/OroIdentityServer.Api/OroIdentityServer.Api.csproj",
@@ -27,7 +50,23 @@
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
         "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
         "HTTP_PORTS": "{identity-api.bindings.http.targetPort}",
-        "ConnectionStrings__Seq": "{Seq.connectionString}"
+        "ConnectionStrings__Seq": "{Seq.connectionString}",
+        "SEQ_HOST": "{Seq.bindings.http.host}",
+        "SEQ_PORT": "{Seq.bindings.http.port}",
+        "SEQ_URI": "{Seq.bindings.http.url}",
+        "ConnectionStrings__identitydb": "{identitydb.connectionString}",
+        "IDENTITYDB_HOST": "{postgres.bindings.tcp.host}",
+        "IDENTITYDB_PORT": "{postgres.bindings.tcp.port}",
+        "IDENTITYDB_USERNAME": "postgres",
+        "IDENTITYDB_PASSWORD": "{postgres-password.value}",
+        "IDENTITYDB_URI": "postgresql://postgres:{postgres-password-uri-encoded.value}@{postgres.bindings.tcp.host}:{postgres.bindings.tcp.port}/identitydb",
+        "IDENTITYDB_JDBCCONNECTIONSTRING": "jdbc:postgresql://{postgres.bindings.tcp.host}:{postgres.bindings.tcp.port}/identitydb",
+        "IDENTITYDB_DATABASENAME": "identitydb",
+        "IDENTITY_WEB_HTTP": "{identity-web.bindings.http.url}",
+        "services__identity-web__http__0": "{identity-web.bindings.http.url}",
+        "IDENTITY_WEB_HTTPS": "{identity-web.bindings.https.url}",
+        "services__identity-web__https__0": "{identity-web.bindings.https.url}",
+        "IdentityWeb__Url": "{identity-web.bindings.https.url}"
       },
       "bindings": {
         "http": {
@@ -46,14 +85,22 @@
     },
     "identity-web": {
       "type": "project.v0",
-      "path": "../Frontends/OroIdentity.Web/OroIdentity.Web.csproj",
+      "path": "../Frontends/OroIdentity.Web/OroIdentity.Web.Server/OroIdentity.Web.Server.csproj",
       "env": {
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
         "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
         "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
         "HTTP_PORTS": "{identity-web.bindings.http.targetPort}",
-        "ConnectionStrings__Seq": "{Seq.connectionString}"
+        "ConnectionStrings__Seq": "{Seq.connectionString}",
+        "SEQ_HOST": "{Seq.bindings.http.host}",
+        "SEQ_PORT": "{Seq.bindings.http.port}",
+        "SEQ_URI": "{Seq.bindings.http.url}",
+        "IDENTITY_API_HTTP": "{identity-api.bindings.http.url}",
+        "services__identity-api__http__0": "{identity-api.bindings.http.url}",
+        "IDENTITY_API_HTTPS": "{identity-api.bindings.https.url}",
+        "services__identity-api__https__0": "{identity-api.bindings.https.url}",
+        "Identity__Url": "{identity-api.bindings.https.url}"
       },
       "bindings": {
         "http": {
@@ -69,6 +116,26 @@
           "external": true
         }
       }
+    },
+    "postgres-password": {
+      "type": "parameter.v0",
+      "value": "{postgres-password.inputs.value}",
+      "inputs": {
+        "value": {
+          "type": "string",
+          "secret": true,
+          "default": {
+            "generate": {
+              "minLength": 22
+            }
+          }
+        }
+      }
+    },
+    "postgres-password-uri-encoded": {
+      "type": "annotated.string",
+      "value": "{postgres-password.value}",
+      "filter": "uri"
     }
   }
 }

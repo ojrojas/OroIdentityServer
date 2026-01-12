@@ -16,7 +16,7 @@ public class GetScopesQueryHandler(
         {
             var scopes = new List<OpenIddictScopeDescriptor>();
 
-            await foreach (var scope in scopeManager.ListAsync(100))
+            await foreach (var scope in scopeManager.ListAsync(100, cancellationToken: cancellationToken))
             {
                 var descriptor = new OpenIddictScopeDescriptor
                 {

@@ -36,7 +36,7 @@ public class LoginUserCommandHandler(
             }
 
             // Verify the password
-            if (!await passwordHasher.VerifyPassword(command.Password, user.SecurityUser.PasswordHash))
+            if (!await passwordHasher.VerifyPassword(command.Password, user.SecurityUser.PasswordHash!))
             {
                 // Increment failed access count
                 user.SecurityUser.IncrementAccessFailedCount();

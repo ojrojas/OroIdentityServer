@@ -69,7 +69,7 @@ public class UserRepository(
     {
         logger.LogInformation("handling request user by email {Email}", email);
         var emailSpecification = new GetUserByEmailSpecification(email);
-        var user = await repository.CurrentContext.FirstOrDefaultAsync(emailSpecification.Criteria);
+        var user = await repository.CurrentContext.FirstOrDefaultAsync(emailSpecification.Criteria, cancellationToken: cancellationToken);
         logger.LogInformation("finish request get user by email");
         return user ?? throw new InvalidOperationException("User cannot be null.");
     }
@@ -94,13 +94,13 @@ public class UserRepository(
         logger.LogInformation("Validating if user can login with email: {Email}", email);
         var user = await GetUserByEmailAsync(email, cancellationToken);
 
-        if (user == null)
+        if (user is null)
         {
             logger.LogWarning("User not found with email: {Email}", email);
             return false;
         }
 
-        var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId.Value, cancellationToken);
+        var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId!.Value, cancellationToken);
 
         if (securityUser.LockoutEnabled && securityUser.LockoutEnd.HasValue && securityUser.LockoutEnd.Value > DateTime.UtcNow)
         {

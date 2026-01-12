@@ -6,7 +6,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public sealed class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregateRoot
 {
-    public TenantName? Name { get; private set; }
+    public TenantName Name { get; private set; }
     public bool IsActive { get; private set; }
 
     public Tenant(string name)
@@ -17,7 +17,10 @@ public sealed class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAg
         RaiseDomainEvent(new TenantCreateEvent(Id, Name));
     }
 
-    private Tenant() { }
+    private Tenant()
+    {
+        Name = null!;
+    }
 
     public void Deactive()
     {

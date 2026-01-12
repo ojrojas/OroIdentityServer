@@ -25,7 +25,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
             .OnDelete(DeleteBehavior.Restrict); 
 
         builder.Property(u => u.SecurityUserId)
-            .HasConversion(id => id.Value, value => new SecurityUserId(value))
+            .HasConversion(id => id!.Value, value => new SecurityUserId(value))
             .HasColumnName("SecurityUserId");
 
         builder.HasOne(u => u.SecurityUser)

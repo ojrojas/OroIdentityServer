@@ -41,7 +41,7 @@ builder.Services.AddHttpClient<LoginService>(configClient =>
         Console.WriteLine($"Certificate error: {errors}");
         return true; 
     }
-});;
+});
 
 var app = builder.Build();
 

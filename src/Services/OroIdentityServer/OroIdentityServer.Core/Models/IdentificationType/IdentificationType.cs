@@ -15,7 +15,10 @@ BaseEntity<IdentificationType, IdentificationTypeId>, IAuditableEntity, IAggrega
         RaiseDomainEvent(new IdentificationTypeCreateEvent(Id));
     }
 
-    private IdentificationType() { }
+    private IdentificationType()
+    {
+        Name = null!;
+    }
 
     public static IdentificationType Create(string name)
     {

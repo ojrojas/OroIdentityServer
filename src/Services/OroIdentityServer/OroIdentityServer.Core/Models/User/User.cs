@@ -7,7 +7,7 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
 {
     public User(
-        UserId id,
+        UserId? id,
         string name,
         string middleName,
         string lastName,
@@ -27,7 +27,7 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
         NormalizedEmail = NormalizedEmailFrom(email);
         NormalizedUserName = NormalizedUserNameFrom(userName);
         RaiseDomainEvent(new UserCreateEvent(
-            id, 
+            Id, 
             name,
             middleName,
             lastName,

@@ -13,10 +13,10 @@ public class UserRoleEntityConfiguration : IEntityTypeConfiguration<UserRole>
         builder.HasKey(ur => new { ur.UserId, ur.RoleId }); // Clave compuesta
 
         builder.Property(ur => ur.UserId)
-            .HasConversion(id => id.Value, value => new UserId(value));
+            .HasConversion(id => id!.Value, value => new UserId(value));
 
         builder.Property(ur => ur.RoleId)
-            .HasConversion(id => id.Value, value => new RoleId(value));
+            .HasConversion(id => id!.Value, value => new RoleId(value));
 
         // Configura las relaciones si es necesario
         builder.HasOne<User>() // Relación con User

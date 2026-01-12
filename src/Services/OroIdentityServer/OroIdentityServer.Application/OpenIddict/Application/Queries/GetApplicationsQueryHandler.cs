@@ -16,7 +16,7 @@ public class GetApplicationsQueryHandler(
         {
             var applications = new List<OpenIddictApplicationDescriptor>();
 
-            await foreach (var application in applicationManager.ListAsync())
+            await foreach (var application in applicationManager.ListAsync(cancellationToken: cancellationToken))
             {
                 var descriptor = new OpenIddictApplicationDescriptor
                 {
