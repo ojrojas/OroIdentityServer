@@ -75,7 +75,7 @@
     public async Task LoginUser()
     {
 
-       var response = await loginService.LoginRequest(Input);
+       var response = await loginService.LoginRequest(Input, CancellationToken.None);
 
        if(response is null)
        {
@@ -86,10 +86,13 @@
        {
         errorMessage = "Email or Password invalid or unauthorized";
        }
-
-        if(response.StatusCode == System.Net.HttpStatusCode.OK)
-        {
+       if(response.StatusCode == System.Net.HttpStatusCode.OK)
+       {
             RedirectManager.RedirectTo(ReturnUrl);
-        }
+       }
+       if(response.StatusCode.Equals(System.Net.HttpStatusCode.BadRequest))
+       {
+        errorMessage = "Bad request";
+       }
     }
 }

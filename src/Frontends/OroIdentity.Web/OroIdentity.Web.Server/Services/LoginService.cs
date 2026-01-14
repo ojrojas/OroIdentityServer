@@ -10,20 +10,22 @@ public class LoginService(
     IAntiforgery antiforgery,
     IHttpContextAccessor context) : ILoginService
 {
-    private readonly string UrlBase = "account/login";
-    public async Task<HttpResponseMessage> LoginRequest(LoginInputModel loginModel)
+    private readonly string UrlBase = "/account/login";
+    public async Task<HttpResponseMessage> LoginRequest(LoginInputModel loginModel, CancellationToken cancellationToken)
     {
         try
         {
             ArgumentNullException.ThrowIfNull(context.HttpContext);
-            antiforgery?.ValidateRequestAsync(context.HttpContext);
+            await antiforgery.ValidateRequestAsync(context.HttpContext);
+            
             logger.LogInformation("Request login to identityserver");
             var requestLogin = new
             {
                 UserName= loginModel.Email,
                 loginModel.Password
             };
-            var response = await client.PostAsJsonAsync(UrlBase, requestLogin);
+
+            var response = await client.PostAsJsonAsync(UrlBase, requestLogin, cancellationToken);
             logger.LogInformation("response to identityserver : {}", JsonSerializer.Serialize(response));
             return response;
         }

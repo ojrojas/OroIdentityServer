@@ -2,6 +2,8 @@
 // Copyright (C) 2025 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using System.Collections.Immutable;
+
 namespace OroIdentityServer.Services.OroIdentityServer.Api.Services;
 
 public class AuthorizationService(
@@ -92,8 +94,9 @@ public class AuthorizationService(
                         .SetClaim(Claims.Email, user.Data.Email)
                         .SetClaim(Claims.Name, user.Data.UserName)
                         .SetClaim(Claims.PreferredUsername, user.Data.UserName)
-                        // .SetClaims(Claims.Role, user.Roles)
-                        ;
+                        .SetClaims(
+                            "Roles", 
+                            user.Data.Roles.Select(r => r.RoleId.ToString()).ToImmutableArray());
 
                 identity.SetScopes(request.GetScopes());
                 identity.SetResources(
