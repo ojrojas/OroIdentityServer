@@ -18,9 +18,9 @@
   </Folder>
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/OroIdentityServer/">
-    <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Api/OroIdentityServer.Api.csproj" />
     <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Application/OroIdentityServer.Application.csproj" />
     <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Core/OroIdentityServer.Core.csproj" />
     <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Infraestructure/OroIdentityServer.Infraestructure.csproj" />
+    <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Server/OroIdentityServer.Server.csproj" />
   </Folder>
 </Solution>
