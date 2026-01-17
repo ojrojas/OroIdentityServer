@@ -1,3 +1,7 @@
+// OroIdentityServer
+// Copyright (C) 2025 Oscar Rojas
+// Licensed under the GNU AGPL v3.0 or later.
+// See the LICENSE file in the project root for details.
 using System.Text.Json;
 using Microsoft.AspNetCore.Antiforgery;
 using OpenIddict.Client;
@@ -14,7 +18,7 @@ public class LoginService(
     IHttpContextAccessor context) : ILoginService
 {
     public HttpClient Client => client;
-    private readonly string UrlBase = "/connect/token";
+    private readonly string UrlBase = "/connect/authorize";
     public async Task<HttpResponseMessage> LoginRequest(LoginInputModel loginModel, CancellationToken cancellationToken)
     {
         try
@@ -25,11 +29,15 @@ public class LoginService(
             logger.LogInformation("Request login to identityserver");
             var content = new FormUrlEncodedContent(new[]
             {
-                new KeyValuePair<string, string>("grant_type", "password"),
-                new KeyValuePair<string, string>("username", loginModel.Email),
-                new KeyValuePair<string, string>("password", loginModel.Password),
+                new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                // new KeyValuePair<string, string>("username", loginModel.Email),
+                // new KeyValuePair<string, string>("password", loginModel.Password),
                 new KeyValuePair<string, string>("client_id", configuration["OpenIddict:ClientId"]),
-                new KeyValuePair<string, string>("client_secret", configuration["OpenIddict:ClientSecret"])
+                new KeyValuePair<string, string>("client_secret", configuration["OpenIddict:ClientSecret"]),
+                new KeyValuePair<string, string>("scope", "openid profile email offline_access api"),
+                new KeyValuePair<string, string>("response_type", "token"),
+                new KeyValuePair<string, string>("response_mode", "form_post"),
+                new KeyValuePair<string, string>("redirect_uri", "https://identityweb/")
             });
 
             var response = await client.PostAsync(UrlBase, content, cancellationToken);

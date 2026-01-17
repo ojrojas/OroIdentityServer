@@ -22,5 +22,6 @@
     <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Core/OroIdentityServer.Core.csproj" />
     <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Infraestructure/OroIdentityServer.Infraestructure.csproj" />
     <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Server/OroIdentityServer.Server.csproj" />
+    <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Server2/OroIdentityServer.Server2.csproj" />
   </Folder>
 </Solution>
