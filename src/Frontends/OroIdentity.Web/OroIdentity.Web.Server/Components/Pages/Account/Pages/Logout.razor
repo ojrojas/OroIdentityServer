@@ -1,0 +1,26 @@
+@page "/logout"
+@layout LoginLayout
+@attribute [AllowAnonymous]
+
+@inject NavigationManager NavigationManager
+@inject IConfiguration Configuration
+@inject IHttpContextAccessor HttpContextAccessor
+
+<PageTitle>Logout</PageTitle>
+
+<h1>Logging out...</h1>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var httpContext = HttpContextAccessor.HttpContext!;
+        if (httpContext.User.Identity?.IsAuthenticated == true)
+        {
+            await httpContext.SignOutAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+        httpContext.Session.Clear();
+
+        var identityUrl = Configuration["Identity:Url"];
+        NavigationManager.NavigateTo($"{identityUrl}/connect/logout", forceLoad: true);
+    }
+}

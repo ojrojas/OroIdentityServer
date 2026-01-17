@@ -9,8 +9,13 @@
 @using Microsoft.AspNetCore.Identity
 @using OpenIddict.Abstractions
 @using OpenIddict.Validation.AspNetCore
+@using OroIdentity.Web.Server.Components.Pages.Account
 @using OroIdentity.Web.Server.Models
 @using OroIdentity.Web.Server.Services
+@using System.Security.Claims
+@using System.Net.Http.Json
+
+@inject IConfiguration configuration
 
 @inject LoginService loginService
 @inject IHttpContextAccessor httpContextAccessor
@@ -52,6 +57,7 @@
     private string? errorMessage;
     private EditContext editContext = default!;
     private HttpContext HttpContext => httpContextAccessor.HttpContext!;
+    private int failedAttempts = 0;
 
     [SupplyParameterFromForm]
     private LoginInputModel Input { get; set; } = default!;
@@ -59,11 +65,24 @@
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
+    private class TokenResponse
+    {
+        [System.Text.Json.Serialization.JsonPropertyName("access_token")]
+        public string AccessToken { get; set; } = string.Empty;
+    }
+
     protected override async Task OnInitializedAsync()
     {
         Input ??= new();
 
         editContext = new EditContext(Input);
+
+        failedAttempts = HttpContext.Session.GetInt32("failedAttempts") ?? 0;
+
+        if (!string.IsNullOrEmpty(ReturnUrl) && !ReturnUrl.StartsWith("/") && !Uri.IsWellFormedUriString(ReturnUrl, UriKind.Relative))
+        {
+            ReturnUrl = "/";
+        }
 
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
@@ -74,25 +93,66 @@
 
     public async Task LoginUser()
     {
+        if (failedAttempts >= 5)
+        {
+            errorMessage = "Too many failed attempts. Try again later.";
+            return;
+        }
 
        var response = await loginService.LoginRequest(Input, CancellationToken.None);
 
        if(response is null)
        {
         errorMessage = "Request to login badrequest or invalid";
+        return;
        }
 
        if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
        {
-        errorMessage = "Email or Password invalid or unauthorized";
+            failedAttempts++;
+            HttpContext.Session.SetInt32("failedAttempts", failedAttempts);
+            errorMessage = "Email or Password invalid or unauthorized";
+            return;
        }
        if(response.StatusCode == System.Net.HttpStatusCode.OK)
        {
-            RedirectManager.RedirectTo(ReturnUrl);
+            // Parse token
+            var tokenJson = await response.Content.ReadAsStringAsync();
+            var tokenData = System.Text.Json.JsonSerializer.Deserialize<TokenResponse>(tokenJson);
+            
+            if (tokenData?.AccessToken != null)
+            {
+                // Sign in user
+                var claims = new List<System.Security.Claims.Claim> 
+                { 
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, Input.Email) 
+                };
+                var identity = new System.Security.Claims.ClaimsIdentity(claims, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme, new System.Security.Claims.ClaimsPrincipal(identity));
+                
+                // Reset failed attempts on success
+                HttpContext.Session.SetInt32("failedAttempts", 0);
+                
+                // Store token in session for later use
+                HttpContext.Session.SetString("access_token", tokenData.AccessToken);
+                
+                NavigationManager.NavigateTo(ReturnUrl ?? "/");
+            }
+            else
+            {
+                errorMessage = "Invalid token response";
+            }
+            return;
        }
        if(response.StatusCode.Equals(System.Net.HttpStatusCode.BadRequest))
        {
         errorMessage = "Bad request";
+        return;
+       }
+       if(response.StatusCode.Equals(System.Net.HttpStatusCode.InternalServerError))
+       {
+        errorMessage = "Internal server error";
+        return;
        }
     }
 }

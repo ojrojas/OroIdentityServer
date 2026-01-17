@@ -6,7 +6,7 @@ using OroIdentity.Web.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-IConfiguration configuration = builder.Configuration;
+ConfigurationManager configuration = builder.Configuration;
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -16,23 +16,33 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 builder.Services.AddFluentUIComponents();
 
+builder.AddOroIdentityWebExtensions();
+builder.Services.AddDIOpenIddictApplication(configuration);
+
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
 
 builder.Services.AddScoped<IdentityRedirectManager>();
 
-builder.AddOroIdentityWebExtensions();
-builder.Services.AddDIOpenIddictApplication(configuration);
-
 builder.Services.AddAntiforgery();
 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
+
+builder.Services.Configure<Microsoft.AspNetCore.Builder.SessionOptions>(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+});
 
 var identityUri = configuration.GetSection("Identity:Url").Value;
 
 builder.Services.AddHttpClient<LoginService>(configClient =>
 {
     configClient.BaseAddress = new Uri(identityUri!);
+    configClient.Timeout = TimeSpan.FromSeconds(30);
 })
 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 {
@@ -61,6 +71,7 @@ app.MapStaticAssets();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
