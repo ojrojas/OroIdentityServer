@@ -1,0 +1,23 @@
+@page "/signout-callback-oidc"
+
+@layout LoginLayout
+@attribute [AllowAnonymous]
+
+@inject IHttpContextAccessor HttpContextAccessor
+
+<PageTitle>Sign out</PageTitle>
+
+<h1>You have been signed out.</h1>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var httpContext = HttpContextAccessor.HttpContext!;
+        // Sign out locally if not already
+        if (httpContext.User.Identity?.IsAuthenticated == true)
+        {
+            await httpContext.SignOutAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+        httpContext.Session.Clear();
+    }
+}

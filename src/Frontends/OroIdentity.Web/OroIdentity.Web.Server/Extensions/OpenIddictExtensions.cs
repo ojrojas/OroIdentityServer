@@ -30,7 +30,7 @@ public static class OpenIddictExtensions
 
                 // Register the ASP.NET Core host.
                 config.UseAspNetCore();
-            });
+            }).AddClient();
 
         return services;
     }

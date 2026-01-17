@@ -49,6 +49,9 @@ public static class OpenIddictExtensions
 
             config.RequireProofKeyForCodeExchange();
 
+            config.SetAccessTokenLifetime(TimeSpan.FromHours(1));
+            config.SetRefreshTokenLifetime(TimeSpan.FromDays(30));
+
             // Register the signing and encryption credentials.
             config.AddDevelopmentEncryptionCertificate()
                    .AddDevelopmentSigningCertificate();

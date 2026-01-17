@@ -3,6 +3,7 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Logging;
 
 namespace OroIdentity.Web.Server.Extensiones;
@@ -13,14 +14,16 @@ public static class OroIdentityWebExtensions
        this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
 
-        builder.Services.AddAuthentication(
-              CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(
-                config =>
-            {
-                config.LoginPath = "/Account/Login";
-            }
-            );
+        builder.Services.AddAuthentication(opt =>
+        {
+            opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            opt.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        })
+        .AddCookie(options =>
+        {
+            options.LoginPath = "/account/login";
+        });
+       
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy("CanAccess", policy =>
             {
@@ -34,7 +37,7 @@ public static class OroIdentityWebExtensions
             });
 
 
-        IdentityModelEventSource.ShowPII = true;
+        IdentityModelEventSource.ShowPII = builder.Environment.IsDevelopment();
 
         builder.Services.AddHttpContextAccessor();
         return builder;
