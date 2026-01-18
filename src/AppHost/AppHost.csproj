@@ -14,9 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Services\OroIdentityServer\OroIdentityServer.Server\OroIdentityServer.Server.csproj" />
     <ProjectReference Include="..\Frontends\OroIdentity.Web\OroIdentity.Web.Server\OroIdentity.Web.Server.csproj" />
-    <ProjectReference Include="..\Services\OroIdentityServer\OroIdentityServer.Server2\OroIdentityServer.Server2.csproj" />
+    <ProjectReference Include="..\Services\OroIdentityServer\OroIdentityServer.Server\OroIdentityServer.Server.csproj" />
   </ItemGroup>
+
 
 </Project>

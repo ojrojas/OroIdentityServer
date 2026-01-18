@@ -7,7 +7,6 @@ using System.Collections.Immutable;
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Services;
 
 public class AuthorizationService(
-    IHttpContextAccessor contextAccessor,
     ILogger<AuthorizationService> logger,
     IOpenIddictApplicationManager applicationManager,
     IOpenIddictAuthorizationManager authorizationManager,
