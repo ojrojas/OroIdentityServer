@@ -1,5 +1,5 @@
 // OroIdentityServer
-// Copyright (C) 2025 Oscar Rojas
+// Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using System.Text.Json;
@@ -27,18 +27,19 @@ public class LoginService(
             await antiforgery.ValidateRequestAsync(context.HttpContext);
             
             logger.LogInformation("Request login to identityserver");
-            var content = new FormUrlEncodedContent(new[]
-            {
+            var algo =  configuration["IdentityWeb:Url"];
+            var content = new FormUrlEncodedContent(
+            [
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
                 // new KeyValuePair<string, string>("username", loginModel.Email),
                 // new KeyValuePair<string, string>("password", loginModel.Password),
                 new KeyValuePair<string, string>("client_id", configuration["OpenIddict:ClientId"]),
                 new KeyValuePair<string, string>("client_secret", configuration["OpenIddict:ClientSecret"]),
                 new KeyValuePair<string, string>("scope", "openid profile email offline_access api"),
-                new KeyValuePair<string, string>("response_type", "token"),
+                new KeyValuePair<string, string>("response_type", "code"),
                 new KeyValuePair<string, string>("response_mode", "form_post"),
-                new KeyValuePair<string, string>("redirect_uri", "https://identityweb/")
-            });
+                new KeyValuePair<string, string>("redirect_uri", configuration["IdentityWeb:Url"])
+            ]);
 
             var response = await client.PostAsync(UrlBase, content, cancellationToken);
             logger.LogInformation("response to identityserver : {}", JsonSerializer.Serialize(response));

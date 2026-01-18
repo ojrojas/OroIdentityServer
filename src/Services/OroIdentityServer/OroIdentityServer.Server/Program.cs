@@ -15,6 +15,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
 
+builder.Services.AddCascadingAuthenticationState();
+
 builder.AddServicesWritersLogger(configuration);
 builder.AddServiceDefaults();
 builder.AddAppExtensions();

@@ -30,20 +30,20 @@
     <FluentGridItem xs="12" md="12" >
     <FluentCard Width="450px">
         <StatusMessages Message="@errorMessage" />
-        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+        <EditForm Model="Input" method="post" OnSubmit="LoginUser" FormName="login">
             <DataAnnotationsValidator />
-            <h1>OroIdentityServer</h1>
+            <h1>OroIdentityServer Admin</h1>
             <hr />
             <FluentValidationSummary class="text-danger" role="alert" />
             <FluentStack Orientation="Orientation.Vertical">
-                <FluentTextField Id="email" Name="Input.Email" @bind-Value="Input.Email" AutoComplete="username" Required="true"
+                @* <FluentTextField Id="email" Name="Input.Email" @bind-Value="Input.Email" AutoComplete="username" Required="true"
                     Placeholder="name@example.com" Label="Email" Style="width: 100%" />
                 <FluentValidationMessage For="() => Input.Email" class="text-danger" />
                 <FluentTextField Id="password" type="password" Name="Input.Password" @bind-Value="Input.Password"
                     AutoComplete="current-password" Required="true" Placeholder="password" Label="Password"
                     Style="width: 100%" />
                 <FluentValidationMessage For="() => Input.Password" class="text-danger" />
-                <FluentCheckbox Name="Input.RememberMe" @bind-Value="Input.RememberMe" Label="Remember me" />
+                <FluentCheckbox Name="Input.RememberMe" @bind-Value="Input.RememberMe" Label="Remember me" /> *@
                 <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Log in
                 </FluentButton>
             </FluentStack>
@@ -59,7 +59,7 @@
     private HttpContext HttpContext => httpContextAccessor.HttpContext!;
     private int failedAttempts = 0;
 
-    [SupplyParameterFromForm]
+    @* [SupplyParameterFromForm] *@
     private LoginInputModel Input { get; set; } = default!;
 
     [SupplyParameterFromQuery]

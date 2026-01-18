@@ -42,7 +42,7 @@ var identityUri = configuration.GetSection("Identity:Url").Value;
 builder.Services.AddHttpClient<LoginService>(configClient =>
 {
     configClient.BaseAddress = new Uri(identityUri!);
-    configClient.Timeout = TimeSpan.FromSeconds(30);
+    configClient.Timeout = TimeSpan.FromMinutes(2);
 })
 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 {

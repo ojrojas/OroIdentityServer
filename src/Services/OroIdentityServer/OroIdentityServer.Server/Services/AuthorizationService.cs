@@ -1,9 +1,8 @@
 // OroIdentityServer
-// Copyright (C) 2025 Oscar Rojas
+// Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using System.Collections.Immutable;
-
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Services;
 
 public class AuthorizationService(
@@ -19,7 +18,7 @@ public class AuthorizationService(
         var request = requested.Context.GetOpenIddictServerRequest() ??
             throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
 
-        var result = await requested.Context.AuthenticateAsync();
+        var result = await requested.Context.AuthenticateAsync(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
         if (result is not { Succeeded: true } ||
             request.HasPromptValue(PromptValues.Login) || request.MaxAge is 0 ||
             (request.MaxAge is not null && result.Properties?.IssuedUtc is not null &&
@@ -39,7 +38,7 @@ public class AuthorizationService(
             {
                 RedirectUri = requested.Context.Request.PathBase + requested.Context.Request.Path + QueryString.Create(
                     requested.Context.Request.HasFormContentType ? requested.Context.Request.Form : requested.Context.Request.Query)
-            }, []);
+            }, [OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme]);
         }
 
         var userId = result.Principal!.GetClaim(Claims.Subject)!;
@@ -53,7 +52,7 @@ public class AuthorizationService(
             {
                 RedirectUri = requested.Context.Request.PathBase + requested.Context.Request.Path + QueryString.Create(
                   requested.Context.Request.HasFormContentType ? requested.Context.Request.Form : requested.Context.Request.Query)
-            }, []);
+            }, [OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme]);
         }
 
         var application = await applicationManager.FindByClientIdAsync(request.ClientId!, cancellationToken: cancellationToken) ??
@@ -189,7 +188,7 @@ public class AuthorizationService(
             ArgumentNullException.ThrowIfNull(request.Username);
             ArgumentNullException.ThrowIfNull(request.Password);
 
-            var loginRequest = new LoginRequest(request.Username, request.Password);
+            var loginRequest = new LoginRequest(request.Username, request.Password, false);
             return await LoginAsync(loginRequest, cancellationToken);
         }
 

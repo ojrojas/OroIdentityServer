@@ -8,6 +8,7 @@
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject Services.IAuthorizationService userService
 
 <PageTitle>Log in</PageTitle>
 
@@ -58,11 +59,7 @@
 
         editContext = new EditContext(Input);
 
-        if (HttpMethods.IsGet(HttpContext.Request.Method))
-        {
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-        }
+        // Note: External logins are not configured, so no need to clear external cookies
     }
 
     public async Task LoginUser()
@@ -73,7 +70,9 @@
             return;
         }
 
-        SignInResult result;
+        LoginResponse result = default!;
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2)); // Timeout de 30 segundos para la operación de login
+        CancellationToken cancellationToken = cts.Token; 
         if (!string.IsNullOrEmpty(Input.Passkey?.CredentialJson))
         {
             // When performing passkey sign-in, don't perform form validation.
@@ -89,29 +88,18 @@
 
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-            @* result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false); *@
+            result = await userService.LoginAsync(new (Input.Email, Input.Password, Input.RememberMe), cancellationToken);
         }
 
-        @* if (result.Succeeded)
+        if (result.ResultType == ResultTypes.SignIn)
         {
             Logger.LogInformation("User logged in.");
             RedirectManager.RedirectTo(ReturnUrl);
         }
-        else if (result.RequiresTwoFactor)
-        {
-            RedirectManager.RedirectTo(
-                "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
-        }
-        else if (result.IsLockedOut)
-        {
-            Logger.LogWarning("User account locked out.");
-            RedirectManager.RedirectTo("Account/Lockout");
-        }
         else
         {
             errorMessage = "Error: Invalid login attempt.";
-        } *@
+        }
     }
 
     private sealed class InputModel

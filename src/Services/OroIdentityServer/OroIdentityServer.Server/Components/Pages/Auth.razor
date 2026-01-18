@@ -11,3 +11,10 @@
 <AuthorizeView>
     Hello @context.User.Identity?.Name!
 </AuthorizeView>
+
+@code{
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("Auth page initialized");
+    }    
+}
