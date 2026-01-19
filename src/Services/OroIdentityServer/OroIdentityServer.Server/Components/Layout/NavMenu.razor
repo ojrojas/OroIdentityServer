@@ -13,8 +13,8 @@
             <FluentNavLink Href="auth" Icon="@(new Icons.Regular.Size20.LockClosedKey())" IconColor="Color.Accent">Auth Required</FluentNavLink>
             <AuthorizeView>
                 <Authorized>
-                    <FluentNavLink Href="Account/Manage">@context.User.Identity?.Name</FluentNavLink>
-                    <form action="Account/Logout" method="post">
+                    <FluentNavLink Href="account/manage">@context.User.Identity?.Name</FluentNavLink>
+                    <form action="/connect/logout" method="get">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                         <FluentButton Type="ButtonType.Submit" Style="width: 100%;">Logout</FluentButton>

@@ -31,7 +31,7 @@ public class AuthorizationService(
                     [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.ConsentRequired,
                     [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
                            "The user is not logged in."
-                }), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+                }), [CookieAuthenticationDefaults.AuthenticationScheme]);
             }
 
             return new LoginResponse(ResultTypes.Challenge, null, new AuthenticationProperties
@@ -77,7 +77,7 @@ public class AuthorizationService(
                     [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.ConsentRequired,
                     [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
                             "The logged in user is not allowed to access this client application."
-                }), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+                }), [CookieAuthenticationDefaults.AuthenticationScheme]);
 
             case ConsentTypes.Implicit:
             case ConsentTypes.External when authorizations.Count is not 0:
@@ -134,7 +134,7 @@ public class AuthorizationService(
         if (request.IsAuthorizationCodeGrantType() || request.IsRefreshTokenGrantType())
         {
             // Retrieve the claims principal stored in the authorization code/refresh token.
-            var result = await requested.Context.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            var result = await requested.Context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             if (result is not { Succeeded: true })
             {
                 throw new InvalidOperationException("The token is no longer valid.");
@@ -151,7 +151,7 @@ public class AuthorizationService(
                 {
                     [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
                     [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The token is no longer valid."
-                }), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+                }), [CookieAuthenticationDefaults.AuthenticationScheme]);
             }
 
             // Ensure the user is still allowed to sign in.
@@ -161,7 +161,7 @@ public class AuthorizationService(
                 {
                     [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
                     [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in."
-                }), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+                }), [CookieAuthenticationDefaults.AuthenticationScheme]);
             }
 
             var identity = new ClaimsIdentity(result.Principal!.Claims,
@@ -212,7 +212,7 @@ public class AuthorizationService(
                                 "The user cannot log in to the application."
             });
 
-            return new LoginResponse(ResultTypes.Forbid, new(), properties, [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+            return new LoginResponse(ResultTypes.Forbid, new(), properties, [CookieAuthenticationDefaults.AuthenticationScheme]);
         }
 
         var user = await sender.Send(new GetUserByEmailQuery(request.UserName), cancellationToken);
@@ -228,7 +228,7 @@ public class AuthorizationService(
                                 "The username/password couple is invalid."
             });
 
-            return new LoginResponse(ResultTypes.Unauthorized, new(), properties, [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+            return new LoginResponse(ResultTypes.Unauthorized, new(), properties, [CookieAuthenticationDefaults.AuthenticationScheme]);
         }
 
         logger.LogInformation("Credentials user validate successful");
@@ -254,16 +254,17 @@ public class AuthorizationService(
 
         identity.SetDestinations(GetDestination.GetDestinations);
         logger.LogInformation("Login user application successful");
-        return new LoginResponse(
+       return new LoginResponse(
             ResultTypes.SignIn,
             new ClaimsPrincipal(identity),
             new(),
-            [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+            [CookieAuthenticationDefaults.AuthenticationScheme]);
+
     }
 
     public async Task<LogoutResponse> LogoutAsync(SimpleRequest request, CancellationToken cancellationToken = default)
     {
-        var response = new LogoutResponse(configuration, null, IdentityConstants.ApplicationScheme);
+        var response = new LogoutResponse(configuration, null, [CookieAuthenticationDefaults.AuthenticationScheme]);
         logger.LogInformation("Logout request success!");
         if (cancellationToken.IsCancellationRequested) throw new InvalidOperationException("Error logout request");
         await Task.CompletedTask;

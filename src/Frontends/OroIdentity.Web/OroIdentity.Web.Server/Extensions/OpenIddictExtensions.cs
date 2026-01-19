@@ -37,26 +37,36 @@ public static class OpenIddictExtensions
                 // Register the ASP.NET Core host.
                 config.UseAspNetCore();
             }) 
-            // .AddClient(options =>
-            // {
-            //     // Note: this sample uses the authorization code flow,
-            //     // but you can enable the other flows if necessary.
-            //     options.AllowAuthorizationCodeFlow()
-            //            .AllowRefreshTokenFlow();
+            .AddClient(options =>
+            {
+                // Disable token storage since we don't need persistent storage for this client
+                options.DisableTokenStorage();
 
-            //     // Register the signing and encryption credentials used to protect
-            //     // sensitive data like the state tokens produced by OpenIddict.
-            //     // Configure encryption and signing of tokens.  testing phrase tokens ORO_IDENTITY_SERVER_PROJECT_0001
-            //     options.AddEncryptionKey(new SymmetricSecurityKey(
-            //         Convert.FromBase64String(signingKey)));
+                // Note: this sample uses the authorization code flow,
+                // but you can enable the other flows if necessary.
+                options.AllowAuthorizationCodeFlow()
+                       .AllowRefreshTokenFlow();
 
-            //     // Register the System.Net.Http integration and use the identity of the current
-            //     // assembly as a more specific user agent, which can be useful when dealing with
-            //     // providers that use the user agent as a way to throttle requests (e.g Reddit).
-            //     options.UseSystemNetHttp()
-            //            .SetProductInformation(typeof(Program).Assembly);
-            // })
-            ;
+                // Register the signing and encryption credentials used to protect
+                // sensitive data like the state tokens produced by OpenIddict.
+                // Configure encryption and signing of tokens.  testing phrase tokens ORO_IDENTITY_SERVER_PROJECT_0001
+                options.AddEncryptionKey(new SymmetricSecurityKey(
+                    Convert.FromBase64String(signingKey)));
+
+                // Add a development signing certificate for interactive flows
+                options.AddDevelopmentSigningCertificate();
+
+                // Register the System.Net.Http integration.
+                options.UseSystemNetHttp();
+                options.UseSystemIntegration();
+
+                options.AddRegistration(new OpenIddictClientRegistration
+                {
+                    ClientId = "OroIdentityServer.Web",
+                    RedirectUri = new Uri($"{configuration["IdentityWeb:Url"]}/signin-oidc"),
+                    Issuer = new Uri($"{configuration["Identity:Url"]}/"),
+                });
+            });
 
         return services;
     }

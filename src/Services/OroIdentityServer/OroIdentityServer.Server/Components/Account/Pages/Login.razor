@@ -59,6 +59,8 @@
 
         editContext = new EditContext(Input);
 
+        await userService.LogoutAsync(new SimpleRequest (HttpContext), CancellationToken.None);
+
         // Note: External logins are not configured, so no need to clear external cookies
     }
 
@@ -93,6 +95,7 @@
 
         if (result.ResultType == ResultTypes.SignIn)
         {
+            await result.ExecuteAsync(HttpContext);
             Logger.LogInformation("User logged in.");
             RedirectManager.RedirectTo(ReturnUrl);
         }

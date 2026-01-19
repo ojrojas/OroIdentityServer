@@ -19,6 +19,8 @@ public static class ApplicationExtensions
            config.EnableSensitiveDataLogging(); // Consider disabling in production for security reasons
         });
 
+        builder.Services.AddProblemDetails();
+
         return builder;
     }
 }

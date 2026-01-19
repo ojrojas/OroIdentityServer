@@ -127,6 +127,7 @@
                 { 
                     new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, Input.Email) 
                 };
+                
                 var identity = new System.Security.Claims.ClaimsIdentity(claims, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
                 await HttpContext.SignInAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme, new System.Security.Claims.ClaimsPrincipal(identity));
                 

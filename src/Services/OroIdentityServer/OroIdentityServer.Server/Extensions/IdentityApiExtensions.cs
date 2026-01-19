@@ -9,7 +9,8 @@ public static class IdentityApiExtensions
     public static void AddIdentityApiExtensions(
         this IHostApplicationBuilder builder, IConfiguration configuration)
     {
-     builder.Services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme).AddCookie();
+     builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+         .AddCookie();
 
         builder.Services.AddAuthorization();
 

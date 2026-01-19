@@ -3,6 +3,8 @@ using OroIdentityServer.Services.OroIdentityServer.Server.Components;
 using OroIdentityServer.Services.OroIdentityServer.Server.Components.Account;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
+using OpenIddict.Abstractions;
+using OpenIddict.Server.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,6 +90,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseRouting();
 app.UseAuthorization();
+
 
 app.UseAntiforgery();
 

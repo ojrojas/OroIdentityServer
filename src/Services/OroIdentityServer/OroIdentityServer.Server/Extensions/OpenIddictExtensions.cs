@@ -26,7 +26,9 @@ public static class OpenIddictExtensions
                   .SetEndSessionEndpointUris("/connect/logout")
                   .SetTokenEndpointUris("/connect/token")
                   .SetIntrospectionEndpointUris("/connect/introspect")
-                  .SetUserInfoEndpointUris("/connect/userinfo");
+                  .SetUserInfoEndpointUris("/connect/userinfo")
+                  ;
+
 
             // Mark the "email", "profile" and "roles" scopes as supported scopes.
             config.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles);
@@ -58,6 +60,7 @@ public static class OpenIddictExtensions
 
             // Register the ASP.NET Core host and configure the ASP.NET Core-specific config.
             config.UseAspNetCore()
+                   .DisableTransportSecurityRequirement()
                    .EnableAuthorizationEndpointPassthrough()
                    .EnableEndSessionEndpointPassthrough()
                    .EnableStatusCodePagesIntegration()

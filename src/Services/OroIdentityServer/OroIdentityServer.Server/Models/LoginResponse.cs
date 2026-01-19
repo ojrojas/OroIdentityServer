@@ -10,8 +10,7 @@ public record LoginResponse(
     AuthenticationProperties? Properties,
     string[] Schemes) : IResult
 {
-
-    public Task ExecuteAsync(HttpContext httpContext)
+    public async Task ExecuteAsync(HttpContext httpContext)
     {
         IResult result;
         switch (ResultType)
@@ -41,6 +40,6 @@ public record LoginResponse(
         }
 
         var adapter = new AdapterResult(result);
-        return adapter.ExecuteAsync(httpContext);
+        await adapter.ExecuteAsync(httpContext);
     }
 }

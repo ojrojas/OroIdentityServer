@@ -38,4 +38,5 @@ global using static OpenIddict.Abstractions.OpenIddictConstants;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Authorization;
 global using OpenIddict.Validation.AspNetCore;
+global using OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
