@@ -1,0 +1,123 @@
+﻿@page "/Account/Login"
+@layout LoginLayout
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+
+@inject ILogger<Login> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject Services.IAuthorizationService userService
+
+<PageTitle>Log in</PageTitle>
+
+<FluentLayout Style="display:flex; justify-content: center; align-items:center">
+<FluentGrid Justify="JustifyContent.Center" AdaptiveRendering="true">
+    <FluentGridItem xs="12" md="12" >
+    <FluentCard Width="450px">
+         <OroIdentityServer.Services.OroIdentityServer.Server.Components.Account.Shared.StatusMessage Message="@errorMessage" />
+        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <DataAnnotationsValidator />
+            <h1>OroIdentityServer</h1>
+            <hr />
+            <FluentValidationSummary class="text-danger" role="alert" />
+            <FluentStack Orientation="Orientation.Vertical">
+                <FluentTextField Id="email" Name="Input.Email" @bind-Value="Input.Email" AutoComplete="username" Required="true"
+                    Placeholder="name@example.com" Label="Email" Style="width: 100%" />
+                <FluentValidationMessage For="() => Input.Email" class="text-danger" />
+                <FluentTextField Id="password" type="password" Name="Input.Password" @bind-Value="Input.Password"
+                    AutoComplete="current-password" Required="true" Placeholder="password" Label="Password"
+                    Style="width: 100%" />
+                <FluentValidationMessage For="() => Input.Password" class="text-danger" />
+                <FluentCheckbox Name="Input.RememberMe" @bind-Value="Input.RememberMe" Label="Remember me" />
+                <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Log in
+                </FluentButton>
+            </FluentStack>
+        </EditForm>
+    </FluentCard>
+    </FluentGridItem>
+</FluentGrid>
+</FluentLayout>
+
+@code {
+    private string? errorMessage;
+    private EditContext editContext = default!;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Input ??= new();
+
+        editContext = new EditContext(Input);
+
+        await userService.LogoutAsync(new SimpleRequest (HttpContext), CancellationToken.None);
+
+        // Note: External logins are not configured, so no need to clear external cookies
+    }
+
+    public async Task LoginUser()
+    {
+        if (!string.IsNullOrEmpty(Input.Passkey?.Error))
+        {
+            errorMessage = $"Error: {Input.Passkey.Error}";
+            return;
+        }
+
+        LoginResponse result = default!;
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2)); // Timeout de 30 segundos para la operación de login
+        CancellationToken cancellationToken = cts.Token; 
+        if (!string.IsNullOrEmpty(Input.Passkey?.CredentialJson))
+        {
+            // When performing passkey sign-in, don't perform form validation.
+            @* result = await SignInManager.PasskeySignInAsync(Input.Passkey.CredentialJson); *@
+        }
+        else
+        {
+            // If doing a password sign-in, validate the form.
+            if (!editContext.Validate())
+            {
+                return;
+            }
+
+            // This doesn't count login failures towards account lockout
+            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+            result = await userService.LoginAsync(new (Input.Email, Input.Password, Input.RememberMe), cancellationToken);
+        }
+
+        if (result.ResultType == ResultTypes.SignIn)
+        {
+            await result.ExecuteAsync(HttpContext);
+            Logger.LogInformation("User logged in.");
+            RedirectManager.RedirectTo(ReturnUrl);
+        }
+        else
+        {
+            errorMessage = "Error: Invalid login attempt.";
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+
+        public PasskeyInputModel? Passkey { get; set; }
+    }
+}

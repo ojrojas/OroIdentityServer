@@ -14,7 +14,7 @@
     [Parameter]
     public string? Message { get; set; }
 
-    private HttpContext HttpContext => httpContextAccessor.HttpContext;
+    private HttpContext HttpContext => httpContextAccessor.HttpContext!;
 
     private string? DisplayMessage => Message ?? messageFromCookie;
 

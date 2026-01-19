@@ -1,17 +1,23 @@
-// OroIdentityServer
-// Copyright (C) 2025 Oscar Rojas
-// Licensed under the GNU AGPL v3.0 or later.
-// See the LICENSE file in the project root for details.
+using Microsoft.AspNetCore.Components.Authorization;
+using OroIdentityServer.Services.OroIdentityServer.Server.Components;
+using OroIdentityServer.Services.OroIdentityServer.Server.Components.Account;
+using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
+using OpenIddict.Abstractions;
+using OpenIddict.Server.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 IConfiguration configuration = builder.Configuration;
 Log.Logger = LoggerPrinter.CreateSerilogLogger("api", "OroIdentityServer", configuration);
+builder.Services.AddOpenApi();
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+builder.Services.AddFluentUIComponents();
+
+builder.Services.AddCascadingAuthenticationState();
 
 builder.AddServicesWritersLogger(configuration);
 builder.AddServiceDefaults();
@@ -22,19 +28,32 @@ builder.AddOpenIddictExtensions(configuration);
 builder.AddIdentityApiExtensions(configuration);
 builder.AddCoreExtensions();
 
+builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
 builder.Services.Configure<RouteOptions>(options =>
 {
     options.ConstraintMap["guid"] = typeof(GuidRouteConstraint);
 });
+
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseMigrationsEndPoint();
+       app.MapOpenApi();
     app.MapScalarApiReference();
 }
+else
+{
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
 
 #if DEBUG
 using var scope = app.Services.CreateScope();
@@ -64,11 +83,20 @@ await DatabaseSeeder.SeedAsync(
 
 #endif
 
+
+app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseRouting();
 app.UseAuthorization();
+
+
+app.UseAntiforgery();
+
+app.MapStaticAssets();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
 // Endpoints
 app.MapAuthorizeEndpoints()

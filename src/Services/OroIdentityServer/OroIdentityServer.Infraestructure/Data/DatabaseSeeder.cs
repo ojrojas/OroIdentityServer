@@ -1,5 +1,5 @@
 // OroIdentityServer
-// Copyright (C) 2025 Oscar Rojas
+// Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Data;
@@ -99,13 +99,13 @@ public static class DatabaseSeeder
                 ClientSecret = "a2344152-e928-49e7-bb3c-ee54acc96c8c",
                 ClientType = OpenIddictConstants.ClientTypes.Confidential,
                 ApplicationType = OpenIddictConstants.ApplicationTypes.Web,
-                ConsentType = OpenIddictConstants.ConsentTypes.Explicit,
+                ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
                 Permissions =
                 {
                     OpenIddictConstants.Permissions.Endpoints.Authorization,
                     OpenIddictConstants.Permissions.Endpoints.Token,
                     OpenIddictConstants.Permissions.Endpoints.Introspection,
-                     OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                    OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
                     OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,                    OpenIddictConstants.Permissions.GrantTypes.Password,                    OpenIddictConstants.Permissions.Scopes.Email,
                     OpenIddictConstants.Permissions.Scopes.Profile,
                     OpenIddictConstants.Permissions.Scopes.Roles,

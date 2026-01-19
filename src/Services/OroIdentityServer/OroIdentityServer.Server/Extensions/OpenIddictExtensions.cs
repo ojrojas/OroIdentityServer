@@ -1,5 +1,5 @@
 // OroIdentityServer
-// Copyright (C) 2025 Oscar Rojas
+// Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Extensions;
@@ -26,7 +26,9 @@ public static class OpenIddictExtensions
                   .SetEndSessionEndpointUris("/connect/logout")
                   .SetTokenEndpointUris("/connect/token")
                   .SetIntrospectionEndpointUris("/connect/introspect")
-                  .SetUserInfoEndpointUris("/connect/userinfo");
+                  .SetUserInfoEndpointUris("/connect/userinfo")
+                  ;
+
 
             // Mark the "email", "profile" and "roles" scopes as supported scopes.
             config.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles);
@@ -58,6 +60,7 @@ public static class OpenIddictExtensions
 
             // Register the ASP.NET Core host and configure the ASP.NET Core-specific config.
             config.UseAspNetCore()
+                   .DisableTransportSecurityRequirement()
                    .EnableAuthorizationEndpointPassthrough()
                    .EnableEndSessionEndpointPassthrough()
                    .EnableStatusCodePagesIntegration()

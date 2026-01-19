@@ -34,7 +34,9 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="OpenIddict.Abstractions" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="OpenIddict.AspNetCore" Version="$(OpenIddictVersion)" />
+    <PackageVersion Include="OpenIddict.Client.SystemIntegration" Version="7.2.0" />
     <PackageVersion Include="OpenIddict.Client.SystemNetHttp" Version="$(OpenIddictVersion)" />
+    <PackageVersion Include="OpenIddict.Core" Version="7.2.0" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="OpenIddict.Quartz" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="$(OpenIddictVersion)" />

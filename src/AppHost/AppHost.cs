@@ -1,5 +1,5 @@
 // OroIdentityServer
-// Copyright (C) 2025 Oscar Rojas
+// Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using Microsoft.Extensions.Configuration;
@@ -36,6 +36,8 @@ identityWeb
 .WithReference(seq)
 .WithReference(identity)
 .WithEnvironment("Identity__Url", identity.GetEndpoint(launchProfile))
+.WithEnvironment("IdentityWeb__Url", identityWeb.GetEndpoint(launchProfile))
+
 .WithExternalHttpEndpoints();
 
 builder.Build().Run();

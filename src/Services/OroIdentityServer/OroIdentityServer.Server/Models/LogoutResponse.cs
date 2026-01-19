@@ -1,25 +1,24 @@
 // OroIdentityServer
-// Copyright (C) 2025 Oscar Rojas
+// Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Models;
 
 public record LogoutResponse(
-        IConfiguration Configuration, AuthenticationProperties? Properties, string Schemes) : IResult
+        IConfiguration Configuration, AuthenticationProperties? Properties, string[] Schemes) : IResult
 {
     public async Task ExecuteAsync(HttpContext context)
     {
-        var request = context.GetOpenIddictServerRequest();
-        var uriUrl = $"{Configuration["Identity:Url"]}";
-        if (request != null && !string.IsNullOrEmpty(request.PostLogoutRedirectUri))
-            uriUrl = request.PostLogoutRedirectUri;
-
+        var uriUrl = context.Request.PathBase + context.Request.Path + QueryString.Create(
+                    context.Request.HasFormContentType ? context.Request.Form : context.Request.Query);
+        if(!uriUrl.StartsWith("https") || !uriUrl.StartsWith("http"))
+        {
+            uriUrl = "/";
+        }
+       
         ArgumentNullException.ThrowIfNull(uriUrl);
 
-        _ = Results.SignOut(Properties, [Schemes]) as IResult;
-        Results.SignOut();
-
-        await context.SignOutAsync(IdentityConstants.ApplicationScheme);
+        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         var adapter = new AdapterResult(Results.Redirect(uriUrl));
 
         await  adapter.ExecuteAsync(context);

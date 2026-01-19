@@ -1,5 +1,5 @@
 // OroIdentityServer
-// Copyright (C) 2025 Oscar Rojas
+// Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 global using System.Diagnostics.CodeAnalysis;
@@ -38,4 +38,5 @@ global using static OpenIddict.Abstractions.OpenIddictConstants;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Authorization;
 global using OpenIddict.Validation.AspNetCore;
+global using OroIdentityServer.Services.OroIdentityServer.Core.Models;
 

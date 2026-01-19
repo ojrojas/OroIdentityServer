@@ -1,11 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-      <RootNamespace>OroIdentityServer.Services.OroIdentityServer.Server</RootNamespace>
+    <RootNamespace>OroIdentityServer.Services.OroIdentityServer.Server</RootNamespace>
     <UserSecretsId>1f7913b8-0298-4b89-9f7c-51a38a051adb</UserSecretsId>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,5 +30,4 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\Loggers\Loggers.csproj" />
     <ProjectReference Include="..\OroIdentityServer.Application\OroIdentityServer.Application.csproj" />
   </ItemGroup>
-
 </Project>
