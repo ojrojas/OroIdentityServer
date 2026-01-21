@@ -1,0 +1,28 @@
+@page "/signin-oidc"
+@using OpenIddict.Client
+@attribute [Authorize]
+
+@inject NavigationManager Navigation
+@inject OpenIddictClientService OpenIddictClient
+@inject IJSRuntime JSRuntime
+
+<h1>Sign In with OpenID Connect</h1>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Aquí puedes agregar la lógica para iniciar el proceso de autenticación OIDC
+        // Por ejemplo, redirigir al usuario al proveedor de identidad
+        await JSRuntime.InvokeVoidAsync("window.close");
+
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Lógica adicional después del primer renderizado, si es necesario
+
+        }
+    }
+}

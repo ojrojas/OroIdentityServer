@@ -134,7 +134,7 @@ public class AuthorizationService(
                     ResultTypes.SignIn,
                     new ClaimsPrincipal(identity),
                     new(),
-                    [CookieAuthenticationDefaults.AuthenticationScheme]);
+                    [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
 
             default:
                 return new LoginResponse(ResultTypes.BadRequest, null, null, []);
