@@ -119,7 +119,7 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
             throw new ArgumentException("UserName and Email cannot be null or empty.");
 
         return new User(
-            new UserId(Guid.NewGuid()),
+            UserId.New(),
             name,
             middleName,
             lastName,

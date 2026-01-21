@@ -3,6 +3,7 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using System.Collections.Immutable;
+using Microsoft.Extensions.Primitives;
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Services;
 
 public class AuthorizationService(
@@ -18,7 +19,7 @@ public class AuthorizationService(
         var request = requested.Context.GetOpenIddictServerRequest() ??
             throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
 
-        var result = await requested.Context.AuthenticateAsync(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+        var result = await requested.Context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         if (result is not { Succeeded: true } ||
             request.HasPromptValue(PromptValues.Login) || request.MaxAge is 0 ||
             (request.MaxAge is not null && result.Properties?.IssuedUtc is not null &&
@@ -34,14 +35,28 @@ public class AuthorizationService(
                 }), [CookieAuthenticationDefaults.AuthenticationScheme]);
             }
 
-            return new LoginResponse(ResultTypes.Challenge, null, new AuthenticationProperties
+            if (!result.Succeeded)
+        {
+            var prompt = string.Join(" ", request.GetPromptValues().Remove(PromptValues.Login));
+
+            var parameters = requested.Context.Request.HasFormContentType ?
+              requested.Context.Request.Form.Where(parameter => parameter.Key != Parameters.Prompt).ToList() :
+              requested.Context.Request.Query.Where(parameter => parameter.Key != Parameters.Prompt).ToList();
+
+            parameters.Add(KeyValuePair.Create(Parameters.Prompt, new StringValues(prompt)));
+
+            var url = requested.Context.Request.PathBase + requested.Context.Request.Path + QueryString.Create(parameters);
+
+            return new LoginResponse(ResultTypes.Challenge,null,
+             new AuthenticationProperties
             {
-                RedirectUri = requested.Context.Request.PathBase + requested.Context.Request.Path + QueryString.Create(
-                    requested.Context.Request.HasFormContentType ? requested.Context.Request.Form : requested.Context.Request.Query)
-            }, [OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme]);
+                RedirectUri = url,
+            },
+             [CookieAuthenticationDefaults.AuthenticationScheme]);
+        }
         }
 
-        var userId = result.Principal!.GetClaim(Claims.Subject)!;
+        var userId = result.Principal!.GetClaim(Claims.Subject)!.Trim('"');
 
         ArgumentNullException.ThrowIfNull(userId);
 
@@ -52,7 +67,7 @@ public class AuthorizationService(
             {
                 RedirectUri = requested.Context.Request.PathBase + requested.Context.Request.Path + QueryString.Create(
                   requested.Context.Request.HasFormContentType ? requested.Context.Request.Form : requested.Context.Request.Query)
-            }, [OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme]);
+            }, [CookieAuthenticationDefaults.AuthenticationScheme]);
         }
 
         var application = await applicationManager.FindByClientIdAsync(request.ClientId!, cancellationToken: cancellationToken) ??
@@ -119,7 +134,7 @@ public class AuthorizationService(
                     ResultTypes.SignIn,
                     new ClaimsPrincipal(identity),
                     new(),
-                    [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+                    [CookieAuthenticationDefaults.AuthenticationScheme]);
 
             default:
                 return new LoginResponse(ResultTypes.BadRequest, null, null, []);

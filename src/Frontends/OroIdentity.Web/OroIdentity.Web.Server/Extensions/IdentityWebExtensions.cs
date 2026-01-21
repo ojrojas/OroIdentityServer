@@ -18,10 +18,7 @@ public static class OroIdentityWebExtensions
             opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             opt.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         })
-        .AddCookie(options =>
-        {
-            options.LoginPath = "/account/login";
-        });
+        .AddCookie();
        
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy("CanAccess", policy =>

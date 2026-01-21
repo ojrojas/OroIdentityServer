@@ -49,6 +49,8 @@ public class LoginService(
 
             var response = await openIddictClientService.AuthenticateInteractivelyAsync(new()
             {
+                CancellationToken = cancellationToken,
+                Properties = result.Properties,
                 Nonce = result.Nonce
             });
 
