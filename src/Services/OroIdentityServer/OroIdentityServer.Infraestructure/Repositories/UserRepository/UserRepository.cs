@@ -77,9 +77,11 @@ public class UserRepository(
     public async Task<User?> GetUserByIdAsync(UserId id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetUserByIdAsync with id: {Id}", id);
-        var result = await repository.GetByIdAsync(id, cancellationToken);
+        var specification = new GetUserByIdSpecification(id);
+        var user = await repository.CurrentContext.FirstOrDefaultAsync(
+            specification.Criteria, cancellationToken: cancellationToken);
         logger.LogInformation("Exiting GetUserByIdAsync");
-        return result;
+        return user;
     }
 
     public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)

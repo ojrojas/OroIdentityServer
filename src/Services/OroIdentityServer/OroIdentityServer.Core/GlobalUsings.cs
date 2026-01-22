@@ -6,7 +6,6 @@ global using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Services;
-global using System.Linq.Expressions;
 global using OroKernel.Shared.Entities;
 global using OroKernel.Shared.Interfaces;
 global using OroKernel.Shared.Events;

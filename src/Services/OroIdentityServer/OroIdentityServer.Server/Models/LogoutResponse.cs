@@ -19,7 +19,13 @@ public record LogoutResponse(
         ArgumentNullException.ThrowIfNull(uriUrl);
 
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        var adapter = new AdapterResult(Results.Redirect(uriUrl));
+        
+        var adapter = new AdapterResult(Results.SignOut(
+            authenticationSchemes: [CookieAuthenticationDefaults.AuthenticationScheme],
+            properties: new AuthenticationProperties
+            {
+                RedirectUri =  uriUrl
+            }));
 
         await  adapter.ExecuteAsync(context);
     }

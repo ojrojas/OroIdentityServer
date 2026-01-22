@@ -106,11 +106,12 @@ public static class DatabaseSeeder
                     OpenIddictConstants.Permissions.Endpoints.Token,
                     OpenIddictConstants.Permissions.Endpoints.Introspection,
                     OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                    OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,                    OpenIddictConstants.Permissions.GrantTypes.Password,                    OpenIddictConstants.Permissions.Scopes.Email,
+                    OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,                    
+                    OpenIddictConstants.Permissions.GrantTypes.Password,                    
+                    OpenIddictConstants.Permissions.Scopes.Email,
                     OpenIddictConstants.Permissions.Scopes.Profile,
                     OpenIddictConstants.Permissions.Scopes.Roles,
                     OpenIddictConstants.Permissions.ResponseTypes.Code,
-                    OpenIddictConstants.ResponseTypes.Code,
                 },
                 Requirements =
                 {

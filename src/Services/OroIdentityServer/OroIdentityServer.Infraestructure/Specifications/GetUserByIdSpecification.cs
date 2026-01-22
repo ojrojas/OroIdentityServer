@@ -4,9 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
 
-public sealed class GetUserByEmailSpecification(string criteria) : ISpecification<User>
+public sealed class GetUserByIdSpecification(UserId id) : ISpecification<User>
 {
-    public Expression<Func<User, bool>> Criteria { get; } = x => EF.Functions.Like(x.Email, $"%{criteria}%");
+    public Expression<Func<User, bool>> Criteria { get; } = x => x.Id == id;
     public List<Expression<Func<User, object>>> Includes { get; } = [];
     public List<string> IncludeStrings { get; } = [];
 }

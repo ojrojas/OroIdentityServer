@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Client;
-using OpenIddict.Abstractions;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace OroIdentity.Web.Server.Extensiones;
 
@@ -18,25 +18,25 @@ public static class OpenIddictExtensions
         ArgumentException.ThrowIfNullOrEmpty(signingKey, "SymmetricSecurityKey configuration is missing");
 
         services.AddOpenIddict()
-            .AddValidation(config =>
-            {
-                config.SetIssuer($"{configuration["Identity:Url"]}/");
-                config.AddAudiences("OroIdentityServer.Web");
+            // .AddValidation(config =>
+            // {
+            //     config.SetIssuer($"{configuration["Identity:Url"]}/");
+            //     config.AddAudiences("OroIdentityServer.Web");
 
-                config.UseIntrospection()
-                .SetClientId("OroIdentityServer.Web")
-                .SetClientSecret("a2344152-e928-49e7-bb3c-ee54acc96c8c");
+            //     config.UseIntrospection()
+            //     .SetClientId("OroIdentityServer.Web")
+            //     .SetClientSecret("a2344152-e928-49e7-bb3c-ee54acc96c8c");
 
-                // Configure encryption and signing of tokens.  testing phrase tokens ORO_IDENTITY_SERVER_PROJECT_0001
-                config.AddEncryptionKey(new SymmetricSecurityKey(
-                    Convert.FromBase64String(signingKey)));
+            //     // Configure encryption and signing of tokens.  testing phrase tokens ORO_IDENTITY_SERVER_PROJECT_0001
+            //     config.AddEncryptionKey(new SymmetricSecurityKey(
+            //         Convert.FromBase64String(signingKey)));
 
-                // Register the System.Net.Http integration.
-                config.UseSystemNetHttp();
+            //     // Register the System.Net.Http integration.
+            //     config.UseSystemNetHttp();
 
-                // Register the ASP.NET Core host.
-                config.UseAspNetCore();
-            }) 
+            //     // Register the ASP.NET Core host.
+            //     config.UseAspNetCore();
+            // }) 
             .AddClient(options =>
             {
                 // Disable token storage since we don't need persistent storage for this client
@@ -58,13 +58,28 @@ public static class OpenIddictExtensions
 
                 // Register the System.Net.Http integration.
                 options.UseSystemNetHttp();
-                options.UseSystemIntegration();
+                // options.UseSystemIntegration();
+                options.UseAspNetCore();
 
                 options.AddRegistration(new OpenIddictClientRegistration
                 {
                     ClientId = "OroIdentityServer.Web",
                     RedirectUri = new Uri($"{configuration["IdentityWeb:Url"]}/signin-oidc"),
-                    Issuer = new Uri($"{configuration["Identity:Url"]}/"),
+                    Issuer = new Uri($"{configuration["Identity:Url"]}/"), 
+                    ClientSecret = "a2344152-e928-49e7-bb3c-ee54acc96c8c",
+                    Scopes =
+                    {
+                        Scopes.OpenId,
+                        Scopes.Email,
+                        Scopes.Profile,
+                        Scopes.Roles,
+                    },
+                    GrantTypes =
+                    {
+                        GrantTypes.AuthorizationCode,
+                        GrantTypes.RefreshToken,
+                    },
+                    
                 });
             });
 

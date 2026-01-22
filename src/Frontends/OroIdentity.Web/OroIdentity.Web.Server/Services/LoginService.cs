@@ -49,12 +49,21 @@ public class LoginService(
 
             var response = await openIddictClientService.AuthenticateInteractivelyAsync(new()
             {
+                CancellationToken = cancellationToken,
+                Properties = result.Properties,
                 Nonce = result.Nonce
             });
 
-            if(!string.IsNullOrWhiteSpace(response.TokenResponse.AccessToken))
+            logger.LogInformation("Authentication response: {}", JsonSerializer.Serialize(response));
+
+            if (!string.IsNullOrWhiteSpace(response.TokenResponse?.AccessToken))
             {
-                logger.LogInformation("Login successful");
+                logger.LogInformation("Login successful, access token received");
+                // Aquí puedes agregar lógica para manejar el token, como guardarlo en sesión o cookies
+            }
+            else
+            {
+                logger.LogWarning("No access token received in response");
             }
 
             return new HttpResponseMessage(System.Net.HttpStatusCode.OK);

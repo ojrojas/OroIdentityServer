@@ -19,6 +19,14 @@ public static class ApplicationExtensions
            config.EnableSensitiveDataLogging(); // Consider disabling in production for security reasons
         });
 
+        builder.Services.AddQuartz(options =>
+        {
+            options.UseSimpleTypeLoader();
+            options.UseInMemoryStore();
+        });
+
+        builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+
         builder.Services.AddProblemDetails();
 
         return builder;

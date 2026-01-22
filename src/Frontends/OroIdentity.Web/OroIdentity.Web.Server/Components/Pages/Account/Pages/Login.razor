@@ -26,17 +26,17 @@
 <PageTitle>Log in</PageTitle>
 
 <FluentLayout Style="display:flex; justify-content: center; align-items:center">
-<FluentGrid Justify="JustifyContent.Center" AdaptiveRendering="true">
-    <FluentGridItem xs="12" md="12" >
-    <FluentCard Width="450px">
-        <StatusMessages Message="@errorMessage" />
-        <EditForm Model="Input" method="post" OnSubmit="LoginUser" FormName="login">
-            <DataAnnotationsValidator />
-            <h1>OroIdentityServer Admin</h1>
-            <hr />
-            <FluentValidationSummary class="text-danger" role="alert" />
-            <FluentStack Orientation="Orientation.Vertical">
-                @* <FluentTextField Id="email" Name="Input.Email" @bind-Value="Input.Email" AutoComplete="username" Required="true"
+    <FluentGrid Justify="JustifyContent.Center" AdaptiveRendering="true">
+        <FluentGridItem xs="12" md="12">
+            <FluentCard Width="450px">
+                <StatusMessages Message="@errorMessage" />
+                <EditForm Model="Input" method="post" OnSubmit="LoginUser" FormName="login">
+                    <DataAnnotationsValidator />
+                    <h1>OroIdentityServer Admin</h1>
+                    <hr />
+                    <FluentValidationSummary class="text-danger" role="alert" />
+                    <FluentStack Orientation="Orientation.Vertical">
+                        @* <FluentTextField Id="email" Name="Input.Email" @bind-Value="Input.Email" AutoComplete="username" Required="true"
                     Placeholder="name@example.com" Label="Email" Style="width: 100%" />
                 <FluentValidationMessage For="() => Input.Email" class="text-danger" />
                 <FluentTextField Id="password" type="password" Name="Input.Password" @bind-Value="Input.Password"
@@ -44,13 +44,13 @@
                     Style="width: 100%" />
                 <FluentValidationMessage For="() => Input.Password" class="text-danger" />
                 <FluentCheckbox Name="Input.RememberMe" @bind-Value="Input.RememberMe" Label="Remember me" /> *@
-                <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Log in
-                </FluentButton>
-            </FluentStack>
-        </EditForm>
-    </FluentCard>
-    </FluentGridItem>
-</FluentGrid>
+                        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%">Log in
+                        </FluentButton>
+                    </FluentStack>
+                </EditForm>
+            </FluentCard>
+        </FluentGridItem>
+    </FluentGrid>
 </FluentLayout>
 
 @code {
@@ -79,7 +79,8 @@
 
         failedAttempts = HttpContext.Session.GetInt32("failedAttempts") ?? 0;
 
-        if (!string.IsNullOrEmpty(ReturnUrl) && !ReturnUrl.StartsWith("/") && !Uri.IsWellFormedUriString(ReturnUrl, UriKind.Relative))
+        if (!string.IsNullOrEmpty(ReturnUrl) && !ReturnUrl.StartsWith("/") && !Uri.IsWellFormedUriString(ReturnUrl,
+        UriKind.Relative))
         {
             ReturnUrl = "/";
         }
@@ -98,45 +99,48 @@
             errorMessage = "Too many failed attempts. Try again later.";
             return;
         }
+        using var source = new CancellationTokenSource(delay: TimeSpan.FromSeconds(90));
+        var response = await loginService.LoginRequest(Input, source.Token);
 
-       var response = await loginService.LoginRequest(Input, CancellationToken.None);
+        if (response is null)
+        {
+            errorMessage = "Request to login badrequest or invalid";
+            return;
+        }
 
-       if(response is null)
-       {
-        errorMessage = "Request to login badrequest or invalid";
-        return;
-       }
-
-       if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-       {
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
             failedAttempts++;
             HttpContext.Session.SetInt32("failedAttempts", failedAttempts);
             errorMessage = "Email or Password invalid or unauthorized";
             return;
-       }
-       if(response.StatusCode == System.Net.HttpStatusCode.OK)
-       {
+        }
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
             // Parse token
             var tokenJson = await response.Content.ReadAsStringAsync();
             var tokenData = System.Text.Json.JsonSerializer.Deserialize<TokenResponse>(tokenJson);
-            
+
             if (tokenData?.AccessToken != null)
             {
                 // Sign in user
-                var claims = new List<System.Security.Claims.Claim> 
-                { 
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, Input.Email) 
-                };
-                
-                var identity = new System.Security.Claims.ClaimsIdentity(claims, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
-                await HttpContext.SignInAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme, new System.Security.Claims.ClaimsPrincipal(identity));
-                
+                var claims = new List<System.Security.Claims.Claim>
+{
+new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, Input.Email)
+};
+
+                var identity = new System.Security.Claims.ClaimsIdentity(claims,
+                Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
+                await
+                HttpContext.SignInAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme,
+                new System.Security.Claims.ClaimsPrincipal(identity));
+
                 // Reset failed attempts on success
                 HttpContext.Session.SetInt32("failedAttempts", 0);
-                
+
                 // Store token in session for later use
                 HttpContext.Session.SetString("access_token", tokenData.AccessToken);
-                
+
                 NavigationManager.NavigateTo(ReturnUrl ?? "/");
             }
             else
@@ -144,16 +148,16 @@
                 errorMessage = "Invalid token response";
             }
             return;
-       }
-       if(response.StatusCode.Equals(System.Net.HttpStatusCode.BadRequest))
-       {
-        errorMessage = "Bad request";
-        return;
-       }
-       if(response.StatusCode.Equals(System.Net.HttpStatusCode.InternalServerError))
-       {
-        errorMessage = "Internal server error";
-        return;
-       }
+        }
+        if (response.StatusCode.Equals(System.Net.HttpStatusCode.BadRequest))
+        {
+            errorMessage = "Bad request";
+            return;
+        }
+        if (response.StatusCode.Equals(System.Net.HttpStatusCode.InternalServerError))
+        {
+            errorMessage = "Internal server error";
+            return;
+        }
     }
 }

@@ -46,7 +46,6 @@ public static class OpenIddictExtensions
             config.AllowAuthorizationCodeFlow()
             .AllowClientCredentialsFlow()
             .AllowPasswordFlow()
-            .AllowImplicitFlow()
             .AllowRefreshTokenFlow();
 
             config.RequireProofKeyForCodeExchange();
