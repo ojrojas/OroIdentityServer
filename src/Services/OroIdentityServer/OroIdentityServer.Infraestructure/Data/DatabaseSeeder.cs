@@ -99,18 +99,19 @@ public static class DatabaseSeeder
                 ClientSecret = "a2344152-e928-49e7-bb3c-ee54acc96c8c",
                 ClientType = OpenIddictConstants.ClientTypes.Confidential,
                 ApplicationType = OpenIddictConstants.ApplicationTypes.Web,
-                ConsentType = OpenIddictConstants.ConsentTypes.Explicit,
+                ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
                 Permissions =
                 {
                     OpenIddictConstants.Permissions.Endpoints.Authorization,
                     OpenIddictConstants.Permissions.Endpoints.Token,
                     OpenIddictConstants.Permissions.Endpoints.Introspection,
                     OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                    OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,                    OpenIddictConstants.Permissions.GrantTypes.Password,                    OpenIddictConstants.Permissions.Scopes.Email,
+                    OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,                    
+                    OpenIddictConstants.Permissions.GrantTypes.Password,                    
+                    OpenIddictConstants.Permissions.Scopes.Email,
                     OpenIddictConstants.Permissions.Scopes.Profile,
                     OpenIddictConstants.Permissions.Scopes.Roles,
                     OpenIddictConstants.Permissions.ResponseTypes.Code,
-                    OpenIddictConstants.ResponseTypes.Code,
                 },
                 Requirements =
                 {

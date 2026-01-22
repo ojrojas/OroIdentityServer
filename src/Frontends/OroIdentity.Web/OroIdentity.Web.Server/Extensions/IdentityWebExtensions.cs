@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for details.
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Logging;
+using OpenIddict.Client.AspNetCore;
 
 namespace OroIdentity.Web.Server.Extensiones;
 
@@ -16,20 +17,19 @@ public static class OroIdentityWebExtensions
         builder.Services.AddAuthentication(opt =>
         {
             opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            opt.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        })
-        .AddCookie();
-       
+            opt.DefaultChallengeScheme = OpenIddictClientAspNetCoreDefaults.AuthenticationScheme;
+        });
+
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy("CanAccess", policy =>
             {
                 policy.RequireAuthenticatedUser()
-                .RequireRole("Administrator","User").Build();
+                .RequireRole("Administrator", "User").Build();
             })
             .AddPolicy("CanSeeError", policy =>
             {
                 policy.RequireAuthenticatedUser()
-                 .RequireRole("Administrator","User").Build();
+                 .RequireRole("Administrator", "User").Build();
             });
 
 

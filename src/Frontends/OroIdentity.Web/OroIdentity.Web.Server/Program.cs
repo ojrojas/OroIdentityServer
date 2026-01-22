@@ -16,12 +16,13 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 builder.Services.AddFluentUIComponents();
 
-builder.AddOroIdentityWebExtensions();
-builder.Services.AddDIOpenIddictApplication(configuration);
 
+builder.AddOroIdentityWebExtensions();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
+
+builder.Services.AddDIOpenIddictApplication(configuration);
 
 builder.Services.AddScoped<IdentityRedirectManager>();
 
@@ -70,9 +71,9 @@ app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseStaticFiles();
 
+app.UseAuthentication();
 app.UseRouting();
 app.UseSession();
-app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseAntiforgery();

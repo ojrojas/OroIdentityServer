@@ -3,8 +3,6 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 
-using OroIdentityServer.Services.OroIdentityServer.Core.Models;
-
 namespace OroIdentityServer.OroIdentityServer.Api.EndPoints;
 
 public static class RoleClaimsEndpoints

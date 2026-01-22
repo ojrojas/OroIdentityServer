@@ -25,7 +25,6 @@ global using OroIdentityServer.Services.OroIdentityServer.Server.Endpoints;
 global using OroIdentityServer.Services.OroIdentityServer.Server.Enums;
 global using OroIdentityServer.Services.OroIdentityServer.Server.Extensions;
 global using OroIdentityServer.Services.OroIdentityServer.Server.Models;
-global using OroIdentityServer.Services.OroIdentityServer.Server.Services;
 global using OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 global using OroIdentityServer.Services.OroIdentityServer.Application.Extensions;
 global using OroIdentityServer.Services.OroIdentityServer.Application.Queries;
