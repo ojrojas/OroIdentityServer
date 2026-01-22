@@ -26,7 +26,7 @@ public static class OpenIddictExtensions
                   .SetEndSessionEndpointUris("/connect/logout")
                   .SetTokenEndpointUris("/connect/token")
                   .SetIntrospectionEndpointUris("/connect/introspect")
-                  .SetUserInfoEndpointUris("/connect/userinfo")
+                //   .SetUserInfoEndpointUris("/connect/userinfo")
                   ;
 
 
