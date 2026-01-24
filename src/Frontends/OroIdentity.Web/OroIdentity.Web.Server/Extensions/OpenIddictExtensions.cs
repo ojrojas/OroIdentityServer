@@ -68,7 +68,7 @@ public static class OpenIddictExtensions
                 {
                     ClientId = "OroIdentityServer.Web",
                     RedirectUri = new Uri($"{configuration["IdentityWeb:Url"]}/signin-oidc"),
-                    Issuer = new Uri($"{configuration["Identity:Url"]}/"),
+                    Issuer = new Uri($"{configuration["Identity:Url"]}"),
                     ClientSecret = "a2344152-e928-49e7-bb3c-ee54acc96c8c",
                     Scopes =
                     {
@@ -82,13 +82,13 @@ public static class OpenIddictExtensions
                         GrantTypes.AuthorizationCode,
                         GrantTypes.RefreshToken,
                     },
-
                 });
 
                 options.AddEventHandler<ApplyRedirectionResponseContext>(builder =>
                 {
                     builder.UseScopedHandler<CustomRedirectionHandler>();
                 });
+
             });
 
         return services;
