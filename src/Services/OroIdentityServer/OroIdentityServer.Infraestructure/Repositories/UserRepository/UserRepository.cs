@@ -2,11 +2,14 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using System.Collections.Immutable;
+
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class UserRepository(
     ILogger<UserRepository> logger, 
     IRepository<User> repository,
+    IUserRolesRepository userRolesRepository,
     ISecurityUserRepository securityUserRepository) : IUserRepository
 {
     public async Task AddUserAsync(User user, CancellationToken cancellationToken)
@@ -78,8 +81,9 @@ public class UserRepository(
     {
         logger.LogInformation("Entering GetUserByIdAsync with id: {Id}", id);
         var specification = new GetUserByIdSpecification(id);
-        var user = await repository.CurrentContext.FirstOrDefaultAsync(
+        var user = await repository.CurrentContext.Include(x=> x.Roles).FirstOrDefaultAsync(
             specification.Criteria, cancellationToken: cancellationToken);
+
         logger.LogInformation("Exiting GetUserByIdAsync");
         return user;
     }

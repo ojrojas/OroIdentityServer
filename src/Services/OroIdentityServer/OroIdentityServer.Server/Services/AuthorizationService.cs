@@ -56,7 +56,7 @@ public class AuthorizationService(
             }
         }
 
-        var userId = result.Principal!.GetClaim(Claims.Subject)!.Trim('"');
+        var userId = result.Principal!.GetClaim(Claims.Subject);
 
         ArgumentNullException.ThrowIfNull(userId);
 
@@ -74,7 +74,7 @@ public class AuthorizationService(
             throw new InvalidOperationException("Details concerning the calling client application cannot be found.");
 
         var authorizations = await authorizationManager.FindAsync(
-            subject: user.Data?.Id.ToString(),
+            subject: user.Data?.Id.Value.ToString(),
             client: await applicationManager.GetIdAsync(application, cancellationToken),
             status: Statuses.Valid,
             type: AuthorizationTypes.Permanent,
@@ -103,13 +103,12 @@ public class AuthorizationService(
                     nameType: Claims.Name,
                     roleType: Claims.Role);
 
-                identity.SetClaim(Claims.Subject, user.Data.Id.Value)
-                        .SetClaim(Claims.Email, user.Data.Email)
-                        .SetClaim(Claims.Name, user.Data.UserName)
-                        .SetClaim(Claims.PreferredUsername, user.Data.UserName)
-                        .SetClaims(
-                            "Roles",
-                            user.Data.Roles.Select(r => r.RoleId.ToString()).ToImmutableArray());
+                identity.SetClaim(Claims.Subject, user?.Data?.Id.Value.ToString())
+                        .SetClaim(Claims.Email, user?.Data?.Email)
+                        .SetClaim(Claims.Name, user?.Data?.UserName)
+                        .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
+                        .SetClaims(Claims.Role,
+                            user.Data.Roles.Select(r => r.RoleId.Value.ToString()).ToImmutableArray());
 
                 identity.SetScopes(request.GetScopes());
                 identity.SetResources(
@@ -121,7 +120,7 @@ public class AuthorizationService(
                 var authorization = authorizations.LastOrDefault();
                 authorization ??= await authorizationManager.CreateAsync(
                     identity: identity,
-                    subject: user.Data.Id.ToString(),
+                    subject: user.Data.Id.Value.ToString(),
                     client: (await applicationManager.GetIdAsync(application, cancellationToken))!,
                     type: AuthorizationTypes.Permanent,
                     scopes: identity.GetScopes(),
@@ -158,7 +157,7 @@ public class AuthorizationService(
             var valueId = result.Principal.GetClaim(Claims.Subject);
             ArgumentNullException.ThrowIfNull(valueId);
 
-            var userId = result.Principal!.GetClaim(Claims.Subject)!.Trim('"');
+            var userId = result.Principal!.GetClaim(Claims.Subject);
             var user = await sender.Send(new GetUserByIdQuery(new(Guid.Parse(userId))), cancellationToken);
             if (user is null)
             {
@@ -170,7 +169,7 @@ public class AuthorizationService(
             }
 
             // Ensure the user is still allowed to sign in.
-            if (!await sender.Send(new ValidateUserToLoginQuery(user.Data.Email), cancellationToken))
+            if (!await sender.Send(new ValidateUserToLoginQuery(user?.Data?.Email), cancellationToken))
             {
                 return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
                 {
@@ -186,11 +185,11 @@ public class AuthorizationService(
 
             // Override the user claims present in the principal in case they
             // changed since the authorization code/refresh token was issued.
-            identity.SetClaim(Claims.Subject, user.Data.Id.Value)
+            identity.SetClaim(Claims.Subject, user.Data.Id.Value.ToString())
                 .SetClaim(Claims.Email, user.Data.Email)
                 .SetClaim(Claims.Name, user.Data.UserName)
                 .SetClaim(Claims.PreferredUsername, user.Data.UserName)
-                // .SetClaims(Claims.Role, user.Data.Roles)
+                .SetClaims(Claims.Role, user.Data.Roles.Select(r => r.RoleId.Value.ToString()).ToImmutableArray())
                 ;
 
             identity.SetDestinations(GetDestination.GetDestinations);
@@ -252,11 +251,11 @@ public class AuthorizationService(
         nameType: Claims.Name,
         roleType: Claims.Role);
 
-        identity.SetClaim(Claims.Subject, user.Data.Id.Value)
-                .SetClaim(Claims.Email, user.Data.Email)
-                .SetClaim(Claims.Name, user.Data.UserName)
-                .SetClaim(Claims.PreferredUsername, user.Data.UserName)
-                // .SetClaims(Claims.Role, user.Data.Roles)
+        identity.SetClaim(Claims.Subject, user?.Data?.Id.Value.ToString())
+                .SetClaim(Claims.Email, user?.Data?.Email)
+                .SetClaim(Claims.Name, user?.Data?.UserName)
+                .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
+                .SetClaims(Claims.Role, user.Data.Roles.Select(r => r.RoleId.Value.ToString()).ToImmutableArray())
                 ;
 
         identity.SetScopes(new[]
@@ -284,5 +283,42 @@ public class AuthorizationService(
         if (cancellationToken.IsCancellationRequested) throw new InvalidOperationException("Error logout request");
         await Task.CompletedTask;
         return response;
+    }
+
+    public async Task<IResult> GetUserInfoAsync(SimpleRequest requested, CancellationToken cancellationToken = default)
+    {
+        var request = requested.Context.GetOpenIddictServerRequest() ??
+           throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
+
+        var result = await requested.Context.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        var userId = result.Principal!.GetClaim(Claims.Subject);
+
+        ArgumentNullException.ThrowIfNull(userId);
+
+        var user = await sender.Send(new GetUserByIdQuery(new(Guid.Parse(userId))), cancellationToken);
+        if (user == null)
+        {
+            return new LoginResponse(ResultTypes.Challenge, null, new AuthenticationProperties
+            {
+                RedirectUri = requested.Context.Request.PathBase + requested.Context.Request.Path + QueryString.Create(
+                  requested.Context.Request.HasFormContentType ? requested.Context.Request.Form : requested.Context.Request.Query)
+            }, [CookieAuthenticationDefaults.AuthenticationScheme]);
+        }
+
+        var claims = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            // Note: the "sub" claim is a mandatory claim and must be included in the JSON response.
+            [Claims.Subject] = userId,
+            [Claims.Email] = user?.Data?.Email,
+            [Claims.Role] = user.Data.Roles.Select(r => r.RoleId.Value.ToString()).ToImmutableArray(),
+        };
+
+        if (user?.Data?.UserName is not null)
+        {
+            claims[Claims.PreferredUsername] = user?.Data?.UserName;
+            claims[Claims.Name] = user?.Data?.UserName;
+        }
+
+        return TypedResults.Ok(claims);
     }
 }

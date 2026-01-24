@@ -1,5 +1,4 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using OroIdentityServer.Server
 
 <FluentNavMenu Collapse="false">
     <FluentNavLink Href="Account/Manage" Match="NavLinkMatch.All">Profile</FluentNavLink>
@@ -17,7 +16,7 @@
 
 
 @code {
-    private bool hasExternalLogins;
+    private bool hasExternalLogins = false;
 
     protected override async Task OnInitializedAsync()
     {

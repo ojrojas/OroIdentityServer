@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Components;
 using OpenIddict.Client;
 
 using static OpenIddict.Client.OpenIddictClientEvents;
@@ -11,7 +10,12 @@ public class CustomRedirectionHandler(
 {
     public async ValueTask HandleAsync(ApplyRedirectionResponseContext context)
     {
+        if(context.IsRequestHandled)
+        {
+            return;
+        }
         logger.LogInformation("Custom redirection handler invoked.");
+        ArgumentNullException.ThrowIfNull(context.RequestUri);
         context.HandleRequest();
     }
 }

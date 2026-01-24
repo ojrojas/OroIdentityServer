@@ -12,13 +12,13 @@ global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using OpenIddict.Abstractions;
-global using OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Interfaces;
 global using OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Models;
 global using OroIdentityServer.Services.OroIdentityServer.Infraestructure;
 global using OroKernel.Shared.Options;
 global using OroKernel.Shared.Interfaces;
+global using OroIdentityServer.OroIdentityServer.Infraestructure.Interfaces;
 
 
 global using OroKernel.Shared.Data;

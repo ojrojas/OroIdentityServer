@@ -26,9 +26,8 @@ public static class OpenIddictExtensions
                   .SetEndSessionEndpointUris("/connect/logout")
                   .SetTokenEndpointUris("/connect/token")
                   .SetIntrospectionEndpointUris("/connect/introspect")
-                //   .SetUserInfoEndpointUris("/connect/userinfo")
+                  // .SetUserInfoEndpointUris("/connect/userinfo")
                   ;
-
 
             // Mark the "email", "profile" and "roles" scopes as supported scopes.
             config.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles);
@@ -63,7 +62,7 @@ public static class OpenIddictExtensions
                    .EnableAuthorizationEndpointPassthrough()
                    .EnableEndSessionEndpointPassthrough()
                    .EnableStatusCodePagesIntegration()
-                   .EnableUserInfoEndpointPassthrough()
+                   // .EnableUserInfoEndpointPassthrough()
                    .EnableTokenEndpointPassthrough();
         })
 

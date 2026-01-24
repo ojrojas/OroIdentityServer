@@ -14,8 +14,19 @@ public static class AuthorizedEndpoints
         api.MapPost("/connect/token", GetToken);
         api.MapGet("/connect/logout", Logout);
         api.MapPost("/account/login", Login);
+        // api.MapGet("/connect/userinfo", UserInfoEndpoint);
 
         return api;
+    }
+
+ 
+    [Authorize(AuthenticationSchemes = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)]
+    private static async Task<IResult> UserInfoEndpoint(
+        HttpContext context,
+        [FromServices] Services.IAuthorizationService service,
+        CancellationToken cancellationToken)
+    {
+        return await service.GetUserInfoAsync(new(context), cancellationToken);
     }
 
     private static async ValueTask<IResult> Login(

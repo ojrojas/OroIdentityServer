@@ -89,6 +89,14 @@ public static class OpenIddictExtensions
                     builder.UseScopedHandler<CustomRedirectionHandler>();
                 });
 
+                options.AddEventHandler<ApplyTokenRequestContext>(builder =>
+                {
+                    builder.UseInlineHandler(handler =>
+                    {
+                        return default;
+                    });
+                });
+
             });
 
         return services;

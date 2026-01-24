@@ -11,14 +11,10 @@ namespace OroIdentity.Web.Server.Services;
 
 public class LoginService(
     ILogger<LoginService> logger,
-    IConfiguration configuration,
-    HttpClient client,
     IAntiforgery antiforgery,
     OpenIddictClientService openIddictClientService,
     IHttpContextAccessor context) : ILoginService
 {
-    public HttpClient Client => client;
-    private readonly string UrlBase = "/connect/authorize";
     public async Task<HttpResponseMessage> LoginRequest(LoginInputModel loginModel, CancellationToken cancellationToken)
     {
         try

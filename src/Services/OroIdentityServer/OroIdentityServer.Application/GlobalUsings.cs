@@ -3,7 +3,6 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 global using OroCQRS.Core.Interfaces;
-global using OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Interfaces;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Models;
 global using Microsoft.Extensions.Logging;
@@ -13,3 +12,5 @@ global using Microsoft.Extensions.Configuration;
 global using OroCQRS.Core.Extensions;
 global using OpenIddict.Abstractions;
 global using OroKernel.Shared.Enums;
+global using OroIdentityServer.OroIdentityServer.Infraestructure.Interfaces;
+global using OroIdentityServer.Services.OroIdentityServer.Application.Queries;

@@ -4,9 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
 
-public sealed class GetUserByIdSpecification(UserId id) : ISpecification<User>
+internal class GetUserRolesByUserIdSpecification(UserId UserId) : ISpecification<UserRole>
 {
-    public Expression<Func<User, bool>> Criteria { get; } = x => x.Id == id;
-    public List<Expression<Func<User, object>>> Includes { get; } = [u => u.Roles];
+    public Expression<Func<UserRole, bool>> Criteria { get; } = x => x.UserId == UserId;
+    public List<Expression<Func<UserRole, object>>> Includes { get; } = [];
     public List<string> IncludeStrings { get; } = [];
 }

@@ -1,6 +1,29 @@
 <Project>
   <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
-  <Target Name="CustomAfterBuildTarget" AfterTargets="Build">
-      <Message Text="Hello from CustomAfterBuildTarget" Importance="high" />
+
+  <!-- Common properties -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <!-- <TreatWarningsAsErrors>true</TreatWarningsAsErrors> -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <!-- Clean target to remove bin and obj directories -->
+  <Target Name="CleanAll" AfterTargets="Clean">
+    <RemoveDir Directories="$(MSBuildProjectDirectory)/bin" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)/obj" />
   </Target>
+
+  <!-- Custom after build target -->
+  <Target Name="CustomAfterBuildTarget" AfterTargets="Build">
+    <Message Text="Build completed for $(MSBuildProjectName)" Importance="high" />
+  </Target>
+
+  <!-- Run tests after build if in Debug configuration -->
+  <Target Name="RunTests" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <Exec Command="dotnet test --no-build --verbosity=normal" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
 </Project>
