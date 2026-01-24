@@ -4,7 +4,9 @@
 // See the LICENSE file in the project root for details.
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Client;
+using OroIdentity.Web.Server.Handlers;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using static OpenIddict.Client.OpenIddictClientEvents;
 
 namespace OroIdentity.Web.Server.Extensiones;
 
@@ -37,6 +39,7 @@ public static class OpenIddictExtensions
             //     // Register the ASP.NET Core host.
             //     config.UseAspNetCore();
             // }) 
+
             .AddClient(options =>
             {
                 // Disable token storage since we don't need persistent storage for this client
@@ -65,7 +68,7 @@ public static class OpenIddictExtensions
                 {
                     ClientId = "OroIdentityServer.Web",
                     RedirectUri = new Uri($"{configuration["IdentityWeb:Url"]}/signin-oidc"),
-                    Issuer = new Uri($"{configuration["Identity:Url"]}/"), 
+                    Issuer = new Uri($"{configuration["Identity:Url"]}/"),
                     ClientSecret = "a2344152-e928-49e7-bb3c-ee54acc96c8c",
                     Scopes =
                     {
@@ -79,7 +82,12 @@ public static class OpenIddictExtensions
                         GrantTypes.AuthorizationCode,
                         GrantTypes.RefreshToken,
                     },
-                    
+
+                });
+
+                options.AddEventHandler<ApplyRedirectionResponseContext>(builder =>
+                {
+                    builder.UseScopedHandler<CustomRedirectionHandler>();
                 });
             });
 
