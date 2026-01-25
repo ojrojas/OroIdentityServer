@@ -36,6 +36,16 @@ builder.Services.Configure<RouteOptions>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "http://localhost:33444", "http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -72,6 +82,9 @@ Console.WriteLine($"Tables: {string.Join(", ", context.Model.GetEntityTypes().Se
 var seedDataPath = Path.Combine(
     Directory.GetCurrentDirectory(),
     "bin", "Debug", "net10.0", "Data", "seedData.json");
+// Log configured IdentityWeb URL so we can verify what the seeder will register
+Console.WriteLine($"Configured IdentityWeb:Url = {configuration["IdentityWeb:Url"]}");
+Console.WriteLine($"Configured Identity:Url = {configuration["Identity:Url"]}");
 await DatabaseSeeder.SeedAsync(
     context, 
     applicationManager, 
@@ -86,6 +99,7 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 
 app.UseRouting();
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

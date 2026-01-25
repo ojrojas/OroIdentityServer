@@ -278,7 +278,10 @@ public class AuthorizationService(
 
     public async Task<LogoutResponse> LogoutAsync(SimpleRequest request, CancellationToken cancellationToken = default)
     {
-        var response = new LogoutResponse(configuration, null, [CookieAuthenticationDefaults.AuthenticationScheme]);
+        var response = new LogoutResponse(configuration, null, [
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            OpenIddictServerAspNetCoreDefaults.AuthenticationScheme
+        ]);
         logger.LogInformation("Logout request success!");
         if (cancellationToken.IsCancellationRequested) throw new InvalidOperationException("Error logout request");
         await Task.CompletedTask;

@@ -24,7 +24,7 @@ public static class OpenIddictExtensions
                   .SetEndSessionEndpointUris("/connect/logout")
                   .SetTokenEndpointUris("/connect/token")
                   .SetIntrospectionEndpointUris("/connect/introspect")
-                  // .SetUserInfoEndpointUris("/connect/userinfo")
+                  .SetUserInfoEndpointUris("/connect/userinfo")
                   ;
 
             // Note: the sample uses the code and refresh token flows but you can enable
@@ -47,10 +47,10 @@ public static class OpenIddictExtensions
             ArgumentException.ThrowIfNullOrEmpty(signingKey, "SymmetricSecurityKey configuration is missing");
 
             // Configure encryption and signing of tokens.  testing phrase tokens ORO_IDENTITY_SERVER_PROJECT_0001
-            config.AddEncryptionKey(new SymmetricSecurityKey(                                         
+            config.AddEncryptionKey(new SymmetricSecurityKey(
                 Convert.FromBase64String(signingKey)));
-    
-         
+
+
 
 
             config.SetAccessTokenLifetime(TimeSpan.FromHours(1));
@@ -66,7 +66,14 @@ public static class OpenIddictExtensions
                    .EnableAuthorizationEndpointPassthrough()
                    .EnableEndSessionEndpointPassthrough()
                    .EnableStatusCodePagesIntegration()
-                   // .EnableUserInfoEndpointPassthrough()
+                   .EnableUserInfoEndpointPassthrough()
+                   .EnableTokenEndpointPassthrough();
+
+                       config.UseAspNetCore()
+                   .EnableAuthorizationEndpointPassthrough()
+                   .EnableEndSessionEndpointPassthrough()
+                   .EnableStatusCodePagesIntegration()
+                   .EnableUserInfoEndpointPassthrough()
                    .EnableTokenEndpointPassthrough();
         })
 

@@ -14,7 +14,7 @@ public static class AuthorizedEndpoints
         api.MapPost("/connect/token", GetToken);
         api.MapGet("/connect/logout", Logout);
         api.MapPost("/account/login", Login);
-        // api.MapGet("/connect/userinfo", UserInfoEndpoint);
+        api.MapGet("/connect/userinfo", UserInfoEndpoint);
 
         return api;
     }

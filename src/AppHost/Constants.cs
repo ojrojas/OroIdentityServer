@@ -9,4 +9,6 @@ public class Constants
     public const string Https = "https";
     public const string IdentityApi = "identity-server";
     public const string IdentityWeb = "identity-web";
+    public const string IdentityAdmin = "identity-admin";
+
 }

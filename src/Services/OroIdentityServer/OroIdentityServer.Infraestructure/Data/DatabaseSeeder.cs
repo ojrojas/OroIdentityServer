@@ -89,7 +89,7 @@ public static class DatabaseSeeder
             }
         }
 
-        // Register OpenIddict application
+        // Register OpenIddict application for server-side web client
         if (await applicationManager.FindByClientIdAsync("OroIdentityServer.Web") == null)
         {
             await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
@@ -111,6 +111,7 @@ public static class DatabaseSeeder
                     OpenIddictConstants.Permissions.Scopes.Email,
                     OpenIddictConstants.Permissions.Scopes.Profile,
                     OpenIddictConstants.Permissions.Scopes.Roles,
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "openid",
                     OpenIddictConstants.Permissions.ResponseTypes.Code,
                 },
                 Requirements =
@@ -120,6 +121,58 @@ public static class DatabaseSeeder
                 RedirectUris = { new Uri($"{configuration["IdentityWeb:Url"]}/signin-oidc") },
                 PostLogoutRedirectUris = { new Uri($"{configuration["IdentityWeb:Url"]}/signout-callback-oidc") }
             });
+        }
+
+        // Register OpenIddict application for the Angular SPA (identity-admin)
+        if (await applicationManager.FindByClientIdAsync("OroIdentityServer.Admin") == null)
+        {
+            var descriptor = new OpenIddictApplicationDescriptor
+            {
+                ClientId = "OroIdentityServer.Admin",
+                DisplayName = "OroIdentityServer Identity Admin (Angular SPA)",
+                // Public client (no client secret) suitable for single-page apps
+                ClientType = OpenIddictConstants.ClientTypes.Public,
+                ApplicationType = OpenIddictConstants.ApplicationTypes.Native,
+                ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
+                Permissions =
+                {
+                    OpenIddictConstants.Permissions.Endpoints.Authorization,
+                    OpenIddictConstants.Permissions.Endpoints.Token,
+                    OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                    OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                    OpenIddictConstants.Permissions.Scopes.Email,
+                    OpenIddictConstants.Permissions.Scopes.Profile,
+                    OpenIddictConstants.Permissions.Scopes.Roles,
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "openid",
+                    OpenIddictConstants.Permissions.ResponseTypes.Code,
+                },
+                Requirements =
+                {
+                    OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange
+                }
+            };
+
+            // Build a list of redirect URIs: configured IdentityAdmin__Url plus common dev ports
+            var configured = configuration["IdentityAdmin__Url"]?.TrimEnd('/');
+            var alternateOrigins = new[] { "http://localhost:4200", "http://localhost:33444", "http://localhost:5173" };
+
+            if (!string.IsNullOrEmpty(configured))
+            {
+                descriptor.RedirectUris.Add(new Uri($"{configured}/signin-oidc"));
+                descriptor.RedirectUris.Add(new Uri($"{configured}/"));
+                descriptor.PostLogoutRedirectUris.Add(new Uri($"{configured}/"));
+            }
+
+            foreach (var origin in alternateOrigins)
+            {
+                if (string.Equals(origin, configured, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                descriptor.RedirectUris.Add(new Uri($"{origin}/signin-oidc"));
+                descriptor.RedirectUris.Add(new Uri($"{origin}/"));
+                descriptor.PostLogoutRedirectUris.Add(new Uri($"{origin}/"));
+            }
+
+            await applicationManager.CreateAsync(descriptor);
         }
 
         await context.SaveChangesAsync();

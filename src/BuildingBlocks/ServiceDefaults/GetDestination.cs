@@ -11,7 +11,9 @@ public static class GetDestination
         return claim.Type switch
         {
             Claims.Name or
-            Claims.Subject
+            Claims.Subject or
+            Claims.Email or
+            Claims.Role
                 => new[] { Destinations.AccessToken, Destinations.IdentityToken },
 
             _ => [Destinations.AccessToken],
