@@ -9,6 +9,7 @@
     <OpenIddictVersion>7.2.0</OpenIddictVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
     <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="$(AspireVersion)" />
     <PackageVersion Include="Aspire.Hosting.Seq" Version="$(AspireVersion)" />
     <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(AspireVersion)" />
@@ -32,9 +33,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Emoji" Version="4.13.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-   
     <PackageVersion Include="OroKernel.Shared" Version="1.0.0" />
-    
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.12.6" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />
@@ -44,7 +43,6 @@
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.0.0" />
   </ItemGroup>
-
   <!-- OpenIddict -->
   <ItemGroup>
     <PackageVersion Include="OpenIddict.Abstractions" Version="$(OpenIddictVersion)" />
@@ -58,7 +56,6 @@
     <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="OpenIddict.Validation.SystemNetHttp" Version="$(OpenIddictVersion)" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.2.0" />
