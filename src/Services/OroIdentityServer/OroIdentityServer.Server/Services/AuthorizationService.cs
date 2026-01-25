@@ -278,7 +278,15 @@ public class AuthorizationService(
 
     public async Task<LogoutResponse> LogoutAsync(SimpleRequest request, CancellationToken cancellationToken = default)
     {
-        var response = new LogoutResponse(configuration, null, [
+        var openIdRequest = request.Context.GetOpenIddictServerRequest();
+        
+        var properties = new AuthenticationProperties();
+        if (openIdRequest is not null && !string.IsNullOrEmpty(openIdRequest.PostLogoutRedirectUri))
+        {
+            properties.RedirectUri = openIdRequest.PostLogoutRedirectUri;
+        }
+
+        var response = new LogoutResponse(configuration, properties, [
             CookieAuthenticationDefaults.AuthenticationScheme,
             OpenIddictServerAspNetCoreDefaults.AuthenticationScheme
         ]);

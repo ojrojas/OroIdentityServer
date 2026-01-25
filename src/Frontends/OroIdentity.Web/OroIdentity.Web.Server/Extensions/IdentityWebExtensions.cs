@@ -22,7 +22,7 @@ public static class OroIdentityWebExtensions
         
         .AddCookie(options => {
             options.LoginPath = "/account/login";
-            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SameSite = SameSiteMode.Lax;
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
 

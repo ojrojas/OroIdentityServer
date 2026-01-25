@@ -36,9 +36,6 @@ public static class OpenIddictExtensions
                 // Register the System.Net.Http integration.
                 config.UseSystemNetHttp();
                 config.UseAspNetCore();
-
-                // Register the ASP.NET Core host.
-                config.UseAspNetCore();
             }) 
 
             .AddClient(options =>
@@ -63,13 +60,15 @@ public static class OpenIddictExtensions
 
                 // Register the System.Net.Http integration.
                 options.UseSystemNetHttp();
-                options.UseSystemIntegration();
-                options.UseAspNetCore();
+                options.UseAspNetCore()
+                       .EnableRedirectionEndpointPassthrough()
+                       .EnablePostLogoutRedirectionEndpointPassthrough();
 
                 options.AddRegistration(new OpenIddictClientRegistration
                 {
                     ClientId = "OroIdentityServer.Web",
                     RedirectUri = new Uri($"{configuration["IdentityWeb:Url"]}/signin-oidc"),
+                    PostLogoutRedirectUri = new Uri($"{configuration["IdentityWeb:Url"]}/signout-callback-oidc"),
                     Issuer = new Uri($"{configuration["Identity:Url"]}"),
                     ClientSecret = "a2344152-e928-49e7-bb3c-ee54acc96c8c",
                     Scopes =
@@ -114,11 +113,6 @@ public static class OpenIddictExtensions
 
                         return default;
                     });
-                });
-
-                options.AddEventHandler<ApplyRedirectionResponseContext>(builder =>
-                {
-                    builder.UseScopedHandler<CustomRedirectionHandler>();
                 });
             });
 

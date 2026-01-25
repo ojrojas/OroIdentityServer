@@ -21,6 +21,6 @@
         httpContext.Session.Clear();
 
         var identityUrl = Configuration["Identity:Url"];
-        NavigationManager.NavigateTo($"{identityUrl}/connect/logout", forceLoad: true);
+        NavigationManager.NavigateTo($"{identityUrl}/connect/logout?returnUrl=/{httpContext.Request.PathBase}", forceLoad: true);
     }
 }

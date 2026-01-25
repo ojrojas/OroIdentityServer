@@ -23,5 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OroIdentity.Web.Client\OroIdentity.Web.Client.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>

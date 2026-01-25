@@ -2,6 +2,7 @@ using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentity.Web.Server.Components;
 using OroIdentity.Web.Server.Components.Pages.Account;
 using OroIdentity.Web.Server.Extensiones;
+using OroIdentityServer.BuildingBlocks.ServicesDefaults;
 using OroIdentity.Web.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +19,7 @@ builder.Services.AddFluentUIComponents();
 
 
 builder.AddOroIdentityWebExtensions();
-builder.Services.AddAuthorizationCore();
+builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddAuthenticationStateDeserialization();
@@ -56,6 +57,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
+
+app.MapIdentityEndpoints();
 
 app.UseAntiforgery();
 

@@ -6,11 +6,11 @@ See the LICENSE file in the project root for details. *@
 
 @inject NavigationManager NavigationManager
 
-<FluentButton Appearance="Appearance.Outline" @OnClick="LogoutApp">Logout...</FluentButton>
+<FluentButton Appearance="Appearance.Outline" OnClick="LogoutApp">Logout...</FluentButton>
 
 @code {
     private async Task LogoutApp()
     {
-        NavigationManager.NavigateTo("/logout", forceLoad: true);
+        NavigationManager.NavigateTo("/account/logout", forceLoad: true);
     }
 }
