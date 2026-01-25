@@ -50,6 +50,7 @@ public static class OpenIddictExtensions
                 options.AllowAuthorizationCodeFlow()
                        .AllowRefreshTokenFlow();
 
+
                 // Register the signing and encryption credentials used to protect
                 // sensitive data like the state tokens produced by OpenIddict.
                 // Configure encryption and signing of tokens.  testing phrase tokens ORO_IDENTITY_SERVER_PROJECT_0001
@@ -61,7 +62,7 @@ public static class OpenIddictExtensions
 
                 // Register the System.Net.Http integration.
                 options.UseSystemNetHttp();
-                // options.UseSystemIntegration();
+                options.UseSystemIntegration();
                 options.UseAspNetCore();
 
                 options.AddRegistration(new OpenIddictClientRegistration
@@ -84,19 +85,40 @@ public static class OpenIddictExtensions
                     },
                 });
 
-                options.AddEventHandler<ApplyRedirectionResponseContext>(builder =>
-                {
-                    builder.UseScopedHandler<CustomRedirectionHandler>();
-                });
-
+                // Log token request parameters for debugging (temporary)
                 options.AddEventHandler<ApplyTokenRequestContext>(builder =>
                 {
-                    builder.UseInlineHandler(handler =>
+                    builder.UseInlineHandler(context =>
                     {
+                        try
+                        {
+                            var reqProp = context.GetType().GetProperty("Request");
+                            var req = reqProp?.GetValue(context);
+                            if (req != null)
+                            {
+                                var paramsProp = req.GetType().GetProperty("Parameters");
+                                if (paramsProp?.GetValue(req) is System.Collections.Generic.IDictionary<string, string> parameters)
+                                {
+                                    Console.WriteLine("=== Token request parameters ===");
+                                    foreach (var kv in parameters)
+                                        Console.WriteLine($"{kv.Key}: {kv.Value}");
+                                    Console.WriteLine("=== End token request parameters ===");
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error logging token request: " + ex);
+                        }
+
                         return default;
                     });
                 });
 
+                options.AddEventHandler<ApplyRedirectionResponseContext>(builder =>
+                {
+                    builder.UseScopedHandler<CustomRedirectionHandler>();
+                });
             });
 
         return services;

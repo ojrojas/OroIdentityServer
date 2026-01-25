@@ -23,18 +23,6 @@ public class LoginService(
             await antiforgery.ValidateRequestAsync(context.HttpContext);
             
             logger.LogInformation("Request login to identityserver");
-            // var content = new FormUrlEncodedContent(
-            // [
-            //     new KeyValuePair<string, string>("grant_type", "authorization_code"),
-            //     // new KeyValuePair<string, string>("username", loginModel.Email),
-            //     // new KeyValuePair<string, string>("password", loginModel.Password),
-            //     new KeyValuePair<string, string>("client_id", configuration["OpenIddict:ClientId"]),
-            //     new KeyValuePair<string, string>("client_secret", configuration["OpenIddict:ClientSecret"]),
-            //     new KeyValuePair<string, string>("scope", "openid profile email"),
-            //     new KeyValuePair<string, string>("response_type", "code"),
-            //     new KeyValuePair<string, string>("response_mode", "form_post"),
-            //     new KeyValuePair<string, string>("redirect_uri", configuration["IdentityWeb:Url"])
-            // ]);
 
             var result = await openIddictClientService.ChallengeInteractivelyAsync(new()
             {

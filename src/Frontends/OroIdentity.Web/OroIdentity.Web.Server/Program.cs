@@ -20,8 +20,8 @@ builder.Services.AddFluentUIComponents();
 builder.AddOroIdentityWebExtensions();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddAuthenticationStateDeserialization();
 
+builder.Services.AddAuthenticationStateDeserialization();
 builder.Services.AddDIOpenIddictApplication(configuration);
 
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -31,28 +31,9 @@ builder.Services.AddAntiforgery();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
-builder.Services.Configure<Microsoft.AspNetCore.Builder.SessionOptions>(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
-});
-
 var identityUri = configuration.GetSection("Identity:Url").Value;
 
-builder.Services.AddHttpClient<LoginService>(configClient =>
-{
-    configClient.BaseAddress = new Uri(identityUri!);
-    configClient.Timeout = TimeSpan.FromMinutes(2);
-})
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-    {
-        Console.WriteLine($"Certificate error: {errors}");
-        return true; 
-    }
-});
+builder.Services.AddScoped<ILoginService, LoginService>();
 
 var app = builder.Build();
 
@@ -71,10 +52,10 @@ app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseStaticFiles();
 
-app.UseAuthentication();
 app.UseRouting();
-app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession();
 
 app.UseAntiforgery();
 

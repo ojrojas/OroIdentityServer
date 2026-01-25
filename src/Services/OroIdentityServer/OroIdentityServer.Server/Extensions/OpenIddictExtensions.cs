@@ -19,8 +19,6 @@ public static class OpenIddictExtensions
 
         .AddServer(config =>
         {
-            config.RequireProofKeyForCodeExchange();
-
             // Enable the authorization, logout, token and userinfo endpoints.
             config.SetAuthorizationEndpointUris("/connect/authorize")
                   .SetEndSessionEndpointUris("/connect/logout")
@@ -28,6 +26,8 @@ public static class OpenIddictExtensions
                   .SetIntrospectionEndpointUris("/connect/introspect")
                   // .SetUserInfoEndpointUris("/connect/userinfo")
                   ;
+
+            config.RequireProofKeyForCodeExchange();
 
             // Mark the "email", "profile" and "roles" scopes as supported scopes.
             config.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles);
@@ -73,6 +73,8 @@ public static class OpenIddictExtensions
 
             // Register the ASP.NET Core host.
             config.UseAspNetCore();
+
+            config.EnableAuthorizationEntryValidation();
         })
         ;
     }

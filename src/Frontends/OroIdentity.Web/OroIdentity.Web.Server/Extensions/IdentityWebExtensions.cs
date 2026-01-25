@@ -18,8 +18,12 @@ public static class OroIdentityWebExtensions
         {
             opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             opt.DefaultChallengeScheme = OpenIddictClientAspNetCoreDefaults.AuthenticationScheme;
-        }).AddCookie(options => {
+        })
+        
+        .AddCookie(options => {
             options.LoginPath = "/account/login";
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
 
         builder.Services.AddAuthorizationBuilder()

@@ -1,26 +1,31 @@
 @page "/signin-oidc"
 @using OpenIddict.Client
+@using Microsoft.AspNetCore.Components
 
 @inject NavigationManager Navigation
 @inject OpenIddictClientService OpenIddictClient
 @inject IJSRuntime JSRuntime
+@inject HttpClient Http
 
 <h1>Sign In with OpenID Connect</h1>
 
 @code {
     [Parameter]
-    public string? code { get; set; }
+    [SupplyParameterFromQuery(Name = "code")]
+    public string? Code { get; set; }
+
     [Parameter]
-    public string? state { get; set; }
+    [SupplyParameterFromQuery(Name = "state")]
+    public string? State { get; set; }
+
     [Parameter]
-    public string? iss { get; set; }
+    [SupplyParameterFromQuery(Name = "iss")]
+    public string? Iss { get; set; }
     
     protected override async Task OnInitializedAsync()
     {
-        // Aquí puedes agregar la lógica para iniciar el proceso de autenticación OIDC
-        // Por ejemplo, redirigir al usuario al proveedor de identidad
-        await JSRuntime.InvokeVoidAsync("window.close");
-
+        // Se corrige la invocación a window.close() para ejecutar la función
+        await JSRuntime.InvokeVoidAsync("eval", "window.close()");
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -31,9 +36,56 @@
 
         }
     }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(Code))
+        {
+            try
+            {
+                // Intentar completar la autenticación interactiva con OpenIddict
+                var response = await OpenIddictClient.AuthenticateInteractivelyAsync(
+                    new OpenIddictClientModels.InteractiveAuthenticationRequest    
+                {
+                    CancellationToken = CancellationToken.None,
+                    Nonce = State,
+                });
+
+                // Aquí manejamos el token: guardarlo en localStorage, notificar ventana padre y enviar al servidor
+                var token = response?.TokenResponse?.AccessToken;
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    // Guardar en localStorage
+                    await JSRuntime.InvokeVoidAsync("localStorage.setItem", "access_token", token);
+
+                    // Notificar a la ventana padre (si existe) SOLO como indicación de éxito.
+                    try
+                    {
+                        var message = new { type = "oidc:success" };
+                        await JSRuntime.InvokeVoidAsync("eval", $"window.opener.postMessage({System.Text.Json.JsonSerializer.Serialize(message)}, '*')");
+                    }
+                    catch { }
+
+                    // Enviar token al servidor para procesamiento/almacenamiento en sesión
+                    try
+                    {
+                        await Http.PostAsJsonAsync("/api/auth/external", new { accessToken = token });
+                    }
+                    catch { }
+                }
+            }
+            catch (Exception)
+            {
+                // No fallar el renderizado por errores del cliente
+            }
+            finally
+            {
+                // Cerrar la ventana popup que el proveedor de identidad pudo haber abierto
+                await JSRuntime.InvokeVoidAsync("eval", "window.close()");
+            }
+        }
+    }
 }
-@* 
-https://localhost:7264/signin-oidc?
-code=YU-gffTTDsaruqocVLVsQ3eNWvPs0gu3n3PB0Z_cP-o&
-state=eyJhbGciOiJBMjU2S1ciLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwidHlwIjoib2lfc3RldCtqd3QiLCJjdHkiOiJKV1QifQ.CMhiDgzskDX4p9Jz8_wONLvy2FJYZQ2c-cgoPYi3x3u6YiRFJecq9ggjP_I6lNu6ssd_Li-5b1OdWdK78hc4hGyG6jW82gco.vAGujZGtTG82dK0ausX2Uw.075ritDlN5huY4E_DUe2R_QqRk4GOi5OToVMlHViOCAwSkFuXiGBr9tyIsYg1A3CyJ7VAUStoue008FzDpgiAN92L8nzX4r2Uf9Ts-Ksw0UubL6AXWa76nAK39_hFovIddEx6MoPYutTEOGT8SGZHouFMbbe-oKVTl7-tUtqYCDWQNDmGCharVjsQvFLRT_1_6iMBX1fFA7SyRGIosvWewSu8JdQB-7TeaSRcw94Db7s6UXHitEgpZxXTkTndgN5tCRZTSO8hvGFxcJE9HSyDcPwChh_63Y1qiYhA70LgO9naF3S_WNKmQ9W0Z0r-en9DRJRRGnRgWTnkWxMQ4nrfskc9uVoGTmlDGNazeGxYy0m4S7yB-Yls4deHtIw0alBb7X6UxpaKp3u2ZDxkt9CqEOYIZdvE8JksoWQ4ofNY-vzUQW8YtR6C3M6IDnzQ1ADWG-PvZL8EuiMtH04A2ORpg47K3fyevXss3qwduppQyIsjbxeWX-7hTh72QB437UwoaNRQvbpQzCaMXxhTh0W4Ma-F0eyh-5k_eomI20bu7lOdQfqL1lvB6uKL7-4g9YIclBu_EQX7SG8ivVa7EsYI3GZLexK_9UEy2WlFA3UyacxGgp8HXfvZkHBmThMlmcrmirjR_YNjUM0lDg9och_aoyjzxhTJy83OrGlTiphQ7jUeC0SYHk3zxFla0isYvCGil8lO77M_eEt8A4fKSYQ3l9VyMi7YPa2MijGFpGkiHVN47ovfitx-3_E7Ner97AFXjCuwtrgd-5LY8HtRu39YmmkHMKSuoWDondsz1IZUWLjHoseyQzJanwpkp2Xy3ft1GQVyb81rLBsL2keaEMcnaugSlslwyVpFq7muUeEwM1Py33N3o20Ta1GTh948nlG8ybfTgcGNnR-LqAaJgw6cQfEoPb0Q6KgT6wdOv5L7iy5dGeQkZe07pazzqlrqDEXaw6uIqv306CXn8ET0fNACKEFIBH7zb1I13fdXGNgvR0hyeMnYmYQxBTAZp23J8N9ZNWSYGYbd6EI5FStxJh505wfY-C-O3QOwvQkvnZTvF3-uYsddCm1DoeN_XqhhwyVHyOrc0VxwFkCkPEXNcdXXRtyVTxTWc8zExD-05ZjqySzV45hCr_wV5qO9uiayh5VhjogGAWkqurtHu5vUTDLd0FfJxXQV92HCIGFRtmYAIfulzctA75ZEnXY5Ll5i8fyS_c0lokk0BLpy6G7eWNUfxKdeuUmIuMfyNDrw0k9wak4v8pjXzWs800pqphvwg1cwDN_74PjXyZHcB0y5acrELIfdzWCCFBu6yBZq_RJ3dqYEs-b7OIPCuvRU8YJgXB5OPhsdIPrCt1AEmoL2CgXfZGPrXc7PR7p9zg-oZVU2ZndOB6H-ujWriix91rdKnCutWY1Z6C3pLU80UgaHiekzj0ti-rbULkJS-LnI77LwwT2Dgv-MPFfh2KwCtqTqFuK-ZegFhHf6sjlqb-i_EoldOh8eaGmxDvTkt3VaOv3C8pUPcZCvWs-6JotP0kKJzQyaqdaRsYRkTB72RylcuP9oA.MZqn0QZIy_P-ZoIJvspgjF8WKnQRJrbJ30UQLuoVJjY&
-iss=https%3A%2F%2Flocalhost%3A7219%2F *@
+@*
+https://localhost:7264/signin-oidc?code=...&state=...&iss=https%3A%2F%2Flocalhost%3A7219%2F
+*@

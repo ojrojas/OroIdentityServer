@@ -32,6 +32,21 @@
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Emoji" Version="4.13.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+   
+    <PackageVersion Include="OroKernel.Shared" Version="1.0.0" />
+    
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.1" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.12.6" />
+    <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />
+    <PackageVersion Include="Serilog" Version="4.3.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageVersion Include="Serilog.Sinks.Seq" Version="9.0.0" />
+  </ItemGroup>
+
+  <!-- OpenIddict -->
+  <ItemGroup>
     <PackageVersion Include="OpenIddict.Abstractions" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="OpenIddict.AspNetCore" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="OpenIddict.Client.AspNetCore" Version="7.2.0" />
@@ -42,16 +57,8 @@
     <PackageVersion Include="OpenIddict.Quartz" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="$(OpenIddictVersion)" />
     <PackageVersion Include="OpenIddict.Validation.SystemNetHttp" Version="$(OpenIddictVersion)" />
-    <PackageVersion Include="OroKernel.Shared" Version="1.0.0" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.1" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.12.6" />
-    <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />
-    <PackageVersion Include="Serilog" Version="4.3.0" />
-    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
-    <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
-    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
-    <PackageVersion Include="Serilog.Sinks.Seq" Version="9.0.0" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.2.0" />
