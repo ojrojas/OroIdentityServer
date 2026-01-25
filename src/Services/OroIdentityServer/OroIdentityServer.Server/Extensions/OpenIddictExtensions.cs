@@ -27,6 +27,16 @@ public static class OpenIddictExtensions
                   // .SetUserInfoEndpointUris("/connect/userinfo")
                   ;
 
+            // Note: the sample uses the code and refresh token flows but you can enable
+            // the other flows if you need to support implicit, password or client credentials.
+            config.AllowAuthorizationCodeFlow()
+                       .AllowHybridFlow()
+                       .AllowImplicitFlow()
+                       .AllowNoneFlow()
+                       .AllowPasswordFlow()
+                       .AllowRefreshTokenFlow()
+                       .AllowTokenExchangeFlow();
+
             config.RequireProofKeyForCodeExchange();
 
             // Mark the "email", "profile" and "roles" scopes as supported scopes.
@@ -40,14 +50,8 @@ public static class OpenIddictExtensions
             config.AddEncryptionKey(new SymmetricSecurityKey(                                         
                 Convert.FromBase64String(signingKey)));
     
-            // Note: the sample uses the code and refresh token flows but you can enable
-            // the other flows if you need to support implicit, password or client credentials.
-            config.AllowAuthorizationCodeFlow()
-            .AllowClientCredentialsFlow()
-            .AllowPasswordFlow()
-            .AllowRefreshTokenFlow();
+         
 
-            config.RequireProofKeyForCodeExchange();
 
             config.SetAccessTokenLifetime(TimeSpan.FromHours(1));
             config.SetRefreshTokenLifetime(TimeSpan.FromDays(30));
