@@ -48,6 +48,8 @@ public static class OpenIddictExtensions
                 options.AllowAuthorizationCodeFlow()
                        .AllowRefreshTokenFlow();
 
+                options.SetPostLogoutRedirectionEndpointUris(
+                    new Uri($"{configuration["IdentityWeb:Url"]}/signout-callback-oidc"));
 
                 // Register the signing and encryption credentials used to protect
                 // sensitive data like the state tokens produced by OpenIddict.

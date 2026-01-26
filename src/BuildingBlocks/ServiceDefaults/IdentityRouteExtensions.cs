@@ -27,22 +27,24 @@ public static class IdentityRouteExtensions
         });
 
         // Endpoint de Logout (SignOut)
-        app.MapGet(options.LogoutPath, (string? returnUrl, HttpContext context) =>
+        // support receiving returnUrl to redirect after logout
+        app.MapPost(options.LogoutPath, (string? returnUrl, HttpContext context) =>
         {
             var properties = new AuthenticationProperties
             {
-                RedirectUri = returnUrl ?? options.DefaultRedirectUri
+                RedirectUri = options.SignoutCallbackPath
             };
 
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                properties.Items["returnUrl"] = returnUrl;
+            }
+
             return Results.SignOut(properties, [
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                OpenIddictClientAspNetCoreDefaults.AuthenticationScheme
+                OpenIddictClientAspNetCoreDefaults.AuthenticationScheme,
+                CookieAuthenticationDefaults.AuthenticationScheme
             ]);
         });
-
-        // Endpoint de Logout redirection
-        app.MapPost(options.LogoutPath, (string? returnUrl) =>
-            Results.Redirect($"{options.LogoutPath}?returnUrl={Uri.EscapeDataString(returnUrl ?? options.DefaultRedirectUri)}"));
 
         // Endpoint Callback (signin-oidc)
         app.MapMethods(options.CallbackPath, [HttpMethods.Get, HttpMethods.Post], async (HttpContext context) =>
@@ -53,26 +55,11 @@ public static class IdentityRouteExtensions
                 return Results.Problem("External authentication failed.");
             }
 
-            // Sign in the user with a cookie.
             var identity = new ClaimsIdentity(result.Principal.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
             await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, result.Properties ?? new AuthenticationProperties());
 
-            var redirectUri = result.Properties?.RedirectUri;
-            if (string.IsNullOrEmpty(redirectUri) || !Uri.IsWellFormedUriString(redirectUri, UriKind.RelativeOrAbsolute))
-            {
-                redirectUri = options.DefaultRedirectUri;
-            }
-
-            return Results.Redirect(redirectUri);
-        }).DisableAntiforgery();
-
-        // Endpoint Signout Callback (signout-callback-oidc)
-        app.MapMethods(options.SignoutCallbackPath, [HttpMethods.Get, HttpMethods.Post], async (HttpContext context) =>
-        {
-            var result = await context.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
-            
             var redirectUri = result.Properties?.RedirectUri;
             if (string.IsNullOrEmpty(redirectUri) || !Uri.IsWellFormedUriString(redirectUri, UriKind.RelativeOrAbsolute))
             {

@@ -12,7 +12,7 @@ public static class AuthorizedEndpoints
 
         api.MapMethods("/connect/authorize", [HttpMethods.Get, HttpMethods.Post], AuthorizeApp);
         api.MapPost("/connect/token", GetToken);
-        api.MapGet("/connect/logout", Logout);
+        api.MapMethods("/connect/logout", [HttpMethods.Get, HttpMethods.Post], Logout);
         api.MapPost("/account/login", Login);
         api.MapGet("/connect/userinfo", UserInfoEndpoint);
 

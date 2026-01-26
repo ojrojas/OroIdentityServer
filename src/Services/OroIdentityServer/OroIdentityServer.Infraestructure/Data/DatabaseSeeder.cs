@@ -103,7 +103,7 @@ public static class DatabaseSeeder
                 Permissions =
                 {
                     OpenIddictConstants.Permissions.Endpoints.Authorization,
-                    // OpenIddictConstants.Permissions.Endpoints.Logout,
+                    OpenIddictConstants.Permissions.Endpoints.EndSession,
                     OpenIddictConstants.Permissions.Endpoints.Token,
                     OpenIddictConstants.Permissions.Endpoints.Introspection,
                     OpenIddictConstants.Permissions.GrantTypes.RefreshToken,

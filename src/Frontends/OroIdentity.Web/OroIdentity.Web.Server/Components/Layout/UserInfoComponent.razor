@@ -1,10 +1,29 @@
+@rendermode InteractiveServer
+
+@* OroIdentityServer
+Copyright (C) 2026 Oscar Rojas
+Licensed under the GNU AGPL v3.0 or later.
+See the LICENSE file in the project root for details. *@
+
 @using Microsoft.AspNetCore.Components.Authorization
- 
- 
+
+
 <AuthorizeView>
-    <FluentLabel>@context.User.Identity?.Name</FluentLabel>
+    <FluentButton OnClick="(() => OpenUserMenu = !OpenUserMenu )">@context.User.Identity?.Name</FluentButton>
+    <FluentMenu @bind-Open="OpenUserMenu" >
+        <FluentMenuItem>
+            <form action="/Account/Logout" method="post">
+                <AntiforgeryToken />
+                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                <FluentButton Type="ButtonType.Submit">Logout</FluentButton>
+            </form>
+        </FluentMenuItem>
+    </FluentMenu>
 </AuthorizeView>
 
-@code{
+
+@code {
+    private bool OpenUserMenu { get; set; }
+    private string? currentUrl;
 
 }

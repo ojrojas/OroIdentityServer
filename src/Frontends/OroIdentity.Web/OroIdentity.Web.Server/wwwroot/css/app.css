@@ -1,11 +1,12 @@
+
 body {
     --body-font: "Segoe UI Variable", "Segoe UI", sans-serif;
     font-family: var(--body-font);
     font-size: var(--type-ramp-base-font-size);
     line-height: var(--type-ramp-base-line-height);
     margin: 0;
-    height: 100vh;
 }
+
 
 .navmenu-icon {
     display: none;
@@ -16,8 +17,10 @@ body {
     align-items: stretch !important;
 }
 
+
 .body-content {
     align-self: stretch;
+    height: calc(100dvh - 86px) !important;
     display: flex;
 }
 
@@ -25,7 +28,6 @@ body {
     padding: 0.5rem 1.5rem;
     align-self: stretch !important;
     width: 100%;
-    height: 100hv;
 }
 
 .manage {
