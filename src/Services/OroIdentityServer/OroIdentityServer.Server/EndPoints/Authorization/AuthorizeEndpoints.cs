@@ -19,7 +19,7 @@ public static class AuthorizedEndpoints
         return api;
     }
 
- 
+
     [Authorize(AuthenticationSchemes = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)]
     private static async Task<IResult> UserInfoEndpoint(
         HttpContext context,
@@ -32,7 +32,7 @@ public static class AuthorizedEndpoints
     private static async ValueTask<IResult> Login(
         HttpContext context,
         [FromServices] Services.IAuthorizationService service,
-        [FromBody]LoginRequest loginRequest,
+        [FromBody] LoginRequest loginRequest,
         CancellationToken cancellationToken)
     {
         return await service.LoginAsync(loginRequest, cancellationToken);
@@ -40,9 +40,9 @@ public static class AuthorizedEndpoints
 
     [IgnoreAntiforgeryToken]
     private static async ValueTask<IResult> Logout(
-           HttpContext context,
-          [FromServices] Services.IAuthorizationService service,
-           CancellationToken cancellationToken)
+        HttpContext context,
+        [FromServices] Services.IAuthorizationService service,
+        CancellationToken cancellationToken)
     {
         return await service.LogoutAsync(new(context), cancellationToken);
     }
