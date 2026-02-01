@@ -25,7 +25,6 @@ public sealed class NavigationHistoryService : IDisposable, INavigationHistorySe
         _navigationManager = navigationManager;
         _navigationManager.LocationChanged += HandleLocationChanged;
         AddCurrent();
-
     }
 
     private void AddCurrent()
@@ -37,8 +36,7 @@ public sealed class NavigationHistoryService : IDisposable, INavigationHistorySe
     {
         var relative = _navigationManager.ToBaseRelativePath(uri);
 
-        if(_history.Count == default) return;
-        if (_history.LastOrDefault().Url == relative)
+        if (_history.LastOrDefault()?.Url == relative)
             return;
 
         _history.Add(new BreadcrumbItem

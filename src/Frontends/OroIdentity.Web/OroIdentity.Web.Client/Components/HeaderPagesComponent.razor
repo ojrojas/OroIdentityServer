@@ -20,5 +20,18 @@
     [Parameter]
     public string Description { get; set; } = string.Empty;
 
+    protected override void OnInitialized()
+    {
+        NavigationHistoryService.OnChanged += Refresh;
+    }
 
+    private void Refresh()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        NavigationHistoryService.OnChanged -= Refresh;
+    }
 }
