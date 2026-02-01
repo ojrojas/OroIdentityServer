@@ -9,16 +9,15 @@ See the LICENSE file in the project root for details. *@
 
 
 <AuthorizeView>
-    <FluentButton OnClick="(() => OpenUserMenu = !OpenUserMenu )">@context.User.Identity?.Name</FluentButton>
-    <FluentMenu @bind-Open="OpenUserMenu" >
-        <FluentMenuItem>
+    <FluentMenuButton UseMenuService="false" Text="@context.User.Identity?.Name" OnClick="(() => OpenUserMenu = !OpenUserMenu )" Appearance="Appearance.Accent">
+        <FluentMenuItem Id="logoutItem">
             <form action="/Account/Logout" method="post">
                 <AntiforgeryToken />
                 <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                 <FluentButton Type="ButtonType.Submit">Logout</FluentButton>
             </form>
         </FluentMenuItem>
-    </FluentMenu>
+    </FluentMenuButton>
 </AuthorizeView>
 
 
