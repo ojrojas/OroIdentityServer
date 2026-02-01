@@ -5,18 +5,94 @@ See the LICENSE file in the project root for details. *@
 
 @rendermode InteractiveServer
 
+@inject NavigationManager NavigationManager
+
+
 <div class="navmenu">
     <input type="checkbox" title="Menu expand/collapse toggle" id="navmenu-toggle" class="navmenu-icon" />
-    <label for="navmenu-toggle" class="navmenu-icon"><FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" Color="Color.Fill" /></label>
+    <label for="navmenu-toggle" class="navmenu-icon">
+        <FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" Color="Color.Fill" />
+    </label>
     <nav class="sitenav" aria-labelledby="main-menu">
-        <FluentNavMenu Id="main-menu" Collapsible="true" Width="250" Title="Navigation menu" @bind-Expanded="expanded" CustomToggle="true">
-            <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())" IconColor="Color.Accent">Home</FluentNavLink>
-            <FluentNavLink Href="counter" Icon="@(new Icons.Regular.Size20.NumberSymbolSquare())" IconColor="Color.Accent">Counter</FluentNavLink>
-            <FluentNavLink Href="weather" Icon="@(new Icons.Regular.Size20.WeatherPartlyCloudyDay())" IconColor="Color.Accent">Weather</FluentNavLink>
-        </FluentNavMenu>
+     <FluentNavMenu Id="main-menu"
+               Collapsible="true"
+               Width="250"
+               Title="Navigation menu"
+               @bind-Expanded="expanded"
+               CustomToggle="true"
+               class="navmenu-container">
+
+    <!-- LINKS -->
+    <div class="navmenu-links">
+        <FluentNavLink Href="/" Match="NavLinkMatch.All"
+                       Icon="@(new Icons.Regular.Size20.Home())"
+                       IconColor="Color.Accent">
+            Home
+        </FluentNavLink>
+
+        <FluentNavLink Href="counter"
+                       Icon="@(new Icons.Regular.Size20.NumberSymbolSquare())"
+                       IconColor="Color.Accent">
+            Counter
+        </FluentNavLink>
+
+        <FluentNavLink Href="weather"
+                       Icon="@(new Icons.Regular.Size20.WeatherPartlyCloudyDay())"
+                       IconColor="Color.Accent">
+            Weather
+        </FluentNavLink>
+          <FluentNavLink Href="application"
+                       Icon="@(new Icons.Regular.Size20.Apps())"
+                       IconColor="Color.Accent">
+            Application
+        </FluentNavLink>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="navmenu-footer">
+        <AuthorizeView>
+            <Authorized>
+                @* <FluentNavLink Href="Account/Manage">
+                    @context.User.Identity?.Name
+                </FluentNavLink> *@
+
+                <form action="Account/Logout" method="post">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+
+                    <FluentButton Type="ButtonType.Submit"
+                                  Style="width: 100%;">
+                        Logout
+                    </FluentButton>
+                </form>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+
+</FluentNavMenu>
+
     </nav>
 </div>
 
 @code {
-    private bool expanded = true;
+     private bool expanded = true;
+
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
 }

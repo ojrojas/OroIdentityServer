@@ -1,0 +1,24 @@
+@using OroIdentity.Frontends.Services
+@inject INavigationHistoryService NavigationHistoryService
+<FluentStack>
+    <FluentBreadcrumb>
+        @foreach (var crumb in NavigationHistoryService.History)
+        {
+            <FluentBreadcrumbItem Href="@crumb.Url">
+                @crumb.Title
+            </FluentBreadcrumbItem>
+        }
+    </FluentBreadcrumb>
+    <h1>@TitlePage</h1>
+    <span>@Description</span>
+</FluentStack>
+
+@code {
+    [Parameter]
+    public string TitlePage { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Description { get; set; } = string.Empty;
+
+
+}

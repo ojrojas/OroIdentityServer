@@ -1,3 +1,4 @@
+@import '_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css';
 
 body {
     --body-font: "Segoe UI Variable", "Segoe UI", sans-serif;
@@ -7,16 +8,15 @@ body {
     margin: 0;
 }
 
-
 .navmenu-icon {
     display: none;
 }
 
 .main {
+    min-height: calc(100dvh - 86px);
     color: var(--neutral-foreground-rest);
     align-items: stretch !important;
 }
-
 
 .body-content {
     align-self: stretch;
@@ -217,3 +217,24 @@ table {
         vertical-align: middle;
         border-bottom: calc(var(--stroke-width) * 1px) solid var(--neutral-stroke-divider-rest);
     }
+
+
+    .navmenu-container {
+    display: flex;
+    flex-direction: column;
+    height: 100% !important;
+}
+
+.navmenu-links {
+    flex: 1;
+}
+
+.navmenu-footer {
+    margin-top: auto;
+    padding: 12px;
+    border-top: 1px solid var(--neutral-stroke-divider-rest);
+}
+
+.sitenav{
+    height: 100%;
+}

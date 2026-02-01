@@ -4,6 +4,7 @@ using OroIdentity.Web.Server.Components.Pages.Account;
 using OroIdentity.Web.Server.Extensiones;
 using OroIdentityServer.BuildingBlocks.ServicesDefaults;
 using OroIdentity.Web.Server.Services;
+using OroIdentity.Frontends.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,7 @@ builder.Services.AddSession();
 var identityUri = configuration.GetSection("Identity:Url").Value;
 
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<INavigationHistoryService, NavigationHistoryService>();
 
 var app = builder.Build();
 
