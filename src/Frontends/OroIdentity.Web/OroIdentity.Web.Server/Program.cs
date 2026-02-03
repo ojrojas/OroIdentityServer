@@ -20,7 +20,7 @@ builder.Services.AddRazorComponents()
         options => options.SerializeAllClaims = true)
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
-builder.Services.AddFluentUIComponents();
+builder.Services.AddFluentUIComponents(options => options.ValidateClassNames = false);
 
 builder.AddOroIdentityWebExtensions();
 builder.Services.AddAuthorization();

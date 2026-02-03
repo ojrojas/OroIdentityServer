@@ -1,0 +1,12 @@
+@page "/resources"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
+@using OroIdentity.Web.Client.Components
+<PageTitle>Resources</PageTitle>
+
+<HeaderPagesComponent TitlePage="Resources"
+Description="Manage your Resources"
+>
+<FluentButton Appearance="Appearance.Accent">Create Resource</FluentButton>
+</HeaderPagesComponent>

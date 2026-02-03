@@ -3,11 +3,9 @@
     <FluentGrid>
         <FluentGridItem xs="6" md="6" lg="6" xl="6">
             <FluentGrid>
-                <FluentGridItem xs="1" >
+                <FluentGridItem Style="display: flex; align-items: center; gap: 10px; height: 100%;" xs="12" >
                     <FluentButton IconEnd="@(new Icons.Regular.Size20.ArrowLeft())"
                         OnClick="(()=> NavigationManager.NavigateTo(HOME))" />
-                </FluentGridItem>
-                <FluentGridItem xs="11" Style="background-color:red">
                     <FluentLabel Typo="Typography.PageTitle">@TitlePage</FluentLabel>
                 </FluentGridItem>
                 <FluentGridItem xs="12">
@@ -15,7 +13,7 @@
                 </FluentGridItem>
             </FluentGrid>
         </FluentGridItem>
-        <FluentGridItem Justify="JustifyContent.FlexEnd" xs="6" md="6" lg="6" xl="6" >
+        <FluentGridItem Style="display: flex; align-items: center; gap: 10px; height: 100%;" Justify="JustifyContent.FlexEnd" xs="6" md="6" lg="6" xl="6" >
             @ChildContent
         </FluentGridItem>
     </FluentGrid>
