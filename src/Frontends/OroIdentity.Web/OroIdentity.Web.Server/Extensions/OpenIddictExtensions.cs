@@ -4,7 +4,6 @@
 // See the LICENSE file in the project root for details.
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Client;
-using OroIdentity.Web.Server.Handlers;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using static OpenIddict.Client.OpenIddictClientEvents;
 

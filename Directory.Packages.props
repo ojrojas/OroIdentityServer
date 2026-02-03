@@ -34,6 +34,8 @@
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Emoji" Version="4.13.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="OroKernel.Shared" Version="1.0.0" />
+    <PackageVersion Include="OroLoggers" Version="1.0.0" />
+    <PackageVersion Include="OroServiceDefaults" Version="1.0.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.12.6" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />

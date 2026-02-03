@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for details.
 using System.Collections.Immutable;
 using Microsoft.Extensions.Primitives;
+using OroBuildingBlocks.ServiceDefaults;
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Services;
 
 public class AuthorizationService(

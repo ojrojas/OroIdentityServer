@@ -2,13 +2,17 @@ using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentity.Web.Server.Components;
 using OroIdentity.Web.Server.Components.Pages.Account;
 using OroIdentity.Web.Server.Extensiones;
-using OroIdentityServer.BuildingBlocks.ServicesDefaults;
 using OroIdentity.Web.Server.Services;
 using OroIdentity.Frontends.Services;
+using OroBuildingBlocks.ServicesDefaults;
+using Serilog;
+using OroBuildingBlocks.Loggers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 ConfigurationManager configuration = builder.Configuration;
+
+Log.Logger = LoggerPrinter.CreateSerilogLogger("api", "OroIdentity.Web.Server", configuration);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -17,7 +21,6 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 builder.Services.AddFluentUIComponents();
-
 
 builder.AddOroIdentityWebExtensions();
 builder.Services.AddAuthorization();

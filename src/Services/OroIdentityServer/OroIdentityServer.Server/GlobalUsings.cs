@@ -16,8 +16,6 @@ global using OpenIddict.Abstractions;
 global using OpenIddict.Server.AspNetCore;
 global using OroCQRS.Core.Interfaces;
 global using OroIdentityServer.Application.Queries;
-global using OroIdentityServer.BuildingBlocks.Loggers;
-global using OroIdentityServer.BuildingBlocks.ServiceDefaults;
 global using OroIdentityServer.OroIdentityServer.Infraestructure.Data;
 global using OroIdentityServer.OroIdentityServer.Infraestructure.Repositories.Extensions;
 global using OroIdentityServer.Services.OroIdentityServer.Server.Adapters;
@@ -38,4 +36,4 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Authorization;
 global using OpenIddict.Validation.AspNetCore;
 global using OroIdentityServer.Services.OroIdentityServer.Core.Models;
-
+global using OroBuildingBlocks.Loggers;

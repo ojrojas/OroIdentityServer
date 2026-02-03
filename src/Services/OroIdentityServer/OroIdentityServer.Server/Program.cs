@@ -3,6 +3,8 @@ using OroIdentityServer.Services.OroIdentityServer.Server.Components;
 using OroIdentityServer.Services.OroIdentityServer.Server.Components.Account;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
+using OroBuildingBlocks.ServiceDefaults;
+using OroBuildingBlocks.Loggers;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -19,10 +19,11 @@
     <PackageReference Include="OpenIddict.Client.SystemNetHttp" />
     <PackageReference Include="OpenIddict.Validation.AspNetCore" />
     <PackageReference Include="OpenIddict.Validation.SystemNetHttp" />
+    <PackageReference Include="OroLoggers" />
+    <PackageReference Include="OroServiceDefaults" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\OroIdentity.Web.Client\OroIdentity.Web.Client.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>

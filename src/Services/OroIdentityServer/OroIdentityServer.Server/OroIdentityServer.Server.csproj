@@ -21,13 +21,12 @@
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" />
     <PackageReference Include="OpenIddict.AspNetCore" />
     <PackageReference Include="OpenIddict.Quartz" />
-    <PackageReference Include="OroCQRS" />
+    <PackageReference Include="OroLoggers" />
+    <PackageReference Include="OroServiceDefaults" />
     <PackageReference Include="Quartz.Extensions.Hosting" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\BuildingBlocks\ServiceDefaults\ServiceDefaults.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\Loggers\Loggers.csproj" />
     <ProjectReference Include="..\OroIdentityServer.Application\OroIdentityServer.Application.csproj" />
   </ItemGroup>
 </Project>
