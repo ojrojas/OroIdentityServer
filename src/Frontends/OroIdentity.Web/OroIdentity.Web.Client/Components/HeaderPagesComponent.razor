@@ -1,28 +1,36 @@
 @using OroIdentity.Frontends.Services
-@inject INavigationHistoryService NavigationHistoryService
-<FluentStack>
-    <FluentBreadcrumb>
-        @foreach (var crumb in NavigationHistoryService.History)
-        {
-            <FluentBreadcrumbItem Href="@crumb.Url">
-                @crumb.Title
-            </FluentBreadcrumbItem>
-        }
-    </FluentBreadcrumb>
-    <h1>@TitlePage</h1>
-    <span>@Description</span>
-</FluentStack>
+@inject NavigationManager NavigationManager
+    <FluentGrid>
+        <FluentGridItem xs="6" md="6" lg="6" xl="6">
+            <FluentGrid>
+                <FluentGridItem xs="1" >
+                    <FluentButton IconEnd="@(new Icons.Regular.Size20.ArrowLeft())"
+                        OnClick="(()=> NavigationManager.NavigateTo(HOME))" />
+                </FluentGridItem>
+                <FluentGridItem xs="11" Style="background-color:red">
+                    <FluentLabel Typo="Typography.PageTitle">@TitlePage</FluentLabel>
+                </FluentGridItem>
+                <FluentGridItem xs="12">
+                    <FluentLabel Typo="Typography.Body">@Description</FluentLabel>
+                </FluentGridItem>
+            </FluentGrid>
+        </FluentGridItem>
+        <FluentGridItem Justify="JustifyContent.FlexEnd" xs="6" md="6" lg="6" xl="6" >
+            @ChildContent
+        </FluentGridItem>
+    </FluentGrid>
 
 @code {
     [Parameter]
     public string TitlePage { get; set; } = string.Empty;
-
     [Parameter]
     public string Description { get; set; } = string.Empty;
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    private string HOME = "home";
 
     protected override void OnInitialized()
     {
-        NavigationHistoryService.OnChanged += Refresh;
     }
 
     private void Refresh()
@@ -32,6 +40,5 @@
 
     public void Dispose()
     {
-        NavigationHistoryService.OnChanged -= Refresh;
     }
 }
