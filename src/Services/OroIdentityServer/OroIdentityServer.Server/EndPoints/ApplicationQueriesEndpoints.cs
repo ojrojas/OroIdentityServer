@@ -2,7 +2,6 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Endpoints;
 
 public static class ApplicationQueriesEndpoints
@@ -12,10 +11,10 @@ public static class ApplicationQueriesEndpoints
         var api = routeBuilder.MapGroup("/applications");
 
         api.MapGet("/", GetApplications)
-            .WithName("GetApplications");
+            .WithName("getapplications");
 
         api.MapGet("/{clientId}", GetApplicationByClientId)
-            .WithName("GetApplicationByClientId");
+            .WithName("getapplicationbyclientid");
 
         api.RequireAuthorization([new AuthorizeAttribute
         {

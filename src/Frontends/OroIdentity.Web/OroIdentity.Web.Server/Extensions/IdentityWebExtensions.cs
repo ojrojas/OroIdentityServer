@@ -3,6 +3,7 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
 using OpenIddict.Client.AspNetCore;
 
@@ -19,13 +20,16 @@ public static class OroIdentityWebExtensions
             opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             opt.DefaultChallengeScheme = OpenIddictClientAspNetCoreDefaults.AuthenticationScheme;
         })
-        
-        .AddCookie(options => {
+
+        .AddBearerToken()
+
+        .AddCookie(options =>
+        {
             options.LoginPath = "/account/login";
             options.Cookie.SameSite = SameSiteMode.Lax;
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
-
+        
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy("CanAccess", policy =>
             {
@@ -38,6 +42,9 @@ public static class OroIdentityWebExtensions
                  .RequireRole("Administrator", "User").Build();
             });
 
+        builder.Services.AddAuthorization();
+        builder.Services.AddCascadingAuthenticationState();
+        builder.Services.AddAuthenticationStateDeserialization();
 
         IdentityModelEventSource.ShowPII = builder.Environment.IsDevelopment();
 

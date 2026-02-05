@@ -7,6 +7,9 @@ using OroIdentity.Frontends.Services;
 using OroBuildingBlocks.ServicesDefaults;
 using Serilog;
 using OroBuildingBlocks.Loggers;
+using OroIdentity.Web.Client.Interfaces;
+using OroIdentity.Web.Client.Services;
+using OroIdentity.Web.Server.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,14 +22,13 @@ builder.Services.AddRazorComponents()
     .AddAuthenticationStateSerialization(
         options => options.SerializeAllClaims = true)
     .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents();
+    .AddInteractiveWebAssemblyComponents()
+    .AddAuthenticationStateSerialization(
+        options => options.SerializeAllClaims = true);
 builder.Services.AddFluentUIComponents(options => options.ValidateClassNames = false);
 
 builder.AddOroIdentityWebExtensions();
-builder.Services.AddAuthorization();
-builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.AddAuthenticationStateDeserialization();
 builder.Services.AddDIOpenIddictApplication(configuration);
 
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -35,11 +37,22 @@ builder.Services.AddAntiforgery();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
+builder.Services.AddScoped<TokenHandler>();
 
 var identityUri = configuration.GetSection("Identity:Url").Value;
 
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<INavigationHistoryService, NavigationHistoryService>();
+builder.Services.AddScoped<IApplicationsService, ApplicationsService>();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHttpClient(
+    "OroIdentityServerApis", 
+    client => { 
+        client.BaseAddress = new Uri(builder.Configuration["Identity:Url"]);
+    }
+).AddHttpMessageHandler<TokenHandler>();
 
 var app = builder.Build();
 
@@ -55,9 +68,6 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-app.MapStaticAssets();
-app.UseStaticFiles();
-
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -67,6 +77,7 @@ app.MapIdentityEndpoints();
 
 app.UseAntiforgery();
 
+app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()

@@ -21,12 +21,19 @@ public class GetApplicationsQueryHandler(
                 var descriptor = new OpenIddictApplicationDescriptor
                 {
                     ClientId = await applicationManager.GetClientIdAsync(application, cancellationToken),
-                    DisplayName = await applicationManager.GetDisplayNameAsync(application, cancellationToken)
+                    DisplayName = await applicationManager.GetDisplayNameAsync(application, cancellationToken),
+                    ClientType = await applicationManager.GetClientTypeAsync(application, cancellationToken),
+                    ApplicationType = await applicationManager.GetApplicationTypeAsync(application, cancellationToken),
                 };
 
                 foreach (var permission in await applicationManager.GetPermissionsAsync(application, cancellationToken))
                 {
                     descriptor.Permissions.Add(permission);
+                }
+
+                foreach(var redirectUri in await  applicationManager.GetRedirectUrisAsync(application, cancellationToken))
+                {
+                    descriptor.RedirectUris.Add(new Uri(redirectUri));
                 }
 
                 applications.Add(descriptor);

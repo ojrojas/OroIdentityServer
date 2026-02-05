@@ -3,9 +3,45 @@
 
 @using Microsoft.AspNetCore.Authorization
 @using OroIdentity.Web.Client.Components
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+@inject IApplicationsService service
+
 <PageTitle>Applications</PageTitle>
-<HeaderPagesComponent TitlePage="Applications"
-Description="Manage your applications"
->
-<FluentButton Appearance="Appearance.Accent">Create</FluentButton>
+<HeaderPagesComponent TitlePage="Applications" Description="Manage your applications">
+    <FluentButton Appearance="Appearance.Accent">Create</FluentButton>
 </HeaderPagesComponent>
+
+<FluentDataGrid Items="_applicationsIQueryable" Pagination="pagination">
+    <PropertyColumn Property="@(p => p.ApplicationType)" Sortable="true" />
+    <PropertyColumn Property="@(p => p.DisplayName)" />
+    <PropertyColumn Property="@(p => p.ClientId)" />
+</FluentDataGrid>
+
+@code {
+    private IQueryable<ApplicationViewModel>? _applicationsIQueryable;
+    private IEnumerable<ApplicationViewModel> _applications = [];
+    private PaginationState pagination = new PaginationState() { ItemsPerPage = 2 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadApplications();
+    }
+
+    protected async Task AfterRendererAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+        }
+    }
+
+    private async Task LoadApplications()
+    {
+        CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+        IEnumerable<ApplicationViewModel> result = await service.GetAllApplicationAsync(token.Token);
+        _applicationsIQueryable = result.AsQueryable();
+    }
+
+
+
+}
