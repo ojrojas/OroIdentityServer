@@ -28,13 +28,6 @@
         await LoadApplications();
     }
 
-    protected async Task AfterRendererAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-        }
-    }
-
     private async Task LoadApplications()
     {
         CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
