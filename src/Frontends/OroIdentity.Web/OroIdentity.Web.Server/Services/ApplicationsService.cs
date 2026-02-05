@@ -20,7 +20,7 @@ public class ApplicationsService(
         using var response = await  client.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<IEnumerable<ApplicationViewModel>>() ?? 
+        return await response.Content.ReadFromJsonAsync<IEnumerable<ApplicationViewModel>>(cancellationToken: cancellationToken) ?? 
         throw new IOException("Error request getallapplications");
     }
 
