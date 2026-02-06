@@ -1,4 +1,4 @@
-@page "/account/login"
+@page "/account/login/disabled"
 
 @layout LoginLayout
 @attribute [AllowAnonymous]
@@ -125,9 +125,9 @@
             {
                 // Sign in user
                 var claims = new List<System.Security.Claims.Claim>
-{
-new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, Input.Email)
-};
+                {
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, Input.Email)
+                };
 
                 var identity = new System.Security.Claims.ClaimsIdentity(claims,
                 Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);

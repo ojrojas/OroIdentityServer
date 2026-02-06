@@ -11,7 +11,6 @@
 @inject NavigationManager NavigationManager
 
 
-
 <PageTitle>Edit Application</PageTitle>
 
 <FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
@@ -25,23 +24,13 @@
             <FluentStack Orientation="Orientation.Vertical">
                 <FluentTextField @bind-Value="newApplication.ClientId" Label="ClientId" />
                 <FluentTextField @bind-Value="newApplication.DisplayName" Label="DisplayName" Required="true" />
-                <FluentSelect @bind-Value="newApplication.ClientType" 
-                    Label="ClientType"
-                    Items="OroIdentityWebConstants.DictionaryClientTypes"
-                    Id="clienttype-listbox"
-                    OptionValue="@(p => p.Key)"
-                    OptionText="@(p => p.Value)"
-                    OptionTitle="@(p => p.Value)"              
-                    />
-                
-                <FluentSelect @bind-Value="newApplication.ConsentType"
-                    Label="ConsentType"
-                    Items="OroIdentityWebConstants.DictionaryConsentTypes"
-                    Id="consenttype-listbox"
-                    OptionValue="@(p => p.Key)"
-                    OptionText="@(p => p.Value)"
-                    OptionTitle="@(p => p.Value)"                    
-                    />
+                <FluentSelect @bind-Value="newApplication.ClientType" Label="ClientType"
+                              Items="OroIdentityWebConstants.DictionaryClientTypes" Id="clienttype-listbox"
+                              OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
+
+                <FluentSelect @bind-Value="newApplication.ConsentType" Label="ConsentType"
+                              Items="OroIdentityWebConstants.DictionaryConsentTypes" Id="consenttype-listbox"
+                              OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
 
 
                 <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Edit Application</FluentButton>
@@ -53,12 +42,27 @@
 
 @code {
     [Parameter]
-    public string ClientId { get; set; }
-    private ApplicationViewModel newApplication = new();
+    public string ClientId { get; set; } = string.Empty;
+    private ApplicationViewModel newApplication { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        newApplication = await Service.GetApplicationByClientIdAsync(ClientId, CancellationToken.None);
+        try
+        {
+            await LoadApplicationById(ClientId);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("ERROR prerender:");
+            Console.Error.WriteLine(ex);
+        }
+    }
+
+    private async Task LoadApplicationById(string ClientId)
+    {
+        CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+        newApplication = await Service.GetApplicationByClientIdAsync(ClientId, token.Token);
+        StateHasChanged();
     }
 
     private async Task HandleSubmit()

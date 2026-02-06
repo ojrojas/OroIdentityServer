@@ -49,7 +49,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient(
     OroIdentityWebConstants.OroIdentityServerApis, 
     client => { 
-        client.BaseAddress = new Uri(builder.Configuration["Identity:Url"]);
+        client.BaseAddress = new Uri(builder.Configuration["Identity:Url"]) ?? 
+        throw new Exception("Missing base address environment");
     }
 ).AddHttpMessageHandler<TokenHandler>();
 
