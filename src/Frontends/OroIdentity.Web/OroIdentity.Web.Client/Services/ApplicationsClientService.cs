@@ -4,28 +4,24 @@
 // See the LICENSE file in the project root for details.
 using System.Net.Http.Json;
 using System.Text.Json;
-using Microsoft.AspNetCore.Components.Authorization;
 using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Client.Models;
 
-
 namespace OroIdentity.Web.Client.Services;
 
-public class ApplicationsClientService(
+internal sealed class ApplicationsClientService(
     ILogger<ApplicationsClientService> logger,
     HttpClient httpClient
-    // ,AuthenticationState authenticationState
     ) : IApplicationsService
 {
-    public string APPLICATIONROUTE = "/applications";
+    public string APPLICATIONROUTE = "/api/v1/applications";
     public async Task<IEnumerable<ApplicationViewModel>?> GetAllApplicationAsync(CancellationToken cancellationToken)
     {
-        // var auth = authenticationState.User.Identity.IsAuthenticated;
         logger.LogInformation("Request get all applications");
         return await httpClient.GetFromJsonAsync<IEnumerable<ApplicationViewModel>>(APPLICATIONROUTE, cancellationToken);
     }
 
-    public async Task<ApplicationViewModel> GetApplicationByClientIdAsync(Guid ClientId, CancellationToken cancellationToken)
+    public async Task<ApplicationViewModel> GetApplicationByClientIdAsync(string ClientId, CancellationToken cancellationToken)
     {
         logger.LogInformation("Request get application by id: {Id}", ClientId);
         Uri uri = new($"{APPLICATIONROUTE}/{ClientId}");

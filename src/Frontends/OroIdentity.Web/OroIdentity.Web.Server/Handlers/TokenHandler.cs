@@ -1,13 +1,11 @@
 
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authentication;
-using OpenIddict.Client;
 using OpenIddict.Client.AspNetCore;
-using static OpenIddict.Client.OpenIddictClientModels;
 
 namespace OroIdentity.Web.Server.Handlers;
 
-public class TokenHandler(IHttpContextAccessor httpContextAccessor) : 
+internal sealed class TokenHandler(IHttpContextAccessor httpContextAccessor) : 
     DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(

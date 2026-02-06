@@ -8,8 +8,9 @@ using OroBuildingBlocks.ServicesDefaults;
 using Serilog;
 using OroBuildingBlocks.Loggers;
 using OroIdentity.Web.Client.Interfaces;
-using OroIdentity.Web.Client.Services;
 using OroIdentity.Web.Server.Handlers;
+using OroIdentity.Web.Client.Constants;
+using OroIdentity.Web.Server.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +20,6 @@ Log.Logger = LoggerPrinter.CreateSerilogLogger("api", "OroIdentity.Web.Server", 
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddAuthenticationStateSerialization(
-        options => options.SerializeAllClaims = true)
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization(
@@ -48,7 +47,7 @@ builder.Services.AddScoped<IApplicationsService, ApplicationsService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddHttpClient(
-    "OroIdentityServerApis", 
+    OroIdentityWebConstants.OroIdentityServerApis, 
     client => { 
         client.BaseAddress = new Uri(builder.Configuration["Identity:Url"]);
     }
@@ -57,13 +56,18 @@ builder.Services.AddHttpClient(
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseWebAssemblyDebugging();
+}
+else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    app.UseWebAssemblyDebugging();
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.MapStaticAssets();
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
@@ -74,10 +78,10 @@ app.UseAuthorization();
 app.UseSession();
 
 app.MapIdentityEndpoints();
+app.MapApplicationEndpointsV1().RequireAuthorization();
 
 app.UseAntiforgery();
 
-app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()

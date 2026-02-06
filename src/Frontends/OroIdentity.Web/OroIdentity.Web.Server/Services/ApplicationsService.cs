@@ -1,10 +1,11 @@
+using OroIdentity.Web.Client.Constants;
 using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Client.Models;
 
 namespace OroIdentity.Web.Server.Services;
 
 public class ApplicationsService(
-    ILogger<ApplicationsService> logger, 
+    ILogger<ApplicationsService> logger,
     IHttpClientFactory httpClientFactory) : IApplicationsService
 {
     public Task CreateApplicationAsync(ApplicationViewModel application, CancellationToken cancellationToken)
@@ -14,19 +15,44 @@ public class ApplicationsService(
 
     public async Task<IEnumerable<ApplicationViewModel>?> GetAllApplicationAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Request api external getallapplications");
-        using var request = new HttpRequestMessage(HttpMethod.Get, "/applications");
-        var client  = httpClientFactory.CreateClient("OroIdentityServerApis");
-        using var response = await  client.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            logger.LogInformation("Request api external getallapplications");
+            using var request = new HttpRequestMessage(HttpMethod.Get, "/applications");
+            var client = httpClientFactory.CreateClient(OroIdentityWebConstants.OroIdentityServerApis);
+            using var response = await client.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<IEnumerable<ApplicationViewModel>>(cancellationToken: cancellationToken) ?? 
-        throw new IOException("Error request getallapplications");
+            var result = await response.Content.ReadFromJsonAsync<IEnumerable<ApplicationViewModel>>(cancellationToken: cancellationToken) ??
+            throw new IOException("Error request getallapplications");
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message, ex);
+        }
     }
 
-    public Task<ApplicationViewModel> GetApplicationByClientIdAsync(Guid ClientId, CancellationToken cancellationToken)
+    public async Task<ApplicationViewModel> GetApplicationByClientIdAsync(string ClientId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+       try
+        {
+            logger.LogInformation("Request api external getallapplications");
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"/applications/{ClientId}");
+            var client = httpClientFactory.CreateClient(OroIdentityWebConstants.OroIdentityServerApis);
+            using var response = await client.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApplicationViewModel>(cancellationToken: cancellationToken) ??
+            throw new IOException("Error request getallapplications");
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message, ex);
+        }
     }
 
     public Task UpdateApplicationAsync(ApplicationViewModel application, CancellationToken cancellationToken)

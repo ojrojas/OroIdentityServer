@@ -4,7 +4,6 @@ using OroIdentityServer.Services.OroIdentityServer.Server.Components.Account;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 using OroBuildingBlocks.ServiceDefaults;
-using OroBuildingBlocks.Loggers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,8 +73,8 @@ var applicationManager = service.GetRequiredService<IOpenIddictApplicationManage
 var passwordHasher = service.GetRequiredService<IPasswordHasher>();
 
 ArgumentNullException.ThrowIfNull(context);
-Console.WriteLine("Deleting database...");
-await context.Database.EnsureDeletedAsync();
+// Console.WriteLine("Deleting database...");
+// await context.Database.EnsureDeletedAsync();
 Console.WriteLine("Creating database...");
 await context.Database.EnsureCreatedAsync();
 Console.WriteLine("Database created successfully.");

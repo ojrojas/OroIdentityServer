@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentity.Frontends.Services;
+using OroIdentity.Web.Client.Constants;
 using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Client.Services;
 
@@ -16,11 +17,10 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
 
-builder.Services.AddScoped<IApplicationsService, ApplicationsClientService>();
+// builder.Services.AddScoped<IApplicationsService, ApplicationsClientService>();
 
 builder.Services.AddHttpClient<IApplicationsService, ApplicationsClientService>(
-    "OroIdentityServerApis", 
-    client => client.BaseAddress = new Uri(builder.Configuration["Identity:Url"])
+    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
 );
 
 builder.Services.AddFluentUIComponents();

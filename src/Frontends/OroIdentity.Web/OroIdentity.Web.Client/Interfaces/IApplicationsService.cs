@@ -10,6 +10,6 @@ public interface IApplicationsService
 {
     Task CreateApplicationAsync(ApplicationViewModel application, CancellationToken cancellationToken);
     Task<IEnumerable<ApplicationViewModel>?> GetAllApplicationAsync(CancellationToken cancellationToken);
-    Task<ApplicationViewModel> GetApplicationByClientIdAsync(Guid ClientId, CancellationToken cancellationToken);
+    Task<ApplicationViewModel> GetApplicationByClientIdAsync(string ClientId, CancellationToken cancellationToken);
     Task UpdateApplicationAsync(ApplicationViewModel application, CancellationToken cancellationToken);
 }

@@ -1,0 +1,72 @@
+@page "/applications/{ClientId}"
+@attribute [Authorize]
+
+@using OpenIddict.Abstractions
+@using OroIdentity.Web.Client.Constants
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+
+@inject IApplicationsService Service
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager
+
+
+
+<PageTitle>Edit Application</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+
+    <HeaderPagesComponent TitlePage="Edit Applications" Description="@($"Edit your application {ClientId}")">
+    </HeaderPagesComponent>
+
+    <FluentCard>
+        <FluentLabel Typo="Typography.H4">Edit Application</FluentLabel>
+        <FluentEditForm Model="@newApplication" OnValidSubmit="HandleSubmit">
+            <FluentStack Orientation="Orientation.Vertical">
+                <FluentTextField @bind-Value="newApplication.ClientId" Label="ClientId" />
+                <FluentTextField @bind-Value="newApplication.DisplayName" Label="DisplayName" Required="true" />
+                <FluentSelect @bind-Value="newApplication.ClientType" 
+                    Label="ClientType"
+                    Items="OroIdentityWebConstants.DictionaryClientTypes"
+                    Id="clienttype-listbox"
+                    OptionValue="@(p => p.Key)"
+                    OptionText="@(p => p.Value)"
+                    OptionTitle="@(p => p.Value)"              
+                    />
+                
+                <FluentSelect @bind-Value="newApplication.ConsentType"
+                    Label="ConsentType"
+                    Items="OroIdentityWebConstants.DictionaryConsentTypes"
+                    Id="consenttype-listbox"
+                    OptionValue="@(p => p.Key)"
+                    OptionText="@(p => p.Value)"
+                    OptionTitle="@(p => p.Value)"                    
+                    />
+
+
+                <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Edit Application</FluentButton>
+            </FluentStack>
+        </FluentEditForm>
+    </FluentCard>
+</FluentStack>
+
+
+@code {
+    [Parameter]
+    public string ClientId { get; set; }
+    private ApplicationViewModel newApplication = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        newApplication = await Service.GetApplicationByClientIdAsync(ClientId, CancellationToken.None);
+    }
+
+    private async Task HandleSubmit()
+    {
+        await Service.UpdateApplicationAsync(newApplication, CancellationToken.None);
+        newApplication = new();
+        ToastService.ShowSuccess("Application edited successful");
+        await Task.Delay(500);
+        NavigationManager.NavigateTo("/applications");
+    }
+}
