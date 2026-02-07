@@ -30,7 +30,8 @@ public class CreateUserCommandHandler(
                 command.MiddleName,
                 command.LastName,
                 command.Identification,
-                command.IdentificationTypeId
+                command.IdentificationTypeId,
+                command.TenantId
             );
 
             // Assign SecurityUser

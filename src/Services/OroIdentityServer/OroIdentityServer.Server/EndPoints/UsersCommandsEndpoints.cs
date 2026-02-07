@@ -10,7 +10,7 @@ public static class UsersCommandsEndpoints
     {
         public RouteGroupBuilder MapUsersCommandsEndpointsV1()
         {
-            var api = routeBuilder.MapGroup(string.Empty);
+            var api = routeBuilder.MapGroup("users");
 
             api.MapPost("/create", CreateUser)
                 .WithName("CreateUser");

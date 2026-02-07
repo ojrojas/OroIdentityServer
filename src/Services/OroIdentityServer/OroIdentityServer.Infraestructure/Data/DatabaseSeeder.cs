@@ -27,6 +27,11 @@ public static class DatabaseSeeder
                 new IdentificationType(new(seedData.IdentificationType)));
         }
 
+        if(!context.Tenants.Any())
+        {
+            context.Tenants.Add(new Tenant(new (seedData.Tenant)));
+        }
+
         await context.SaveChangesAsync();
 
         if (!context.Users.Any())
@@ -45,7 +50,8 @@ public static class DatabaseSeeder
                     user.UserName,
                     user.Email,
                     user.Identification,
-                    context.IdentificationTypes.First().Id
+                    context.IdentificationTypes.First().Id,
+                    context.Tenants.First().Id
                 );
                 newUser.AssignSecurityUser(securityUser);
                 context.Users.Add(newUser);
@@ -183,6 +189,7 @@ public static class DatabaseSeeder
 public class SeedData
 {
     public string IdentificationType { get; set; } = string.Empty;
+    public string Tenant {get;set;} = string.Empty;
     public List<SeedUser> Users { get; set; } = [];
     public List<SeedRole> Roles { get; set; } = [];
 }

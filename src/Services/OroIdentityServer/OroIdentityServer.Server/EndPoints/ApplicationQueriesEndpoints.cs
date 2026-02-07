@@ -8,7 +8,7 @@ public static class ApplicationQueriesEndpoints
 {
     public static RouteGroupBuilder MapApplicationQueriesEndpointsV1(this IEndpointRouteBuilder routeBuilder)
     {
-        var api = routeBuilder.MapGroup("/applications");
+        var api = routeBuilder.MapGroup("applications");
 
         api.MapGet("/", GetApplications)
             .WithName("getapplications");

@@ -4,15 +4,15 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Infraestructure;
 
-public class IdentificationTypeEntityConfiguration : IEntityTypeConfiguration<IdentificationType>
+public class TenantEntityConfiguration : IEntityTypeConfiguration<Tenant>
 {
-    public void Configure(EntityTypeBuilder<IdentificationType> builder)
+    public void Configure(EntityTypeBuilder<Tenant> builder)
     {
-        builder.ToTable("IdentificationTypes");
+        builder.ToTable("Tenants");
 
         builder.HasKey(it => it.Id);
         builder.Property(it => it.Id)
-            .HasConversion(id => id.Value, value => new IdentificationTypeId(value))
+            .HasConversion(id => id.Value, value => new TenantId(value))
             .HasColumnName("Id");
 
         builder.Property(it => it.IsActive)
@@ -27,15 +27,15 @@ public class IdentificationTypeEntityConfiguration : IEntityTypeConfiguration<Id
                 .IsRequired();
             name.HasIndex(n => n.Value)
                 .IsUnique()
-                .HasDatabaseName("IX_IdentificationTypes_Name");
+                .HasDatabaseName("IX_Tenants_Name");
         });
 
         // builder.HasIndex(it => it.Name.Value)
-        //     .HasDatabaseName("IX_IdentificationTypes_Name")
+        //     .HasDatabaseName("IX_Tenants_Name")
         //     .IsUnique();
 
         builder.HasIndex(it => it.IsActive)
-            .HasDatabaseName("IX_IdentificationTypes_IsActive");
+            .HasDatabaseName("IX_Tenants_IsActive");
 
         builder.HasQueryFilter(it => it.IsActive);
     }

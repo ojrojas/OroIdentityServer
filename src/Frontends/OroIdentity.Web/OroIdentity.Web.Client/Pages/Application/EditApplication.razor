@@ -9,6 +9,7 @@
 @inject IApplicationsService Service
 @inject IToastService ToastService
 @inject NavigationManager NavigationManager
+@inject ILogger<EditApplication> logger
 
 
 <PageTitle>Edit Application</PageTitle>
@@ -43,19 +44,29 @@
 @code {
     [Parameter]
     public string ClientId { get; set; } = string.Empty;
-    private ApplicationViewModel newApplication { get; set; } = new();
+    public ApplicationViewModel? newApplication { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        newApplication ??= new ApplicationViewModel();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            await LoadApplicationById(ClientId);
+            try
+            {
+                await LoadApplicationById(ClientId);
+            }
+            catch (Exception ex)
+            {
+                if (logger.IsEnabled(LogLevel.Information))
+                    logger.LogInformation($"Error load applications, {ex.Message}");
+            }
         }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine("ERROR prerender:");
-            Console.Error.WriteLine(ex);
-        }
+
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     private async Task LoadApplicationById(string ClientId)

@@ -1,5 +1,6 @@
 {
   "IdentificationType": "Passport",
+  "Tenant": "OroIdentityServer",
   "Users": [
     {
       "Name": "Pepe",

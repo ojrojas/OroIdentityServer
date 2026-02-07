@@ -14,17 +14,17 @@ internal sealed class ApplicationsClientService(
     HttpClient httpClient
     ) : IApplicationsService
 {
-    public string APPLICATIONROUTE = "/api/v1/applications";
+    public string APPLICATIONROUTE = "api/v1/applications";
     public async Task<IEnumerable<ApplicationViewModel>?> GetAllApplicationAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Request get all applications");
         return await httpClient.GetFromJsonAsync<IEnumerable<ApplicationViewModel>>(APPLICATIONROUTE, cancellationToken);
     }
 
-    public async Task<ApplicationViewModel> GetApplicationByClientIdAsync(string ClientId, CancellationToken cancellationToken)
+    public async Task<ApplicationViewModel?> GetApplicationByClientIdAsync(string ClientId, CancellationToken cancellationToken)
     {
         logger.LogInformation("Request get application by id: {Id}", ClientId);
-        Uri uri = new($"{APPLICATIONROUTE}/{ClientId}");
+        var uri = $"{APPLICATIONROUTE}/{ClientId}";
         return await httpClient.GetFromJsonAsync<ApplicationViewModel>(uri, cancellationToken);
     }
 

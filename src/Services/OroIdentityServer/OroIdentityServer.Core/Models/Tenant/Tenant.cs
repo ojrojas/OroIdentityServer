@@ -4,17 +4,15 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public sealed class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregateRoot
+public class Tenant :
+BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregateRoot
 {
-    public TenantName Name { get; private set; }
-    public bool IsActive { get; private set; }
-
-    public Tenant(string name)
+    public Tenant(string name) : base()
     {
         Id = TenantId.New();
         Name = new TenantName(name);
         IsActive = true;
-        RaiseDomainEvent(new TenantCreateEvent(Id, Name));
+        RaiseDomainEvent(new TenantCreateEvent(Id));
     }
 
     private Tenant()
@@ -22,32 +20,59 @@ public sealed class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAg
         Name = null!;
     }
 
+    public static Tenant Create(string name)
+    {
+
+        var Tenant = new Tenant(name);
+        Tenant.Validate();
+        return Tenant;
+    }
+
+    public TenantName Name { get; private set; }
+    public bool IsActive { get; private set; }
+
     public void Deactive()
     {
-        if(!IsActive) return;
+        if (!IsActive) return;
 
         IsActive = false;
-        RaiseDomainEvent(new TenantDeactiveEvent(Id, Name));
+        RaiseDomainEvent(new TenantDeactiveEvent(Id));
     }
 
-    public static Tenant CreateTenant(TenantName name)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name?.Value);
-        return new Tenant(name.Value);
-    }
-
+    // Add validation logic to Tenant
     public void Validate()
     {
-        if (string.IsNullOrWhiteSpace(Name?.Value))
-            throw new ArgumentException("Tenant name cannot be empty.");
+        if (Name == null || string.IsNullOrWhiteSpace(Name.Value))
+            throw new ArgumentException("Identification type name cannot be empty.");
     }
-}
 
-// Add repository interface for Tenant
-public interface ITenantRepository
-{
-    Tenant? GetById(TenantId id);
-    void Add(Tenant tenant);
-    void Update(Tenant tenant);
-    void Remove(Tenant tenant);
+    // Add method to update the name
+    public void UpdateName(TenantName newName)
+    {
+        if (newName == null || string.IsNullOrWhiteSpace(newName.Value))
+            throw new ArgumentException("New name cannot be null or empty.");
+
+        if (Name != null && Name.Equals(newName)) return; // Avoid unnecessary updates
+
+        Name = newName;
+        RaiseDomainEvent(new TenantUpdatedEvent(Id, newName));
+    }
+
+    // Add method to activate the entity
+    public void Activate()
+    {
+        if (IsActive) return; // Avoid unnecessary updates
+
+        IsActive = true;
+        RaiseDomainEvent(new TenantActivatedEvent(Id));
+    }
+
+    // Update Deactive method to ensure consistency
+    public void Deactivate()
+    {
+        if (!IsActive) return; // Avoid unnecessary updates
+
+        IsActive = false;
+        RaiseDomainEvent(new TenantDeactivatedEvent(Id));
+    }
 }

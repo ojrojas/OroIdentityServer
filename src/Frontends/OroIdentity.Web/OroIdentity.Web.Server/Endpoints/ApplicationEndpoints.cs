@@ -8,12 +8,12 @@ public static class ApplicationEndpoints
 {
     public static RouteGroupBuilder MapApplicationEndpointsV1(this IEndpointRouteBuilder routeBuilder)
     {
-        var group = routeBuilder.MapGroup("/api/v1/applications")
+        var group = routeBuilder.MapGroup("api/v1/applications")
             .WithTags("Applications")
             .RequireAuthorization();
 
         group.MapGet("", GetAllApplications);
-        group.MapGet("/{clientid:guid}", GetApplicationByClientId);
+        group.MapGet("/{clientid}", GetApplicationByClientId);
         group.MapPost("", CreateApplication);
 
         return group;
@@ -24,9 +24,14 @@ public static class ApplicationEndpoints
         throw new NotImplementedException();
     }
 
-    private static async Task GetApplicationByClientId(HttpContext context)
+    private static async Task<ApplicationViewModel> GetApplicationByClientId(
+        HttpContext context,
+        string clientId,
+        [FromServices] IApplicationsService service,
+        CancellationToken cancellationToken
+        )
     {
-        throw new NotImplementedException();
+        return await service.GetApplicationByClientIdAsync(clientId, cancellationToken);
     }
 
     private static async Task<IEnumerable<ApplicationViewModel>> GetAllApplications(

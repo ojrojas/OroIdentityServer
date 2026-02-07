@@ -5,7 +5,7 @@ using OpenIddict.Client.AspNetCore;
 
 namespace OroIdentity.Web.Server.Handlers;
 
-internal sealed class TokenHandler(IHttpContextAccessor httpContextAccessor) : 
+internal sealed class TokenHandler(IHttpContextAccessor httpContextAccessor) :
     DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(
@@ -17,7 +17,7 @@ internal sealed class TokenHandler(IHttpContextAccessor httpContextAccessor) :
         }
 
         var accessToken = await httpContextAccessor.HttpContext.GetTokenAsync(
-            OpenIddictClientAspNetCoreConstants.Tokens.BackchannelAccessToken);;
+            OpenIddictClientAspNetCoreConstants.Tokens.BackchannelAccessToken); ;
 
         request.Headers.Authorization =
             new AuthenticationHeaderValue("Bearer", accessToken);
