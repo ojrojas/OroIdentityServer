@@ -3,6 +3,7 @@
 @layout LoginLayout
 @attribute [AllowAnonymous]
 
+@inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
 
 <PageTitle>Sign out</PageTitle>
@@ -13,11 +14,22 @@
     protected override async Task OnInitializedAsync()
     {
         var httpContext = HttpContextAccessor.HttpContext!;
+
+        // Procesar el resultado de OpenIddict para limpiar el estado del cliente
+        var result = await httpContext.AuthenticateAsync(OpenIddict.Client.AspNetCore.OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
+
         // Sign out locally if not already
         if (httpContext.User.Identity?.IsAuthenticated == true)
         {
             await httpContext.SignOutAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
         }
+        
         httpContext.Session.Clear();
+
+        // Recuperar el returnUrl guardado en las propiedades durante el logout
+        var redirectUri = result.Properties?.Items.TryGetValue("returnUrl", out var url) == true ? url : "/";
+
+        // Redirigir al destino final
+        NavigationManager.NavigateTo(redirectUri ?? "/");
     }
 }

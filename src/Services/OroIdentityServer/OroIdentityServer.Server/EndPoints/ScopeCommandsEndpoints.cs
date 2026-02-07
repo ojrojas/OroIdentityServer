@@ -9,7 +9,7 @@ public static class ScopeCommandsEndpoints
 {
     public static RouteGroupBuilder MapScopeCommandsEndpointsV1(this IEndpointRouteBuilder routeBuilder)
     {
-        var api = routeBuilder.MapGroup("/scopes");
+        var api = routeBuilder.MapGroup("scopes");
 
         api.MapPost("/create", CreateScope)
             .WithName("CreateScope");

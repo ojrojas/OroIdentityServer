@@ -17,7 +17,7 @@ public sealed class IdentificationTypeName : BaseValueObject
 
     public static IdentificationTypeName Create(string value)
     {
-        if(string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException("Email is required");
+        if(string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException("Name is required");
         return new IdentificationTypeName(value);
     }
 

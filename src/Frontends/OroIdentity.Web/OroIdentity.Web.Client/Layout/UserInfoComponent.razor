@@ -1,0 +1,24 @@
+@* OroIdentityServer
+Copyright (C) 2026 Oscar Rojas
+Licensed under the GNU AGPL v3.0 or later.
+See the LICENSE file in the project root for details. *@
+
+@using Microsoft.AspNetCore.Components.Authorization
+
+
+<AuthorizeView>
+    <FluentPersona 
+    Name="@context.User.Identity?.Name" 
+    Status="PresenceStatus.Available"
+        StatusSize="PresenceBadgeSize.Small" 
+        StatusTitle="He is available"
+        OnClick="(() => OpenUserMenu = !OpenUserMenu )" ImageSize="50px"
+        >
+    </FluentPersona>
+</AuthorizeView>
+
+
+@code {
+    private bool OpenUserMenu { get; set; }
+    private string? currentUrl = "/";
+}

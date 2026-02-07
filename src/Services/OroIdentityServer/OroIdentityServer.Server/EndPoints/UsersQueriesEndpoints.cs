@@ -10,7 +10,7 @@ public static class UsersQueriesEndpoints
     {
         public RouteGroupBuilder MapUsersQueriesEndpointsV1()
         {
-            var api = routeBuilder.MapGroup(string.Empty);
+            var api = routeBuilder.MapGroup("users");
 
             api.MapGet("/getuserinfo", GetUserInfo)
                 .WithName("GetUserInfo");

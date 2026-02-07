@@ -1,0 +1,48 @@
+@page "/applications"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+@inject IApplicationsService Service
+@inject NavigationManager NavigationManager
+
+<PageTitle>Applications</PageTitle>
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+
+    <HeaderPagesComponent TitlePage="Applications" Description="Manage your applications">
+        <FluentButton Appearance="Appearance.Accent">Create</FluentButton>
+    </HeaderPagesComponent>
+
+    <FluentDataGrid Items="_applicationsIQueryable" Pagination="pagination">
+        <TemplateColumn Title="Action">
+            <FluentButton OnClick="(() => RedirectEdit(context.ClientId))">Edit</FluentButton>
+        </TemplateColumn>
+        <PropertyColumn Property="@(p => p.ApplicationType)" Sortable="true" />
+        <PropertyColumn Property="@(p => p.DisplayName)" />
+    </FluentDataGrid>
+</FluentStack>
+
+@code {
+    private IQueryable<ApplicationViewModel>? _applicationsIQueryable;
+    [PersistentState]
+    public IEnumerable<ApplicationViewModel> _applications { get; set; }
+    private PaginationState pagination = new PaginationState() { ItemsPerPage = 10 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadApplications();
+    }
+
+    private async Task LoadApplications()
+    {
+        CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+        IEnumerable<ApplicationViewModel> result = await Service.GetAllApplicationAsync(CancellationToken.None);
+        _applicationsIQueryable = result.AsQueryable();
+    }
+
+    private void RedirectEdit(string ClientId)
+    {
+        NavigationManager.NavigateTo($"/applications/{ClientId}");
+    }
+}

@@ -14,7 +14,8 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
         string userName,
         string email,
         string identification,
-        IdentificationTypeId identificationTypeId) 
+        IdentificationTypeId identificationTypeId, 
+        TenantId tenantId)
     {
         Id = id ?? UserId.New();
         Name = name;
@@ -24,28 +25,32 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
         Email = email;
         Identification = identification;
         IdentificationTypeId = identificationTypeId;
+        TenantId = tenantId;
         NormalizedEmail = NormalizedEmailFrom(email);
         NormalizedUserName = NormalizedUserNameFrom(userName);
         RaiseDomainEvent(new UserCreateEvent(
-            Id, 
+            Id,
             name,
             middleName,
             lastName,
             userName,
             email,
             identification,
-            identificationTypeId));
+            identificationTypeId, 
+            tenantId));
     }
 
-    public static string NormalizedEmailFrom(string email){
-        if(string.IsNullOrWhiteSpace(email))
+    public static string NormalizedEmailFrom(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("Email cannot be null or empty.");
-        return email.ToUpperInvariant();    
+        return email.ToUpperInvariant();
     }
-    public static string NormalizedUserNameFrom(string userName) {
-        if(string.IsNullOrWhiteSpace(userName))
+    public static string NormalizedUserNameFrom(string userName)
+    {
+        if (string.IsNullOrWhiteSpace(userName))
             throw new ArgumentException("UserName cannot be null or empty.");
-        return userName.ToUpperInvariant();    
+        return userName.ToUpperInvariant();
     }
 
     private readonly IList<UserRole> _roles = [];
@@ -61,18 +66,21 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
     public string? NormalizedUserName { get; set; } = string.Empty;
     public IdentificationType? IdentificationType { get; set; }
 
+    public TenantId? TenantId { get; private set; }
+    public Tenant? Tenant { get; set; }
+
     public IReadOnlyCollection<UserRole> Roles => _roles.AsReadOnly();
 
     public SecurityUserId? SecurityUserId { get; set; }
     public SecurityUser? SecurityUser { get; set; }
 
-    public interface IUserRepository
-    {
-        User? GetById(UserId id);
-        void Add(User user);
-        void Update(User user);
-        void Remove(User user);
-    }
+    // public interface IUserRepository
+    // {
+    //     User? GetById(UserId id);
+    //     void Add(User user);
+    //     void Update(User user);
+    //     void Remove(User user);
+    // }
 
     public void AddRole(UserRole role)
     {
@@ -94,26 +102,31 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
             throw new ArgumentException("Name cannot be empty.");
         if (string.IsNullOrWhiteSpace(Email))
             throw new ArgumentException("Email cannot be empty.");
-        if (!Email.Contains("@"))
+        if (!Email.Contains('@'))
             throw new ArgumentException("Email must be valid.");
     }
 
     public void AssignSecurityUser(SecurityUser securityUser)
     {
-        if (securityUser == null)
-            throw new ArgumentNullException(nameof(securityUser), "SecurityUser cannot be null.");
-
         if (SecurityUser != null)
             throw new InvalidOperationException("SecurityUser is already assigned.");
 
-        SecurityUser = securityUser;
+        SecurityUser = securityUser ?? throw new ArgumentNullException(nameof(securityUser), "SecurityUser cannot be null.");
         SecurityUserId = securityUser.Id;
 
         RaiseDomainEvent(new SecurityUserAssignedEvent(Id, securityUser.Id));
     }
 
     // Add Create method
-    public static User Create(string userName, string email, string name, string middleName, string lastName, string identification, IdentificationTypeId identificationTypeId)
+    public static User Create(
+        string userName, 
+        string email, 
+        string name, 
+        string middleName, 
+        string lastName, 
+        string identification,
+        IdentificationTypeId identificationTypeId,
+        TenantId tenantId)
     {
         if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("UserName and Email cannot be null or empty.");
@@ -126,12 +139,21 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
             userName,
             email,
             identification,
-            identificationTypeId
+            identificationTypeId, 
+            tenantId
         );
     }
 
     // Add UpdateDetails method
-    public void UpdateDetails(string name, string middleName, string lastName, string userName, string email, string identification, IdentificationTypeId identificationTypeId)
+    public void UpdateDetails(
+        string name, 
+        string middleName, 
+        string lastName, 
+        string userName, 
+        string email, 
+        string identification, 
+        IdentificationTypeId identificationTypeId,
+        TenantId tenantId)
     {
         Name = name;
         MiddleName = middleName;
@@ -140,5 +162,6 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
         Email = email;
         Identification = identification;
         IdentificationTypeId = identificationTypeId;
+        TenantId = tenantId;
     }
 }

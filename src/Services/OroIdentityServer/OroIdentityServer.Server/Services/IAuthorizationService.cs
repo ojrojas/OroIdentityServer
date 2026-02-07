@@ -10,4 +10,5 @@ public interface IAuthorizationService
     Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
     Task<LogoutResponse> LogoutAsync(SimpleRequest request, CancellationToken cancellationToken = default);
     Task<LoginResponse> GetTokenAsync(SimpleRequest request, CancellationToken cancellationToken);
+    Task<IResult> GetUserInfoAsync(SimpleRequest request, CancellationToken cancellationToken = default);
 }

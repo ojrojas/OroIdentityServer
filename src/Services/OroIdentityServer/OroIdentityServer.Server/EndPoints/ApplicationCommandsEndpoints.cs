@@ -9,7 +9,7 @@ public static class ApplicationCommandsEndpoints
 {
     public static RouteGroupBuilder MapApplicationCommandsEndpointsV1(this IEndpointRouteBuilder routeBuilder)
     {
-        var api = routeBuilder.MapGroup("/applications");
+        var api = routeBuilder.MapGroup("applications");
 
         api.MapPost("/create", CreateApplication)
             .WithName("CreateApplication");

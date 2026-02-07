@@ -12,6 +12,7 @@ public class OroIdentityAppContext(
     public DbSet<SecurityUser> SecurityUsers { get; set; }
     public DbSet<IdentificationType> IdentificationTypes { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
+    public DbSet<Tenant> Tenants {get;set;}
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -42,6 +43,7 @@ public class OroIdentityAppContext(
         builder.ApplyConfiguration(new IdentificationTypeEntityConfiguration());
         builder.ApplyConfiguration(new UserRoleEntityConfiguration());
         builder.ApplyConfiguration(new SecurityUserEntityConfiguration());
+        builder.ApplyConfiguration(new TenantEntityConfiguration());
 
     }
 }

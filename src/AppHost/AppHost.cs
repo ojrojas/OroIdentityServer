@@ -22,12 +22,15 @@ var identityDb = postgres.AddDatabase("identitydb");
 
 var identity = builder.AddProject<Projects.OroIdentityServer_Server>(Constants.IdentityApi, launchProfile);
 var identityWeb = builder.AddProject<Projects.OroIdentity_Web_Server>(Constants.IdentityWeb, launchProfile);
+var identityAdmin = builder.AddNpmApp(Constants.IdentityAdmin, "../Frontends/identity-admin");
+
 
 identity
 .WaitFor(identityDb)
 .WithReference(seq)
 .WithReference(identityDb)
-.WithReference(identityWeb)
+// .WithReference(identityWeb)
+.WithEnvironment("IdentityAdmin__Url", identityAdmin.GetEndpoint("http"))
 .WithEnvironment("IdentityWeb__Url", identityWeb.GetEndpoint(launchProfile))
 .WithExternalHttpEndpoints();
 
@@ -39,6 +42,18 @@ identityWeb
 .WithEnvironment("IdentityWeb__Url", identityWeb.GetEndpoint(launchProfile))
 
 .WithExternalHttpEndpoints();
+
+
+
+identityAdmin
+.WaitFor(identity)
+.WithHttpEndpoint(env: "PORT", port: 33444, targetPort: 4200)
+.WithReference(seq)
+.WithReference(identity)
+.WithExternalHttpEndpoints()
+.PublishAsDockerFile();
+
+
 
 builder.Build().Run();
 

@@ -10,7 +10,7 @@ public static class IdentificationTypeQueriesEndpoints
     {
         public RouteGroupBuilder MapIdentificationTypeQueriesEndpointsV1()
         {
-            var api = routeBuilder.MapGroup(string.Empty);
+            var api = routeBuilder.MapGroup("identificationtypes");
 
             api.MapGet("/getall", GetAllIdentificationTypes)
             .WithName("GetAllIdentificationTypes");

@@ -14,7 +14,8 @@ public record UpdateUserCommand(
     string Email, 
     string Password,
     string Identification,
-    IdentificationTypeId IdentificationTypeId
+    IdentificationTypeId IdentificationTypeId,
+    TenantId TenantId
 ) : ICommand<UpdateUserResponse>
 {
     public Guid CorrelationId() => Guid.NewGuid();

@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public record TenantDeactiveEvent(TenantId TenantId, TenantName Name): DomainEventBase;
+public sealed record TenantDeactiveEvent(TenantId TenantId) : DomainEventBase;

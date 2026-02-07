@@ -8,7 +8,7 @@ public static class IdentificationTypeCommandsEndpoints
 {
     public static RouteGroupBuilder MapIdentificationTypeCommandsEndpointsV1(this IEndpointRouteBuilder routeBuilder)
     {
-        var api = routeBuilder.MapGroup("/identificationtypes");
+        var api = routeBuilder.MapGroup("identificationtypes");
 
         api.MapPost("/create", CreateIdentificationType)
             .WithName("CreateIdentificationType");

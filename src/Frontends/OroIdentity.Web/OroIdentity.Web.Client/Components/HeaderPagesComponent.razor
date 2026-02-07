@@ -1,0 +1,42 @@
+@using OroIdentity.Frontends.Services
+@inject NavigationManager NavigationManager
+    <FluentGrid>
+        <FluentGridItem xs="6" md="6" lg="6" xl="6">
+            <FluentGrid>
+                <FluentGridItem Style="display: flex; align-items: center; gap: 10px; height: 100%;" xs="12" >
+                    <FluentButton IconEnd="@(new Icons.Regular.Size20.ArrowLeft())"
+                        OnClick="(()=> NavigationManager.NavigateTo(ROOT))" />
+                    <FluentLabel Typo="Typography.PageTitle">@TitlePage</FluentLabel>
+                </FluentGridItem>
+                <FluentGridItem xs="12">
+                    <FluentLabel Typo="Typography.Body">@Description</FluentLabel>
+                </FluentGridItem>
+            </FluentGrid>
+        </FluentGridItem>
+        <FluentGridItem Style="display: flex; align-items: center; gap: 10px; height: 100%;" Justify="JustifyContent.FlexEnd" xs="6" md="6" lg="6" xl="6" >
+            @ChildContent
+        </FluentGridItem>
+    </FluentGrid>
+
+@code {
+    [Parameter]
+    public string TitlePage { get; set; } = string.Empty;
+    [Parameter]
+    public string Description { get; set; } = string.Empty;
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    private string ROOT = "/";
+
+    protected override void OnInitialized()
+    {
+    }
+
+    private void Refresh()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+    }
+}

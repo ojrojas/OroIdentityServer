@@ -3,6 +3,7 @@ using OroIdentityServer.Services.OroIdentityServer.Server.Components;
 using OroIdentityServer.Services.OroIdentityServer.Server.Components.Account;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
+using OroBuildingBlocks.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,16 @@ builder.Services.Configure<RouteOptions>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "http://localhost:33444", "http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -62,8 +73,8 @@ var applicationManager = service.GetRequiredService<IOpenIddictApplicationManage
 var passwordHasher = service.GetRequiredService<IPasswordHasher>();
 
 ArgumentNullException.ThrowIfNull(context);
-Console.WriteLine("Deleting database...");
-await context.Database.EnsureDeletedAsync();
+// Console.WriteLine("Deleting database...");
+// await context.Database.EnsureDeletedAsync();
 Console.WriteLine("Creating database...");
 await context.Database.EnsureCreatedAsync();
 Console.WriteLine("Database created successfully.");
@@ -72,6 +83,9 @@ Console.WriteLine($"Tables: {string.Join(", ", context.Model.GetEntityTypes().Se
 var seedDataPath = Path.Combine(
     Directory.GetCurrentDirectory(),
     "bin", "Debug", "net10.0", "Data", "seedData.json");
+// Log configured IdentityWeb URL so we can verify what the seeder will register
+Console.WriteLine($"Configured IdentityWeb:Url = {configuration["IdentityWeb:Url"]}");
+Console.WriteLine($"Configured Identity:Url = {configuration["Identity:Url"]}");
 await DatabaseSeeder.SeedAsync(
     context, 
     applicationManager, 
@@ -85,8 +99,9 @@ await DatabaseSeeder.SeedAsync(
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
 app.UseRouting();
+app.UseCors();
+app.UseAuthentication();
 app.UseAuthorization();
 
 

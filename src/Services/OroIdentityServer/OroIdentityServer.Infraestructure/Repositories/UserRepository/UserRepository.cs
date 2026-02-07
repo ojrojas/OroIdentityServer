@@ -78,8 +78,9 @@ public class UserRepository(
     {
         logger.LogInformation("Entering GetUserByIdAsync with id: {Id}", id);
         var specification = new GetUserByIdSpecification(id);
-        var user = await repository.CurrentContext.FirstOrDefaultAsync(
+        var user = await repository.CurrentContext.Include(x=> x.Roles).FirstOrDefaultAsync(
             specification.Criteria, cancellationToken: cancellationToken);
+
         logger.LogInformation("Exiting GetUserByIdAsync");
         return user;
     }

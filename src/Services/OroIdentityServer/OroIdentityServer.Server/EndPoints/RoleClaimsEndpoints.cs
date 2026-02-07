@@ -9,7 +9,7 @@ public static class RoleClaimsEndpoints
 {
     public static RouteGroupBuilder MapRoleClaimsEndpointsV1(this IEndpointRouteBuilder routeBuilder)
     {
-        var api = routeBuilder.MapGroup("/roleclaims");
+        var api = routeBuilder.MapGroup("roleclaims");
 
         api.MapGet("/get/{id}", GetRoleClaimById)
             .WithName("GetRoleClaimById");

@@ -18,10 +18,17 @@ public static class OroIdentityWebExtensions
         {
             opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             opt.DefaultChallengeScheme = OpenIddictClientAspNetCoreDefaults.AuthenticationScheme;
-        }).AddCookie(options => {
-            options.LoginPath = "/account/login";
-        });
+        })
 
+        .AddBearerToken()
+
+        .AddCookie(options =>
+        {
+            options.LoginPath = "/account/login";
+            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        });
+        
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy("CanAccess", policy =>
             {
@@ -34,6 +41,9 @@ public static class OroIdentityWebExtensions
                  .RequireRole("Administrator", "User").Build();
             });
 
+        builder.Services.AddAuthorization();
+        builder.Services.AddCascadingAuthenticationState();
+        builder.Services.AddAuthenticationStateDeserialization();
 
         IdentityModelEventSource.ShowPII = builder.Environment.IsDevelopment();
 

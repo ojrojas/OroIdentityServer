@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class UserRole
+public class UserRole : IAggregateRoot
 {
     // Constructor vacío requerido por EF Core
     private UserRole()

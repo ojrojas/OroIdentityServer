@@ -4,24 +4,22 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class TenantName : BaseValueObject
+public sealed class TenantName : BaseValueObject
 {
     public string Value { get; private set; }
-    public TenantName(string value)
-    {
-        Value = value;
-    }
 
-    public static TenantName Create(string value)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(value, "Tenant name value is null or empty");
-        return new TenantName(value);
+    public TenantName(string value) => Value = value;
 
-    }
-
-    protected override IEnumerable<object?> GetEquatibilityComponents()
+    protected override IEnumerable<object> GetEquatibilityComponents()
     {
         yield return Value;
     }
 
+    public static TenantName Create(string value)
+    {
+        if(string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException("Name is required");
+        return new TenantName(value);
+    }
+
+    public static TenantName Empty => new(string.Empty);
 }

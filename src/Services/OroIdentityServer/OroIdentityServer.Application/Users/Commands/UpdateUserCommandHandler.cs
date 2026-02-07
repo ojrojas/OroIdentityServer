@@ -31,7 +31,8 @@ public class UpdateUserCommandHandler(
                 command.UserName,
                 command.Email,
                 command.Identification,
-                command.IdentificationTypeId
+                command.IdentificationTypeId,
+                command.TenantId
             );
 
             // Persist changes
