@@ -1,5 +1,63 @@
-@page "/application/create"
+@page "/create-application"
+
+@using OroIdentity.Web.Client.Constants
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+
+@inject IApplicationsService Service
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager
+@inject ILogger<CreateApplication> logger
 
 <PageTitle>Create Application</PageTitle>
-<HeaderPagesComponent TitlePage="Create Applications" Description="Create your application")">
+
+<HeaderPagesComponent TitlePage="Create Applications" Description="Create your application">
 </HeaderPagesComponent>
+
+<FluentEditForm Model="@newApplication" OnValidSubmit="HandleSubmit">
+        <FluentCard>
+            <FluentSpacer/>
+            <FluentLabel Typo="Typography.H4">Create Application</FluentLabel>
+            <FluentGrid>
+                <FluentGridItem md="4" sm="4">
+                    <FluentTextField @bind-Value="newApplication.ClientId" Label="ClientId" />
+                </FluentGridItem>
+                <FluentGridItem md="4" sm="4">
+                    <FluentTextField @bind-Value="newApplication.DisplayName" Label="DisplayName" Required="true" />
+                </FluentGridItem>
+                <FluentGridItem md="4" sm="4">
+                    <FluentSelect @bind-Value="newApplication.ClientType" Label="ClientType"
+                                  Items="OroIdentityWebConstants.DictionaryClientTypes" Id="clienttype-listbox"
+                                  OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
+                </FluentGridItem>
+                <FluentGridItem md="4" sm="4">
+                    <FluentSelect Style="z-index: 100" @bind-Value="newApplication.ConsentType" Label="ConsentType"
+                                  Items="OroIdentityWebConstants.DictionaryConsentTypes" Id="consenttype-listbox"
+                                  OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
+                </FluentGridItem>
+                <FluentDivider />
+                <FluentGridItem md="12" sm="12">
+                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Edit Application
+                    </FluentButton>
+                </FluentGridItem>
+            </FluentGrid>
+        </FluentCard>
+</FluentEditForm>
+
+@code {
+    public ApplicationViewModel? newApplication { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        newApplication ??= new ApplicationViewModel();
+    }
+
+    private async Task HandleSubmit()
+    {
+        await Service.CreateApplicationAsync(newApplication, CancellationToken.None);
+        newApplication = new();
+        ToastService.ShowSuccess("Application edited successful");
+        await Task.Delay(500);
+        NavigationManager.NavigateTo("/applications");
+    }
+}

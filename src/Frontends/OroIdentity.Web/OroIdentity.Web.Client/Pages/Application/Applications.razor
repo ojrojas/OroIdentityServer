@@ -8,20 +8,23 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>Applications</PageTitle>
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
 
-    <HeaderPagesComponent TitlePage="Applications" Description="Manage your applications">
-        <FluentButton Appearance="Appearance.Accent">Create</FluentButton>
-    </HeaderPagesComponent>
+<HeaderPagesComponent TitlePage="Applications" Description="Manage your applications">
+    <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToCreatePage">Create</FluentButton>
+</HeaderPagesComponent>
 
-    <FluentDataGrid Items="_applicationsIQueryable" Pagination="pagination">
-        <TemplateColumn Title="Action">
-            <FluentButton OnClick="(() => RedirectEdit(context.ClientId))">Edit</FluentButton>
-        </TemplateColumn>
-        <PropertyColumn Property="@(p => p.ApplicationType)" Sortable="true" />
-        <PropertyColumn Property="@(p => p.DisplayName)" />
-    </FluentDataGrid>
-</FluentStack>
+<FluentDataGrid 
+    Items="_applicationsIQueryable" 
+    Pagination="pagination" 
+    AutoFit="true"
+    RowSize="@DataGridRowSize.Medium"
+    >
+    <TemplateColumn Title="Action">
+        <FluentButton OnClick="(() => RedirectEdit(context.ClientId))">Edit</FluentButton>
+    </TemplateColumn>
+    <PropertyColumn Property="@(p => p.ApplicationType)" Sortable="true" />
+    <PropertyColumn Property="@(p => p.DisplayName)" />
+</FluentDataGrid>
 
 @code {
     private IQueryable<ApplicationViewModel>? _applicationsIQueryable;
@@ -44,5 +47,10 @@
     private void RedirectEdit(string ClientId)
     {
         NavigationManager.NavigateTo($"/applications/{ClientId}");
+    }
+
+    private void RedirectToCreatePage()
+    {
+        NavigationManager.NavigateTo("/create-application");
     }
 }

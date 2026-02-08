@@ -14,22 +14,21 @@
 
 <PageTitle>Edit Application</PageTitle>
 
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
 
     <HeaderPagesComponent TitlePage="Edit Applications" Description="@($"Edit your application {ClientId}")">
     </HeaderPagesComponent>
 
     <FluentCard>
         <FluentLabel Typo="Typography.H4">Edit Application</FluentLabel>
-        <FluentEditForm Model="@newApplication" OnValidSubmit="HandleSubmit">
+        <FluentEditForm Model="@editApplication" OnValidSubmit="HandleSubmit">
             <FluentStack Orientation="Orientation.Vertical">
-                <FluentTextField @bind-Value="newApplication.ClientId" Label="ClientId" />
-                <FluentTextField @bind-Value="newApplication.DisplayName" Label="DisplayName" Required="true" />
-                <FluentSelect @bind-Value="newApplication.ClientType" Label="ClientType"
+                <FluentTextField @bind-Value="editApplication.ClientId" Label="ClientId" />
+                <FluentTextField @bind-Value="editApplication.DisplayName" Label="DisplayName" Required="true" />
+                <FluentSelect @bind-Value="editApplication.ClientType" Label="ClientType"
                               Items="OroIdentityWebConstants.DictionaryClientTypes" Id="clienttype-listbox"
                               OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
 
-                <FluentSelect @bind-Value="newApplication.ConsentType" Label="ConsentType"
+                <FluentSelect @bind-Value="editApplication.ConsentType" Label="ConsentType"
                               Items="OroIdentityWebConstants.DictionaryConsentTypes" Id="consenttype-listbox"
                               OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
 
@@ -38,17 +37,16 @@
             </FluentStack>
         </FluentEditForm>
     </FluentCard>
-</FluentStack>
 
 
 @code {
     [Parameter]
     public string ClientId { get; set; } = string.Empty;
-    public ApplicationViewModel? newApplication { get; set; }
+    public ApplicationViewModel? editApplication { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        newApplication ??= new ApplicationViewModel();
+        editApplication ??= new ApplicationViewModel();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -72,14 +70,14 @@
     private async Task LoadApplicationById(string ClientId)
     {
         CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-        newApplication = await Service.GetApplicationByClientIdAsync(ClientId, token.Token);
+        editApplication = await Service.GetApplicationByClientIdAsync(ClientId, token.Token);
         StateHasChanged();
     }
 
     private async Task HandleSubmit()
     {
-        await Service.UpdateApplicationAsync(newApplication, CancellationToken.None);
-        newApplication = new();
+        await Service.UpdateApplicationAsync(editApplication, CancellationToken.None);
+        editApplication = new();
         ToastService.ShowSuccess("Application edited successful");
         await Task.Delay(500);
         NavigationManager.NavigateTo("/applications");
