@@ -13,30 +13,31 @@
 
 
 <PageTitle>Edit Application</PageTitle>
+<HeaderPagesComponent TitlePage="Edit Applications" Description="@($"Edit your application {ClientId}")">
+</HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
+</FluentDivider>
+
+<FluentCard>
+    <FluentLabel Typo="Typography.H4">Edit Application</FluentLabel>
+    <FluentEditForm Model="@editApplication" OnValidSubmit="HandleSubmit">
+        <FluentStack Orientation="Orientation.Vertical">
+            <FluentTextField @bind-Value="editApplication.ClientId" Label="ClientId" />
+            <FluentTextField @bind-Value="editApplication.DisplayName" Label="DisplayName" Required="true" />
+            <FluentSelect @bind-Value="editApplication.ClientType" Label="ClientType"
+                          Items="OroIdentityWebConstants.DictionaryClientTypes" Id="clienttype-listbox"
+                          OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
+
+            <FluentSelect @bind-Value="editApplication.ConsentType" Label="ConsentType"
+                          Items="OroIdentityWebConstants.DictionaryConsentTypes" Id="consenttype-listbox"
+                          OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
 
 
-    <HeaderPagesComponent TitlePage="Edit Applications" Description="@($"Edit your application {ClientId}")">
-    </HeaderPagesComponent>
-
-    <FluentCard>
-        <FluentLabel Typo="Typography.H4">Edit Application</FluentLabel>
-        <FluentEditForm Model="@editApplication" OnValidSubmit="HandleSubmit">
-            <FluentStack Orientation="Orientation.Vertical">
-                <FluentTextField @bind-Value="editApplication.ClientId" Label="ClientId" />
-                <FluentTextField @bind-Value="editApplication.DisplayName" Label="DisplayName" Required="true" />
-                <FluentSelect @bind-Value="editApplication.ClientType" Label="ClientType"
-                              Items="OroIdentityWebConstants.DictionaryClientTypes" Id="clienttype-listbox"
-                              OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
-
-                <FluentSelect @bind-Value="editApplication.ConsentType" Label="ConsentType"
-                              Items="OroIdentityWebConstants.DictionaryConsentTypes" Id="consenttype-listbox"
-                              OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
-
-
-                <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Edit Application</FluentButton>
-            </FluentStack>
-        </FluentEditForm>
-    </FluentCard>
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Edit Application</FluentButton>
+        </FluentStack>
+    </FluentEditForm>
+</FluentCard>
 
 
 @code {

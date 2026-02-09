@@ -13,12 +13,13 @@
     <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToCreatePage">Create</FluentButton>
 </HeaderPagesComponent>
 
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
+
 <FluentDataGrid 
     Items="_applicationsIQueryable" 
-    Pagination="pagination" 
+    Pagination="pagination"
     AutoFit="true"
-    RowSize="@DataGridRowSize.Medium"
-    >
+    RowSize="@DataGridRowSize.Medium">
     <TemplateColumn Title="Action">
         <FluentButton OnClick="(() => RedirectEdit(context.ClientId))">Edit</FluentButton>
     </TemplateColumn>

@@ -1,27 +1,23 @@
-@using OroIdentity.Frontends.Services
 @inject NavigationManager NavigationManager
+@using OroIdentity.Frontends.Services
 
-<FluentGrid>
-    <FluentGridItem xs="6" md="6" lg="6" xl="6">
-        <FluentGrid>
-            <FluentGridItem Style="display: flex; align-items: center; gap: 10px; height: 100%;" xs="12">
-                <FluentButton IconEnd="@(new Icons.Regular.Size20.ArrowLeft())"
-                              OnClick="(()=> NavigationManager.NavigateTo(ROOT))" />
-                <FluentLabel Typo="Typography.PageTitle">@TitlePage</FluentLabel>
-            </FluentGridItem>
-            <FluentGridItem md="12" sm="12">
-                <FluentGrid>
-                    <FluentGridItem md="1" sm="1"></FluentGridItem>
-                    <FluentGridItem md="11" sm="11">
-                        <FluentLabel Typo="Typography.Body">@Description</FluentLabel>
-                    </FluentGridItem>
-                </FluentGrid>
-            </FluentGridItem>
-        </FluentGrid>
+<FluentGrid Align="AlignItems.Center" Style="height:110px;">
+    <FluentGridItem xs="6" md="6" lg="6">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <FluentButton IconEnd="@(new Icons.Regular.Size20.ArrowLeft())"
+                          OnClick="(()=> NavigationManager.NavigateTo(ROOT))" />
+            <FluentLabel Typo="Typography.PageTitle">
+                @TitlePage
+            </FluentLabel>
+        </div>
     </FluentGridItem>
-    <FluentGridItem Style="display: flex; align-items: center; gap: 10px; height: 100%;"
-                    Justify="JustifyContent.FlexEnd" xs="6" md="6" lg="6" xl="6">
+    <FluentGridItem xs="6" md="6" lg="6" Style="display:flex; justify-content:flex-end; align-items:center;">
         @ChildContent
+    </FluentGridItem>
+    <FluentGridItem xs="12">
+        <FluentLabel Typo="Typography.H6">
+            @Description
+        </FluentLabel>
     </FluentGridItem>
 </FluentGrid>
 
