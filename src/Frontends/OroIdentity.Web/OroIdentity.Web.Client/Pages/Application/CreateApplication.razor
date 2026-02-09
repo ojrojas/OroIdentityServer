@@ -15,12 +15,12 @@
 </HeaderPagesComponent>
 
 <FluentEditForm Model="@newApplication" OnValidSubmit="HandleSubmit">
-        <FluentCard>
+        <div  style="height:260px; border-radius: 15px; padding:10px; box-shadow: 0 1px 2px green, 0 1px 3px orange">
             <FluentSpacer/>
             <FluentLabel Typo="Typography.H4">Create Application</FluentLabel>
             <FluentGrid>
-                <FluentGridItem md="4" sm="4">
-                    <FluentTextField @bind-Value="newApplication.ClientId" Label="ClientId" />
+                 <FluentGridItem md="4" sm="4">
+                    <FluentTextField style="size:28px" @bind-Value="newApplication.ClientId" Label="ClientId" Required="true" />
                 </FluentGridItem>
                 <FluentGridItem md="4" sm="4">
                     <FluentTextField @bind-Value="newApplication.DisplayName" Label="DisplayName" Required="true" />
@@ -31,7 +31,7 @@
                                   OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
                 </FluentGridItem>
                 <FluentGridItem md="4" sm="4">
-                    <FluentSelect Style="z-index: 100" @bind-Value="newApplication.ConsentType" Label="ConsentType"
+                    <FluentSelect Style="z-index: 10000000" @bind-Value="newApplication.ConsentType" Label="ConsentType"
                                   Items="OroIdentityWebConstants.DictionaryConsentTypes" Id="consenttype-listbox"
                                   OptionValue="@(p => p.Key)" OptionText="@(p => p.Value)" OptionTitle="@(p => p.Value)" />
                 </FluentGridItem>
@@ -41,7 +41,7 @@
                     </FluentButton>
                 </FluentGridItem>
             </FluentGrid>
-        </FluentCard>
+        </div>
 </FluentEditForm>
 
 @code {
