@@ -42,7 +42,8 @@ internal sealed class ApplicationsClientService(
     {
         try
         {
-            var response = await httpClient.PatchAsync(APPLICATIONROUTE, new StringContent(JsonSerializer.Serialize(application)), cancellationToken);
+            var uri = $"{APPLICATIONROUTE}/{application.ClientId}";
+            var response = await httpClient.PatchAsync(uri, new StringContent(JsonSerializer.Serialize(application)), cancellationToken);
             response.EnsureSuccessStatusCode();
         }
         catch (Exception ex)

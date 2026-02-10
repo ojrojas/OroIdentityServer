@@ -14,7 +14,7 @@ public static class ApplicationCommandsEndpoints
         api.MapPost("", CreateApplication)
             .WithName("CreateApplication");
 
-        api.MapPut("", UpdateApplication)
+        api.MapPatch("/{clientId}", UpdateApplication)
             .WithName("UpdateApplication");
 
         api.MapDelete("/{clientId}", DeleteApplication)
@@ -41,6 +41,7 @@ public static class ApplicationCommandsEndpoints
     private static async Task<Results<Ok, BadRequest<string>, ProblemHttpResult>> UpdateApplication(
         HttpContext context,
         [FromServices] ISender sender,
+        [FromRoute] string clientId,
         [FromBody] UpdateApplicationCommand request,
         CancellationToken cancellationToken)
     {

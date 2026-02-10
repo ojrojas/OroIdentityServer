@@ -22,6 +22,11 @@
 <FluentDivider Style="width: 100%;height:18px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator" />
 
 <FluentEditForm Model="@editApplication" OnValidSubmit="HandleSubmit">
+    <!-- Action buttons above the form -->
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
+        <FluentButton Appearance="Appearance.Lightweight" OnClick="Cancel">Cancel</FluentButton>
+        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Edit application</FluentButton>
+    </div>
     <FluentGrid Columns="2" RowGap="12">
         <FluentGridItem>
             <FluentCard>
@@ -33,15 +38,15 @@
                         <FluentSelect Style="width:100%" @bind-Value="editApplication.ApplicationType"
                                       Label="Client type" Items="OroIdentityWebConstants.DictionaryApplicationTypes"
                                       OptionValue="@(p => p.Value)" OptionText="@(p => p.Key)"
-                                      OptionSelected="@(p => p.Value == "web")" />
+                                      OptionSelected='@(p => p.Value == "web")' />
                         <FluentTextField @bind-Value="editApplication.DisplayName" Label="Display name"
                                          Required="true" />
                         <FluentSelect Style="width:100%" @bind-Value="editApplication.ClientType" Label="Client type"
                                       Items="OroIdentityWebConstants.DictionaryClientTypes" OptionValue="@(p => p.Value)"
-                                      OptionText="@(p => p.Key)" OptionSelected="@(p => p.Value == "confidential")" />
+                                      OptionText="@(p => p.Key)" OptionSelected='@(p => p.Value == "confidential")' />
                         <FluentSelect Style="width:100%" @bind-Value="editApplication.ConsentType" Label="Consent type"
                                       Items="OroIdentityWebConstants.DictionaryConsentTypes"
-                                      OptionSelected="@(p => p.Value == "explicit")" OptionValue="@(p => p.Value)"
+                                      OptionSelected='@(p => p.Value == "explicit")' OptionValue="@(p => p.Value)"
                                       OptionText="@(p => p.Key)" />
                     </div>
                 </div>
@@ -68,7 +73,7 @@
                             {
                                 <FluentBadge>
                                     <span style="margin-right:8px;">@uri</span>
-                                    <FluentButton Appearance="Appearance.Lightweight"                                                  OnClick="@(() => RemoveRedirect(uri))">x
+                                    <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => RemoveRedirect(uri))">x
                                     </FluentButton>
                                 </FluentBadge>
                             }
@@ -114,6 +119,8 @@
                                             @onchange="(e) => OnCheckboxChanged(e, selectedResponseTypes, kv.Value)" />
                         }
                     </div>
+
+
                 </div>
             </FluentCard>
         </FluentGridItem>
@@ -147,15 +154,37 @@
                                 }
                             </div>
                         </div>
+
+                        <div style="flex:1;">
+                            <FluentLabel>Requirements / Features</FluentLabel>
+                            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+                                @foreach (var kv in OroIdentityWebConstants.DictionaryRequirementsFeatures)
+                                {
+                                    <FluentCheckbox Label="@kv.Key" type="checkbox"
+                                                    checked="@selectedRequirementsFeatures.Contains(kv.Value)"
+                                                    @onchange="(e) => OnCheckboxChanged(e, selectedRequirementsFeatures, kv.Value)" />
+                                }
+                            </div>
+                        </div>
+
+                         <div style="flex:1;">
+                            <FluentLabel>Requirements / Prefixes</FluentLabel>
+                            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+                                @foreach (var kv in OroIdentityWebConstants.DictionaryRequirementsPrefixes)
+                                {
+                                    <FluentCheckbox Label="@kv.Key" type="checkbox"
+                                                    checked="@selectedRequirementsPrefixes.Contains(kv.Value)"
+                                                    @onchange="(e) => OnCheckboxChanged(e, selectedRequirementsPrefixes, kv.Value)" />
+                                }
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </FluentCard>
         </FluentGridItem>
 
-        <FluentGridItem Columns="2" Style="display:flex;justify-content:flex-end;gap:8px;">
-            <FluentButton Appearance="Appearance.Lightweight" OnClick="Cancel">Cancel</FluentButton>
-            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Edit application</FluentButton>
-        </FluentGridItem>
+        
     </FluentGrid>
 </FluentEditForm>
 
@@ -175,6 +204,10 @@
     private string inputRedirect = string.Empty;
     private string inputPostLogout = string.Empty;
 
+    private List<string> selectedRequirementsFeatures = new();
+    private List<string> selectedRequirementsPrefixes = new();
+
+
     protected override async Task OnInitializedAsync()
     {
         editApplication ??= new ApplicationViewModel();
@@ -187,8 +220,9 @@
 
         try
         {
-            CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+            CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             var app = await Service.GetApplicationByClientIdAsync(ClientId, token.Token);
+            token.Dispose();
             if (app == null)
             {
                 ToastService.ShowError("Application not found.");
@@ -262,7 +296,7 @@
 
     private async Task HandleSubmit()
     {
-        logger.LogInformation("Creating new application: {Application}", editApplication);
+        logger.LogInformation("Updating application: {Application}", editApplication);
         // Map temporary collections to the model
         foreach (var permission in selectedPermissions)
         {
