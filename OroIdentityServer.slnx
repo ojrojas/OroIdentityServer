@@ -2,10 +2,6 @@
   <Folder Name="/src/">
     <Project Path="src/AppHost/AppHost.csproj" />
   </Folder>
-  <Folder Name="/src/BuildingBlocks/">
-    <Project Path="src/BuildingBlocks/Loggers/Loggers.csproj" />
-    <Project Path="src/BuildingBlocks/ServiceDefaults/ServiceDefaults.csproj" />
-  </Folder>
   <Folder Name="/src/Frontends/" />
   <Folder Name="/src/Frontends/OroIdentity.Web/">
     <Project Path="src/Frontends/OroIdentity.Web/OroIdentity.Web.Client/OroIdentity.Web.Client.csproj" />

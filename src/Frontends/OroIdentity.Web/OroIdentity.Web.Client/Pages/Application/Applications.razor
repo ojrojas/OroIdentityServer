@@ -29,8 +29,8 @@
 
 @code {
     private IQueryable<ApplicationViewModel>? _applicationsIQueryable;
-    [PersistentState]
-    public IEnumerable<ApplicationViewModel> _applications { get; set; }
+    @* [PersistentState] *@
+    public IEnumerable<ApplicationViewModel>? _applications { get; set; }
     private PaginationState pagination = new PaginationState() { ItemsPerPage = 10 };
 
     protected override async Task OnInitializedAsync()
@@ -41,8 +41,8 @@
     private async Task LoadApplications()
     {
         CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-        IEnumerable<ApplicationViewModel> result = await Service.GetAllApplicationAsync(CancellationToken.None);
-        _applicationsIQueryable = result.AsQueryable();
+        IEnumerable<ApplicationViewModel>? result = await Service.GetAllApplicationAsync(token.Token);
+        _applicationsIQueryable = result?.AsQueryable();
     }
 
     private void RedirectEdit(string ClientId)

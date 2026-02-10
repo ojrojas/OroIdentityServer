@@ -41,6 +41,16 @@ public class GetApplicationByClientIdQueryHandler(
                 descriptor.Permissions.Add(permission);
             }
 
+            foreach (var uri in await applicationManager.GetRedirectUrisAsync(application, cancellationToken))
+            {
+                descriptor.RedirectUris.Add(new Uri(uri));
+            }
+
+            foreach (var uri in await applicationManager.GetPostLogoutRedirectUrisAsync(application, cancellationToken))
+            {
+                descriptor.PostLogoutRedirectUris.Add(new Uri(uri));
+            }
+
             logger.LogInformation("Application with ClientId {ClientId} retrieved successfully.", query.ClientId);
             return descriptor;
         }

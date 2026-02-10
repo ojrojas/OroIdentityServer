@@ -10,20 +10,17 @@ using OroIdentity.Web.Client.Models;
 namespace OroIdentity.Web.Client.Services;
 
 internal sealed class ApplicationsClientService(
-    ILogger<ApplicationsClientService> logger,
     HttpClient httpClient
     ) : IApplicationsService
 {
     public string APPLICATIONROUTE = "api/v1/applications";
     public async Task<IEnumerable<ApplicationViewModel>?> GetAllApplicationAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Request get all applications");
         return await httpClient.GetFromJsonAsync<IEnumerable<ApplicationViewModel>>(APPLICATIONROUTE, cancellationToken);
     }
 
     public async Task<ApplicationViewModel?> GetApplicationByClientIdAsync(string ClientId, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Request get application by id: {Id}", ClientId);
         var uri = $"{APPLICATIONROUTE}/{ClientId}";
         return await httpClient.GetFromJsonAsync<ApplicationViewModel>(uri, cancellationToken);
     }
@@ -32,11 +29,8 @@ internal sealed class ApplicationsClientService(
     {
         try
         {
-            logger.LogInformation("Request create application");
-            var response = await httpClient.PostAsync(APPLICATIONROUTE, new StringContent(JsonSerializer.Serialize(application)), cancellationToken);
+            var response = await httpClient.PostAsJsonAsync(APPLICATIONROUTE, application, cancellationToken);
             response.EnsureSuccessStatusCode();
-            logger.LogInformation("Request create application success");
-
         }
         catch (Exception ex)
         {
@@ -48,7 +42,6 @@ internal sealed class ApplicationsClientService(
     {
         try
         {
-            logger.LogInformation("Request update application");
             var response = await httpClient.PatchAsync(APPLICATIONROUTE, new StringContent(JsonSerializer.Serialize(application)), cancellationToken);
             response.EnsureSuccessStatusCode();
         }
