@@ -55,6 +55,22 @@ public class OroIdentityWebConstants
             f => f.Name,
             f => (string)f.GetValue(null)!);
 
+    public static IReadOnlyDictionary<string, string> DictionaryRequirementsFeatures { get; }
+    = typeof(OpenIddictConstants.Requirements.Features)
+        .GetFields(BindingFlags.Public | BindingFlags.Static)
+        .Where(f => f.FieldType == typeof(string))
+        .ToDictionary(
+            f => f.Name,
+            f => (string)f.GetValue(null)!);
+
+    public static IReadOnlyDictionary<string, string> DictionaryRequirementsPrefixes { get; }
+    = typeof(OpenIddictConstants.Requirements.Prefixes)
+        .GetFields(BindingFlags.Public | BindingFlags.Static)
+        .Where(f => f.FieldType == typeof(string))
+        .ToDictionary(
+            f => f.Name,
+            f => (string)f.GetValue(null)!);
+
     // Common scopes - provide a small curated list for UI selection
     public static IReadOnlyDictionary<string, string> DictionaryScopes { get; } =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -71,4 +87,4 @@ public class OroIdentityWebConstants
         {
             { "default", "Default Organization" }
         };
-}
+}   

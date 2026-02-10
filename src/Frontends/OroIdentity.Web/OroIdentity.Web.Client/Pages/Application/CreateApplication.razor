@@ -20,27 +20,75 @@
 <FluentDivider Style="width: 100%;height:18px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator" />
 
 <FluentEditForm Model="@newApplication" OnValidSubmit="HandleSubmit">
-    <FluentGrid Columns="2" RowGap="12">
+    <!-- Action buttons above the form -->
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
+        <FluentButton Appearance="Appearance.Lightweight" OnClick="Cancel">Cancel</FluentButton>
+        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Create application</FluentButton>
+    </div>
+    <!-- 3-column layout: Basic | Grants & Scopes | URIs & Endpoints -->
+    <FluentGrid Columns="3" RowGap="12">
         <FluentGridItem>
             <FluentCard>
-                <div style="padding:12px;">
+                <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
                     <FluentLabel Typo="Typography.H5">Basic information</FluentLabel>
                     <FluentLabel Typo="Typography.H6">Identifiers and organization</FluentLabel>
 
-                    <div style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
-                        <FluentSelect Style="width:100%" @bind-Value="newApplication.ApplicationType"
-                                      Label="Client type" Items="OroIdentityWebConstants.DictionaryApplicationTypes"
-                                      OptionValue="@(p => p.Value)" OptionText="@(p => p.Key)"
-                                      OptionSelected="@(p => p.Value == "web")" />
-                        <FluentTextField @bind-Value="newApplication.DisplayName" Label="Display name"
-                                         Required="true" />
-                        <FluentSelect Style="width:100%" @bind-Value="newApplication.ClientType" Label="Client type"
-                                      Items="OroIdentityWebConstants.DictionaryClientTypes" OptionValue="@(p => p.Value)"
-                                      OptionText="@(p => p.Key)" OptionSelected="@(p => p.Value == "confidential")" />
-                        <FluentSelect Style="width:100%" @bind-Value="newApplication.ConsentType" Label="Consent type"
-                                      Items="OroIdentityWebConstants.DictionaryConsentTypes"
-                                      OptionSelected="@(p => p.Value == "explicit")" OptionValue="@(p => p.Value)"
-                                      OptionText="@(p => p.Key)" />
+                    <FluentSelect Style="width:100%" @bind-Value="newApplication.ApplicationType"
+                                  Label="Application type" Items="OroIdentityWebConstants.DictionaryApplicationTypes"
+                                  OptionValue="@(p => p.Value)" OptionText="@(p => p.Key)"  OptionSelected="@(p => p.Value == "web")" />
+                    <FluentTextField @bind-Value="newApplication.DisplayName" Label="Display name" Required="true" />
+                    <FluentSelect Style="width:100%" @bind-Value="newApplication.ClientType" Label="Client type"
+                                  Items="OroIdentityWebConstants.DictionaryClientTypes" OptionValue="@(p => p.Value)"
+                                  OptionText="@(p => p.Key)"  OptionSelected="@(p => p.Value == "confidential")" />
+                    <FluentSelect Style="width:100%" @bind-Value="newApplication.ConsentType" Label="Consent type"
+                                  Items="OroIdentityWebConstants.DictionaryConsentTypes" OptionValue="@(p => p.Value)"
+                                  OptionText="@(p => p.Key)"  OptionSelected="@(p => p.Value == "explicit")" />
+                </div>
+            </FluentCard>
+        </FluentGridItem>
+
+        <FluentGridItem>
+            <FluentCard>
+                <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
+                    <FluentLabel Typo="Typography.H5">Grants & Scopes</FluentLabel>
+                    <FluentLabel Typo="Typography.H6">Configure grant types and scopes</FluentLabel>
+
+                    <div style="display:flex; gap:12px; margin-top:8px; flex-wrap:wrap;">
+                        <div style="min-width:200px; flex:1;">
+                            <FluentLabel>Grant types</FluentLabel>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                                @foreach (var kv in OroIdentityWebConstants.DictionaryGrantTypes)
+                                {
+                                    <FluentCheckbox Label="@kv.Key" type="checkbox"
+                                                    checked="@selectedGrantTypes.Contains(kv.Value)"
+                                                    @onchange="(e) => OnCheckboxChanged(e, selectedGrantTypes, kv.Value)" />
+                                }
+                            </div>
+                        </div>
+
+                        <div style="min-width:200px; flex:1;">
+                            <FluentLabel>Scopes</FluentLabel>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                                @foreach (var kv in AvailableScopes)
+                                {
+                                    <FluentCheckbox Label="@kv.Key" type="checkbox"
+                                                    checked="@selectedScopes.Contains(kv.Value)"
+                                                    @onchange="(e) => OnCheckboxChanged(e, selectedScopes, kv.Value)" />
+                                }
+                            </div>
+                        </div>
+
+                        <div style="min-width:200px; flex:1;">
+                            <FluentLabel>Requirements</FluentLabel>
+                            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                                @foreach (var kv in OroIdentityWebConstants.DictionaryRequirementsFeatures)
+                                {
+                                    <FluentCheckbox Label="@kv.Key" type="checkbox"
+                                                    checked="@selectedRequirementsFeatures.Contains(kv.Value)"
+                                                    @onchange="(e) => OnCheckboxChanged(e, selectedRequirementsFeatures, kv.Value)" />
+                                }
+                            </div>
+                        </div>
                     </div>
                 </div>
             </FluentCard>
@@ -48,14 +96,13 @@
 
         <FluentGridItem>
             <FluentCard>
-                <div style="padding:12px;">
+                <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
                     <FluentLabel Typo="Typography.H5">URIs and Endpoints</FluentLabel>
                     <FluentLabel Typo="Typography.H6">Redirect URLs and permissions</FluentLabel>
 
                     <FluentLabel>Redirect URIs</FluentLabel>
                     <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
-                        <FluentTextField @bind-Value="inputRedirect" Placeholder="https://mi-app/callback"
-                                         Style="flex:1" />
+                        <FluentTextField @bind-Value="inputRedirect" Placeholder="https://mi-app/callback" Style="flex:1" />
                         <FluentButton Appearance="Appearance.Accent" OnClick="AddRedirect">Add</FluentButton>
                     </div>
                     @if (redirectUris.Any())
@@ -65,8 +112,7 @@
                             {
                                 <FluentBadge>
                                     <span style="margin-right:8px;">@uri</span>
-                                    <FluentButton Appearance="Appearance.Lightweight"
-                                                  OnClick="@(()=>RemoveRedirect(uri))">x</FluentButton>
+                                    <FluentButton Appearance="Appearance.Lightweight" OnClick="@(()=>RemoveRedirect(uri))">x</FluentButton>
                                 </FluentBadge>
                             }
                         </div>
@@ -74,8 +120,7 @@
 
                     <FluentLabel>Post-logout Redirect URIs</FluentLabel>
                     <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
-                        <FluentTextField @bind-Value="inputPostLogout" Placeholder="https://mi-app/signout-callback"
-                                         Style="flex:1" />
+                        <FluentTextField @bind-Value="inputPostLogout" Placeholder="https://mi-app/signout-callback" Style="flex:1" />
                         <FluentButton Appearance="Appearance.Accent" OnClick="AddPostLogout">Add</FluentButton>
                     </div>
                     @if (postLogoutUris.Any())
@@ -85,8 +130,7 @@
                             {
                                 <FluentBadge>
                                     <span style="margin-right:8px;">@uri</span>
-                                    <FluentButton Appearance="Appearance.Lightweight" 
-                                                  OnClick="@(()=>RemovePostLogout(uri))">x</FluentButton>
+                                    <FluentButton Appearance="Appearance.Lightweight" OnClick="@(()=>RemovePostLogout(uri))">x</FluentButton>
                                 </FluentBadge>
                             }
                         </div>
@@ -105,8 +149,7 @@
                     <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
                         @foreach (var kv in OroIdentityWebConstants.DictionaryResponseTypes)
                         {
-                            <FluentCheckbox Label="@kv.Key" type="checkbox"
-                                            checked="@selectedResponseTypes.Contains(kv.Value)"
+                            <FluentCheckbox Label="@kv.Key" type="checkbox" checked="@selectedResponseTypes.Contains(kv.Value)"
                                             @onchange="(e) => OnCheckboxChanged(e, selectedResponseTypes, kv.Value)" />
                         }
                     </div>
@@ -114,43 +157,7 @@
             </FluentCard>
         </FluentGridItem>
 
-        <FluentGridItem Columns="2">
-            <FluentCard>
-                <div style="padding:12px;">
-                    <FluentLabel Typo="Typography.H5">Grants & Scopes</FluentLabel>
-                    <FluentLabel Typo="Typography.H6">Configure grant types and scopes</FluentLabel>
-                    <div style="display:flex; gap:12px; margin-top:8px;">
-                        <div style="flex:1;">
-                            <FluentLabel>Grant types</FluentLabel>
-                            <div style="display:flex;flex-wrap:wrap;gap:8px;">
-                                @foreach (var kv in OroIdentityWebConstants.DictionaryGrantTypes)
-                                {
-                                    <FluentCheckbox Label="@kv.Key" type="checkbox"
-                                                    checked="@selectedGrantTypes.Contains(kv.Value)"
-                                                    @onchange="(e) => OnCheckboxChanged(e, selectedGrantTypes, kv.Value)" />
-                                }
-                            </div>
-                        </div>
-                        <div style="flex:1;">
-                            <FluentLabel>Scopes</FluentLabel>
-                            <div style="display:flex;flex-wrap:wrap;gap:8px;">
-                                @foreach (var kv in AvailableScopes)
-                                {
-                                    <FluentCheckbox Label="@kv.Key" type="checkbox"
-                                                    checked="@selectedScopes.Contains(kv.Value)"
-                                                    @onchange="(e) => OnCheckboxChanged(e, selectedScopes, kv.Value)" />
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </FluentCard>
-        </FluentGridItem>
-
-        <FluentGridItem Columns="2" Style="display:flex;justify-content:flex-end;gap:8px;">
-            <FluentButton Appearance="Appearance.Lightweight" OnClick="Cancel">Cancel</FluentButton>
-            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Create application</FluentButton>
-        </FluentGridItem>
+        
     </FluentGrid>
 </FluentEditForm>
 
@@ -163,6 +170,9 @@
     private List<string> selectedResponseTypes = new();
     private List<string> redirectUris = new();
     private List<string> postLogoutUris = new();
+
+    private List<string> selectedRequirementsFeatures = new();
+    private List<string> selectedRequirementsPrefixes = new();
 
     private string inputRedirect = string.Empty;
     private string inputPostLogout = string.Empty;
@@ -257,15 +267,30 @@
             newApplication?.PostLogoutRedirectUris.Add(new Uri(uri));
         }
 
+        foreach (var feature in selectedRequirementsFeatures)
+        {
+            logger.LogInformation("Selected requirement feature: {RequirementFeature}", feature);
+            newApplication.Requirements.Add(feature);
+        }
+
+        foreach (var prefix in selectedRequirementsPrefixes)
+        {
+            logger.LogInformation("Selected requirement prefix: {RequirementPrefix}", prefix);
+            newApplication.Requirements.Add(prefix);
+        }
+
         if (newApplication.ClientType.Equals("confidential"))
         {
             newApplication.ClientSecret = Guid.NewGuid().ToString("N");
             logger.LogInformation("Generated client secret for explicit client: {ClientSecret}", newApplication.ClientSecret);
         }
 
+        newApplication.ClientId = Guid.NewGuid().ToString("N");
+        logger.LogInformation("Generated client ID: {ClientId}", newApplication.ClientId);
+
         try
         {
-            CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+            CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             await Service.CreateApplicationAsync(newApplication, token.Token);
             ToastService.ShowSuccess("Application created successfully");
             NavigationManager.NavigateTo("/applications");
