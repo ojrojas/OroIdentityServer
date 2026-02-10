@@ -1,5 +1,289 @@
-@page "/application/create"
+@page "/create-application"
+@attribute [Authorize]
 
-<PageTitle>Create Application</PageTitle>
-<HeaderPagesComponent TitlePage="Create Applications" Description="Create your application")">
+@using OroIdentity.Web.Client.Constants
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+
+@inject IApplicationsService Service
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager
+@inject ILogger<CreateApplication> logger
+
+<PageTitle>Create application</PageTitle>
+
+<HeaderPagesComponent TitlePage="Create application"
+                      Description="Configure basic data and advanced options for your application">
+    <FluentButton Appearance="Appearance.Accent" OnClick="GoBack">Back</FluentButton>
 </HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:18px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator" />
+
+<FluentEditForm Model="@newApplication" OnValidSubmit="HandleSubmit">
+    <FluentGrid Columns="2" RowGap="12">
+        <FluentGridItem>
+            <FluentCard>
+                <div style="padding:12px;">
+                    <FluentLabel Typo="Typography.H5">Basic information</FluentLabel>
+                    <FluentLabel Typo="Typography.H6">Identifiers and organization</FluentLabel>
+
+                    <div style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
+                        <FluentSelect Style="width:100%" @bind-Value="newApplication.ApplicationType"
+                                      Label="Client type" Items="OroIdentityWebConstants.DictionaryApplicationTypes"
+                                      OptionValue="@(p => p.Value)" OptionText="@(p => p.Key)"
+                                      OptionSelected="@(p => p.Value == "web")" />
+                        <FluentTextField @bind-Value="newApplication.DisplayName" Label="Display name"
+                                         Required="true" />
+                        <FluentSelect Style="width:100%" @bind-Value="newApplication.ClientType" Label="Client type"
+                                      Items="OroIdentityWebConstants.DictionaryClientTypes" OptionValue="@(p => p.Value)"
+                                      OptionText="@(p => p.Key)" OptionSelected="@(p => p.Value == "confidential")" />
+                        <FluentSelect Style="width:100%" @bind-Value="newApplication.ConsentType" Label="Consent type"
+                                      Items="OroIdentityWebConstants.DictionaryConsentTypes"
+                                      OptionSelected="@(p => p.Value == "explicit")" OptionValue="@(p => p.Value)"
+                                      OptionText="@(p => p.Key)" />
+                    </div>
+                </div>
+            </FluentCard>
+        </FluentGridItem>
+
+        <FluentGridItem>
+            <FluentCard>
+                <div style="padding:12px;">
+                    <FluentLabel Typo="Typography.H5">URIs and Endpoints</FluentLabel>
+                    <FluentLabel Typo="Typography.H6">Redirect URLs and permissions</FluentLabel>
+
+                    <FluentLabel>Redirect URIs</FluentLabel>
+                    <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                        <FluentTextField @bind-Value="inputRedirect" Placeholder="https://mi-app/callback"
+                                         Style="flex:1" />
+                        <FluentButton Appearance="Appearance.Accent" OnClick="AddRedirect">Add</FluentButton>
+                    </div>
+                    @if (redirectUris.Any())
+                    {
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+                            @foreach (var uri in redirectUris)
+                            {
+                                <FluentBadge>
+                                    <span style="margin-right:8px;">@uri</span>
+                                    <FluentButton Appearance="Appearance.Lightweight"
+                                                  OnClick="@(()=>RemoveRedirect(uri))">x</FluentButton>
+                                </FluentBadge>
+                            }
+                        </div>
+                    }
+
+                    <FluentLabel>Post-logout Redirect URIs</FluentLabel>
+                    <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                        <FluentTextField @bind-Value="inputPostLogout" Placeholder="https://mi-app/signout-callback"
+                                         Style="flex:1" />
+                        <FluentButton Appearance="Appearance.Accent" OnClick="AddPostLogout">Add</FluentButton>
+                    </div>
+                    @if (postLogoutUris.Any())
+                    {
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+                            @foreach (var uri in postLogoutUris)
+                            {
+                                <FluentBadge>
+                                    <span style="margin-right:8px;">@uri</span>
+                                    <FluentButton Appearance="Appearance.Lightweight" 
+                                                  OnClick="@(()=>RemovePostLogout(uri))">x</FluentButton>
+                                </FluentBadge>
+                            }
+                        </div>
+                    }
+
+                    <FluentLabel>Endpoints / Permissions</FluentLabel>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+                        @foreach (var kv in OroIdentityWebConstants.DictionaryEndpoints)
+                        {
+                            <FluentCheckbox Label="@kv.Key" type="checkbox" checked="@selectedPermissions.Contains(kv.Value)"
+                                            @onchange="(e) => OnCheckboxChanged(e, selectedPermissions, kv.Value)" />
+                        }
+                    </div>
+
+                    <FluentLabel>Response types</FluentLabel>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+                        @foreach (var kv in OroIdentityWebConstants.DictionaryResponseTypes)
+                        {
+                            <FluentCheckbox Label="@kv.Key" type="checkbox"
+                                            checked="@selectedResponseTypes.Contains(kv.Value)"
+                                            @onchange="(e) => OnCheckboxChanged(e, selectedResponseTypes, kv.Value)" />
+                        }
+                    </div>
+                </div>
+            </FluentCard>
+        </FluentGridItem>
+
+        <FluentGridItem Columns="2">
+            <FluentCard>
+                <div style="padding:12px;">
+                    <FluentLabel Typo="Typography.H5">Grants & Scopes</FluentLabel>
+                    <FluentLabel Typo="Typography.H6">Configure grant types and scopes</FluentLabel>
+                    <div style="display:flex; gap:12px; margin-top:8px;">
+                        <div style="flex:1;">
+                            <FluentLabel>Grant types</FluentLabel>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                                @foreach (var kv in OroIdentityWebConstants.DictionaryGrantTypes)
+                                {
+                                    <FluentCheckbox Label="@kv.Key" type="checkbox"
+                                                    checked="@selectedGrantTypes.Contains(kv.Value)"
+                                                    @onchange="(e) => OnCheckboxChanged(e, selectedGrantTypes, kv.Value)" />
+                                }
+                            </div>
+                        </div>
+                        <div style="flex:1;">
+                            <FluentLabel>Scopes</FluentLabel>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                                @foreach (var kv in AvailableScopes)
+                                {
+                                    <FluentCheckbox Label="@kv.Key" type="checkbox"
+                                                    checked="@selectedScopes.Contains(kv.Value)"
+                                                    @onchange="(e) => OnCheckboxChanged(e, selectedScopes, kv.Value)" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </FluentCard>
+        </FluentGridItem>
+
+        <FluentGridItem Columns="2" Style="display:flex;justify-content:flex-end;gap:8px;">
+            <FluentButton Appearance="Appearance.Lightweight" OnClick="Cancel">Cancel</FluentButton>
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Create application</FluentButton>
+        </FluentGridItem>
+    </FluentGrid>
+</FluentEditForm>
+
+@code {
+    public ApplicationViewModel? newApplication { get; set; }
+
+    private List<string> selectedPermissions = new();
+    private List<string> selectedGrantTypes = new();
+    private List<string> selectedScopes = new();
+    private List<string> selectedResponseTypes = new();
+    private List<string> redirectUris = new();
+    private List<string> postLogoutUris = new();
+
+    private string inputRedirect = string.Empty;
+    private string inputPostLogout = string.Empty;
+
+    private IReadOnlyDictionary<string, string> AvailableScopes { get; } = new Dictionary<string, string>
+    {
+        ["openid"] = "OpenID",
+        ["profile"] = "Profile",
+        ["email"] = "Email",
+        ["offline_access"] = "Offline access"
+    };
+
+    protected override Task OnInitializedAsync()
+    {
+        newApplication ??= new ApplicationViewModel();
+        return Task.CompletedTask;
+    }
+
+    private void AddRedirect()
+    {
+        var value = inputRedirect?.Trim();
+        if (!string.IsNullOrEmpty(value) && !redirectUris.Contains(value))
+        {
+            redirectUris.Add(value);
+            inputRedirect = string.Empty;
+        }
+    }
+
+    private void RemoveRedirect(string uri) => redirectUris.Remove(uri);
+
+    private void AddPostLogout()
+    {
+        var value = inputPostLogout?.Trim();
+        if (!string.IsNullOrEmpty(value) && !postLogoutUris.Contains(value))
+        {
+            postLogoutUris.Add(value);
+            inputPostLogout = string.Empty;
+        }
+    }
+
+    private void RemovePostLogout(string uri) => postLogoutUris.Remove(uri);
+
+    private void OnCheckboxChanged(ChangeEventArgs e, List<string> target, string key)
+    {
+        bool isChecked = false;
+        if (e?.Value is bool b) isChecked = b;
+        else if (e?.Value is string s && bool.TryParse(s, out var parsed)) isChecked = parsed;
+
+        if (isChecked)
+        {
+            if (!target.Contains(key)) target.Add(key);
+        }
+        else
+        {
+            if (target.Contains(key)) target.Remove(key);
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        logger.LogInformation("Creating new application: {Application}", newApplication);
+        // Map temporary collections to the model
+        foreach (var permission in selectedPermissions)
+        {
+            logger.LogInformation("Selected permission: {Permission}", permission);
+            newApplication.Permissions.Add(permission);
+        }
+
+        foreach (var grantType in selectedGrantTypes)
+        {
+            logger.LogInformation("Selected grant type: {GrantType}", grantType);
+            newApplication.Permissions.Add(grantType);
+        }
+        foreach (var scope in selectedScopes)
+        {
+            logger.LogInformation("Selected scope: {Scope}", scope);
+            newApplication.Permissions.Add(scope);
+        }
+        foreach (var responseType in selectedResponseTypes)
+        {
+            logger.LogInformation("Selected response type: {ResponseType}", responseType);
+            newApplication.Permissions.Add(responseType);
+        }
+        foreach (var uri in redirectUris)
+        {
+            logger.LogInformation("Added redirect URI: {RedirectUri}", uri);
+            newApplication.RedirectUris.Add(new Uri(uri));
+        }
+        foreach (var uri in postLogoutUris)
+        {
+            logger.LogInformation("Added post-logout redirect URI: {PostLogoutUri}", uri);
+            newApplication?.PostLogoutRedirectUris.Add(new Uri(uri));
+        }
+
+        if (newApplication.ClientType.Equals("confidential"))
+        {
+            newApplication.ClientSecret = Guid.NewGuid().ToString("N");
+            logger.LogInformation("Generated client secret for explicit client: {ClientSecret}", newApplication.ClientSecret);
+        }
+
+        try
+        {
+            CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+            await Service.CreateApplicationAsync(newApplication, token.Token);
+            ToastService.ShowSuccess("Application created successfully");
+            NavigationManager.NavigateTo("/applications");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error creating application");
+            ToastService.ShowError("Failed to create application. Please try again.");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/applications");
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/applications");
+    }
+}

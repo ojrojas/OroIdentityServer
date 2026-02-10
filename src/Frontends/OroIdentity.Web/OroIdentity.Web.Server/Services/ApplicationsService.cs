@@ -1,4 +1,3 @@
-using OroIdentity.Web.Client.Constants;
 using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Client.Models;
 
@@ -6,11 +5,25 @@ namespace OroIdentity.Web.Server.Services;
 
 public class ApplicationsService(
     ILogger<ApplicationsService> logger,
-    IHttpClientFactory httpClientFactory) : IApplicationsService
+    HttpClient httpClient) : IApplicationsService
 {
-    public Task CreateApplicationAsync(ApplicationViewModel application, CancellationToken cancellationToken)
+    public async Task CreateApplicationAsync(ApplicationViewModel application, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Request api external createapplication");
+        var newApplication = new
+        {
+            Descriptor= application
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "applications")
+        {
+            Content = JsonContent.Create(newApplication)
+        };
+        
+        using var response = await httpClient.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        logger.LogInformation("Application created with ClientId: {ClientId}", newApplication.Descriptor.ClientId);
     }
 
     public async Task<IEnumerable<ApplicationViewModel>?> GetAllApplicationAsync(CancellationToken cancellationToken)
@@ -19,8 +32,7 @@ public class ApplicationsService(
         {
             logger.LogInformation("Request api external getallapplications");
             using var request = new HttpRequestMessage(HttpMethod.Get, "/applications");
-            var client = httpClientFactory.CreateClient(OroIdentityWebConstants.OroIdentityServerApis);
-            using var response = await client.SendAsync(request, cancellationToken);
+            using var response = await httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<IEnumerable<ApplicationViewModel>>(cancellationToken: cancellationToken) ??
@@ -40,8 +52,7 @@ public class ApplicationsService(
         {
             logger.LogInformation("Request api external getallapplications");
             using var request = new HttpRequestMessage(HttpMethod.Get, $"/applications/{ClientId}");
-            var client = httpClientFactory.CreateClient(OroIdentityWebConstants.OroIdentityServerApis);
-            using var response = await client.SendAsync(request, cancellationToken);
+            using var response = await httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<ApplicationViewModel>(cancellationToken: cancellationToken) ??
@@ -55,8 +66,21 @@ public class ApplicationsService(
         }
     }
 
-    public Task UpdateApplicationAsync(ApplicationViewModel application, CancellationToken cancellationToken)
+    public async Task UpdateApplicationAsync(ApplicationViewModel application, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        logger.LogInformation("Request api external updateapplication for ClientId: {ClientId}", application.ClientId);
+        var newApplication = new
+        {
+            Descriptor= application
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Put, $"/applications/{application.ClientId}")
+        {
+            Content = JsonContent.Create(newApplication)
+        };
+        using var response = await httpClient.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        logger.LogInformation("Application updated with ClientId: {ClientId}", newApplication.Descriptor.ClientId);
     }
 }

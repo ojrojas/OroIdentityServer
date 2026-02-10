@@ -8,25 +8,29 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>Applications</PageTitle>
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
 
-    <HeaderPagesComponent TitlePage="Applications" Description="Manage your applications">
-        <FluentButton Appearance="Appearance.Accent">Create</FluentButton>
-    </HeaderPagesComponent>
+<HeaderPagesComponent TitlePage="Applications" Description="Manage your applications">
+    <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToCreatePage">Create</FluentButton>
+</HeaderPagesComponent>
 
-    <FluentDataGrid Items="_applicationsIQueryable" Pagination="pagination">
-        <TemplateColumn Title="Action">
-            <FluentButton OnClick="(() => RedirectEdit(context.ClientId))">Edit</FluentButton>
-        </TemplateColumn>
-        <PropertyColumn Property="@(p => p.ApplicationType)" Sortable="true" />
-        <PropertyColumn Property="@(p => p.DisplayName)" />
-    </FluentDataGrid>
-</FluentStack>
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
+
+<FluentDataGrid 
+    Items="_applicationsIQueryable" 
+    Pagination="pagination"
+    AutoFit="true"
+    RowSize="@DataGridRowSize.Medium">
+    <TemplateColumn Title="Action">
+        <FluentButton OnClick="(() => RedirectEdit(context.ClientId))">Edit</FluentButton>
+    </TemplateColumn>
+    <PropertyColumn Property="@(p => p.ApplicationType)" Sortable="true" />
+    <PropertyColumn Property="@(p => p.DisplayName)" />
+</FluentDataGrid>
 
 @code {
     private IQueryable<ApplicationViewModel>? _applicationsIQueryable;
-    [PersistentState]
-    public IEnumerable<ApplicationViewModel> _applications { get; set; }
+    @* [PersistentState] *@
+    public IEnumerable<ApplicationViewModel>? _applications { get; set; }
     private PaginationState pagination = new PaginationState() { ItemsPerPage = 10 };
 
     protected override async Task OnInitializedAsync()
@@ -37,12 +41,17 @@
     private async Task LoadApplications()
     {
         CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-        IEnumerable<ApplicationViewModel> result = await Service.GetAllApplicationAsync(CancellationToken.None);
-        _applicationsIQueryable = result.AsQueryable();
+        IEnumerable<ApplicationViewModel>? result = await Service.GetAllApplicationAsync(token.Token);
+        _applicationsIQueryable = result?.AsQueryable();
     }
 
     private void RedirectEdit(string ClientId)
     {
         NavigationManager.NavigateTo($"/applications/{ClientId}");
+    }
+
+    private void RedirectToCreatePage()
+    {
+        NavigationManager.NavigateTo("/create-application");
     }
 }

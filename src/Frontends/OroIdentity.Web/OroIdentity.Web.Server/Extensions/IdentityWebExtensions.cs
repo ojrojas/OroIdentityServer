@@ -27,6 +27,7 @@ public static class OroIdentityWebExtensions
             options.LoginPath = "/account/login";
             options.Cookie.SameSite = SameSiteMode.Lax;
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.ExpireTimeSpan = TimeSpan.FromDays(7);
         });
         
         builder.Services.AddAuthorizationBuilder()
@@ -48,6 +49,7 @@ public static class OroIdentityWebExtensions
         IdentityModelEventSource.ShowPII = builder.Environment.IsDevelopment();
 
         builder.Services.AddHttpContextAccessor();
+
         return builder;
     }
 }

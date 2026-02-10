@@ -9,14 +9,14 @@ using Serilog;
 using OroBuildingBlocks.Loggers;
 using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Server.Handlers;
-using OroIdentity.Web.Client.Constants;
 using OroIdentity.Web.Server.Endpoints;
+using OroBuildingBlocks.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
 ConfigurationManager configuration = builder.Configuration;
 
-Log.Logger = LoggerPrinter.CreateSerilogLogger("api", "OroIdentity.Web.Server", configuration);
+Log.Logger = LoggerPrinter.CreateSerilogLogger("web.server", "OroIdentity.Web.Server", configuration);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -46,10 +46,11 @@ builder.Services.AddScoped<IApplicationsService, ApplicationsService>();
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddHttpClient(
-    OroIdentityWebConstants.OroIdentityServerApis, 
+builder.AddServiceDefaults();
+
+builder.Services.AddHttpClient<IApplicationsService, ApplicationsService>(
     client => { 
-        client.BaseAddress = new Uri(builder.Configuration["Identity:Url"]) ?? 
+        client.BaseAddress = new Uri(identityUri) ?? 
         throw new Exception("Missing base address environment");
     }
 ).AddHttpMessageHandler<TokenHandler>();
@@ -80,6 +81,8 @@ app.UseSession();
 
 app.MapIdentityEndpoints();
 app.MapApplicationEndpointsV1().RequireAuthorization();
+
+app.MapDefaultEndpoints();
 
 app.UseAntiforgery();
 

@@ -2,11 +2,9 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentity.Frontends.Services;
-using OroIdentity.Web.Client.Constants;
 using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Client.Services;
 
@@ -23,5 +21,6 @@ builder.Services.AddHttpClient<IApplicationsService, ApplicationsClientService>(
 );
 
 builder.Services.AddFluentUIComponents();
+
 
 await builder.Build().RunAsync();

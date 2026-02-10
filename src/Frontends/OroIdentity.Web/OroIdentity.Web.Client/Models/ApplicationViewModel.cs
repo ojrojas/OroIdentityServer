@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for details.
 using System.Globalization;
 using System.Text.Json;
+using OpenIddict.Abstractions;
 
 namespace OroIdentity.Web.Client.Models;
 
@@ -12,7 +13,7 @@ namespace OroIdentity.Web.Client.Models;
 /// </summary>
 public class ApplicationViewModel
 {
-     /// <summary>
+    /// <summary>
     /// Gets or sets the application type associated with the application.
     /// </summary>
     public string? ApplicationType { get; set; }
@@ -20,7 +21,7 @@ public class ApplicationViewModel
     /// <summary>
     /// Gets or sets the client identifier associated with the application.
     /// </summary>
-    public string? ClientId { get; set; }
+    public string? ClientId { get; set; } = Guid.NewGuid().ToString("N");
 
     /// <summary>
     /// Gets or sets the client secret associated with the application.

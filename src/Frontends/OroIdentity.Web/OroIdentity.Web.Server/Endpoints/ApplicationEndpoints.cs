@@ -9,19 +9,34 @@ public static class ApplicationEndpoints
     public static RouteGroupBuilder MapApplicationEndpointsV1(this IEndpointRouteBuilder routeBuilder)
     {
         var group = routeBuilder.MapGroup("api/v1/applications")
-            .WithTags("Applications")
-            .RequireAuthorization();
+            .WithTags("Applications");
 
-        group.MapGet("", GetAllApplications);
+        group.MapGet(string.Empty, GetAllApplications);
         group.MapGet("/{clientid}", GetApplicationByClientId);
-        group.MapPost("", CreateApplication);
+        group.MapPost(string.Empty, CreateApplication);
+        group.MapPut(string.Empty, UpdateApplication);
 
         return group;
     }
 
-    private static async Task CreateApplication(HttpContext context)
+     private static async Task<IResult> UpdateApplication(
+        HttpContext context,
+        [FromServices] IApplicationsService service,
+        [FromBody] ApplicationViewModel application,
+        CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await service.UpdateApplicationAsync(application, cancellationToken);
+        return TypedResults.Ok();
+    }
+
+    private static async Task<IResult> CreateApplication(
+        HttpContext context,
+        [FromServices] IApplicationsService service,
+        [FromBody] ApplicationViewModel application,
+        CancellationToken cancellationToken)
+    {
+        await service.CreateApplicationAsync(application, cancellationToken);
+        return TypedResults.Ok();
     }
 
     private static async Task<ApplicationViewModel> GetApplicationByClientId(

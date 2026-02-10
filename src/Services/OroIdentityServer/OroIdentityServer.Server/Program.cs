@@ -104,6 +104,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapDefaultEndpoints();
 
 app.UseAntiforgery();
 
