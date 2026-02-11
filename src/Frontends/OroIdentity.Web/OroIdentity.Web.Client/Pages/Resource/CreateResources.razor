@@ -1,2 +1,23 @@
 @page "/create-resource"
-<h1>Resources</h1>
+@attribute [Authorize]
+
+
+@inject NavigationManager NavigationManager
+
+<PageTitle>Resources</PageTitle>
+
+<HeaderPagesComponent TitlePage="Resources" Description="Manage your resources">
+    <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToResources">Back</FluentButton>
+</HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
+
+
+
+@code{
+
+    private void RedirectToResources()
+    {
+        NavigationManager.NavigateTo("/resources");
+    }
+}

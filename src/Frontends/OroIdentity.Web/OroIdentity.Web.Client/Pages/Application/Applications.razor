@@ -29,7 +29,7 @@
 
 @code {
     private IQueryable<ApplicationViewModel>? _applicationsIQueryable;
-    @* [PersistentState] *@
+    [PersistentState]
     public IEnumerable<ApplicationViewModel>? _applications { get; set; }
     private PaginationState pagination = new PaginationState() { ItemsPerPage = 10 };
 

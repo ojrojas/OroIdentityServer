@@ -41,7 +41,9 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "http://localhost:33444", "http://localhost:5173")
+        policy.WithOrigins(
+            builder.Configuration["IdentityWeb:Url"], 
+            builder.Configuration["IdentityAdmin:Url"])
             .AllowAnyHeader()
             .AllowAnyMethod();
     });

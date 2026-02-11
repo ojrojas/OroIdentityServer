@@ -1,0 +1,27 @@
+@page "/roles"
+
+@attribute [Authorize]
+
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>Roles</PageTitle>
+
+<HeaderPagesComponent TitlePage="Roles" Description="Manage your roles">
+    <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToCreatePage">Create</FluentButton>
+</HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
+
+
+
+
+
+
+@code{
+
+    private void RedirectToCreatePage()
+    {
+        NavigationManager.NavigateTo("/create-application");
+    }
+}
