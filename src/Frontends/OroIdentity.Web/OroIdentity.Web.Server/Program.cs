@@ -11,6 +11,7 @@ using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Server.Handlers;
 using OroIdentity.Web.Server.Endpoints;
 using OroBuildingBlocks.ServiceDefaults;
+using OroIdentity.Web.Client.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,9 @@ var identityUri = configuration.GetSection("Identity:Url").Value;
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<INavigationHistoryService, NavigationHistoryService>();
 builder.Services.AddScoped<IApplicationsService, ApplicationsService>();
+
+builder.Services.AddScoped<IThemeService, ThemeService>();
+
 
 builder.Services.AddHttpContextAccessor();
 
