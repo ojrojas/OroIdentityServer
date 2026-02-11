@@ -16,6 +16,7 @@ builder.Services.AddAuthenticationStateDeserialization();
 
 builder.Services.AddScoped<INavigationHistoryService, NavigationHistoryService>();
 
+
 builder.Services.AddHttpClient<IApplicationsService, ApplicationsClientService>(
     client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
 );
