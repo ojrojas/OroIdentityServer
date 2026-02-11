@@ -69,7 +69,7 @@
                         <div style="min-width:200px; flex:1;">
                             <FluentLabel>Scopes</FluentLabel>
                             <div style="display:flex;flex-wrap:wrap;gap:8px;">
-                                @foreach (var kv in AvailableScopes)
+                                @foreach (var kv in OroIdentityWebConstants.DictionaryScopes)
                                 {
                                     <FluentCheckbox Label="@kv.Key" type="checkbox"
                                                     checked="@selectedScopes.Contains(kv.Value)"

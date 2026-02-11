@@ -105,8 +105,8 @@
                         @foreach (var kv in OroIdentityWebConstants.DictionaryEndpoints)
                         {
                             <FluentCheckbox Label="@kv.Key" type="checkbox"
-                                            checked="@selectedPermissions.Contains(kv.Value)"
-                                            @onchange="(e) => OnCheckboxChanged(e, selectedPermissions, kv.Value)" />
+                                            checked="@selectedEndpoints.Contains(kv.Value)"
+                                            @onchange="(e) => OnCheckboxChanged(e, selectedEndpoints, kv.Value)" />
                         }
                     </div>
 
@@ -146,7 +146,7 @@
                         <div style="flex:1;">
                             <FluentLabel>Scopes</FluentLabel>
                             <div style="display:flex;flex-wrap:wrap;gap:8px;">
-                                @foreach (var kv in AvailableScopes)
+                                @foreach (var kv in OroIdentityWebConstants.DictionaryScopes)
                                 {
                                     <FluentCheckbox Label="@kv.Key" type="checkbox"
                                                     checked="@selectedScopes.Contains(kv.Value)"
@@ -160,9 +160,21 @@
                             <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
                                 @foreach (var kv in OroIdentityWebConstants.DictionaryRequirementsFeatures)
                                 {
+                                   <FluentCheckbox Label="@kv.Key" type="checkbox"
+                                                    checked="@selectedRequirementsFeatures.Contains(kv.Value)"
+                                                    @onchange="(e) => OnCheckboxChanged(e, selectedRequirementsFeatures, kv.Value)" />
+                                }
+                            </div>
+                        </div>
+
+                           <div style="flex:1;">
+                            <FluentLabel>Requirements / Prefixes</FluentLabel>
+                            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+                                @foreach (var kv in OroIdentityWebConstants.DictionaryRequirementsPrefixes)
+                                {
                                     <FluentCheckbox Label="@kv.Key" type="checkbox"
-                                                    checked="@selectedRequirements.Contains(kv.Value)"
-                                                    @onchange="(e) => OnCheckboxChanged(e, selectedRequirements, kv.Value)" />
+                                                    checked="@selectedRequirementsPrefixes.Contains(kv.Value)"
+                                                    @onchange="(e) => OnCheckboxChanged(e, selectedRequirementsPrefixes, kv.Value)" />
                                 }
                             </div>
                         </div>
@@ -181,7 +193,7 @@
     public string? ClientId { get; set; }
     public ApplicationViewModel? editApplication { get; set; }
 
-    private List<string> selectedPermissions = new();
+    private List<string> selectedEndpoints = new();
     private List<string> selectedGrantTypes = new();
     private List<string> selectedScopes = new();
     private List<string> selectedResponseTypes = new();
@@ -191,7 +203,8 @@
     private string inputRedirect = string.Empty;
     private string inputPostLogout = string.Empty;
 
-    private List<string> selectedRequirements = new();
+     private List<string> selectedRequirementsFeatures = new();
+    private List<string> selectedRequirementsPrefixes = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -218,11 +231,16 @@
             editApplication = app;
 
             // Initialize temporary collections with existing data
-            selectedPermissions = editApplication.Permissions.ToList();
+            selectedEndpoints = editApplication.Permissions.Where(p => p.StartsWith("ept:")).ToList();
+            selectedGrantTypes = editApplication.Permissions.Where(p => p.StartsWith("gt:")).ToList();
+            selectedResponseTypes = editApplication.Permissions.Where(p => p.StartsWith("rst:")).ToList();
+            selectedScopes = editApplication.Permissions.Where(p => p.StartsWith("scp:")).ToList()!;
+            selectedRequirementsFeatures = editApplication.Requirements.Where(p => p.StartsWith("ft:")).ToList();
+
             redirectUris = editApplication.RedirectUris.Select(uri => uri.ToString()).ToList();
             postLogoutUris = editApplication.PostLogoutRedirectUris.Select(uri => uri.ToString()).ToList();
-            
-            selectedRequirements = editApplication.Requirements.Select(r => r.ToString()).ToList();
+
+            selectedRequirementsPrefixes = editApplication.Requirements.Where(p => OroIdentityWebConstants.DictionaryRequirementsPrefixes.ContainsKey(p)).ToList();
         }
         catch (Exception ex)
         {
@@ -232,16 +250,7 @@
         }
     }
 
-    // Provide a small set of common scopes when the library constants are not available
-    private IReadOnlyDictionary<string, string> AvailableScopes { get; } = new Dictionary<string, string>
-    {
-        ["openid"] = "OpenID",
-        ["profile"] = "Profile",
-        ["email"] = "Email",
-        ["offline_access"] = "Offline access"
-    };
-
-    private void AddRedirect()
+     private void AddRedirect()
     {
         var value = inputRedirect?.Trim();
         if (!string.IsNullOrEmpty(value) && !redirectUris.Contains(value))
@@ -285,7 +294,7 @@
     {
         logger.LogInformation("Updating application: {Application}", editApplication);
         // Map temporary collections to the model
-        foreach (var permission in selectedPermissions)
+        foreach (var permission in selectedEndpoints)
         {
             logger.LogInformation("Selected permission: {Permission}", permission);
             editApplication.Permissions.Add(permission);
@@ -316,6 +325,20 @@
             logger.LogInformation("Added post-logout redirect URI: {PostLogoutUri}", uri);
             editApplication?.PostLogoutRedirectUris.Add(new Uri(uri));
         }
+
+
+        foreach (var requirement in selectedRequirementsFeatures)
+        {
+            logger.LogInformation("Selected requirement/feature: {Requirement}", requirement);
+            editApplication.Requirements.Add(requirement);
+        }
+
+        foreach (var requirement in selectedRequirementsPrefixes)
+        {
+            logger.LogInformation("Selected requirement/prefix: {Requirement}", requirement);
+            editApplication.Requirements.Add(requirement);
+        }
+
 
         if (editApplication.ClientType.Equals("confidential"))
         {
