@@ -14,3 +14,6 @@ global using OpenIddict.Abstractions;
 global using OroKernel.Shared.Enums;
 global using OroIdentityServer.OroIdentityServer.Infraestructure.Interfaces;
 global using OroIdentityServer.Services.OroIdentityServer.Application.Queries;
+global using System.Globalization;
+global using System.Text.Json;
+global using Microsoft.IdentityModel.Tokens;

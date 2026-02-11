@@ -5,7 +5,7 @@
 
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
-public record UpdateApplicationCommand(OpenIddictApplicationDescriptor descriptor) : ICommand
+public record UpdateApplicationCommand(ApplicationDescriptor descriptor) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }

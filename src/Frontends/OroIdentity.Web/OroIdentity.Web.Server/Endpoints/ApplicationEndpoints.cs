@@ -14,7 +14,7 @@ public static class ApplicationEndpoints
         group.MapGet(string.Empty, GetAllApplications);
         group.MapGet("/{clientid}", GetApplicationByClientId);
         group.MapPost(string.Empty, CreateApplication);
-        group.MapPatch(string.Empty, UpdateApplication);
+        group.MapPut(string.Empty, UpdateApplication);
 
         return group;
     }
