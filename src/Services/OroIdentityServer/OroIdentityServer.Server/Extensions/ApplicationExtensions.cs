@@ -15,8 +15,11 @@ public static class ApplicationExtensions
         {
            config.UseNpgsql();
            config.UseOpenIddict();
-           config.EnableDetailedErrors(); // Consider disabling in production for performance reasons
-           config.EnableSensitiveDataLogging(); // Consider disabling in production for security reasons
+           if(builder.Environment.IsDevelopment())
+           {
+               config.EnableDetailedErrors(); // Consider disabling in production for performance reasons
+               config.EnableSensitiveDataLogging(); // Consider disabling in production for security reasons
+           }
         });
 
         builder.Services.AddQuartz(options =>

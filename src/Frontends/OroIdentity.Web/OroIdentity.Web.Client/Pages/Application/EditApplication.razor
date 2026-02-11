@@ -161,24 +161,11 @@
                                 @foreach (var kv in OroIdentityWebConstants.DictionaryRequirementsFeatures)
                                 {
                                     <FluentCheckbox Label="@kv.Key" type="checkbox"
-                                                    checked="@selectedRequirementsFeatures.Contains(kv.Value)"
-                                                    @onchange="(e) => OnCheckboxChanged(e, selectedRequirementsFeatures, kv.Value)" />
+                                                    checked="@selectedRequirements.Contains(kv.Value)"
+                                                    @onchange="(e) => OnCheckboxChanged(e, selectedRequirements, kv.Value)" />
                                 }
                             </div>
                         </div>
-
-                         <div style="flex:1;">
-                            <FluentLabel>Requirements / Prefixes</FluentLabel>
-                            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
-                                @foreach (var kv in OroIdentityWebConstants.DictionaryRequirementsPrefixes)
-                                {
-                                    <FluentCheckbox Label="@kv.Key" type="checkbox"
-                                                    checked="@selectedRequirementsPrefixes.Contains(kv.Value)"
-                                                    @onchange="(e) => OnCheckboxChanged(e, selectedRequirementsPrefixes, kv.Value)" />
-                                }
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </FluentCard>
@@ -204,9 +191,7 @@
     private string inputRedirect = string.Empty;
     private string inputPostLogout = string.Empty;
 
-    private List<string> selectedRequirementsFeatures = new();
-    private List<string> selectedRequirementsPrefixes = new();
-
+    private List<string> selectedRequirements = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -236,6 +221,8 @@
             selectedPermissions = editApplication.Permissions.ToList();
             redirectUris = editApplication.RedirectUris.Select(uri => uri.ToString()).ToList();
             postLogoutUris = editApplication.PostLogoutRedirectUris.Select(uri => uri.ToString()).ToList();
+            
+            selectedRequirements = editApplication.Requirements.Select(r => r.ToString()).ToList();
         }
         catch (Exception ex)
         {
@@ -338,14 +325,14 @@
 
         try
         {
-            CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-            await Service.UpdateApplicationAsync(editApplication, token.Token);
+            CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            await Service.UpdateApplicationAsync(editApplication, default);
             ToastService.ShowSuccess("Application Editd successfully");
             NavigationManager.NavigateTo("/applications");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error creating application");
+            logger.LogError(ex, "Error editing application");
             ToastService.ShowError("Failed to Edit application. Please try again.");
         }
     }

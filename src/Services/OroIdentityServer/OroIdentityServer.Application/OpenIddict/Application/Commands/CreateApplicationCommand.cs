@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
-public record CreateApplicationCommand(OpenIddictApplicationDescriptor descriptor) : ICommand
+public record CreateApplicationCommand(ApplicationDescriptor descriptor) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }

@@ -3,6 +3,9 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Endpoints;
 
 public static class ApplicationCommandsEndpoints
@@ -14,7 +17,7 @@ public static class ApplicationCommandsEndpoints
         api.MapPost("", CreateApplication)
             .WithName("CreateApplication");
 
-        api.MapPatch("/{clientId}", UpdateApplication)
+        api.MapPut("/{clientId}", UpdateApplication)
             .WithName("UpdateApplication");
 
         api.MapDelete("/{clientId}", DeleteApplication)

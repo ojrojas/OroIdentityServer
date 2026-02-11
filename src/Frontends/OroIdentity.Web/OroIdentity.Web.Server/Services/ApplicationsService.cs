@@ -40,7 +40,7 @@ public class ApplicationsService(
         try
         {
             logger.LogInformation("Request api external getallapplications");
-            using var request = new HttpRequestMessage(HttpMethod.Get, "/applications");
+            using var request = new HttpRequestMessage(HttpMethod.Get, "applications");
             using var response = await httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
@@ -60,7 +60,7 @@ public class ApplicationsService(
         try
         {
             logger.LogInformation("Request api external getallapplications");
-            using var request = new HttpRequestMessage(HttpMethod.Get, $"/applications/{ClientId}");
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"applications/{ClientId}");
             using var response = await httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
@@ -78,20 +78,27 @@ public class ApplicationsService(
 
     public async Task UpdateApplicationAsync(ApplicationViewModel application, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Request api external updateapplication for ClientId: {ClientId}", application.ClientId);
-        var newApplication = new
+        try
         {
-            Descriptor = application
-        };
+            logger.LogInformation("Request api external updateapplication for ClientId: {ClientId}", application.ClientId);
+            var newApplication = new
+            {
+                Descriptor = application
+            };
 
-        using var request = new HttpRequestMessage(HttpMethod.Patch, $"/applications/{application.ClientId}")
+            using var request = new HttpRequestMessage(HttpMethod.Put, $"applications/{application.ClientId}")
+            {
+                Content = JsonContent.Create(newApplication)
+            };
+
+            using var response = await httpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            logger.LogInformation("Application updated with ClientId: {ClientId}", newApplication.Descriptor.ClientId);
+        }
+        catch (Exception ex)
         {
-            Content = JsonContent.Create(newApplication)
-        };
-
-        using var response = await httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        logger.LogInformation("Application updated with ClientId: {ClientId}", newApplication.Descriptor.ClientId);
+            throw new Exception(ex.Message, ex);
+        }
     }
 }

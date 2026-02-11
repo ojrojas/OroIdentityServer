@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.Application.Abstractions.Mappers;
+
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
 public class UpdateApplicationCommandHandler(
@@ -29,17 +31,7 @@ public class UpdateApplicationCommandHandler(
                 return;
             }
 
-            // Update the application descriptor
-            var descriptor = new OpenIddictApplicationDescriptor
-            {
-                DisplayName = command.descriptor.DisplayName
-            };
-
-            descriptor.Permissions.Clear();
-            foreach (var permission in command.descriptor.Permissions)
-            {
-                descriptor.Permissions.Add(permission);
-            }
+            var descriptor = command.descriptor.ToOpenIddict();
 
             await applicationManager.UpdateAsync(existingApplication, descriptor, cancellationToken);
 

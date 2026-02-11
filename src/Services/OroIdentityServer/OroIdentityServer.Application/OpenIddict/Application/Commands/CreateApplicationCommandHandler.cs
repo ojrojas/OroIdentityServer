@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.Application.Abstractions.Mappers;
+
 namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 
 public class CreateApplicationCommandHandler(
@@ -29,8 +31,10 @@ public class CreateApplicationCommandHandler(
                 return;
             }
 
+            var descriptor = command.descriptor.ToOpenIddict();
+
             // Create the application
-            await applicationManager.CreateAsync(command.descriptor, cancellationToken);
+            await applicationManager.CreateAsync(descriptor, cancellationToken);
 
             logger.LogInformation("Application with ClientId {ClientId} created successfully.", command.descriptor.ClientId);
         }
