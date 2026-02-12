@@ -12,11 +12,9 @@ public sealed class RoleName : BaseValueObject
         Value = value;
     }
 
-    public static RoleName Create(string value)
+    public static RoleName Create(string? value)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(value, "Role name value is null or empty");
-        return new RoleName(value);
-
+        return new RoleName(value ?? string.Empty);
     }
 
     protected override IEnumerable<object?> GetEquatibilityComponents()

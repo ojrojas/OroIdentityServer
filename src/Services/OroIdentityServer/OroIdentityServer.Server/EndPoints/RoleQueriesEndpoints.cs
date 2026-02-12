@@ -12,10 +12,13 @@ public static class RoleQueriesEndpoints
     {
         var api = routeBuilder.MapGroup("roles");
 
-        api.MapGet("/get/{id}", GetRoleById)
+        api.MapGet("/{id:guid}", GetRoleById)
             .WithName("GetRoleById");
+         
+        api.MapGet("/{name}", GetRoleByName)
+            .WithName("GetRoleByName");
 
-        api.MapGet("/getall", GetAllRoles)
+        api.MapGet(string.Empty, GetAllRoles)
             .WithName("GetAllRoles");
         
         api.RequireAuthorization([new AuthorizeAttribute
@@ -24,6 +27,17 @@ public static class RoleQueriesEndpoints
         }]);
 
         return api;
+    }
+
+    private static async Task <Results<Ok<GetRoleByNameResponse>, NotFound>> GetRoleByName(
+        HttpContext context,
+        [FromRoute] string name,
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await sender.Send(new GetRoleByNameQuery(new(name)), cancellationToken);
+        return result.Data != null ? TypedResults.Ok(result) : TypedResults.NotFound();
     }
 
     private static async Task<Results<Ok<GetRoleByIdResponse>, NotFound>> GetRoleById(

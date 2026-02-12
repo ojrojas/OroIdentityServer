@@ -1,0 +1,1 @@
+public record GetRoleByNameResponse: BaseResponse<Role>;

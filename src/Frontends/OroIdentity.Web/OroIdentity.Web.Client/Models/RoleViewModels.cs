@@ -6,8 +6,8 @@ namespace OroIdentity.Web.Client.Models;
 
 public class RoleViewModel
 {
-    public Guid RoleId {get;set;}
-    public required string Name {get;set; }
+    public IdViewModel RoleId {get;set;}
+    public NameViewModel Name {get;set; }
     public bool IsActive {get;set;}
     public IReadOnlyCollection<RoleClaimViewModel> Claims => _claims.AsReadOnly();
     private readonly IList<RoleClaimViewModel> _claims = [];

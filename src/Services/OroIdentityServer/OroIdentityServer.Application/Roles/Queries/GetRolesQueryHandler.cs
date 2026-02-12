@@ -26,6 +26,8 @@ public class GetRolesQueryHandler(
             return new GetRolesResponse
             {
                 Data = roles,
+                StatusCode = 200,
+                Message = "Roles retrieved successfully."
             };
         }
         catch (Exception ex)
@@ -34,7 +36,9 @@ public class GetRolesQueryHandler(
 
             return new GetRolesResponse
             {
-                Errors = ["An error occurred while retrieving roles."]
+                Errors = ["An error occurred while retrieving roles."],
+                StatusCode = 500,
+                Message = "An error occurred while retrieving roles."
             };
         }
     }

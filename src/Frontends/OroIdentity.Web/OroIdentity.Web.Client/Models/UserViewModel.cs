@@ -12,7 +12,7 @@ public class UserViewModel
     /// Name user
     /// </summary>
     [Required]
-    public string Name { get; set; } 
+    public string Name { get; set; }
     public string MiddleName { get; set; }
     [Required]
     public string LastName { get; set; }
@@ -24,4 +24,16 @@ public class UserViewModel
     public string Identification { get; set; }
     [Required]
     public Guid IdentificationTypeId { get; set; }
+
+    public SecurityUserViewModel Security { get; set; } = new SecurityUserViewModel();
+}
+
+public class SecurityUserViewModel
+{
+    public string? PasswordHash { get; set; }
+    public string? SecurityStamp { get; set; } = string.Empty;
+    public string? ConcurrencyStamp { get; set; }
+    public DateTime? LockoutEnd { get; set; } = DateTime.UtcNow;
+    public bool LockoutEnabled { get; set; } = false;
+    public int AccessFailedCount { get; set; } = 0;
 }

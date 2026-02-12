@@ -1,0 +1,61 @@
+@page "/roles"
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+
+@attribute [Authorize]
+
+@inject NavigationManager NavigationManager
+@inject IRolesService Service
+
+<PageTitle>Roles</PageTitle>
+
+<HeaderPagesComponent TitlePage="Roles" Description="Manage your roles">
+    <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToCreatePage">Create</FluentButton>
+</HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:30px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
+</FluentDivider>
+<FluentDataGrid Items="roles" Style="width:100%;">
+    <TemplateColumn Title="Action">
+        <FluentButton OnClick="(() => RedirectEdit(context.RoleId.Value))" Appearance="Appearance.Accent">Edit
+        </FluentButton>
+    </TemplateColumn>
+    <TemplateColumn SortBy="sortByName">
+        @context.Name.Value
+    </TemplateColumn>
+    <TemplateColumn>
+        @context.IsActive
+    </TemplateColumn>
+</FluentDataGrid>
+
+@code {
+    [PersistentState]
+    public IQueryable<RoleViewModel> roles { get; set; }
+
+     GridSort<RoleViewModel> sortByName = GridSort<RoleViewModel>
+        .ByAscending(p => p.Name.Value)
+        .ThenAscending(p => p.Name.Value);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoles();
+    }
+
+    private async Task LoadRoles()
+    {
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        var rolesList =
+            await Service.GetAllRolesAsync(cts.Token);
+        roles = rolesList.Data.AsQueryable();
+    }
+
+    private void RedirectToCreatePage()
+    {
+        NavigationManager.NavigateTo("/create-role");
+    }
+
+    private void RedirectEdit(Guid roleId)
+    {
+        NavigationManager.NavigateTo($"/roles/{roleId}");
+    }
+}

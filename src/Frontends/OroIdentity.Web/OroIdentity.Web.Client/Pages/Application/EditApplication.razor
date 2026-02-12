@@ -349,7 +349,7 @@
         try
         {
             CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-            await Service.UpdateApplicationAsync(editApplication, default);
+            await Service.UpdateApplicationAsync(editApplication, token.Token);
             ToastService.ShowSuccess("Application Editd successfully");
             NavigationManager.NavigateTo("/applications");
         }
