@@ -13,10 +13,10 @@ public static class RolesEndpoints
 
 
         group.MapGet(string.Empty, GetAllRoles);
-        group.MapGet("/{name}", GetRoleByName);
-        group.MapGet("/{roleId: guid}", GetRoleById);
+        group.MapGet("{name}", GetRoleByName);
+        group.MapGet("{roleId:guid}", GetRoleById);
 
-        group.MapDelete("/{roleId: guid}", DeleteRoleById);
+        group.MapDelete("{roleId:guid}", DeleteRoleById);
         group.MapPost(string.Empty, CreateRole);
         group.MapPut(string.Empty, UpdateRole);
 
@@ -79,6 +79,6 @@ public static class RolesEndpoints
         CancellationToken cancellationToken
         )
     {
-       return await service.GetAllRolesAsync(cancellationToken);
+        return await service.GetAllRolesAsync(cancellationToken);
     }
 }

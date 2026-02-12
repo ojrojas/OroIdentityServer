@@ -10,7 +10,7 @@ public static class RoleCommandsEndpoints
     {
         var api = routeBuilder.MapGroup("roles");
 
-        api.MapPost("/create", CreateRole)
+        api.MapPost(string.Empty, CreateRole)
             .WithName("CreateRole");
 
         api.RequireAuthorization([new AuthorizeAttribute

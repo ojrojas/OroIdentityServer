@@ -17,7 +17,9 @@ public class GetRoleByNameQueryHandler(
                 return Task.FromResult(new GetRoleByNameResponse
                 {
                     Data = null,
-                    Errors = ["Role not found."]
+                    Errors = ["Role not found."],
+                    Message = $"Role with name {query.Name} not found",
+                    StatusCode = 404
                 });
             }
 
@@ -35,7 +37,9 @@ public class GetRoleByNameQueryHandler(
             return Task.FromResult(new GetRoleByNameResponse
             {
                 Data = null,
-                Errors = ["An error occurred while retrieving the role."]
+                Errors = ["An error occurred while retrieving the role."],
+                Message = $"An error occurred while retrieving the role with name: {query.Name}",
+                StatusCode = 500
             });
         }
     }

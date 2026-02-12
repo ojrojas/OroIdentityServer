@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using OroIdentity.Web.Client.Interfaces;
@@ -17,7 +18,11 @@ public class RolesService(
 
     public async Task CreateRoleAsync(RoleViewModel role, CancellationToken cancellationToken)
     {
-        await httpClient.PostAsJsonAsync("roles", role, options, cancellationToken);
+        var newRole = new
+        {
+            roleName = role.Name
+        };
+        await httpClient.PostAsJsonAsync("roles", newRole, options, cancellationToken);
     }
 
     public async Task DeleteRoleAsync(string roleId, CancellationToken cancellationToken)
@@ -36,12 +41,9 @@ public class RolesService(
 
             var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
+            var result = JsonSerializer.Deserialize<BaseResponseViewModel<IEnumerable<RoleViewModel>>>(json, options);
 
-            var responseModel = new BaseResponseViewModel<IEnumerable<RoleViewModel>>();
-
-            return responseModel;
+            return result;
         }
         catch (Exception ex)
         {
@@ -52,13 +54,13 @@ public class RolesService(
     public async Task<RoleViewModel> GetRoleByIdAsync(string roleId, CancellationToken cancellationToken)
     {
         return await httpClient.GetFromJsonAsync<RoleViewModel>($"roles/{roleId}", cancellationToken)
-               ?? new RoleViewModel() { Name = string.Empty };
+               ?? new RoleViewModel() { Name = NameViewModel.Create(string.Empty) };
     }
 
     public async Task<RoleViewModel> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken)
     {
         return await httpClient.GetFromJsonAsync<RoleViewModel>($"roles/{roleName}", cancellationToken)
-               ?? new RoleViewModel() { Name = string.Empty };
+               ?? new RoleViewModel() { Name = NameViewModel.Create(string.Empty) };
     }
 
     public async Task UpdateRoleAsync(RoleViewModel role, CancellationToken cancellationToken)

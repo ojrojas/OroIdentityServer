@@ -91,6 +91,7 @@ app.UseSession();
 
 app.MapIdentityEndpoints();
 app.MapApplicationEndpointsV1().RequireAuthorization();
+app.MapRolesEndpointsV1().RequireAuthorization();
 
 app.MapDefaultEndpoints();
 

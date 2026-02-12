@@ -1,8 +1,12 @@
 @page "/create-role"
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
 
 @attribute [Authorize]
 
 @inject NavigationManager NavigationManager
+@inject IRolesService Service
+@inject IToastService ToastService
 
 <PageTitle>Roles</PageTitle>
 
@@ -10,14 +14,58 @@
     <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToRoles">Back</FluentButton>
 </HeaderPagesComponent>
 
-<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
+</FluentDivider>
 
+<FluentEditForm Model="@newRole" OnValidSubmit="HandleSubmit">
+    <!-- Action buttons above the form -->
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
+        <FluentButton Appearance="Appearance.Lightweight" OnClick="Cancel">Cancel</FluentButton>
+        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Create role</FluentButton>
+    </div>
+    <FluentGrid Spacing="1">
+        <FluentGridItem>
+            <FluentCard>
+                <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
+                    <FluentLabel Typo="Typography.H5">Role information</FluentLabel>
+                    <FluentTextField @bind-Value="newRole.Name.Value" Label="Role name" Required="true" />
+                    <FluentSelect Items="activeOptions" Style="width:100%"  @bind-Value="@optionSelected"  Label="Status"
+                                  OptionText="@(opt => opt.Key)"       OptionValue="@(opt => opt.Value)"        />
+                </div>
+            </FluentCard>
+        </FluentGridItem>
+    </FluentGrid>
+</FluentEditForm>
 
+@code {
+    public RoleViewModel? newRole { get; set; }
+    private string optionSelected { get; set; }
+    private Dictionary<string, string> activeOptions = new Dictionary<string, string> { { "Active", "1" }, { "Inactive", "0" } };
 
+    protected override void OnInitialized()
+    {
+        newRole = new RoleViewModel
+        {
+            Name = new NameViewModel(string.Empty),
+            IsActive = true
+        };
+    }
 
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/roles");
+    }
 
-
-@code{
+    private async Task HandleSubmit()
+    {
+        // Call the service to create the role
+        // await Service.CreateRoleAsync(newRole);
+        // After successful creation, navigate back to the roles list
+         CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        await Service.CreateRoleAsync(newRole, token.Token);
+        ToastService.ShowSuccess("Role created successfully");
+        NavigationManager.NavigateTo("/roles");
+    }
 
     private void RedirectToRoles()
     {

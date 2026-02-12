@@ -24,7 +24,9 @@ public class GetRoleByIdQueryHandler(
                 return new GetRoleByIdResponse
                 {
                     Data = null,
-                    Errors = ["Role not found."]
+                    Errors = ["Role not found."],
+                    Message = $"Role with Id {query.Id} not found",
+                    StatusCode = 404
                 };
             }
 
@@ -32,7 +34,7 @@ public class GetRoleByIdQueryHandler(
 
             return new GetRoleByIdResponse
             {
-                Data = role,
+                Data = role
             };
         }
         catch (Exception ex)
@@ -41,7 +43,9 @@ public class GetRoleByIdQueryHandler(
 
             return new GetRoleByIdResponse
             {
-                Errors = ["An error occurred while retrieving the role."]
+                Errors = ["An error occurred while retrieving the role."],
+                StatusCode = 500,
+                Message = $"An error occurred while retrieving the role with Id: {query.Id}"
             };
         }
     }
