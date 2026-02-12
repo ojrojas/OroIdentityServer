@@ -49,7 +49,7 @@ public static class ApplicationEndpoints
         return await service.GetApplicationByClientIdAsync(clientId, cancellationToken);
     }
 
-    private static async Task<IEnumerable<ApplicationViewModel>> GetAllApplications(
+    private static async Task<IEnumerable<ApplicationViewModel>?> GetAllApplications(
         HttpContext context,
         [FromServices] IApplicationsService service,
         CancellationToken cancellationToken

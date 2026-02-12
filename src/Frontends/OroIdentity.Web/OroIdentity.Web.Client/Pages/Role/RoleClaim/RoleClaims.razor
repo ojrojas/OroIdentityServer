@@ -1,0 +1,63 @@
+@using OroIdentity.Web.Client.Models
+@inject NavigationManager NavigationManager
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
+</FluentDivider>
+
+<table>
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Value</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var claim in Claims)
+        {
+            <tr>
+                <td>@claim.ClaimType</td>
+                <td>@claim.ClaimValue</td>
+                <td>
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@(() => EditClaim(claim))">Edit</FluentButton>
+                    <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => DeleteClaim(claim))">Delete
+                    </FluentButton>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<RoleClaimViewModel> Claims = new List<RoleClaimViewModel>();
+
+    protected override void OnInitialized()
+    {
+        // Load claims for the role
+        LoadClaims();
+    }
+
+    private void LoadClaims()
+    {
+        // This is where you would typically call a service to get the claims for the role
+        // For demonstration purposes, we'll just add some dummy data
+        Claims = new List<RoleClaimViewModel>
+        {
+            new RoleClaimViewModel { ClaimType = "Permission", ClaimValue = "Read" },
+            new RoleClaimViewModel { ClaimType = "Permission", ClaimValue = "Write" }
+        };
+    }
+
+    private void EditClaim(RoleClaimViewModel claim)
+    {
+        // Navigate to the edit claim page with the claim details
+        NavigationManager.NavigateTo($"/roles/edit-claim/{claim.ClaimType}");
+    }
+
+    private void DeleteClaim(RoleClaimViewModel claim)
+    {
+        // Here you would typically call a service to delete the claim
+        // For demonstration purposes, we'll just remove it from the list
+        Claims.Remove(claim);
+    }
+}

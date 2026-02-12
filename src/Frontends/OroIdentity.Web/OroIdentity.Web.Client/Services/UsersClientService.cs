@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentity.Web.Client.Services;
 
-public class UsersClientService(
+internal class UsersClientService(
     ILogger<UsersClientService> logger,
     HttpClient httpClient)
 {
