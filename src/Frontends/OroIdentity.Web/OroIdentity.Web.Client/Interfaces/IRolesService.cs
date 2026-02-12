@@ -5,7 +5,7 @@ namespace OroIdentity.Web.Client.Interfaces;
 
 public interface IRolesService
 {
-    Task<IEnumerable<RoleViewModel>> GetAllRolesAsync(CancellationToken cancellationToken);
+    Task<BaseResponseViewModel<IEnumerable<RoleViewModel>>> GetAllRolesAsync(CancellationToken cancellationToken);
     Task<RoleViewModel> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken);
     Task<RoleViewModel> GetRoleByIdAsync(string roleId, CancellationToken cancellationToken);
     Task CreateRoleAsync(RoleViewModel role, CancellationToken cancellationToken);

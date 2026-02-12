@@ -73,7 +73,7 @@ public static class RolesEndpoints
         return await service.GetRoleByNameAsync(name, cancellationToken);
     }
 
-    private static async Task<IEnumerable<RoleViewModel>?> GetAllRoles(
+    private static async Task<BaseResponseViewModel<IEnumerable<RoleViewModel>>?> GetAllRoles(
         HttpContext context,
         [FromServices] IRolesService service,
         CancellationToken cancellationToken

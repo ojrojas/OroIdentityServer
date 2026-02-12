@@ -24,11 +24,11 @@ internal sealed class RolesClientService(
         logger.LogInformation("Role with ID: {RoleId} deleted successfully", roleId);
     }
 
-    public async Task<IEnumerable<RoleViewModel>> GetAllRolesAsync(CancellationToken cancellationToken)
+    public async Task<BaseResponseViewModel<IEnumerable<RoleViewModel>>> GetAllRolesAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Retrieving all roles");
-        return await httpClient.GetFromJsonAsync<IEnumerable<RoleViewModel>>(ROUTEROLES, cancellationToken)
-               ?? [];
+        var response = await httpClient.GetFromJsonAsync<BaseResponseViewModel<IEnumerable<RoleViewModel>>>(ROUTEROLES, cancellationToken);
+        return response;
     }
 
     public async Task<RoleViewModel> GetRoleByIdAsync(string roleId, CancellationToken cancellationToken)
@@ -51,4 +51,6 @@ internal sealed class RolesClientService(
         await httpClient.PutAsJsonAsync(ROUTEROLES, role, cancellationToken);
         logger.LogInformation("Role with ID: {RoleId} updated successfully", role.RoleId);
     }
+
+   
 }

@@ -9,7 +9,6 @@ public class RolesService(
     ILogger<RolesService> logger,
     HttpClient httpClient) : IRolesService
 {
-
     private readonly JsonSerializerOptions options = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -26,19 +25,23 @@ public class RolesService(
         await httpClient.DeleteAsync($"roles/{roleId}", cancellationToken);
     }
 
-    public async Task<IEnumerable<RoleViewModel>?> GetAllRolesAsync(CancellationToken cancellationToken)
+    public async Task<BaseResponseViewModel<IEnumerable<RoleViewModel>>> GetAllRolesAsync(CancellationToken cancellationToken)
     {
         try
         {
             logger.LogInformation("Request api external getallroles");
             using var request = new HttpRequestMessage(HttpMethod.Get, "roles");
-            using var response = await httpClient.SendAsync(request, cancellationToken);
+            using var response = await httpClient.GetAsync("roles", cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<IEnumerable<RoleViewModel>>(cancellationToken: cancellationToken) ??
-            throw new IOException("Error request getallroles");
+            var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            return result;
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            var responseModel = new BaseResponseViewModel<IEnumerable<RoleViewModel>>();
+
+            return responseModel;
         }
         catch (Exception ex)
         {

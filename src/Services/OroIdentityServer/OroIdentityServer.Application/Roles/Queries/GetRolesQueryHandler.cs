@@ -26,6 +26,8 @@ public class GetRolesQueryHandler(
             return new GetRolesResponse
             {
                 Data = roles,
+                StatusCode = 200,
+                Message = "Roles retrieved successfully."
             };
         }
         catch (Exception ex)

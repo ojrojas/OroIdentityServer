@@ -1,10 +1,11 @@
 @page "/roles"
+@using OroIdentity.Web.Client.Interfaces
 @using OroIdentity.Web.Client.Models
 
 @attribute [Authorize]
 
 @inject NavigationManager NavigationManager
-
+@inject IRolesService Service
 
 <PageTitle>Roles</PageTitle>
 
@@ -19,8 +20,21 @@
 </FluentDataGrid>
 
 @code{
-
+    [PersistentState]
     public IQueryable<RoleViewModel> roles { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoles();
+    }
+
+    private async Task LoadRoles()
+    {
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        var rolesList = 
+            await Service.GetAllRolesAsync(cts.Token);
+        roles = rolesList.Data.AsQueryable();
+    }
 
     private void RedirectToCreatePage()
     {
