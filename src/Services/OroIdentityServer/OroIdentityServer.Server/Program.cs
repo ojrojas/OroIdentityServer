@@ -7,7 +7,7 @@ using OroBuildingBlocks.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
-IConfiguration configuration = builder.Configuration;
+ConfigurationManager configuration = builder.Configuration;
 Log.Logger = LoggerPrinter.CreateSerilogLogger("api", "OroIdentityServer", configuration);
 builder.Services.AddOpenApi();
 
