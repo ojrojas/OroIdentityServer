@@ -1,0 +1,71 @@
+@page "/users/{userId}"
+@attribute [Authorize]
+
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+
+@inject NavigationManager NavigationManager
+@inject IUsersService Service
+
+<PageTitle>Edit User</PageTitle>
+
+<HeaderPagesComponent TitlePage="Users" Description="Edit user">
+    <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToUsers">Back</FluentButton>
+</HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
+
+@if (user != null)
+{
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" Gap="1rem">
+            <FluentTextField Label="Name" @bind-Value="user.Name" />
+            <FluentTextField Label="Middle Name" @bind-Value="user.MiddleName" />
+            <FluentTextField Label="Last Name" @bind-Value="user.LastName" />
+            <FluentTextField Label="User Name" @bind-Value="user.UserName" />
+            <FluentTextField Label="Email" @bind-Value="user.Email" />
+            <FluentTextField Label="Identification" @bind-Value="user.Identification" />
+            <FluentTextField Label="Identification Type Id" @bind-Value="identificationTypeIdString" />
+            <FluentButton Appearance="Appearance.Accent" OnClick="UpdateUser">Update</FluentButton>
+        </FluentStack>
+    </FluentCard>
+}
+
+@code {
+    [Parameter]
+    public string UserName { get; set; }
+
+    private UserViewModel? user;
+    private string identificationTypeIdString = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUser();
+    }
+
+    private async Task LoadUser()
+    {
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        user = await Service.GetUserByIdAsync(UserName, cts.Token);
+        if (user != null)
+        {
+            identificationTypeIdString = user.IdentificationTypeId.ToString();
+        }
+    }
+
+    private async Task UpdateUser()
+    {
+        if (user != null && Guid.TryParse(identificationTypeIdString, out var id))
+        {
+            user.IdentificationTypeId = id;
+            CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            await Service.UpdateUserAsync(user, cts.Token);
+            NavigationManager.NavigateTo("/users");
+        }
+    }
+
+    private void RedirectToUsers()
+    {
+        NavigationManager.NavigateTo("/users");
+    }
+}

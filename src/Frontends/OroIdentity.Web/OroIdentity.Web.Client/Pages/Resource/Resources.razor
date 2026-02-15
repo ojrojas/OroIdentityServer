@@ -1,8 +1,11 @@
 @page "/resources"
 @attribute [Authorize]
 
-@inject NavigationManager NavigationManager
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
 
+@inject NavigationManager NavigationManager
+@inject IScopesService Service
 
 <PageTitle>Resources</PageTitle>
 
@@ -13,11 +16,45 @@
 <FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
 </FluentDivider>
 
+<FluentDataGrid Items="scopes" Style="width:100%;">
+    <TemplateColumn Title="Action">
+        <FluentButton OnClick="(() => RedirectEdit(context.Id))" Appearance="Appearance.Accent">Edit</FluentButton>
+    </TemplateColumn>
+    <TemplateColumn SortBy="sortByName">
+        @context.Name
+    </TemplateColumn>
+    <TemplateColumn>
+        @context.Description
+    </TemplateColumn>
+</FluentDataGrid>
 
 @code {
+    [PersistentState]
+    public IQueryable<ScopeViewModel> scopes { get; set; }
+
+    GridSort<ScopeViewModel> sortByName = GridSort<ScopeViewModel>
+        .ByAscending(p => p.Name);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadScopes();
+    }
+
+    private async Task LoadScopes()
+    {
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        var scopesList =
+            await Service.GetAllScopesAsync(cts.Token);
+        scopes = scopesList.Data.AsQueryable();
+    }
 
     private void RedirectToCreatePage()
     {
         NavigationManager.NavigateTo("/create-resource");
+    }
+
+    private void RedirectEdit(Guid scopeId)
+    {
+        NavigationManager.NavigateTo($"/resources/{scopeId}");
     }
 }

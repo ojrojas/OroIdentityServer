@@ -25,6 +25,15 @@ builder.Services.AddHttpClient<IRolesService, RolesClientService>(
     client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
 );
 
+builder.Services.AddHttpClient<IScopesService, ScopesClientService>(
+    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+);
+
+builder.Services.AddHttpClient<IUsersService, UsersClientService>(
+    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+);
+
+
 builder.Services.AddFluentUIComponents();
 
 

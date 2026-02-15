@@ -15,13 +15,13 @@ public static class UsersQueriesEndpoints
             api.MapGet("/getuserinfo", GetUserInfo)
                 .WithName("GetUserInfo");
 
-            api.MapGet("/users", GetUsers)
+            api.MapGet(string.Empty, GetUsers)
                 .WithName("GetUsers");
 
             api.MapGet("/getuserbyemail/{email}", GetUserByEmail)
                 .WithName("GetUserByEmail");
 
-            api.MapGet("/getuserbyid/{id}", GetUserById)
+            api.MapGet("{id:guid}", GetUserById)
                 .WithName("GetUserById");
 
             api.RequireAuthorization([new AuthorizeAttribute

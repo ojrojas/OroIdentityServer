@@ -1,0 +1,60 @@
+@page "/roles/{roleId:guid}"
+@attribute [Authorize]
+
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+
+@inject NavigationManager NavigationManager
+@inject IRolesService Service
+
+<PageTitle>Edit Role</PageTitle>
+
+<HeaderPagesComponent TitlePage="Roles" Description="Manage your roles">
+    <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToRoles">Back</FluentButton>
+</HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
+
+@if (role != null)
+{
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" Gap="1rem">
+            <FluentTextField Label="Name" @bind-Value="role.Name.Value" />
+            <FluentCheckbox Label="Is Active" @bind-Value="role.IsActive" />
+            <FluentButton Appearance="Appearance.Accent" OnClick="UpdateRole">Update</FluentButton>
+        </FluentStack>
+    </FluentCard>
+}
+
+@code {
+    [Parameter]
+    public Guid RoleId { get; set; }
+
+    private RoleViewModel? role;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRole();
+    }
+
+    private async Task LoadRole()
+    {
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        role = await Service.GetRoleByIdAsync(RoleId.ToString(), cts.Token);
+    }
+
+    private async Task UpdateRole()
+    {
+        if (role != null)
+        {
+            CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            await Service.UpdateRoleAsync(role, cts.Token);
+            NavigationManager.NavigateTo("/roles");
+        }
+    }
+
+    private void RedirectToRoles()
+    {
+        NavigationManager.NavigateTo("/roles");
+    }
+}
