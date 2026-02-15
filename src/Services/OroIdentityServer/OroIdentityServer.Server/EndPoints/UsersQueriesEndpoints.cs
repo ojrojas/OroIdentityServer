@@ -66,11 +66,24 @@ public static class UsersQueriesEndpoints
            CancellationToken cancellationToken
        )
     {
-        //    var result = await context.AuthenticateAsync(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
-        // var response = await services.GetUserByIdAsync(new(Guid.Parse(result.Principal.GetUserId())));
+        // Try to use the authenticated user available on the HttpContext.
+        // Prefer `NameIdentifier` claim, then `sub`, then `user_id`.
+        var principal = context.User;
+        if (principal?.Identity?.IsAuthenticated != true)
+        {
+            return TypedResults.Problem("User is not authenticated", statusCode: StatusCodes.Status401Unauthorized);
+        }
 
-        // return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(id), cancellationToken));
-        throw new NotImplementedException();
+        var idClaim = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                      ?? principal.FindFirst("sub")?.Value
+                      ?? principal.FindFirst("user_id")?.Value;
+
+        if (string.IsNullOrWhiteSpace(idClaim) || !Guid.TryParse(idClaim, out var userGuid))
+        {
+            return TypedResults.BadRequest("Invalid or missing user identifier in claims.");
+        }
+
+        return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(new(userGuid)), cancellationToken));
 
     }
 }
