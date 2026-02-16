@@ -33,6 +33,10 @@ builder.Services.AddHttpClient<IUsersService, UsersClientService>(
     client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
 );
 
+builder.Services.AddHttpClient<IIdentificationTypeService, IdentificationTypesClientService>(
+    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+);
+
 
 builder.Services.AddFluentUIComponents();
 

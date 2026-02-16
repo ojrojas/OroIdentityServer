@@ -12,13 +12,13 @@ public static class UsersCommandsEndpoints
         {
             var api = routeBuilder.MapGroup("users");
 
-            api.MapPost("/create", CreateUser)
+            api.MapPost(string.Empty, CreateUser)
                 .WithName("CreateUser");
 
-            api.MapPatch("/update", UpdateUser)
+            api.MapPut(string.Empty, UpdateUser)
                 .WithName("UpdateUser");
 
-            api.MapDelete("/delete/{id}", DeleteUser)
+            api.MapDelete("/{id}", DeleteUser)
                 .WithName("DeleteUser");
 
             api.RequireAuthorization([new AuthorizeAttribute

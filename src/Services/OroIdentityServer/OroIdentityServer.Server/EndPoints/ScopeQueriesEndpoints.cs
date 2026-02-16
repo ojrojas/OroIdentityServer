@@ -10,7 +10,7 @@ public static class ScopeQueriesEndpoints
     {
         var api = routeBuilder.MapGroup("scopes");
 
-        api.MapGet("/", GetScopes)
+        api.MapGet(string.Empty, GetScopes)
             .WithName("GetScopes");
 
         api.RequireAuthorization([new AuthorizeAttribute

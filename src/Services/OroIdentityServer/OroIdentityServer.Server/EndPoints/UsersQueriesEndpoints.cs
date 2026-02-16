@@ -21,7 +21,7 @@ public static class UsersQueriesEndpoints
             api.MapGet("/getuserbyemail/{email}", GetUserByEmail)
                 .WithName("GetUserByEmail");
 
-            api.MapGet("{id:guid}", GetUserById)
+            api.MapGet("/{id:guid}", GetUserById)
                 .WithName("GetUserById");
 
             api.RequireAuthorization([new AuthorizeAttribute
@@ -32,7 +32,8 @@ public static class UsersQueriesEndpoints
         }
     }
 
-    private static async Task<Results<Ok<GetUserByIdQueryResponse>, BadRequest<string>, ProblemHttpResult>> GetUserById(
+    private static async Task<Results<Ok<GetUserByIdQueryResponse>, BadRequest<string>, ProblemHttpResult>> 
+    GetUserById(
            HttpContext context,
            [FromRoute] Guid id,
            [FromServices] ISender sender,
@@ -42,7 +43,8 @@ public static class UsersQueriesEndpoints
         return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(new(id)), cancellationToken));
     }
 
-    private static async Task<Results<Ok<GetUserByEmailResponse>, BadRequest<string>, ProblemHttpResult>> GetUserByEmail(
+    private static async Task<Results<Ok<GetUserByEmailResponse>, BadRequest<string>, ProblemHttpResult>> 
+    GetUserByEmail(
            HttpContext context,
            [FromRoute] string email,
            [FromServices] ISender sender,
@@ -52,7 +54,8 @@ public static class UsersQueriesEndpoints
         return TypedResults.Ok(await sender.Send(new GetUserByEmailQuery(email), cancellationToken));
     }
 
-    private static async Task<Results<Ok<GetUsersQueryResponse>, BadRequest<string>, ProblemHttpResult>> GetUsers(
+    private static async Task<Results<Ok<GetUsersQueryResponse>, BadRequest<string>, ProblemHttpResult>> 
+    GetUsers(
            HttpContext context,
            [FromServices] ISender sender,
            CancellationToken cancellationToken)
@@ -60,7 +63,8 @@ public static class UsersQueriesEndpoints
         return TypedResults.Ok(await sender.Send(new GetUsersQuery(), cancellationToken));
     }
 
-    private static async Task<Results<Ok<GetUserByIdQueryResponse>, BadRequest<string>, ProblemHttpResult>> GetUserInfo(
+    private static async Task<Results<Ok<GetUserByIdQueryResponse>, BadRequest<string>, ProblemHttpResult>> 
+    GetUserInfo(
            HttpContext context,
            [FromServices] ISender sender,
            CancellationToken cancellationToken

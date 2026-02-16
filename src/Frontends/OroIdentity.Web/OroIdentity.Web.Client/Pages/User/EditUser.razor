@@ -5,6 +5,7 @@
 @using OroIdentity.Web.Client.Models
 
 @inject NavigationManager NavigationManager
+@inject IIdentificationTypeService IdentificationTypeService
 @inject IUsersService Service
 
 <PageTitle>Edit User</PageTitle>
@@ -25,7 +26,12 @@
             <FluentTextField Label="User Name" @bind-Value="user.UserName" />
             <FluentTextField Label="Email" @bind-Value="user.Email" />
             <FluentTextField Label="Identification" @bind-Value="user.Identification" />
-            <FluentTextField Label="Identification Type Id" @bind-Value="identificationTypeIdString" />
+            <FluentSelect 
+            Label="Identification Type Id" 
+            @bind-Value="identificationTypeIdString" 
+            OptionValue="@(t => t.Id.Value.ToString())"
+            OptionText="@(t => t.Name.Value)"
+            Items="IdentificationTypes" />
             <FluentButton Appearance="Appearance.Accent" OnClick="UpdateUser">Update</FluentButton>
         </FluentStack>
     </FluentCard>
@@ -33,32 +39,45 @@
 
 @code {
     [Parameter]
-    public string UserName { get; set; }
+    public string userId { get; set; }
+    public List<IdentificationTypeViewModel> IdentificationTypes { get; set; } = new List<IdentificationTypeViewModel>();
 
     private UserViewModel? user;
     private string identificationTypeIdString = "";
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadIdentificationTypes();
         await LoadUser();
+    }
+
+    private async Task LoadIdentificationTypes()
+    {
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        var result = (await IdentificationTypeService.GetAllIdentificationTypesAsync(cts.Token));
+        if(result != null && result.Data != null)
+        {
+            IdentificationTypes = result.Data.ToList();
+        }
     }
 
     private async Task LoadUser()
     {
         CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-        user = await Service.GetUserByIdAsync(UserName, cts.Token);
-        if (user != null)
+        user = await Service.GetUserByIdAsync(userId, cts.Token);
+        if(user != null && user.IdentificationTypeId != null)
         {
-            identificationTypeIdString = user.IdentificationTypeId.ToString();
+            identificationTypeIdString = user.IdentificationTypeId.Value.ToString();
         }
     }
+
 
     private async Task UpdateUser()
     {
         if (user != null && Guid.TryParse(identificationTypeIdString, out var id))
         {
-            user.IdentificationTypeId = IdViewModel.New(id);
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            user.IdentificationTypeId = IdViewModel.New(id);
             await Service.UpdateUserAsync(user, cts.Token);
             NavigationManager.NavigateTo("/users");
         }

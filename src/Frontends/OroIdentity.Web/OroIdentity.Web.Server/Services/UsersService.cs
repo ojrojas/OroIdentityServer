@@ -60,12 +60,25 @@ public class UsersService(
 
     public async Task<UserViewModel> GetUserByIdAsync(string userId, CancellationToken cancellationToken)
     {
-        return await httpClient.GetFromJsonAsync<UserViewModel>($"users/{userId}", cancellationToken)
-               ?? new UserViewModel();
+        var response = await httpClient.GetFromJsonAsync<BaseResponseViewModel<UserViewModel>>($"users/{userId}", cancellationToken) ?? throw new Exception("User not found");
+        response.Message = "User retrieved successfully";
+        return response.Data;
     }
 
     public async Task UpdateUserAsync(UserViewModel user, CancellationToken cancellationToken)
     {
-        await httpClient.PutAsJsonAsync("users", user, options, cancellationToken);
+        var updateUser = new
+        {
+            userName = user.UserName,
+            name = user.Name,
+            middleName = user.MiddleName,
+            lastName = user.LastName,
+            email = user.Email,
+            identification = user.Identification,
+            identificationTypeId = user.IdentificationTypeId,
+            password = user.Security.PasswordHash
+        };
+
+        await httpClient.PutAsJsonAsync("users", updateUser, options, cancellationToken);
     }
 }

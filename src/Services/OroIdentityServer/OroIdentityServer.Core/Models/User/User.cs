@@ -74,14 +74,6 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
     public SecurityUserId? SecurityUserId { get; set; }
     public SecurityUser? SecurityUser { get; set; }
 
-    // public interface IUserRepository
-    // {
-    //     User? GetById(UserId id);
-    //     void Add(User user);
-    //     void Update(User user);
-    //     void Remove(User user);
-    // }
-
     public void AddRole(UserRole role)
     {
         if (_roles.Any(r => r.RoleId == role.RoleId))

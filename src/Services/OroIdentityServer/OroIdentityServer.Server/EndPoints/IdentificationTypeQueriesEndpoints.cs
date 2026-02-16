@@ -12,8 +12,11 @@ public static class IdentificationTypeQueriesEndpoints
         {
             var api = routeBuilder.MapGroup("identificationtypes");
 
-            api.MapGet("/getall", GetAllIdentificationTypes)
+            api.MapGet(string.Empty, GetAllIdentificationTypes)
             .WithName("GetAllIdentificationTypes");
+
+            api.MapGet("{id:guid}", GetIdentificationTypeById)
+            .WithName("GetIdentificationTypeById");
 
             api.RequireAuthorization([new AuthorizeAttribute
         {
@@ -22,6 +25,16 @@ public static class IdentificationTypeQueriesEndpoints
 
             return api;
         }
+    }
+
+    private static async Task<IResult> GetIdentificationTypeById(
+        [FromRoute] Guid id,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetIdentificationTypeByIdQuery(new(id));
+        var result = await sender.Send(query, cancellationToken);
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> GetAllIdentificationTypes(ISender sender, CancellationToken cancellationToken)

@@ -22,6 +22,7 @@ public class GetIdentificationTypesQueryHandler(
             return new GetIdentificationTypesResponse
             {
                 Data = identificationTypes,
+                Message = "Identification types retrieved successfully"
             };
         }
         catch (Exception ex)

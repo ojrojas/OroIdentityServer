@@ -4,10 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentity.Web.Client.Models;
 
-public class RoleClaimViewModel
+public class IdentificationTypeViewModel
 {
-    public string ClaimType { get;  set; }
-    public string ClaimValue { get;  set; }
-    public bool IsActive { get; set; } = true;
     public IdViewModel Id { get; set; }
+     public NameViewModel Name {get;set; }
+     public bool IsActive { get; set; }
 }

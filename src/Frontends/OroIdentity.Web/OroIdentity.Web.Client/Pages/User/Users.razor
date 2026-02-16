@@ -12,8 +12,7 @@
 <PageTitle>Users</PageTitle>
 
 <HeaderPagesComponent TitlePage="Users"
-Description="Manage your Users"
->
+Description="Manage your Users">
 <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToCreatePage">Create User</FluentButton>
 </HeaderPagesComponent>
 
@@ -22,7 +21,9 @@ Description="Manage your Users"
 
 <FluentDataGrid Items="users" Style="width:100%;">
     <TemplateColumn Title="Action">
-        <FluentButton OnClick="(() => RedirectEdit(context.UserName))" Appearance="Appearance.Accent">Edit</FluentButton>
+        <FluentButton 
+            OnClick="(() => RedirectEdit(context.Id.Value))" 
+            Appearance="Appearance.Accent">Edit</FluentButton>
     </TemplateColumn>
     <TemplateColumn Title="Name" SortBy="sortByName">
         @context.Name
@@ -60,8 +61,8 @@ Description="Manage your Users"
         NavigationManager.NavigateTo("/create-user");
     }
 
-    private void RedirectEdit(string userName)
+    private void RedirectEdit(Guid userId)
     {
-        NavigationManager.NavigateTo($"/users/{userName}");
+        NavigationManager.NavigateTo($"/users/{userId}");
     }
 }

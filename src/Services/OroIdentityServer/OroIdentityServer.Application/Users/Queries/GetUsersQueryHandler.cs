@@ -12,9 +12,21 @@ public class GetUsersQueryHandler(
     public async Task<GetUsersQueryResponse> HandleAsync(GetUsersQuery query, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling GetUsersQuery");
+        var data = await repository.GetAllUsersAsync(cancellationToken);
+        if(data == null || !data.Any())
+        {
+            logger.LogWarning("No users found in the repository");
+            return new GetUsersQueryResponse
+            {
+                Data = null,
+                StatusCode = (int)HttpStatusCode.NotFound,
+                Message = "No users found."
+            };
+        }
+
         GetUsersQueryResponse response = new()
         {
-            Data = await repository.GetAllUsersAsync(cancellationToken),
+            Data = data,
             StatusCode = (int)HttpStatusCode.OK,
             Message = "Users retrieved successfully."
         };
