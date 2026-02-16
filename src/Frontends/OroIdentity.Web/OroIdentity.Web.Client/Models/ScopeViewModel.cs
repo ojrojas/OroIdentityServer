@@ -7,9 +7,17 @@ namespace OroIdentity.Web.Client.Models;
 public class ScopeViewModel
 {
     /// <summary>
+    /// Id scope 
+    /// </summary>
+    public Guid Id { get; set; }
+    /// <summary>
     /// Name scope 
     /// </summary>
     public string Name { get; set; } = string.Empty;
+    /// <summary>
+    /// Description scope
+    /// </summary>
+    public string Description { get; set; } = string.Empty;
     /// <summary>
     /// Resources associated to scope
     /// </summary>

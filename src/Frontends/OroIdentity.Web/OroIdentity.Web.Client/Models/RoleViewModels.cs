@@ -9,10 +9,10 @@ public class RoleViewModel
     public IdViewModel RoleId {get;set;}
     public NameViewModel Name {get;set; }
     public bool IsActive {get;set;}
-    public IReadOnlyCollection<RoleClaimViewModel> Claims => _claims.AsReadOnly();
-    private readonly IList<RoleClaimViewModel> _claims = [];
+    public IReadOnlyCollection<IdentificationTypeViewModel> Claims => _claims.AsReadOnly();
+    private readonly IList<IdentificationTypeViewModel> _claims = [];
 
-    public void AddRoleClaimViewModel(RoleClaimViewModel roleClaim)
+    public void AddRoleClaimViewModel(IdentificationTypeViewModel roleClaim)
     {
         _claims.Add(roleClaim);
     }

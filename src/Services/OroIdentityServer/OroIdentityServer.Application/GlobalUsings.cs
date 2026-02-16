@@ -17,3 +17,4 @@ global using OroIdentityServer.Services.OroIdentityServer.Application.Queries;
 global using System.Globalization;
 global using System.Text.Json;
 global using Microsoft.IdentityModel.Tokens;
+global using System.Net;

@@ -13,6 +13,7 @@ public class UserViewModel
     /// </summary>
     [Required]
     public string Name { get; set; }
+    public IdViewModel? Id { get; set; }
     public string MiddleName { get; set; }
     [Required]
     public string LastName { get; set; }
@@ -23,9 +24,10 @@ public class UserViewModel
     [Required]
     public string Identification { get; set; }
     [Required]
-    public Guid IdentificationTypeId { get; set; }
+    public IdViewModel IdentificationTypeId { get; set; }
 
     public SecurityUserViewModel Security { get; set; } = new SecurityUserViewModel();
+    public IdViewModel SecurityUserId  { get; set; }
 }
 
 public class SecurityUserViewModel

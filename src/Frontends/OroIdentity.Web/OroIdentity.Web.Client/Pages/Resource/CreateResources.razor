@@ -1,8 +1,11 @@
 @page "/create-resource"
 @attribute [Authorize]
 
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
 
 @inject NavigationManager NavigationManager
+@inject IScopesService Service
 
 <PageTitle>Resources</PageTitle>
 
@@ -12,9 +15,23 @@
 
 <FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
 
+<FluentCard>
+    <FluentStack Orientation="Orientation.Vertical" Gap="1rem">
+        <FluentTextField Label="Name" @bind-Value="scope.Name" />
+        <FluentTextArea Label="Description" @bind-Value="scope.Description" />
+        <FluentButton Appearance="Appearance.Accent" OnClick="CreateScope">Create</FluentButton>
+    </FluentStack>
+</FluentCard>
 
+@code {
+    private ScopeViewModel scope = new();
 
-@code{
+    private async Task CreateScope()
+    {
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        await Service.CreateScopeAsync(scope, cts.Token);
+        NavigationManager.NavigateTo("/resources");
+    }
 
     private void RedirectToResources()
     {

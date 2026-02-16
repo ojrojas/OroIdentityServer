@@ -1,0 +1,60 @@
+@page "/resources/{scopeId:guid}"
+@attribute [Authorize]
+
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+
+@inject NavigationManager NavigationManager
+@inject IScopesService Service
+
+<PageTitle>Edit Resource</PageTitle>
+
+<HeaderPagesComponent TitlePage="Resources" Description="Manage your resources">
+    <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToResources">Back</FluentButton>
+</HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
+
+@if (scope != null)
+{
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" Gap="1rem">
+            <FluentTextField Label="Name" @bind-Value="scope.Name" />
+            <FluentTextArea Label="Description" @bind-Value="scope.Description" />
+            <FluentButton Appearance="Appearance.Accent" OnClick="UpdateScope">Update</FluentButton>
+        </FluentStack>
+    </FluentCard>
+}
+
+@code {
+    [Parameter]
+    public Guid ScopeId { get; set; }
+
+    private ScopeViewModel? scope;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadScope();
+    }
+
+    private async Task LoadScope()
+    {
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        scope = await Service.GetScopeByIdAsync(ScopeId.ToString(), cts.Token);
+    }
+
+    private async Task UpdateScope()
+    {
+        if (scope != null)
+        {
+            CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            await Service.UpdateScopeAsync(scope, cts.Token);
+            NavigationManager.NavigateTo("/resources");
+        }
+    }
+
+    private void RedirectToResources()
+    {
+        NavigationManager.NavigateTo("/resources");
+    }
+}

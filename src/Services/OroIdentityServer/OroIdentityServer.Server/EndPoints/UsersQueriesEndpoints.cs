@@ -15,13 +15,13 @@ public static class UsersQueriesEndpoints
             api.MapGet("/getuserinfo", GetUserInfo)
                 .WithName("GetUserInfo");
 
-            api.MapGet("/users", GetUsers)
+            api.MapGet(string.Empty, GetUsers)
                 .WithName("GetUsers");
 
             api.MapGet("/getuserbyemail/{email}", GetUserByEmail)
                 .WithName("GetUserByEmail");
 
-            api.MapGet("/getuserbyid/{id}", GetUserById)
+            api.MapGet("/{id:guid}", GetUserById)
                 .WithName("GetUserById");
 
             api.RequireAuthorization([new AuthorizeAttribute
@@ -32,7 +32,8 @@ public static class UsersQueriesEndpoints
         }
     }
 
-    private static async Task<Results<Ok<GetUserByIdQueryResponse>, BadRequest<string>, ProblemHttpResult>> GetUserById(
+    private static async Task<Results<Ok<GetUserByIdQueryResponse>, BadRequest<string>, ProblemHttpResult>> 
+    GetUserById(
            HttpContext context,
            [FromRoute] Guid id,
            [FromServices] ISender sender,
@@ -42,7 +43,8 @@ public static class UsersQueriesEndpoints
         return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(new(id)), cancellationToken));
     }
 
-    private static async Task<Results<Ok<GetUserByEmailResponse>, BadRequest<string>, ProblemHttpResult>> GetUserByEmail(
+    private static async Task<Results<Ok<GetUserByEmailResponse>, BadRequest<string>, ProblemHttpResult>> 
+    GetUserByEmail(
            HttpContext context,
            [FromRoute] string email,
            [FromServices] ISender sender,
@@ -52,7 +54,8 @@ public static class UsersQueriesEndpoints
         return TypedResults.Ok(await sender.Send(new GetUserByEmailQuery(email), cancellationToken));
     }
 
-    private static async Task<Results<Ok<GetUsersQueryResponse>, BadRequest<string>, ProblemHttpResult>> GetUsers(
+    private static async Task<Results<Ok<GetUsersQueryResponse>, BadRequest<string>, ProblemHttpResult>> 
+    GetUsers(
            HttpContext context,
            [FromServices] ISender sender,
            CancellationToken cancellationToken)
@@ -60,17 +63,31 @@ public static class UsersQueriesEndpoints
         return TypedResults.Ok(await sender.Send(new GetUsersQuery(), cancellationToken));
     }
 
-    private static async Task<Results<Ok<GetUserByIdQueryResponse>, BadRequest<string>, ProblemHttpResult>> GetUserInfo(
+    private static async Task<Results<Ok<GetUserByIdQueryResponse>, BadRequest<string>, ProblemHttpResult>> 
+    GetUserInfo(
            HttpContext context,
            [FromServices] ISender sender,
            CancellationToken cancellationToken
        )
     {
-        //    var result = await context.AuthenticateAsync(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
-        // var response = await services.GetUserByIdAsync(new(Guid.Parse(result.Principal.GetUserId())));
+        // Try to use the authenticated user available on the HttpContext.
+        // Prefer `NameIdentifier` claim, then `sub`, then `user_id`.
+        var principal = context.User;
+        if (principal?.Identity?.IsAuthenticated != true)
+        {
+            return TypedResults.Problem("User is not authenticated", statusCode: StatusCodes.Status401Unauthorized);
+        }
 
-        // return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(id), cancellationToken));
-        throw new NotImplementedException();
+        var idClaim = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                      ?? principal.FindFirst("sub")?.Value
+                      ?? principal.FindFirst("user_id")?.Value;
+
+        if (string.IsNullOrWhiteSpace(idClaim) || !Guid.TryParse(idClaim, out var userGuid))
+        {
+            return TypedResults.BadRequest("Invalid or missing user identifier in claims.");
+        }
+
+        return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(new(userGuid)), cancellationToken));
 
     }
 }

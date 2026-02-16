@@ -11,13 +11,13 @@ public static class ScopeCommandsEndpoints
     {
         var api = routeBuilder.MapGroup("scopes");
 
-        api.MapPost("/create", CreateScope)
+        api.MapPost(string.Empty, CreateScope)
             .WithName("CreateScope");
 
-        api.MapPut("/update", UpdateScope)
+        api.MapPut(string.Empty, UpdateScope)
             .WithName("UpdateScope");
 
-        api.MapDelete("/delete/{name}", DeleteScope)
+        api.MapDelete("/{name}", DeleteScope)
             .WithName("DeleteScope");
 
  api.RequireAuthorization([new AuthorizeAttribute
