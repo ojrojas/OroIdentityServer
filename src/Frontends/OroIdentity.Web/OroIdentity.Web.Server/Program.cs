@@ -116,6 +116,7 @@ app.MapApplicationEndpointsV1().RequireAuthorization();
 app.MapRolesEndpointsV1().RequireAuthorization();
 app.MapScopesEndpointsV1().RequireAuthorization();
 app.MapUsersEndpointsV1().RequireAuthorization();
+app.MapIdentificationTypesEndpointsV1().RequireAuthorization();
 
 app.MapDefaultEndpoints();
 

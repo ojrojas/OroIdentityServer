@@ -76,7 +76,6 @@ public class UsersService(
             email = user.Email,
             identification = user.Identification,
             identificationTypeId = user.IdentificationTypeId,
-            password = user.Security.PasswordHash
         };
 
         await httpClient.PutAsJsonAsync("users", updateUser, options, cancellationToken);

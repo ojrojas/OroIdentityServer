@@ -17,11 +17,11 @@ internal sealed class IdentificationTypesClientService(
         return response;
     }
 
-    public async Task<IdentificationTypeViewModel> GetIdentificationTypeByIdAsync(string id, CancellationToken cancellationToken)
+    public async Task<BaseResponseViewModel<IdentificationTypeViewModel>?> GetIdentificationTypeByIdAsync(string id, CancellationToken cancellationToken)
     {
         logger.LogInformation("Retrieving identification type with ID: {Id}", id);
-        return await httpClient.GetFromJsonAsync<IdentificationTypeViewModel>($"{ROUTE}/{id}", cancellationToken)
-               ?? new IdentificationTypeViewModel() { Id = IdViewModel.Empty(), Name = NameViewModel.Create(string.Empty) };
+        return await httpClient.GetFromJsonAsync<BaseResponseViewModel<IdentificationTypeViewModel>>($"{ROUTE}/{id}", cancellationToken);
+              
     }
 
     public async Task CreateIdentificationTypeAsync(IdentificationTypeViewModel identificationType, CancellationToken cancellationToken)
@@ -44,4 +44,6 @@ internal sealed class IdentificationTypesClientService(
         await httpClient.DeleteAsync($"{ROUTE}/{id}", cancellationToken);
         logger.LogInformation("Identification type deleted: {Id}", id);
     }
+
+   
 }
