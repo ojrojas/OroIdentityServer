@@ -7,6 +7,7 @@
 @inject NavigationManager NavigationManager
 @inject IIdentificationTypeService IdentificationTypeService
 @inject IUsersService Service
+@inject IToastService ToastService
 
 <PageTitle>Edit User</PageTitle>
 
@@ -79,6 +80,7 @@
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             user.IdentificationTypeId = IdViewModel.New(id);
             await Service.UpdateUserAsync(user, cts.Token);
+            ToastService.ShowSuccess("User updated successfully");
             NavigationManager.NavigateTo("/users");
         }
     }

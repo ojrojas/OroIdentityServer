@@ -35,11 +35,11 @@ public class IdentificationTypesService(
         }
     }
 
-    public async Task<IdentificationTypeViewModel> GetIdentificationTypeByIdAsync(string id, CancellationToken cancellationToken)
+    public async Task<BaseResponseViewModel<IdentificationTypeViewModel>> GetIdentificationTypeByIdAsync(string id, CancellationToken cancellationToken)
     {
         var response = await httpClient.GetFromJsonAsync<BaseResponseViewModel<IdentificationTypeViewModel>>($"identificationtypes/{id}", cancellationToken) ?? throw new Exception("Identification type not found");
         response.Message = "Identification type retrieved successfully";
-        return response.Data;
+        return response;
     }
 
     public async Task CreateIdentificationTypeAsync(IdentificationTypeViewModel identificationType, CancellationToken cancellationToken)
