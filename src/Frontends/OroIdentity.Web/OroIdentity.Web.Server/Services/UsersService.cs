@@ -30,6 +30,7 @@ public class UsersService(
             identificationTypeId = user.IdentificationTypeId,
             password = user.Security.PasswordHash
         };
+
         await httpClient.PostAsJsonAsync("users", newUser, options, cancellationToken);
     }
 
@@ -69,6 +70,8 @@ public class UsersService(
     {
         var updateUser = new
         {
+            userId = user.Id,
+            id = user.Id,
             userName = user.UserName,
             name = user.Name,
             middleName = user.MiddleName,

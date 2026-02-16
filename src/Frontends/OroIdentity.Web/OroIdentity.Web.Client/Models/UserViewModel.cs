@@ -8,12 +8,12 @@ namespace OroIdentity.Web.Client.Models;
 
 public class UserViewModel
 {
+    public IdViewModel? Id { get; set; }
     /// <summary>
     /// Name user
     /// </summary>
     [Required]
     public string Name { get; set; }
-    public IdViewModel? Id { get; set; }
     public string MiddleName { get; set; }
     [Required]
     public string LastName { get; set; }
