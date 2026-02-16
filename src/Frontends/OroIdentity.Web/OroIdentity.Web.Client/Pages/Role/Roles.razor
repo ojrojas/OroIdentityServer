@@ -19,11 +19,11 @@
     <TemplateColumn Title="Action">
         <FluentButton OnClick="(() => RedirectEdit(context.RoleId.Value))" Appearance="Appearance.Accent">Edit
         </FluentButton>
-    </TemplateColumn>
-    <TemplateColumn SortBy="sortByName">
+    </TemplateColumn >
+    <TemplateColumn Title="Name" SortBy="sortByName">
         @context.Name.Value
     </TemplateColumn>
-    <TemplateColumn>
+    <TemplateColumn Title="Active">
         @context.IsActive
     </TemplateColumn>
 </FluentDataGrid>

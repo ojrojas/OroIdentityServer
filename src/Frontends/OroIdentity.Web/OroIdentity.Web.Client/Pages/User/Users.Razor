@@ -24,13 +24,13 @@ Description="Manage your Users"
     <TemplateColumn Title="Action">
         <FluentButton OnClick="(() => RedirectEdit(context.UserName))" Appearance="Appearance.Accent">Edit</FluentButton>
     </TemplateColumn>
-    <TemplateColumn SortBy="sortByName">
+    <TemplateColumn Title="Name" SortBy="sortByName">
         @context.Name
     </TemplateColumn>
-    <TemplateColumn>
+    <TemplateColumn Title="Last Name">
         @context.LastName
     </TemplateColumn>
-    <TemplateColumn>
+    <TemplateColumn Title="Email">
         @context.Email
     </TemplateColumn>
 </FluentDataGrid>

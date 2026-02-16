@@ -4,13 +4,11 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentity.Web.Client.Models;
 
-public class IdViewModel
+public class IdViewModel(Guid value)
 {
-    public Guid Value { get; set; }
+    public Guid Value { get; set; } = value;
 
-    public IdViewModel(Guid value) => Value = value;
-
-    public static IdViewModel New() => new(Guid.CreateVersion7());
+    public static IdViewModel New(Guid id) => new(id);
     public static IdViewModel Empty() => new(Guid.Empty);
 
 }

@@ -20,10 +20,10 @@
     <TemplateColumn Title="Action">
         <FluentButton OnClick="(() => RedirectEdit(context.Id))" Appearance="Appearance.Accent">Edit</FluentButton>
     </TemplateColumn>
-    <TemplateColumn SortBy="sortByName">
+    <TemplateColumn Title="Name" SortBy="sortByName">
         @context.Name
     </TemplateColumn>
-    <TemplateColumn>
+    <TemplateColumn Title="Description">
         @context.Description
     </TemplateColumn>
 </FluentDataGrid>

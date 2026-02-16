@@ -23,7 +23,10 @@
         <FluentTextField Label="User Name" @bind-Value="user.UserName" />
         <FluentTextField Label="Email" @bind-Value="user.Email" />
         <FluentTextField Label="Identification" @bind-Value="user.Identification" />
-        <FluentTextField Label="Identification Type Id" @bind-Value="identificationTypeIdString" />
+        <FluentSelect 
+            Label="Identification Type Id" 
+            @bind-Value="identificationTypeIdString" 
+            Items="identificationTypes" />
         <FluentTextField Label="Password" @bind-Value="user.Security.PasswordHash" Type="password" />
         <FluentButton Appearance="Appearance.Accent" OnClick="CreateUserAsync">Create</FluentButton>
     </FluentStack>
@@ -33,12 +36,15 @@
     private UserViewModel user = new();
     private string identificationTypeIdString = "";
 
+    private Dictionary<string, string> identificationTypes = new();
+
     private async Task CreateUserAsync()
     {
         if (Guid.TryParse(identificationTypeIdString, out var id))
         {
-            user.IdentificationTypeId = id;
+            user.IdentificationTypeId = IdViewModel.New(id);
         }
+        
         CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
         await Service.CreateUserAsync(user, cts.Token);
         NavigationManager.NavigateTo("/users");

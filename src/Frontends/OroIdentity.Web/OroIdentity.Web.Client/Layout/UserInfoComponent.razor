@@ -8,7 +8,7 @@ See the LICENSE file in the project root for details. *@
 
 <AuthorizeView>
     <FluentPersona 
-    Name="@context.User.Identity?.Name" 
+    Name="@context.User.Claims.FirstOrDefault(c => c.Type == "name")?.Value" 
     Status="PresenceStatus.Available"
         StatusSize="PresenceBadgeSize.Small"
         TextPosition="TextPosition.Start"

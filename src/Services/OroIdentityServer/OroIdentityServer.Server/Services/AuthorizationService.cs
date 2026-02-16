@@ -106,10 +106,10 @@ public class AuthorizationService(
 
                 identity.SetClaim(Claims.Subject, user?.Data?.Id.Value.ToString())
                         .SetClaim(Claims.Email, user?.Data?.Email)
-                        .SetClaim(Claims.Name, user?.Data?.UserName)
+                        .SetClaim(Claims.Name, $"{user?.Data?.Name} {user?.Data?.LastName}")
                         .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
                         .SetClaims(Claims.Role,
-                            user.Data.Roles.Select(r => r.RoleId.Value.ToString()).ToImmutableArray());
+                            [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
 
                 identity.SetScopes(request.GetScopes());
                 identity.SetResources(
@@ -186,12 +186,12 @@ public class AuthorizationService(
 
             // Override the user claims present in the principal in case they
             // changed since the authorization code/refresh token was issued.
-            identity.SetClaim(Claims.Subject, user.Data.Id.Value.ToString())
-                .SetClaim(Claims.Email, user.Data.Email)
-                .SetClaim(Claims.Name, user.Data.UserName)
-                .SetClaim(Claims.PreferredUsername, user.Data.UserName)
-                .SetClaims(Claims.Role, user.Data.Roles.Select(r => r.RoleId.Value.ToString()).ToImmutableArray())
-                ;
+            identity.SetClaim(Claims.Subject, user?.Data?.Id.Value.ToString())
+                        .SetClaim(Claims.Email, user?.Data?.Email)
+                        .SetClaim(Claims.Name, $"{user?.Data?.Name} {user?.Data?.LastName}")
+                        .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
+                        .SetClaims(Claims.Role,
+                            [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
 
             identity.SetDestinations(GetDestination.GetDestinations);
 
@@ -253,11 +253,11 @@ public class AuthorizationService(
         roleType: Claims.Role);
 
         identity.SetClaim(Claims.Subject, user?.Data?.Id.Value.ToString())
-                .SetClaim(Claims.Email, user?.Data?.Email)
-                .SetClaim(Claims.Name, user?.Data?.UserName)
-                .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
-                .SetClaims(Claims.Role, user.Data.Roles.Select(r => r.RoleId.Value.ToString()).ToImmutableArray())
-                ;
+                        .SetClaim(Claims.Email, user?.Data?.Email)
+                        .SetClaim(Claims.Name, $"{user?.Data?.Name} {user?.Data?.LastName}")
+                        .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
+                        .SetClaims(Claims.Role,
+                            [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
 
         identity.SetScopes(new[]
         {
@@ -324,11 +324,12 @@ public class AuthorizationService(
             [Claims.Email] = user?.Data?.Email,
             [Claims.Role] = user.Data.Roles.Select(r => r.RoleId.Value.ToString()).ToImmutableArray(),
         };
+        
+        claims[Claims.Name] = $"{user?.Data?.Name} {user?.Data?.LastName}";
 
         if (user?.Data?.UserName is not null)
         {
-            claims[Claims.PreferredUsername] = user?.Data?.UserName;
-            claims[Claims.Name] = user?.Data?.UserName;
+            claims[Claims.PreferredUsername] = user?.Data?.Name ?? user?.Data?.UserName;
         }
 
         return TypedResults.Ok(claims);

@@ -57,7 +57,7 @@
     {
         if (user != null && Guid.TryParse(identificationTypeIdString, out var id))
         {
-            user.IdentificationTypeId = id;
+            user.IdentificationTypeId = IdViewModel.New(id);
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             await Service.UpdateUserAsync(user, cts.Token);
             NavigationManager.NavigateTo("/users");
