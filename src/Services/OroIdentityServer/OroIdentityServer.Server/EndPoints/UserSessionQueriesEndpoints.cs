@@ -1,0 +1,33 @@
+// OroIdentityServer
+// Copyright (C) 2026 Oscar Rojas
+// Licensed under the GNU AGPL v3.0 or later.
+// See the LICENSE file in the project root for details.
+namespace OroIdentityServer.Services.OroIdentityServer.Server.Endpoints;
+
+public static class UserSessionQueriesEndpoints
+{
+    public static RouteGroupBuilder MapUserSessionQueriesEndpointsV1(this IEndpointRouteBuilder routeBuilder)
+    {
+        var api = routeBuilder.MapGroup("users");
+
+        api.MapGet("/{id:guid}/sessions", GetSessionsByUser)
+            .WithName("GetUserSessionsByUser");
+
+        api.RequireAuthorization([new AuthorizeAttribute
+        {
+            AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme
+        }]);
+
+        return api;
+    }
+
+    private static async Task<Results<Ok<IEnumerable<UserSession>>, BadRequest<string>, ProblemHttpResult>> GetSessionsByUser(
+        HttpContext context,
+        [FromRoute] Guid id,
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetUserSessionsByUserQuery(new UserId(id)), cancellationToken);
+        return TypedResults.Ok(result);
+    }
+}

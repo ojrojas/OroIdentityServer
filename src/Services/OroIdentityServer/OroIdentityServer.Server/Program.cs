@@ -143,4 +143,9 @@ app.MapApplicationQueriesEndpointsV1()
 app.MapApplicationCommandsEndpointsV1()
 .WithTags("ApplicationCommands");
 
+app.MapUserSessionQueriesEndpointsV1()
+.WithTags("UserSessionQueries");
+app.MapUserSessionCommandsEndpointsV1()
+.WithTags("UserSessionCommands");
+
 app.Run();
