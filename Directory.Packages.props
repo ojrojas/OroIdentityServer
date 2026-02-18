@@ -14,26 +14,26 @@
     <PackageVersion Include="Aspire.Hosting.Seq" Version="13.1.1" />
     <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.1" />
     <PackageVersion Include="Aspire.Seq" Version="$(AspireVersion)" />
-    <PackageVersion Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageVersion Include="BCrypt.Net-Next" Version="4.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.2" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="$(AspnetVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="$(AspnetVersion)" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="$(AspnetVersion)">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(AspnetVersion)">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(AspnetVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(AspnetVersion)" />
-    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Emoji" Version="4.13.2" />
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Emoji" Version="4.14.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="OroKernel.Shared" Version="1.0.0" />
     <PackageVersion Include="OroLoggers" Version="1.0.0" />
@@ -74,17 +74,17 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Mix -->
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
   </ItemGroup>
   <!-- Own -->
   <ItemGroup>
     <PackageVersion Include="OroCQRS" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" PrivateAssets="all" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" PrivateAssets="all" />
-    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.13.2" />
-    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.13.2" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.3" PrivateAssets="all" />
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.14.0" />
   </ItemGroup>
 </Project>
