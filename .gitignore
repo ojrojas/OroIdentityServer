@@ -486,3 +486,7 @@ $RECYCLE.BIN/
 .DS_Store
 DS_Store
 nupkgs
+
+# pnpm
+pnpm-lock.yaml
+pnpm-workspace.yaml
