@@ -200,11 +200,62 @@ public class AuthorizationService(
         }
         if (request.IsPasswordGrantType())
         {
+            // Password grant should not create an authentication cookie; issue tokens only.
             ArgumentNullException.ThrowIfNull(request.Username);
             ArgumentNullException.ThrowIfNull(request.Password);
 
-            var loginRequest = new LoginRequest(request.Username, request.Password, false);
-            return await LoginAsync(requested, loginRequest, cancellationToken);
+            // Ensure the user can login
+            if (!await sender.Send(new ValidateUserToLoginQuery(request.Username), cancellationToken))
+            {
+                return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user cannot log in to the application."
+                }), [OpenIddictServerAspNetCoreConstants.AuthenticationScheme]);
+            }
+
+            var user = await sender.Send(new GetUserByEmailQuery(request.Username), cancellationToken);
+            var securityUser = await sender.Send(new ValidateUserPasswordQuery(request.Username, request.Password), cancellationToken);
+
+            if (user == null || !securityUser.Data)
+            {
+                return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The username/password couple is invalid."
+                }), [OpenIddictServerAspNetCoreConstants.AuthenticationScheme]);
+            }
+
+            // Build identity for token issuance (no cookie)
+            var identity = new ClaimsIdentity(
+                authenticationType: TokenValidationParameters.DefaultAuthenticationType,
+                nameType: Claims.Name,
+                roleType: Claims.Role);
+
+            identity.SetClaim(Claims.Subject, user?.Data?.Id.Value.ToString())
+                    .SetClaim(Claims.Email, user?.Data?.Email)
+                    .SetClaim(Claims.Name, $"{user?.Data?.Name} {user?.Data?.LastName}")
+                    .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
+                    .SetClaims(Claims.Role, [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
+
+            identity.SetScopes(request.GetScopes());
+            identity.SetDestinations(GetDestination.GetDestinations);
+
+            // create session record (ip, country, start) but don't create cookie
+            try
+            {
+                var ip = requested.Context.Connection.RemoteIpAddress?.ToString() ??
+                         requested.Context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "unknown";
+                var country = "unknown";
+                await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country), cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to create session record for user {UserId}", user?.Data?.Id);
+            }
+
+            // Return SignIn result for OpenIddict to issue tokens (no cookie scheme)
+            return new LoginResponse(ResultTypes.SignIn, new ClaimsPrincipal(identity), new(), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
         }
 
         throw new InvalidOperationException("The specified grant type is not supported.");

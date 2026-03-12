@@ -47,6 +47,7 @@ public class OroIdentityAppContext(
         builder.ApplyConfiguration(new UserRoleEntityConfiguration());
         builder.ApplyConfiguration(new SecurityUserEntityConfiguration());
         builder.ApplyConfiguration(new TenantEntityConfiguration());
+        builder.ApplyConfiguration(new ApplicationTenantEntityConfiguration());
         builder.ApplyConfiguration(new PermissionEntityConfiguration());
         builder.ApplyConfiguration(new RolePermissionEntityConfiguration());
         builder.ApplyConfiguration(new SessionEntityConfiguration());
