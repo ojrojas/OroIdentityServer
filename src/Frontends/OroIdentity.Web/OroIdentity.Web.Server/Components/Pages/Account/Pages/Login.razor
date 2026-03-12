@@ -9,6 +9,7 @@
 @using Microsoft.AspNetCore.Identity
 @using OpenIddict.Abstractions
 @using OpenIddict.Validation.AspNetCore
+@using OpenIddict.Client.AspNetCore
 @using OroIdentity.Web.Server.Components.Pages.Account
 @using OroIdentity.Web.Server.Models
 @using OroIdentity.Web.Server.Services
@@ -87,8 +88,9 @@
 
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
-            // Clear the existing external cookie to ensure a clean login process
+            // Clear the existing external cookies to ensure a clean login process
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
         }
     }
 
@@ -123,23 +125,14 @@
 
             if (tokenData?.AccessToken != null)
             {
-                // Sign in user
-                var claims = new List<System.Security.Claims.Claim>
-                {
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, Input.Email)
-                };
-
-                var identity = new System.Security.Claims.ClaimsIdentity(claims,
-                Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
-                await
-                HttpContext.SignInAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme,
-                new System.Security.Claims.ClaimsPrincipal(identity));
-
                 // Reset failed attempts on success
                 HttpContext.Session.SetInt32("failedAttempts", 0);
 
-                // Store token in session for later use
+                // Store token in session for later use (do not create an auth cookie here)
                 HttpContext.Session.SetString("access_token", tokenData.AccessToken);
+
+                // Ensure any residual OpenIddict client cookie is cleared
+                await HttpContext.SignOutAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
 
                 NavigationManager.NavigateTo(ReturnUrl ?? "/");
             }

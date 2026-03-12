@@ -35,4 +35,19 @@ public class ApplicationTenantRepository(
             await repository.UpdateAsync(existing, cancellationToken);
         }
     }
+
+    // Additional helper: ensure mapping exists for given client
+    public async Task EnsureMappingAsync(string clientId, TenantId tenantId, CancellationToken cancellationToken)
+    {
+        var existing = await repository.CurrentContext.FirstOrDefaultAsync(at => at.ClientId == clientId, cancellationToken: cancellationToken);
+        if (existing == null)
+        {
+            await repository.AddAsync(new ApplicationTenant(clientId, tenantId), cancellationToken);
+        }
+        else if (!existing.TenantId.Equals(tenantId))
+        {
+            existing.TenantId = tenantId;
+            await repository.UpdateAsync(existing, cancellationToken);
+        }
+    }
 }

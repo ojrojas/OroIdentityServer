@@ -24,6 +24,10 @@ public class SessionEntityConfiguration : IEntityTypeConfiguration<Session>
             .HasForeignKey(s => s.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Property(s => s.TenantId)
+            .HasConversion(id => id.Value, value => new TenantId(value))
+            .HasColumnName("TenantId");
+
         builder.Property(s => s.IpAddress).HasMaxLength(50);
         builder.Property(s => s.Country).HasMaxLength(100);
         builder.Property(s => s.StartedAtUtc).IsRequired();

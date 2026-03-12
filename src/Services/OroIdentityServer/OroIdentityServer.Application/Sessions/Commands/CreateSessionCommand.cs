@@ -10,7 +10,8 @@ namespace OroIdentityServer.Services.OroIdentityServer.Application.Commands;
 public record CreateSessionCommand(
     UserId UserId,
     string IpAddress,
-    string Country
+    string Country,
+    TenantId TenantId
 ) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();

@@ -2,9 +2,13 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-namespace OroIdentityServer.Services.OroIdentityServer.Server.Endpoints;
-
 using Microsoft.AspNetCore.Http.HttpResults;
+using OroIdentityServer.OroIdentityServer.Infraestructure.Interfaces;
+using OroIdentityServer.Services.OroIdentityServer.Core.Models;
+using OpenIddict.Abstractions;
+using OroBuildingBlocks.ServiceDefaults;
+
+namespace OroIdentityServer.Services.OroIdentityServer.Server.Endpoints;
 
 public static class SessionCommandsEndpoints
 {
@@ -27,8 +31,42 @@ public static class SessionCommandsEndpoints
         HttpContext context,
         [FromRoute] Guid sessionId,
         [FromServices] ISender sender,
+        [FromServices] ISessionRepository sessionRepository,
+        [FromServices] IOpenIddictAuthorizationManager authorizationManager,
+        [FromServices] IOpenIddictTokenManager tokenManager,
         CancellationToken cancellationToken)
     {
+        var session = await sessionRepository.GetSessionByIdAsync(new SessionId(sessionId), cancellationToken);
+        if (session == null)
+        {
+            return TypedResults.BadRequest("Session not found");
+        }
+
+        var subject = session.UserId.Value.ToString();
+
+        try
+        {
+            // Revoke authorizations for this subject
+            await authorizationManager.RevokeAsync(
+                subject: subject,
+                client: null,
+                status: Statuses.Valid,
+                type: null,
+                cancellationToken: cancellationToken);
+
+            // Revoke tokens for this subject (best-effort)
+            await tokenManager.RevokeAsync(
+                subject: subject,
+                client: null,
+                status: Statuses.Valid,
+                type: null,
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Log and continue with marking session ended
+        }
+
         await sender.Send(new TerminateSessionCommand(new(sessionId)), cancellationToken);
         return TypedResults.Ok();
     }

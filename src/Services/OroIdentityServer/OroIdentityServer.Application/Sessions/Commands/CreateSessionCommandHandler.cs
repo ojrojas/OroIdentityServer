@@ -16,7 +16,7 @@ public class CreateSessionCommandHandler(
 
         try
         {
-            var session = Session.Create(command.UserId, command.IpAddress, command.Country);
+            var session = Session.Create(command.UserId, command.IpAddress, command.Country, command.TenantId);
             await sessionRepository.AddSessionAsync(session, cancellationToken);
             logger.LogInformation("Successfully created session with Id: {SessionId}", session.Id);
         }

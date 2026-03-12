@@ -5,6 +5,7 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Primitives;
 using OroBuildingBlocks.ServiceDefaults;
+using OroIdentityServer.OroIdentityServer.Infraestructure.Interfaces;
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Services;
 
 public class AuthorizationService(
@@ -13,6 +14,7 @@ public class AuthorizationService(
     IOpenIddictAuthorizationManager authorizationManager,
     IOpenIddictScopeManager scopeManager,
     IConfiguration configuration,
+    IApplicationTenantRepository applicationTenantRepository,
     ISender sender) : IAuthorizationService
 {
     public async Task<LoginResponse> AuthorizedAsync(SimpleRequest requested, CancellationToken cancellationToken = default)
@@ -74,6 +76,26 @@ public class AuthorizationService(
         var application = await applicationManager.FindByClientIdAsync(request.ClientId!, cancellationToken: cancellationToken) ??
             throw new InvalidOperationException("Details concerning the calling client application cannot be found.");
 
+        // Validate that the user has a tenant assigned
+        var mappedTenant = await applicationTenantRepository.GetTenantByClientIdAsync(request.ClientId!, cancellationToken);
+        if (user?.Data?.TenantId == null)
+        {
+            return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
+            {
+                [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user does not belong to a tenant."
+            }), [CookieAuthenticationDefaults.AuthenticationScheme]);
+        }
+
+        if (mappedTenant != null && !mappedTenant.Equals(user.Data.TenantId))
+        {
+            return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
+            {
+                [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The client application is not authorized for the user's tenant."
+            }), [CookieAuthenticationDefaults.AuthenticationScheme]);
+        }
+
         var authorizations = await authorizationManager.FindAsync(
             subject: user.Data?.Id.Value.ToString(),
             client: await applicationManager.GetIdAsync(application, cancellationToken),
@@ -110,6 +132,9 @@ public class AuthorizationService(
                         .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
                         .SetClaims(Claims.Role,
                             [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
+
+                // Add tenant claim so downstream services can rely on it
+                identity.SetClaim("tenant_id", user?.Data?.TenantId?.Value.ToString());
 
                 identity.SetScopes(request.GetScopes());
                 identity.SetResources(
@@ -193,6 +218,9 @@ public class AuthorizationService(
                         .SetClaims(Claims.Role,
                             [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
 
+            // Add tenant claim
+            identity.SetClaim("tenant_id", user?.Data?.TenantId?.Value.ToString());
+
             identity.SetDestinations(GetDestination.GetDestinations);
 
             // Returning a SignInResult will ask OpenIddict to issue the appropriate access/identity tokens.
@@ -211,7 +239,7 @@ public class AuthorizationService(
                 {
                     [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
                     [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user cannot log in to the application."
-                }), [OpenIddictServerAspNetCoreConstants.AuthenticationScheme]);
+                }), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
             }
 
             var user = await sender.Send(new GetUserByEmailQuery(request.Username), cancellationToken);
@@ -223,7 +251,7 @@ public class AuthorizationService(
                 {
                     [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
                     [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The username/password couple is invalid."
-                }), [OpenIddictServerAspNetCoreConstants.AuthenticationScheme]);
+                }), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
             }
 
             // Build identity for token issuance (no cookie)
@@ -247,7 +275,7 @@ public class AuthorizationService(
                 var ip = requested.Context.Connection.RemoteIpAddress?.ToString() ??
                          requested.Context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "unknown";
                 var country = "unknown";
-                await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country), cancellationToken);
+                await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country, user.Data!.TenantId), cancellationToken);
             }
             catch (Exception ex)
             {
@@ -311,6 +339,9 @@ public class AuthorizationService(
                         .SetClaims(Claims.Role,
                             [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
 
+        // Add tenant claim
+        identity.SetClaim("tenant_id", user?.Data?.TenantId?.Value.ToString());
+
         identity.SetScopes(new[]
         {
             Scopes.OpenId,
@@ -327,7 +358,7 @@ public class AuthorizationService(
             var ip = requested.Context.Connection.RemoteIpAddress?.ToString() ??
                      requested.Context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "unknown";
             var country = "unknown";
-            await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country), cancellationToken);
+            await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country, user.Data!.TenantId), cancellationToken);
         }
         catch (Exception ex)
         {
