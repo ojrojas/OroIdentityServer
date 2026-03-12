@@ -80,8 +80,9 @@ var passwordHasher = service.GetRequiredService<IPasswordHasher>();
 
 ArgumentNullException.ThrowIfNull(context);
 // Console.WriteLine("Deleting database...");
-await context.Database.EnsureDeletedAsync(); // Disabled: use migrations instead to preserve DB during debug
+// await context.Database.EnsureDeletedAsync(); // Disabled: use migrations instead to preserve DB during debug
 Console.WriteLine("Applying pending migrations (if any)...");
+await context.Database.EnsureCreatedAsync();
 await context.Database.MigrateAsync();
 Console.WriteLine("Database migrated successfully.");
 Console.WriteLine($"Database path: {context.Database.GetDbConnection().Database}");
