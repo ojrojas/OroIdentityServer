@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
 
 namespace OroIdentity.Web.Server.Components.Pages.Account
 {
@@ -44,7 +45,17 @@ namespace OroIdentity.Web.Server.Components.Pages.Account
         [DoesNotReturn]
         public void RedirectToWithStatus(string uri, string message, HttpContext context)
         {
-            context.Response.Cookies.Append(StatusCookieName, message, StatusCookieBuilder.Build(context));
+            if (context?.Session != null)
+            {
+                context.Session.SetString(StatusCookieName, message);
+            }
+            else
+            {
+                // Fallback to cookie when session is not available
+                context.Response.Cookies.Delete(StatusCookieName);
+                context.Response.Cookies.Append(StatusCookieName, message, StatusCookieBuilder.Build(context));
+            }
+
             RedirectTo(uri);
         }
 

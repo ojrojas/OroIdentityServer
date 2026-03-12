@@ -19,9 +19,20 @@
 
     protected override void OnInitialized()
     {
-        messageFromCookie = HttpContext.Request.Cookies[IdentityRedirectManager.StatusCookieName];
+        string? sessionMessage = null;
 
-        if (messageFromCookie is not null)
+        if (HttpContext?.Session != null)
+        {
+            if (HttpContext.Session.TryGetValue(IdentityRedirectManager.StatusCookieName, out var bytes) && bytes?.Length > 0)
+            {
+                sessionMessage = System.Text.Encoding.UTF8.GetString(bytes);
+                HttpContext.Session.Remove(IdentityRedirectManager.StatusCookieName);
+            }
+        }
+
+        messageFromCookie = sessionMessage ?? HttpContext.Request.Cookies[IdentityRedirectManager.StatusCookieName];
+
+        if (messageFromCookie is not null && HttpContext?.Session == null)
         {
             HttpContext.Response.Cookies.Delete(IdentityRedirectManager.StatusCookieName);
         }
