@@ -9,6 +9,7 @@ namespace OroIdentity.Web.Server.Components.Pages.Account
 
         private static readonly CookieBuilder StatusCookieBuilder = new()
         {
+            Path = "/",
             SameSite = SameSiteMode.Strict,
             HttpOnly = true,
             IsEssential = true,

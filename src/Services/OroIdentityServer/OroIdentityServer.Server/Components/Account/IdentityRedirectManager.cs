@@ -8,6 +8,7 @@ internal sealed class IdentityRedirectManager(NavigationManager navigationManage
 
     private static readonly CookieBuilder StatusCookieBuilder = new()
     {
+        Path = "/",
         SameSite = SameSiteMode.Strict,
         HttpOnly = true,
         IsEssential = true,
