@@ -28,6 +28,10 @@ public class SessionEntityConfiguration : IEntityTypeConfiguration<Session>
             .HasConversion(id => id.Value, value => new TenantId(value))
             .HasColumnName("TenantId");
 
+        builder.Property(s => s.AuthorizationId)
+            .HasMaxLength(200)
+            .HasColumnName("AuthorizationId");
+
         builder.Property(s => s.IpAddress).HasMaxLength(50);
         builder.Property(s => s.Country).HasMaxLength(100);
         builder.Property(s => s.StartedAtUtc).IsRequired();

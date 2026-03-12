@@ -7,6 +7,7 @@ using OroIdentityServer.OroIdentityServer.Infraestructure.Interfaces;
 using OroIdentityServer.Services.OroIdentityServer.Core.Models;
 using OpenIddict.Abstractions;
 using OroBuildingBlocks.ServiceDefaults;
+using System.Reflection;
 
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Endpoints;
 
@@ -42,27 +43,93 @@ public static class SessionCommandsEndpoints
             return TypedResults.BadRequest("Session not found");
         }
 
-        var subject = session.UserId.Value.ToString();
-
         try
         {
-            // Revoke authorizations for this subject
-            await authorizationManager.RevokeAsync(
-                subject: subject,
-                client: null,
-                status: Statuses.Valid,
-                type: null,
-                cancellationToken: cancellationToken);
+            if (!string.IsNullOrEmpty(session.AuthorizationId))
+            {
+                // Attempt to find and invoke OpenIddict extension methods (RevokeByAuthorizationIdAsync) via reflection.
+                bool revoked = false;
 
-            // Revoke tokens for this subject (best-effort)
-            await tokenManager.RevokeAsync(
-                subject: subject,
-                client: null,
-                status: Statuses.Valid,
-                type: null,
-                cancellationToken: cancellationToken);
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    foreach (var type in asm.GetTypes())
+                    {
+                        var method = type.GetMethod("RevokeByAuthorizationIdAsync", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                        if (method != null)
+                        {
+                            var parameters = method.GetParameters();
+                            if (parameters.Length >= 2 && parameters[0].ParameterType.IsAssignableFrom(authorizationManager.GetType()) && parameters[1].ParameterType == typeof(string))
+                            {
+                                var task = (Task)method.Invoke(null, new object[] { authorizationManager, session.AuthorizationId, cancellationToken });
+                                await task;
+                                revoked = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (revoked) break;
+                }
+
+                bool tokensRevoked = false;
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    foreach (var type in asm.GetTypes())
+                    {
+                        var method = type.GetMethod("RevokeByAuthorizationIdAsync", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                        if (method != null)
+                        {
+                            var parameters = method.GetParameters();
+                            if (parameters.Length >= 2 && parameters[0].ParameterType.IsAssignableFrom(tokenManager.GetType()) && parameters[1].ParameterType == typeof(string))
+                            {
+                                var task = (Task)method.Invoke(null, new object[] { tokenManager, session.AuthorizationId, cancellationToken });
+                                await task;
+                                tokensRevoked = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (tokensRevoked) break;
+                }
+
+                if (!revoked && !tokensRevoked)
+                {
+                    var subject = session.UserId.Value.ToString();
+                    await authorizationManager.RevokeAsync(
+                        subject: subject,
+                        client: null,
+                        status: Statuses.Valid,
+                        type: null,
+                        cancellationToken: cancellationToken);
+
+                    await tokenManager.RevokeAsync(
+                        subject: subject,
+                        client: null,
+                        status: Statuses.Valid,
+                        type: null,
+                        cancellationToken: cancellationToken);
+                }
+            }
+            else
+            {
+                var subject = session.UserId.Value.ToString();
+                await authorizationManager.RevokeAsync(
+                    subject: subject,
+                    client: null,
+                    status: Statuses.Valid,
+                    type: null,
+                    cancellationToken: cancellationToken);
+
+                await tokenManager.RevokeAsync(
+                    subject: subject,
+                    client: null,
+                    status: Statuses.Valid,
+                    type: null,
+                    cancellationToken: cancellationToken);
+            }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Log and continue with marking session ended
         }

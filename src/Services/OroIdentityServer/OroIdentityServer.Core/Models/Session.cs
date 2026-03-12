@@ -9,6 +9,7 @@ public sealed class Session : BaseEntity<Session, SessionId>, IAuditableEntity, 
     public UserId UserId { get; private set; }
     public User? User { get; set; }
     public TenantId TenantId { get; private set; }
+    public string? AuthorizationId { get; private set; }
     public string IpAddress { get; private set; } = string.Empty;
     public string Country { get; private set; } = string.Empty;
     public DateTime StartedAtUtc { get; private set; }
@@ -18,21 +19,23 @@ public sealed class Session : BaseEntity<Session, SessionId>, IAuditableEntity, 
     {
         UserId = default!;
         TenantId = default!;
+        AuthorizationId = null;
     }
 
-    public Session(SessionId? id, UserId userId, TenantId tenantId, string ipAddress, string country, DateTime startedAtUtc)
+    public Session(SessionId? id, UserId userId, TenantId tenantId, string ipAddress, string country, DateTime startedAtUtc, string? authorizationId)
     {
         Id = id ?? SessionId.Create(null);
         UserId = userId;
         TenantId = tenantId;
+        AuthorizationId = authorizationId;
         IpAddress = ipAddress;
         Country = country;
         StartedAtUtc = startedAtUtc;
     }
 
-    public static Session Create(UserId userId, string ipAddress, string country, TenantId tenantId)
+    public static Session Create(UserId userId, string ipAddress, string country, TenantId tenantId, string? authorizationId = null)
     {
-        return new Session(SessionId.Create(null), userId, tenantId, ipAddress, country, DateTime.UtcNow);
+        return new Session(SessionId.Create(null), userId, tenantId, ipAddress, country, DateTime.UtcNow, authorizationId);
     }
 
     public void End(DateTime endedAtUtc)

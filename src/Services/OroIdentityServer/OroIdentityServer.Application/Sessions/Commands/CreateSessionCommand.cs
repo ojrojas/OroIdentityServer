@@ -11,7 +11,8 @@ public record CreateSessionCommand(
     UserId UserId,
     string IpAddress,
     string Country,
-    TenantId TenantId
+    TenantId TenantId,
+    string? AuthorizationId = null
 ) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();

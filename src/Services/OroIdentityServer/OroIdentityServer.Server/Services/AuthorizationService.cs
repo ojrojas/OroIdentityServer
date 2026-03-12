@@ -152,8 +152,22 @@ public class AuthorizationService(
                     scopes: identity.GetScopes(),
                     cancellationToken: cancellationToken);
 
-                identity.SetAuthorizationId(await authorizationManager.GetIdAsync(authorization, cancellationToken));
+                var authorizationId = await authorizationManager.GetIdAsync(authorization, cancellationToken);
+                identity.SetAuthorizationId(authorizationId);
                 identity.SetDestinations(GetDestination.GetDestinations);
+
+                // create session record (ip, country, start) and associate authorization id
+                try
+                {
+                    var ip = requested.Context.Connection.RemoteIpAddress?.ToString() ??
+                             requested.Context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "unknown";
+                    var country = "unknown";
+                    await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country, user.Data!.TenantId, authorizationId), cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Failed to create session record for user {UserId}", user?.Data?.Id);
+                }
 
                 return new LoginResponse(
                     ResultTypes.SignIn,
@@ -351,19 +365,6 @@ public class AuthorizationService(
         });
 
         identity.SetDestinations(GetDestination.GetDestinations);
-
-        // create session record (ip, country, start)
-        try
-        {
-            var ip = requested.Context.Connection.RemoteIpAddress?.ToString() ??
-                     requested.Context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "unknown";
-            var country = "unknown";
-            await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country, user.Data!.TenantId), cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Failed to create session record for user {UserId}", user?.Data?.Id);
-        }
 
         logger.LogInformation("Login user application successful");
         return new LoginResponse(
