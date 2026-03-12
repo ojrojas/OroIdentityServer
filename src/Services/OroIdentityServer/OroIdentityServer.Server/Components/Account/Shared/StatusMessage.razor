@@ -21,20 +21,22 @@
     {
         string? sessionMessage = null;
 
-        if (HttpContext?.Session != null)
+        var sessionFeature = HttpContext?.Features?.Get<Microsoft.AspNetCore.Http.Features.ISessionFeature>();
+        if (sessionFeature?.Session != null)
         {
-            if (HttpContext.Session.TryGetValue(IdentityRedirectManager.StatusCookieName, out var bytes) && bytes?.Length > 0)
+            var session = sessionFeature.Session;
+            if (session.TryGetValue(IdentityRedirectManager.StatusCookieName, out var bytes) && bytes?.Length > 0)
             {
                 sessionMessage = System.Text.Encoding.UTF8.GetString(bytes);
-                HttpContext.Session.Remove(IdentityRedirectManager.StatusCookieName);
+                session.Remove(IdentityRedirectManager.StatusCookieName);
             }
         }
 
-        messageFromCookie = sessionMessage ?? HttpContext.Request.Cookies[IdentityRedirectManager.StatusCookieName];
+        messageFromCookie = sessionMessage ?? HttpContext?.Request?.Cookies[IdentityRedirectManager.StatusCookieName];
 
-        if (messageFromCookie is not null && HttpContext?.Session == null)
+        if (messageFromCookie is not null && sessionFeature?.Session == null)
         {
-            HttpContext.Response.Cookies.Delete(IdentityRedirectManager.StatusCookieName);
+            HttpContext?.Response?.Cookies.Delete(IdentityRedirectManager.StatusCookieName);
         }
     }
 }

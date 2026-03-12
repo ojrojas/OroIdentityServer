@@ -6,6 +6,7 @@ using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 using OroBuildingBlocks.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,11 +45,22 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy.WithOrigins(
-            builder.Configuration["IdentityWeb:Url"], 
-            builder.Configuration["IdentityAdmin:Url"])
+            builder.Configuration["IdentityWeb:Url"],
+            builder.Configuration["IdentityAdmin:Url"]) 
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+});
+
+// Enable in-memory cache and session support used by the server UI (transient status messages, etc.)
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Path = "/";
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 var app = builder.Build();
@@ -77,10 +89,15 @@ var applicationManager = service.GetRequiredService<IOpenIddictApplicationManage
 var passwordHasher = service.GetRequiredService<IPasswordHasher>();
 
 ArgumentNullException.ThrowIfNull(context);
-// Console.WriteLine("Deleting database...");
-await context.Database.EnsureDeletedAsync(); // Disabled: use migrations instead to preserve DB during debug
+
+var resetDb = configuration.GetValue<bool>("Debug:ResetDatabase", false);
+if (resetDb)
+{
+    Console.WriteLine("Deleting database...");
+    await context.Database.EnsureDeletedAsync();
+}
+
 Console.WriteLine("Applying pending migrations (if any)...");
-// await context.Database.EnsureCreatedAsync();
 await context.Database.MigrateAsync();
 Console.WriteLine("Database migrated successfully.");
 Console.WriteLine($"Database path: {context.Database.GetDbConnection().Database}");
@@ -92,9 +109,9 @@ var seedDataPath = Path.Combine(
 Console.WriteLine($"Configured IdentityWeb:Url = {configuration["IdentityWeb:Url"]}");
 Console.WriteLine($"Configured Identity:Url = {configuration["Identity:Url"]}");
 await DatabaseSeeder.SeedAsync(
-    context, 
-    applicationManager, 
-    seedDataPath, 
+    context,
+    applicationManager,
+    seedDataPath,
     passwordHasher,
     configuration);
 
@@ -106,6 +123,10 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 app.UseCors();
+
+// Ensure session middleware is available for components that rely on HttpContext.Session
+app.UseSession();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
