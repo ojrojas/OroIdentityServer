@@ -384,6 +384,10 @@ public class AuthorizationService(
         {
             properties.RedirectUri = openIdRequest.PostLogoutRedirectUri;
         }
+        else
+        {
+            properties.RedirectUri = "/";
+        }
 
         var response = new LogoutResponse(configuration, properties, [
             CookieAuthenticationDefaults.AuthenticationScheme,
