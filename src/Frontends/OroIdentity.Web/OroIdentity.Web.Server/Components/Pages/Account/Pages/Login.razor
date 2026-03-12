@@ -100,7 +100,7 @@
             return;
         }
         using var source = new CancellationTokenSource(delay: TimeSpan.FromSeconds(90));
-        var response = await loginService.LoginRequest(Input, source.Token);
+        var response = await loginService.RequestLogin(Input, cancellationToken: source.Token);
 
         if (response is null)
         {

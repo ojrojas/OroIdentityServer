@@ -36,6 +36,9 @@ public class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
             claims.ToTable("RoleClaims");
             claims.WithOwner().HasForeignKey("RoleId");
 
+            // Explicit shadow FK column to match principal key (Role.Id -> RoleId conversion)
+            claims.Property<Guid>("RoleId").HasColumnName("RoleId").IsRequired();
+
             claims.Property(rc => rc.Id)
                 .HasColumnName("Id")
                 .ValueGeneratedOnAdd();

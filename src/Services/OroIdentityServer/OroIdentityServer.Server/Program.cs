@@ -4,8 +4,12 @@ using OroIdentityServer.Services.OroIdentityServer.Server.Components.Account;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 using OroBuildingBlocks.ServiceDefaults;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
 
 ConfigurationManager configuration = builder.Configuration;
 Log.Logger = LoggerPrinter.CreateSerilogLogger("api", "OroIdentityServer", configuration);
@@ -76,10 +80,10 @@ var passwordHasher = service.GetRequiredService<IPasswordHasher>();
 
 ArgumentNullException.ThrowIfNull(context);
 // Console.WriteLine("Deleting database...");
-// await context.Database.EnsureDeletedAsync();
-Console.WriteLine("Creating database...");
-await context.Database.EnsureCreatedAsync();
-Console.WriteLine("Database created successfully.");
+await context.Database.EnsureDeletedAsync(); // Disabled: use migrations instead to preserve DB during debug
+Console.WriteLine("Applying pending migrations (if any)...");
+await context.Database.MigrateAsync();
+Console.WriteLine("Database migrated successfully.");
 Console.WriteLine($"Database path: {context.Database.GetDbConnection().Database}");
 Console.WriteLine($"Tables: {string.Join(", ", context.Model.GetEntityTypes().Select(t => t.GetTableName()))}");
 var seedDataPath = Path.Combine(
@@ -137,6 +141,16 @@ app.MapScopeQueriesEndpointsV1()
 .WithTags("ScopeQueries");
 app.MapScopeCommandsEndpointsV1()
 .WithTags("ScopeCommands");
+
+app.MapPermissionQueriesEndpointsV1()
+.WithTags("PermissionQueries");
+app.MapPermissionCommandsEndpointsV1()
+.WithTags("PermissionCommands");
+
+app.MapSessionQueriesEndpointsV1()
+.WithTags("SessionQueries");
+app.MapSessionCommandsEndpointsV1()
+.WithTags("SessionCommands");
 
 app.MapApplicationQueriesEndpointsV1()
 .WithTags("ApplicationQueries");

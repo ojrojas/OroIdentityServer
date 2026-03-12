@@ -7,5 +7,5 @@ namespace OroIdentity.Web.Server.Services;
 
 public interface ILoginService
 {
-    Task<HttpResponseMessage> LoginRequest(LoginInputModel loginModel, CancellationToken cancellationToken);
+    Task<HttpResponseMessage> RequestLogin(LoginInputModel loginModel, CancellationToken cancellationToken);
 }

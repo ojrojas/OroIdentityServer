@@ -204,13 +204,14 @@ public class AuthorizationService(
             ArgumentNullException.ThrowIfNull(request.Password);
 
             var loginRequest = new LoginRequest(request.Username, request.Password, false);
-            return await LoginAsync(loginRequest, cancellationToken);
+            return await LoginAsync(requested, loginRequest, cancellationToken);
         }
 
         throw new InvalidOperationException("The specified grant type is not supported.");
     }
 
     public async Task<LoginResponse> LoginAsync(
+        SimpleRequest requested,
         LoginRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -268,6 +269,20 @@ public class AuthorizationService(
         });
 
         identity.SetDestinations(GetDestination.GetDestinations);
+
+        // create session record (ip, country, start)
+        try
+        {
+            var ip = requested.Context.Connection.RemoteIpAddress?.ToString() ??
+                     requested.Context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "unknown";
+            var country = "unknown";
+            await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country), cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to create session record for user {UserId}", user?.Data?.Id);
+        }
+
         logger.LogInformation("Login user application successful");
         return new LoginResponse(
              ResultTypes.SignIn,
