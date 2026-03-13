@@ -121,6 +121,13 @@ builder.Services.AddHttpClient<ISessionsService, SessionsService>(
     }
 ).AddHttpMessageHandler<TokenHandler>();
 
+builder.Services.AddHttpClient<IRoleClaimsService, RoleClaimsService>(
+    client => {
+        client.BaseAddress = new Uri(identityUri) ??
+        throw new Exception("Missing base address environment");
+    }
+).AddHttpMessageHandler<TokenHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -148,6 +155,7 @@ app.UseSession();
 app.MapIdentityEndpoints();
 app.MapApplicationEndpointsV1().RequireAuthorization();
 app.MapRolesEndpointsV1().RequireAuthorization();
+app.MapRoleClaimsEndpointsV1().RequireAuthorization();
 app.MapPermissionsEndpointsV1().RequireAuthorization();
 app.MapScopesEndpointsV1().RequireAuthorization();
 app.MapUsersEndpointsV1().RequireAuthorization();

@@ -45,6 +45,10 @@ builder.Services.AddHttpClient<ISessionsService, SessionsClientService>(
     client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
 );
 
+builder.Services.AddHttpClient<IRoleClaimsService, RoleClaimsClientService>(
+    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+);
+
 builder.Services.AddFluentUIComponents();
 
 
