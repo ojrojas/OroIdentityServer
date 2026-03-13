@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 public class Constants
 {
-    public const string Seq = "Seq";
+    public const string Seq = "seq";
     public const string Http = "http";
     public const string Https = "https";
     public const string IdentityApi = "identity-server";
