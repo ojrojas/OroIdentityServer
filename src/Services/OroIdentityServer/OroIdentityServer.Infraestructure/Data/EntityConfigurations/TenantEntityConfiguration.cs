@@ -38,5 +38,8 @@ public class TenantEntityConfiguration : IEntityTypeConfiguration<Tenant>
             .HasDatabaseName("IX_Tenants_IsActive");
 
         builder.HasQueryFilter(it => it.IsActive);
+
+        // Ignore TenantUsers navigation for now - mapped separately when needed
+        builder.Ignore(t => t.TenantUsers);
     }
 }

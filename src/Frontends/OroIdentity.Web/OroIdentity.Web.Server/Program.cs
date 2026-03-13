@@ -12,12 +12,31 @@ using OroIdentity.Web.Server.Handlers;
 using OroIdentity.Web.Server.Endpoints;
 using OroBuildingBlocks.ServiceDefaults;
 using OroIdentity.Web.Client.Services;
+using System.IO;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 ConfigurationManager configuration = builder.Configuration;
 
 Log.Logger = LoggerPrinter.CreateSerilogLogger("web.server", "OroIdentity.Web.Server", configuration);
+
+// Shared DataProtection keys for cookie unprotect across apps
+var keysFolder = Path.Combine(builder.Environment.ContentRootPath, "..", "..", "..", "..", "data-protection-keys");
+Directory.CreateDirectory(keysFolder);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.GetFullPath(keysFolder)))
+    .SetApplicationName("OroIdentityShared");
+
+// Configure authentication cookie options
+builder.Services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme, opts =>
+{
+    opts.Cookie.Name = "OroAuth";
+    opts.Cookie.Path = "/";
+    opts.Cookie.SameSite = SameSiteMode.Lax;
+    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

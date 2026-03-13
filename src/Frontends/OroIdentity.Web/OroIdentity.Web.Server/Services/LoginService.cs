@@ -15,7 +15,7 @@ public class LoginService(
     OpenIddictClientService openIddictClientService,
     IHttpContextAccessor context) : ILoginService
 {
-    public async Task<HttpResponseMessage> LoginRequest(LoginInputModel loginModel, CancellationToken cancellationToken)
+    public async Task<HttpResponseMessage> RequestLogin(LoginInputModel loginModel, CancellationToken cancellationToken)
     {
         try
         {

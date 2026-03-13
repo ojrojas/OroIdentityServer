@@ -40,6 +40,12 @@
     private UserViewModel user = new();
     private string identificationTypeIdString = "";
     public List<IdentificationTypeViewModel> IdentificationTypes { get; set; } = new List<IdentificationTypeViewModel>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadIdentificationTypes();
+    }
    
     private async Task CreateUserAsync()
     {

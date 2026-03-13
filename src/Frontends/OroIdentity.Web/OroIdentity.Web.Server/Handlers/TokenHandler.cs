@@ -1,6 +1,7 @@
 
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using OpenIddict.Client.AspNetCore;
 using OroIdentity.Web.Client.Constants;
@@ -21,7 +22,8 @@ internal sealed class TokenHandler(
             throw new Exception("HttpContext not available");
         }
 
-        var accessToken = await GetTokenAsync(httpContextAccessor) ??
+        var accessToken = await GetTokenAsync();
+        if (string.IsNullOrWhiteSpace(accessToken))
             throw new ArgumentNullException("The access token couldn't be found in the request options.");
 
         request.Headers.Authorization =
@@ -45,11 +47,52 @@ internal sealed class TokenHandler(
         return response;
     }
 
-    private static async Task<string> GetTokenAsync(IHttpContextAccessor httpContextAccessor)
+    private async Task<string> GetTokenAsync()
     {
         ArgumentNullException.ThrowIfNull(httpContextAccessor);
-        return await httpContextAccessor.HttpContext.GetTokenAsync(
-          OpenIddictClientAspNetCoreConstants.Tokens.BackchannelAccessToken);
+
+        // 1) Prefer tokens stored in ProtectedSessionStorage (used by the UI components)
+        try
+        {
+            var sessionToken = await storage.GetAsync<string>("access_token");
+            if (sessionToken.Success && !string.IsNullOrWhiteSpace(sessionToken.Value))
+            {
+                return sessionToken.Value;
+            }
+        }
+        catch
+        {
+            // ignore storage failures (circuit may not exist for some requests)
+        }
+
+        var ctx = httpContextAccessor.HttpContext;
+        if (ctx is null)
+            return string.Empty;
+
+        // 2) Try to get token from the OpenIddict client authentication result (explicit scheme)
+        try
+        {
+            // common fallback names
+            var token = await ctx.GetTokenAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
+            if (!string.IsNullOrWhiteSpace(token))
+                return token;
+
+            // check cookie authentication scheme
+            token = await ctx.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            if (!string.IsNullOrWhiteSpace(token))
+                return token;
+
+            // last attempt: default scheme + backchannel token name
+            token = await ctx.GetTokenAsync(OpenIddictClientAspNetCoreConstants.Tokens.BackchannelAccessToken);
+            if (!string.IsNullOrWhiteSpace(token))
+                return token;
+        }
+        catch
+        {
+            // ignore and return empty
+        }
+
+        return string.Empty;
     }
 
     public async Task<string> TryRefreshTokenAsync()

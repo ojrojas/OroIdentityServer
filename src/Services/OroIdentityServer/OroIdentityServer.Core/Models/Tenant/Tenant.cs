@@ -4,32 +4,57 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
-public class Tenant :
-BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregateRoot
+public class TenantUser
 {
+    public TenantId TenantId { get; private set; }
+    public UserId UserId { get; private set; }
+    public bool IsOwner { get; private set; }
+    private readonly List<UserRole> _userRoles = [];
+    public IReadOnlyCollection<UserRole> UserRoles => _userRoles;
+
+    // Navigation
+    public Tenant Tenant { get; set; } = null!;
+    public User User { get; set; } = null!;
+}
+
+
+
+public class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregateRoot
+{
+    public TenantName Name { get; private set; }
+    public bool IsActive { get; private set; }
+    public string Slug { get; private set; }
+
+    private readonly List<TenantUser> _tenantUsers = [];
+    public IReadOnlyCollection<TenantUser> TenantUsers => _tenantUsers;
+
     public Tenant(string name) : base()
     {
         Id = TenantId.New();
         Name = new TenantName(name);
         IsActive = true;
+        Slug = GenerateSlug(name);
         RaiseDomainEvent(new TenantCreateEvent(Id));
+    }
+
+    private static string GenerateSlug(string name)
+    {
+        return name.ToLower().Replace(" ", "-");
     }
 
     private Tenant()
     {
         Name = null!;
+        Slug = string.Empty;
     }
 
     public static Tenant Create(string name)
     {
-
         var Tenant = new Tenant(name);
         Tenant.Validate();
         return Tenant;
     }
 
-    public TenantName Name { get; private set; }
-    public bool IsActive { get; private set; }
 
     public void Deactive()
     {
