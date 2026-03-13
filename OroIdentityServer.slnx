@@ -14,4 +14,5 @@
     <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Infraestructure/OroIdentityServer.Infraestructure.csproj" />
     <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Server/OroIdentityServer.Server.csproj" />
   </Folder>
+  <Project Path="../OroBuildingBlocks/src/ServiceDefaults/ServiceDefaults.csproj" />
 </Solution>
