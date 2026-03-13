@@ -1,0 +1,79 @@
+@page "/sessions"
+@attribute [Authorize]
+
+@using OroIdentity.Web.Client.Models
+@using OroIdentity.Web.Client.Interfaces
+
+@inject ISessionsService Service
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<PageTitle>Active Sessions</PageTitle>
+
+<HeaderPagesComponent TitlePage="Active Sessions" Description="List of active user sessions">
+</HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
+</FluentDivider>
+
+@if (sessions == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <FluentDataGrid Items="sessions" Style="width:100%;">
+        <TemplateColumn Title="Action">
+            <FluentButton OnClick="(() => ConfirmTerminate(context.Id.Value))" Appearance="Appearance.Accent">Terminate</FluentButton>
+        </TemplateColumn>
+        <TemplateColumn Title="User">
+            @context.UserDisplayName
+        </TemplateColumn>
+        <TemplateColumn Title="IP">
+            @context.IpAddress
+        </TemplateColumn>
+        <TemplateColumn Title="Country">
+            @context.Country
+        </TemplateColumn>
+        <TemplateColumn Title="Started">
+            @context.StartedAtUtc.ToLocalTime().ToString("g")
+        </TemplateColumn>
+        <TemplateColumn Title="Duration">
+            @GetDuration(context)
+        </TemplateColumn>
+    </FluentDataGrid>
+}
+
+@code {
+    private IQueryable<SessionViewModel>? sessions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSessions();
+    }
+
+    private async Task LoadSessions()
+    {
+        var result = await Service.GetAllSessionsAsync(CancellationToken.None);
+        sessions = result.Data.AsQueryable();
+        StateHasChanged();
+    }
+
+    private string GetDuration(SessionViewModel s)
+    {
+        var end = s.EndedAtUtc ?? DateTime.UtcNow;
+        var span = end - s.StartedAtUtc;
+        if (span.TotalSeconds < 60) return $"{(int)span.TotalSeconds}s";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours}h";
+        return $"{(int)span.TotalDays}d";
+    }
+
+    private async Task ConfirmTerminate(Guid sessionId)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to terminate this session?");
+        if (!confirmed) return;
+        await Service.TerminateSessionAsync(sessionId, CancellationToken.None);
+        await LoadSessions();
+    }
+}

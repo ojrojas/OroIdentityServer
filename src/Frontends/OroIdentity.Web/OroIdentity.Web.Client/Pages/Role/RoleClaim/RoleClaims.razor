@@ -1,5 +1,40 @@
 @using OroIdentity.Web.Client.Models
+@using OroIdentity.Web.Client.Interfaces
 @inject NavigationManager NavigationManager
+@inject IRoleClaimsService Service
+@inject IJSRuntime JSRuntime
+
+@code {
+    [Parameter]
+    public Guid RoleId { get; set; }
+
+    private List<RoleClaimViewModel> Claims = new List<RoleClaimViewModel>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadClaims();
+    }
+
+    private async Task LoadClaims()
+    {
+        if (RoleId == Guid.Empty) return;
+        var response = await Service.GetRoleClaimsByRoleIdAsync(RoleId, CancellationToken.None);
+        Claims = response.Data?.ToList() ?? new List<RoleClaimViewModel>();
+    }
+
+    private void EditClaim(RoleClaimViewModel claim)
+    {
+        NavigationManager.NavigateTo($"/roles/edit-claim/{claim.Id.Value}");
+    }
+
+    private async Task DeleteClaim(RoleClaimViewModel claim)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Delete claim?");
+        if (!confirmed) return;
+        await Service.DeleteRoleClaimAsync(claim.Id.Value, CancellationToken.None);
+        await LoadClaims();
+    }
+}
 
 <FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
 </FluentDivider>
@@ -27,37 +62,3 @@
         }
     </tbody>
 </table>
-
-@code {
-    private List<RoleClaimViewModel> Claims = new List<RoleClaimViewModel>();
-
-    protected override void OnInitialized()
-    {
-        // Load claims for the role
-        LoadClaims();
-    }
-
-    private void LoadClaims()
-    {
-        // This is where you would typically call a service to get the claims for the role
-        // For demonstration purposes, we'll just add some dummy data
-        Claims = new List<RoleClaimViewModel>
-        {
-            new RoleClaimViewModel { ClaimType = "Permission", ClaimValue = "Read" },
-            new RoleClaimViewModel { ClaimType = "Permission", ClaimValue = "Write" }
-        };
-    }
-
-    private void EditClaim(RoleClaimViewModel claim)
-    {
-        // Navigate to the edit claim page with the claim details
-        NavigationManager.NavigateTo($"/roles/edit-claim/{claim.ClaimType}");
-    }
-
-    private void DeleteClaim(RoleClaimViewModel claim)
-    {
-        // Here you would typically call a service to delete the claim
-        // For demonstration purposes, we'll just remove it from the list
-        Claims.Remove(claim);
-    }
-}

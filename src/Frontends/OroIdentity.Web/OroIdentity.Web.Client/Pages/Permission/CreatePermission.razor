@@ -1,0 +1,72 @@
+@page "/create-permission"
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+
+@attribute [Authorize]
+
+@inject NavigationManager NavigationManager
+@inject IPermissionsService Service
+@inject IToastService ToastService
+
+<PageTitle>Permissions</PageTitle>
+
+<HeaderPagesComponent TitlePage="Permissions" Description="Manage your permissions">
+    <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToPermissions">Back</FluentButton>
+</HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
+</FluentDivider>
+
+<FluentEditForm Model="@newPermission" OnValidSubmit="HandleSubmit">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
+        <FluentButton Appearance="Appearance.Lightweight" OnClick="Cancel">Cancel</FluentButton>
+        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Create permission</FluentButton>
+    </div>
+    <FluentGrid Spacing="1">
+        <FluentGridItem>
+            <FluentCard>
+                <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
+                    <FluentLabel Typo="Typography.H5">Permission information</FluentLabel>
+                    <FluentTextField @bind-Value="newPermission.Name" Label="Permission name" Required="true" />
+                    <FluentTextField @bind-Value="newPermission.DisplayName" Label="Display name" />
+                    <FluentTextField @bind-Value="newPermission.Description" Label="Description" />
+                    <FluentTextField @bind-Value="newPermission.Resource" Label="Resource" />
+                    <FluentCheckbox @bind-Checked="newPermission.IsSystem">System</FluentCheckbox>
+                </div>
+            </FluentCard>
+        </FluentGridItem>
+    </FluentGrid>
+</FluentEditForm>
+
+@code {
+    public PermissionViewModel? newPermission { get; set; }
+
+    protected override void OnInitialized()
+    {
+        newPermission = new PermissionViewModel
+        {
+            Name = string.Empty,
+            DisplayName = string.Empty,
+            Resource = string.Empty,
+            IsSystem = false
+        };
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/permissions");
+    }
+
+    private async Task HandleSubmit()
+    {
+        CancellationTokenSource token = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        await Service.CreatePermissionAsync(newPermission!, token.Token);
+        ToastService.ShowSuccess("Permission created successfully");
+        NavigationManager.NavigateTo("/permissions");
+    }
+
+    private void RedirectToPermissions()
+    {
+        NavigationManager.NavigateTo("/permissions");
+    }
+}

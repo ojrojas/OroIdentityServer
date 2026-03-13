@@ -106,6 +106,28 @@ builder.Services.AddHttpClient<IIdentificationTypeService, IdentificationTypesSe
     }
 ).AddHttpMessageHandler<TokenHandler>();
 
+builder.Services.AddHttpClient<IPermissionsService, PermissionsService>(
+    client => { 
+        client.BaseAddress = new Uri(identityUri) ?? 
+        throw new Exception("Missing base address environment");
+    }
+).AddHttpMessageHandler<TokenHandler>();
+
+// Sessions proxy service to aggregate and manage sessions from identity server
+builder.Services.AddHttpClient<ISessionsService, SessionsService>(
+    client => {
+        client.BaseAddress = new Uri(identityUri) ??
+        throw new Exception("Missing base address environment");
+    }
+).AddHttpMessageHandler<TokenHandler>();
+
+builder.Services.AddHttpClient<IRoleClaimsService, RoleClaimsService>(
+    client => {
+        client.BaseAddress = new Uri(identityUri) ??
+        throw new Exception("Missing base address environment");
+    }
+).AddHttpMessageHandler<TokenHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -133,9 +155,12 @@ app.UseSession();
 app.MapIdentityEndpoints();
 app.MapApplicationEndpointsV1().RequireAuthorization();
 app.MapRolesEndpointsV1().RequireAuthorization();
+app.MapRoleClaimsEndpointsV1().RequireAuthorization();
+app.MapPermissionsEndpointsV1().RequireAuthorization();
 app.MapScopesEndpointsV1().RequireAuthorization();
 app.MapUsersEndpointsV1().RequireAuthorization();
 app.MapIdentificationTypesEndpointsV1().RequireAuthorization();
+app.MapSessionsEndpointsV1().RequireAuthorization();
 
 app.MapDefaultEndpoints();
 
