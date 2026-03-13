@@ -390,4 +390,33 @@ This project is licensed under the GNU AGPL v3.0 License. See the [LICENSE](./LI
 
 Thank you for using OroIdentityServer! If you have any questions or suggestions, feel free to open an issue in the repository.
 
+### Fixes and Improvements (2026-03-13)
+- Conditional external callback signin (SignInLocal option) to avoid duplicate cookies in client flows.
+- Shared DataProtection keyring and normalized authentication cookie (OroAuth, Path=/) to allow cookie unprotect when necessary across apps in development (see ./data-protection-keys).
+- TokenHandler: robust token retrieval covering ProtectedSessionStorage and explicit OpenIddict client-scheme token properties with multiple fallbacks.
+- StatusMessage component checks ISessionFeature and falls back to cookies to avoid "Session has not been configured" exceptions.
+- Added AuthorizationId to Session aggregate; TerminateSession endpoint revokes OpenIddict authorizations and tokens (with subject-based fallback for compatibility).
+- Guarded database EnsureDeletedAsync with Debug:ResetDatabase flag to prevent accidental DB wipes during debug.
+- EF migrations added for Session Tenant and AuthorizationId (migrations are generated; apply with `dotnet ef database update` if needed).
+- Removed redundant SignInAsync calls on client login flows and normalized cookie options to prevent creation of many cookies with different paths.
+
+### Libraries (selected)
+The project relies on the following NuGet packages (selected list; versions managed in Directory.Packages.props):
+
+- OpenIddict (OpenIddict.Abstractions, OpenIddict.AspNetCore, OpenIddict.Client.AspNetCore, OpenIddict.EntityFrameworkCore, OpenIddict.Validation)
+- Microsoft.AspNetCore.Authentication.OpenIdConnect
+- Microsoft.AspNetCore.Authentication.Cookies
+- Npgsql.EntityFrameworkCore.PostgreSQL
+- Serilog (Serilog.AspNetCore, Serilog.Sinks.Seq, Serilog.Sinks.Console)
+- Aspire integration packages (Aspire.Hosting.PostgreSQL, Aspire.Seq, etc.)
+- MediatR / OroCQRS (CQRS support)
+- Microsoft.AspNetCore.DataProtection
+- BCrypt.Net-Next
+- Quartz.Extensions.Hosting
+- OpenTelemetry packages (instrumentation and exporters)
+
+Note: Internal libraries used by this solution (OroKernel.Shared, OroLoggers, OroServiceDefaults, OroCQRS) are included in this repository and are published under the GitHub account "ojrojas".
+
+Please review and run the app locally. For development, keep data-protection keys shared at ./data-protection-keys and set `Debug:ResetDatabase=false` in `appsettings.Development.json` to avoid wiping the DB on startup.
+
 find . -name "*.csproj" -print0 | xargs -0 dotnet sln add
