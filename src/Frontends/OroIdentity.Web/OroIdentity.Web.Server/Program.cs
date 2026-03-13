@@ -69,6 +69,12 @@ builder.Services.AddScoped<IThemeService, ThemeService>();
 
 builder.Services.AddHttpContextAccessor();
 
+// When initiating the OAuth/OpenId Connect challenge, set a flag that indicates whether the client
+// app expects a local sign-in to be performed by the callback handler. This prevents the ServiceDefaults
+// callback from creating cookies unless explicitly requested by the initiator.
+// Usage: when calling /account/login, set authentication properties Parameters["local_signin"] = "true" if a local cookie is desired.
+
+
 builder.AddServiceDefaults();
 
 builder.Services.AddHttpClient<IApplicationsService, ApplicationsService>(

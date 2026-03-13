@@ -2,6 +2,7 @@
 @using OroIdentity.Web.Client.Interfaces
 @inject NavigationManager NavigationManager
 @inject IRoleClaimsService Service
+@inject IToastService ToastService
 @inject IJSRuntime JSRuntime
 
 @code {
@@ -10,11 +11,9 @@
 
     private List<RoleClaimViewModel> Claims = new List<RoleClaimViewModel>();
 
-    private string newClaimType = string.Empty;
-    private string newClaimValue = string.Empty;
+    private RoleClaimInputModel newClaim = new();
     private bool isAdding = false;
     private bool isUpdating = false;
-    private string? operationMessage;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -31,25 +30,17 @@
     private async Task AddClaim()
     {
         if (RoleId == Guid.Empty) return;
-        if (string.IsNullOrWhiteSpace(newClaimType) || string.IsNullOrWhiteSpace(newClaimValue))
-        {
-            await JSRuntime.InvokeVoidAsync("alert", "Claim type and value are required.");
-            return;
-        }
-
         isAdding = true;
-        operationMessage = null;
         try
         {
-            await Service.AssociateClaimToRoleAsync(RoleId, newClaimType.Trim(), newClaimValue.Trim(), CancellationToken.None);
-            newClaimType = string.Empty;
-            newClaimValue = string.Empty;
+            await Service.AssociateClaimToRoleAsync(RoleId, newClaim.ClaimType!.Trim(), newClaim.ClaimValue!.Trim(), CancellationToken.None);
+            newClaim = new RoleClaimInputModel();
             await LoadClaims();
-            operationMessage = "Claim added successfully.";
+            ToastService.ShowSuccess("Claim added successfully");
         }
         catch (Exception ex)
         {
-            operationMessage = $"Error adding claim: {ex.Message}";
+            ToastService.ShowError($"Error adding claim: {ex.Message}");
         }
         finally
         {
@@ -66,8 +57,16 @@
     {
         var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Delete claim?");
         if (!confirmed) return;
-        await Service.DeleteRoleClaimAsync(claim.Id.Value, CancellationToken.None);
-        await LoadClaims();
+        try
+        {
+            await Service.DeleteRoleClaimAsync(claim.Id.Value, CancellationToken.None);
+            await LoadClaims();
+            ToastService.ShowSuccess("Claim deleted");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error deleting claim: {ex.Message}");
+        }
     }
 
     private async Task ToggleActive(RoleClaimViewModel claim)
@@ -80,30 +79,43 @@
         {
             await Service.UpdateRoleClaimAsync(claim, CancellationToken.None);
             await LoadClaims();
+            ToastService.ShowSuccess("Claim updated");
         }
-        catch
+        catch (Exception ex)
         {
             claim.IsActive = original;
+            ToastService.ShowError($"Error updating claim: {ex.Message}");
         }
         finally
         {
             isUpdating = false;
         }
     }
+
+    // Input model with validation
+    public class RoleClaimInputModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Claim type is required")]
+        public string? ClaimType { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Claim value is required")]
+        public string? ClaimValue { get; set; }
+    }
 }
 
 <FluentCard>
-    <FluentStack Orientation="Orientation.Horizontal" Gap="1rem" AlignItems="AlignItems.Center">
-        <FluentTextField Label="Claim Type" @bind-Value="newClaimType" />
-        <FluentTextField Label="Claim Value" @bind-Value="newClaimValue" />
-        <FluentButton Appearance="Appearance.Accent" OnClick="@(async () => await AddClaim())" Disabled="@isAdding">
-            @if (isAdding) { <text>Adding...</text> } else { <text>Add</text> }
-        </FluentButton>
-        @if (!string.IsNullOrEmpty(operationMessage))
-        {
-            <div>@operationMessage</div>
-        }
-    </FluentStack>
+    <FluentEditForm Model="newClaim" OnValidSubmit="AddClaim">
+        <FluentStack Orientation="Orientation.Horizontal" Gap="1rem" AlignItems="AlignItems.Center">
+            <FluentTextField Label="Claim Type" @bind-Value="newClaim.ClaimType" Required="true" />
+            <FluentTextField Label="Claim Value" @bind-Value="newClaim.ClaimValue" Required="true" />
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Disabled="@isAdding">
+                @if (isAdding) { <text>Adding...</text> } else { <text>Add</text> }
+            </FluentButton>
+        </FluentStack>
+        <div style="color:red;margin-top:6px;">
+            <ValidationSummary />
+        </div>
+    </FluentEditForm>
 </FluentCard>
 
 <FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
