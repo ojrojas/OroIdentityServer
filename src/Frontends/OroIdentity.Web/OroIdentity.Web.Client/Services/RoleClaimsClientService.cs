@@ -30,7 +30,8 @@ public class RoleClaimsClientService(
 
     public async Task AssociateClaimToRoleAsync(Guid roleId, string claimType, string claimValue, CancellationToken cancellationToken)
     {
-        var payload = new { RoleId = roleId, ClaimType = claimType, ClaimValue = claimValue };
+        // Web.Server expects a payload shaped like RoleClaimViewModel where Id.Value is the RoleId
+        var payload = new { Id = new { Value = roleId }, ClaimType = claimType, ClaimValue = claimValue };
         await httpClient.PostAsJsonAsync($"{ROUTE}/associate", payload, options, cancellationToken);
     }
 
