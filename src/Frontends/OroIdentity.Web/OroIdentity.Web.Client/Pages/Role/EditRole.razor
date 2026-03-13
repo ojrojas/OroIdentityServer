@@ -11,6 +11,7 @@
 
 <HeaderPagesComponent TitlePage="Roles" Description="Manage your roles">
     <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToRoles">Back</FluentButton>
+    <FluentButton Appearance="Appearance.Secondary" OnClick="(() => NavigationManager.NavigateTo($"/roles/{RoleId}/create-claim"))">Create Claim</FluentButton>
 </HeaderPagesComponent>
 
 <FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
@@ -24,6 +25,10 @@
             <FluentButton Appearance="Appearance.Accent" OnClick="UpdateRole">Update</FluentButton>
         </FluentStack>
     </FluentCard>
+
+    <FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
+
+    <RoleClaims RoleId="@RoleId" />
 }
 
 @code {
