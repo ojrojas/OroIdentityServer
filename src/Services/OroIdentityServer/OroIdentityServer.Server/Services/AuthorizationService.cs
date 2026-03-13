@@ -5,6 +5,7 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Primitives;
 using OroBuildingBlocks.ServiceDefaults;
+using OroIdentityServer.OroIdentityServer.Infraestructure.Interfaces;
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Services;
 
 public class AuthorizationService(
@@ -13,6 +14,7 @@ public class AuthorizationService(
     IOpenIddictAuthorizationManager authorizationManager,
     IOpenIddictScopeManager scopeManager,
     IConfiguration configuration,
+    IApplicationTenantRepository applicationTenantRepository,
     ISender sender) : IAuthorizationService
 {
     public async Task<LoginResponse> AuthorizedAsync(SimpleRequest requested, CancellationToken cancellationToken = default)
@@ -74,6 +76,26 @@ public class AuthorizationService(
         var application = await applicationManager.FindByClientIdAsync(request.ClientId!, cancellationToken: cancellationToken) ??
             throw new InvalidOperationException("Details concerning the calling client application cannot be found.");
 
+        // Validate that the user has a tenant assigned
+        var mappedTenant = await applicationTenantRepository.GetTenantByClientIdAsync(request.ClientId!, cancellationToken);
+        if (user?.Data?.TenantId == null)
+        {
+            return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
+            {
+                [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user does not belong to a tenant."
+            }), [CookieAuthenticationDefaults.AuthenticationScheme]);
+        }
+
+        if (mappedTenant != null && !mappedTenant.Equals(user.Data.TenantId))
+        {
+            return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
+            {
+                [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The client application is not authorized for the user's tenant."
+            }), [CookieAuthenticationDefaults.AuthenticationScheme]);
+        }
+
         var authorizations = await authorizationManager.FindAsync(
             subject: user.Data?.Id.Value.ToString(),
             client: await applicationManager.GetIdAsync(application, cancellationToken),
@@ -111,6 +133,9 @@ public class AuthorizationService(
                         .SetClaims(Claims.Role,
                             [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
 
+                // Add tenant claim so downstream services can rely on it
+                identity.SetClaim("tenant_id", user?.Data?.TenantId?.Value.ToString());
+
                 identity.SetScopes(request.GetScopes());
                 identity.SetResources(
                     await scopeManager.ListResourcesAsync(
@@ -127,8 +152,22 @@ public class AuthorizationService(
                     scopes: identity.GetScopes(),
                     cancellationToken: cancellationToken);
 
-                identity.SetAuthorizationId(await authorizationManager.GetIdAsync(authorization, cancellationToken));
+                var authorizationId = await authorizationManager.GetIdAsync(authorization, cancellationToken);
+                identity.SetAuthorizationId(authorizationId);
                 identity.SetDestinations(GetDestination.GetDestinations);
+
+                // create session record (ip, country, start) and associate authorization id
+                try
+                {
+                    var ip = requested.Context.Connection.RemoteIpAddress?.ToString() ??
+                             requested.Context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "unknown";
+                    var country = "unknown";
+                    await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country, user.Data!.TenantId, authorizationId), cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Failed to create session record for user {UserId}", user?.Data?.Id);
+                }
 
                 return new LoginResponse(
                     ResultTypes.SignIn,
@@ -193,6 +232,9 @@ public class AuthorizationService(
                         .SetClaims(Claims.Role,
                             [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
 
+            // Add tenant claim
+            identity.SetClaim("tenant_id", user?.Data?.TenantId?.Value.ToString());
+
             identity.SetDestinations(GetDestination.GetDestinations);
 
             // Returning a SignInResult will ask OpenIddict to issue the appropriate access/identity tokens.
@@ -200,17 +242,69 @@ public class AuthorizationService(
         }
         if (request.IsPasswordGrantType())
         {
+            // Password grant should not create an authentication cookie; issue tokens only.
             ArgumentNullException.ThrowIfNull(request.Username);
             ArgumentNullException.ThrowIfNull(request.Password);
 
-            var loginRequest = new LoginRequest(request.Username, request.Password, false);
-            return await LoginAsync(loginRequest, cancellationToken);
+            // Ensure the user can login
+            if (!await sender.Send(new ValidateUserToLoginQuery(request.Username), cancellationToken))
+            {
+                return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user cannot log in to the application."
+                }), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+            }
+
+            var user = await sender.Send(new GetUserByEmailQuery(request.Username), cancellationToken);
+            var securityUser = await sender.Send(new ValidateUserPasswordQuery(request.Username, request.Password), cancellationToken);
+
+            if (user == null || !securityUser.Data)
+            {
+                return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The username/password couple is invalid."
+                }), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+            }
+
+            // Build identity for token issuance (no cookie)
+            var identity = new ClaimsIdentity(
+                authenticationType: TokenValidationParameters.DefaultAuthenticationType,
+                nameType: Claims.Name,
+                roleType: Claims.Role);
+
+            identity.SetClaim(Claims.Subject, user?.Data?.Id.Value.ToString())
+                    .SetClaim(Claims.Email, user?.Data?.Email)
+                    .SetClaim(Claims.Name, $"{user?.Data?.Name} {user?.Data?.LastName}")
+                    .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
+                    .SetClaims(Claims.Role, [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
+
+            identity.SetScopes(request.GetScopes());
+            identity.SetDestinations(GetDestination.GetDestinations);
+
+            // create session record (ip, country, start) but don't create cookie
+            try
+            {
+                var ip = requested.Context.Connection.RemoteIpAddress?.ToString() ??
+                         requested.Context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "unknown";
+                var country = "unknown";
+                await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country, user.Data!.TenantId), cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to create session record for user {UserId}", user?.Data?.Id);
+            }
+
+            // Return SignIn result for OpenIddict to issue tokens (no cookie scheme)
+            return new LoginResponse(ResultTypes.SignIn, new ClaimsPrincipal(identity), new(), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
         }
 
         throw new InvalidOperationException("The specified grant type is not supported.");
     }
 
     public async Task<LoginResponse> LoginAsync(
+        SimpleRequest requested,
         LoginRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -259,6 +353,9 @@ public class AuthorizationService(
                         .SetClaims(Claims.Role,
                             [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
 
+        // Add tenant claim
+        identity.SetClaim("tenant_id", user?.Data?.TenantId?.Value.ToString());
+
         identity.SetScopes(new[]
         {
             Scopes.OpenId,
@@ -268,6 +365,7 @@ public class AuthorizationService(
         });
 
         identity.SetDestinations(GetDestination.GetDestinations);
+
         logger.LogInformation("Login user application successful");
         return new LoginResponse(
              ResultTypes.SignIn,
@@ -285,6 +383,10 @@ public class AuthorizationService(
         if (openIdRequest is not null && !string.IsNullOrEmpty(openIdRequest.PostLogoutRedirectUri))
         {
             properties.RedirectUri = openIdRequest.PostLogoutRedirectUri;
+        }
+        else
+        {
+            properties.RedirectUri = "/";
         }
 
         var response = new LogoutResponse(configuration, properties, [

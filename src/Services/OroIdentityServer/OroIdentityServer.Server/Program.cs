@@ -4,11 +4,34 @@ using OroIdentityServer.Services.OroIdentityServer.Server.Components.Account;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 using OroBuildingBlocks.ServiceDefaults;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 ConfigurationManager configuration = builder.Configuration;
 Log.Logger = LoggerPrinter.CreateSerilogLogger("api", "OroIdentityServer", configuration);
+
+// Shared DataProtection keys for cookie unprotect across apps
+var keysFolder = Path.Combine(builder.Environment.ContentRootPath, "..", "..", "..", "..", "data-protection-keys");
+Directory.CreateDirectory(keysFolder);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.GetFullPath(keysFolder)))
+    .SetApplicationName("OroIdentityShared");
+
+// Configure authentication cookie options
+builder.Services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme, opts =>
+{
+    opts.Cookie.Name = "OroAuth";
+    opts.Cookie.Path = "/";
+    opts.Cookie.SameSite = SameSiteMode.Lax;
+    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
+
 builder.Services.AddOpenApi();
 
 // Add services to the container.
@@ -42,11 +65,22 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy.WithOrigins(
-            builder.Configuration["IdentityWeb:Url"], 
-            builder.Configuration["IdentityAdmin:Url"])
+            builder.Configuration["IdentityWeb:Url"],
+            builder.Configuration["IdentityAdmin:Url"]) 
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+});
+
+// Enable in-memory cache and session support used by the server UI (transient status messages, etc.)
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Path = "/";
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 var app = builder.Build();
@@ -75,11 +109,17 @@ var applicationManager = service.GetRequiredService<IOpenIddictApplicationManage
 var passwordHasher = service.GetRequiredService<IPasswordHasher>();
 
 ArgumentNullException.ThrowIfNull(context);
-// Console.WriteLine("Deleting database...");
-// await context.Database.EnsureDeletedAsync();
-Console.WriteLine("Creating database...");
-await context.Database.EnsureCreatedAsync();
-Console.WriteLine("Database created successfully.");
+
+var resetDb = configuration.GetValue<bool>("Debug:ResetDatabase", false);
+if (resetDb)
+{
+    Console.WriteLine("Deleting database...");
+    await context.Database.EnsureDeletedAsync();
+}
+
+Console.WriteLine("Applying pending migrations (if any)...");
+await context.Database.MigrateAsync();
+Console.WriteLine("Database migrated successfully.");
 Console.WriteLine($"Database path: {context.Database.GetDbConnection().Database}");
 Console.WriteLine($"Tables: {string.Join(", ", context.Model.GetEntityTypes().Select(t => t.GetTableName()))}");
 var seedDataPath = Path.Combine(
@@ -89,9 +129,9 @@ var seedDataPath = Path.Combine(
 Console.WriteLine($"Configured IdentityWeb:Url = {configuration["IdentityWeb:Url"]}");
 Console.WriteLine($"Configured Identity:Url = {configuration["Identity:Url"]}");
 await DatabaseSeeder.SeedAsync(
-    context, 
-    applicationManager, 
-    seedDataPath, 
+    context,
+    applicationManager,
+    seedDataPath,
     passwordHasher,
     configuration);
 
@@ -103,6 +143,10 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 app.UseCors();
+
+// Ensure session middleware is available for components that rely on HttpContext.Session
+app.UseSession();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -137,6 +181,16 @@ app.MapScopeQueriesEndpointsV1()
 .WithTags("ScopeQueries");
 app.MapScopeCommandsEndpointsV1()
 .WithTags("ScopeCommands");
+
+app.MapPermissionQueriesEndpointsV1()
+.WithTags("PermissionQueries");
+app.MapPermissionCommandsEndpointsV1()
+.WithTags("PermissionCommands");
+
+app.MapSessionQueriesEndpointsV1()
+.WithTags("SessionQueries");
+app.MapSessionCommandsEndpointsV1()
+.WithTags("SessionCommands");
 
 app.MapApplicationQueriesEndpointsV1()
 .WithTags("ApplicationQueries");

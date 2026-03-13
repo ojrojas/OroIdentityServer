@@ -6,6 +6,26 @@ namespace OroIdentityServer.Services.OroIdentityServer.Core.Models;
 
 public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
 {
+    public string? Name { get; private set; } = string.Empty;
+    public string? LastName { get; private set; } = string.Empty;
+    public string? MiddleName { get; set; } = string.Empty;
+    public string? UserName { get; private set; }
+    public string? Email { get; private set; }
+    public string? Identification { get; private set; } = string.Empty;
+    public IdentificationTypeId? IdentificationTypeId { get; private set; }
+    public string? NormalizedEmail { get; set; } = string.Empty;
+    public string? NormalizedUserName { get; set; } = string.Empty;
+    public IdentificationType? IdentificationType { get; set; }
+
+    public TenantId? TenantId { get; private set; }
+    public Tenant? Tenant { get; set; }
+
+    public SecurityUserId? SecurityUserId { get; set; }
+    public SecurityUser? SecurityUser { get; set; }
+  
+    private readonly IList<UserRole> _roles = [];
+    public IReadOnlyCollection<UserRole> Roles => _roles.AsReadOnly();
+
     public User(
         UserId? id,
         string name,
@@ -53,26 +73,6 @@ public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
         return userName.ToUpperInvariant();
     }
 
-    private readonly IList<UserRole> _roles = [];
-
-    public string? Name { get; private set; } = string.Empty;
-    public string? LastName { get; private set; } = string.Empty;
-    public string? MiddleName { get; set; } = string.Empty;
-    public string? UserName { get; private set; }
-    public string? Email { get; private set; }
-    public string? Identification { get; private set; } = string.Empty;
-    public IdentificationTypeId? IdentificationTypeId { get; private set; }
-    public string? NormalizedEmail { get; set; } = string.Empty;
-    public string? NormalizedUserName { get; set; } = string.Empty;
-    public IdentificationType? IdentificationType { get; set; }
-
-    public TenantId? TenantId { get; private set; }
-    public Tenant? Tenant { get; set; }
-
-    public IReadOnlyCollection<UserRole> Roles => _roles.AsReadOnly();
-
-    public SecurityUserId? SecurityUserId { get; set; }
-    public SecurityUser? SecurityUser { get; set; }
 
     public void AddRole(UserRole role)
     {

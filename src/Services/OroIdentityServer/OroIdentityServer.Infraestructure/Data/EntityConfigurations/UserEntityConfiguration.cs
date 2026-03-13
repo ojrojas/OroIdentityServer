@@ -24,8 +24,13 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(u => u.IdentificationTypeId)
             .OnDelete(DeleteBehavior.Restrict); 
 
-         builder.HasOne(u => u.Tenant)
-            .WithMany() 
+        // Configure TenantId value-object conversion and FK
+        builder.Property(u => u.TenantId)
+            .HasConversion(id => id!.Value, value => new TenantId(value))
+            .HasColumnName("TenantId");
+
+        builder.HasOne(u => u.Tenant)
+            .WithMany()
             .HasForeignKey(u => u.TenantId)
             .OnDelete(DeleteBehavior.Restrict); 
 

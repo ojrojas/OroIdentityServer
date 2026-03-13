@@ -21,8 +21,18 @@ public static class IdentityApiExtensions
             config.ExpireTimeSpan = TimeSpan.FromHours(8);
             config.Cookie.SameSite = SameSiteMode.None;
             config.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        }
-        );
+        });
+
+        builder.Services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromHours(8);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        });
+
+        builder.Services.AddDistributedMemoryCache();
 
         builder.Services.AddAuthorization();
     }

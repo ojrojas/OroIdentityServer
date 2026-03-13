@@ -35,7 +35,7 @@ public static class AuthorizedEndpoints
         [FromBody] LoginRequest loginRequest,
         CancellationToken cancellationToken)
     {
-        return await service.LoginAsync(loginRequest, cancellationToken);
+        return await service.LoginAsync(new(context), loginRequest, cancellationToken);
     }
 
     [IgnoreAntiforgeryToken]

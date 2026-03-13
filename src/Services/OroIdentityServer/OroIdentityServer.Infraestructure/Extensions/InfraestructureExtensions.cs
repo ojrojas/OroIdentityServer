@@ -19,11 +19,13 @@ public static class InfraestructureExtensions
 
         builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
-        builder.Services.AddScoped<IIdentificationTypeRepository, IdentificationTypeRepository>();
-        builder.Services.AddScoped<IRolesRepository, RolesRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IRolesRepository, RolesRepository>();
         builder.Services.AddScoped<IUserRolesRepository, UserRolesRepository>();
+        builder.Services.AddScoped<IIdentificationTypeRepository, IdentificationTypeRepository>();
         builder.Services.AddScoped<ISecurityUserRepository, SecurityUserRepository>();
-        builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
+        builder.Services.AddScoped<IApplicationTenantRepository, ApplicationTenantRepository>();
+        builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+        builder.Services.AddScoped<ISessionRepository, SessionRepository>();
     }
 }

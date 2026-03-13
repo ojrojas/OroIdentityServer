@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
 
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Components.Account;
 
@@ -8,6 +9,7 @@ internal sealed class IdentityRedirectManager(NavigationManager navigationManage
 
     private static readonly CookieBuilder StatusCookieBuilder = new()
     {
+        Path = "/",
         SameSite = SameSiteMode.Strict,
         HttpOnly = true,
         IsEssential = true,
@@ -36,7 +38,17 @@ internal sealed class IdentityRedirectManager(NavigationManager navigationManage
 
     public void RedirectToWithStatus(string uri, string message, HttpContext context)
     {
-        context.Response.Cookies.Append(StatusCookieName, message, StatusCookieBuilder.Build(context));
+        if (context?.Session != null)
+        {
+            context.Session.SetString(StatusCookieName, message);
+        }
+        else
+        {
+            // Fallback to cookie when session is not available
+            context.Response.Cookies.Delete(StatusCookieName);
+            context.Response.Cookies.Append(StatusCookieName, message, StatusCookieBuilder.Build(context));
+        }
+
         RedirectTo(uri);
     }
 
