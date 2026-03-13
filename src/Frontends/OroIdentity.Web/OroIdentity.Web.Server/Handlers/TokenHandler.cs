@@ -1,6 +1,7 @@
 
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using OpenIddict.Client.AspNetCore;
 using OroIdentity.Web.Client.Constants;
@@ -71,17 +72,13 @@ internal sealed class TokenHandler(
         // 2) Try to get token from the OpenIddict client authentication result (explicit scheme)
         try
         {
-            var token = await ctx.GetTokenAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme, OpenIddictClientAspNetCoreConstants.Tokens.BackchannelAccessToken);
-            if (!string.IsNullOrWhiteSpace(token))
-                return token;
-
             // common fallback names
-            token = await ctx.GetTokenAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme, "access_token");
+            var token = await ctx.GetTokenAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
             if (!string.IsNullOrWhiteSpace(token))
                 return token;
 
             // check cookie authentication scheme
-            token = await ctx.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "access_token");
+            token = await ctx.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             if (!string.IsNullOrWhiteSpace(token))
                 return token;
 
