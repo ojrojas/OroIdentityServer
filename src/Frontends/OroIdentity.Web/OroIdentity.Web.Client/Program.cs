@@ -37,6 +37,9 @@ builder.Services.AddHttpClient<IIdentificationTypeService, IdentificationTypesCl
     client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
 );
 
+builder.Services.AddHttpClient<IPermissionsService, PermissionsClientService>(
+    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+);
 
 builder.Services.AddFluentUIComponents();
 

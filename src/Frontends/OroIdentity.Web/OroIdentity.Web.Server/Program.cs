@@ -106,6 +106,13 @@ builder.Services.AddHttpClient<IIdentificationTypeService, IdentificationTypesSe
     }
 ).AddHttpMessageHandler<TokenHandler>();
 
+builder.Services.AddHttpClient<IPermissionsService, PermissionsService>(
+    client => { 
+        client.BaseAddress = new Uri(identityUri) ?? 
+        throw new Exception("Missing base address environment");
+    }
+).AddHttpMessageHandler<TokenHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
