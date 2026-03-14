@@ -60,6 +60,6 @@ builder.Services.AddHttpClient<IPermissionsService, PermissionsClientService>(
 builder.Services.AddFluentUIComponents();
 
 // Global toast service for consistent UX across pages
-builder.Services.AddScoped<OroIdentity.Web.Client.Interfaces.IToastService, OroIdentity.Web.Client.Services.ToastService>();
+builder.Services.AddScoped<OroIdentity.Web.Client.Interfaces.IToastService, OroIdentity.Web.Client.Services.FluentToastAdapter>();
 
 await builder.Build().RunAsync();
