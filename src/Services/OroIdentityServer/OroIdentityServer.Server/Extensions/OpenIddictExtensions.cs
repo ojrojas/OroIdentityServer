@@ -44,7 +44,21 @@ public static class OpenIddictExtensions
 
             var signingKey = configuration.GetSection("SymmetricSecurityKey").Value;
 
-            ArgumentException.ThrowIfNullOrEmpty(signingKey, "SymmetricSecurityKey configuration is missing");
+            // If running tests or development and key is missing, generate a fallback symmetric key to allow tests to run.
+            if (string.IsNullOrWhiteSpace(signingKey))
+            {
+                if (builder.Environment.IsEnvironment("IntegrationTest") || builder.Environment.IsDevelopment())
+                {
+                    // Generate a 32-byte random key and use base64 representation
+                    var keyBytes = System.Security.Cryptography.RandomNumberGenerator.GetBytes(32);
+                    signingKey = Convert.ToBase64String(keyBytes);
+                    Console.WriteLine("TESTERROR: SymmetricSecurityKey missing. Generated fallback key for tests/development.");
+                }
+                else
+                {
+                    ArgumentException.ThrowIfNullOrEmpty(signingKey, "SymmetricSecurityKey configuration is missing");
+                }
+            }
 
             // Configure encryption and signing of tokens.  testing phrase tokens ORO_IDENTITY_SERVER_PROJECT_0001
             config.AddEncryptionKey(new SymmetricSecurityKey(

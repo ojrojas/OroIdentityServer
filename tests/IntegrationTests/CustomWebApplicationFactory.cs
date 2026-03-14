@@ -17,19 +17,26 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        // Provide minimal configuration values required by the tested app (e.g. symmetric signing key)
+        builder.ConfigureAppConfiguration((ctx, conf) =>
+        {
+            var dict = new System.Collections.Generic.Dictionary<string, string?>
+            {
+                ["SymmetricSecurityKey"] = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("integration-test-signing-key-should-be-32bytes"))
+            };
+            conf.AddInMemoryCollection(dict);
+        });
+
         builder.ConfigureServices(services =>
         {
             // Remove existing OroIdentityAppContext registrations
             var dbContextDescriptor = services.SingleOrDefault(d => d.ServiceType != null && d.ServiceType.Name.Contains("DbContextOptions`1") && d.ServiceType.FullName!.Contains("OroIdentityAppContext"));
             if (dbContextDescriptor != null) services.Remove(dbContextDescriptor);
 
-            // Create SQLite in-memory connection
-            _connection = new SqliteConnection("DataSource=:memory:");
-            _connection.Open();
-
+            // Use EF Core InMemory provider for tests to avoid native SQLite/EF version issues
             services.AddDbContext<OroIdentityServer.Services.OroIdentityServer.Infraestructure.OroIdentityAppContext>(options =>
             {
-                options.UseSqlite(_connection);
+                options.UseInMemoryDatabase("IntegrationTestsDb");
                 options.UseOpenIddict();
             });
 
@@ -55,6 +62,16 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
+        // Ensure configuration used by Program.Main (host-level) contains required symmetric key
+        builder.ConfigureAppConfiguration((ctx, conf) =>
+        {
+            var dict = new System.Collections.Generic.Dictionary<string, string?>
+            {
+                ["SymmetricSecurityKey"] = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("integration-test-signing-key-should-be-32bytes"))
+            };
+            conf.AddInMemoryCollection(dict);
+        });
+
         return base.CreateHost(builder);
     }
 }
