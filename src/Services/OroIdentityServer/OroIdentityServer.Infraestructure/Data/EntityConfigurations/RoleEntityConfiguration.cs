@@ -64,6 +64,11 @@ public class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
                     .HasMaxLength(500) 
                     .IsRequired();
             });
+
+            // Unique index to prevent duplicate role claims at database level
+            claims.HasIndex("RoleId", "ClaimType", "ClaimValue")
+                .IsUnique()
+                .HasDatabaseName("IX_RoleClaims_RoleId_ClaimType_ClaimValue_Unique");
         });
 
         builder.HasIndex(r => r.IsActive)

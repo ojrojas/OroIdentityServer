@@ -45,4 +45,10 @@ public class RoleClaimsClientService(
     {
         await httpClient.DeleteAsync($"{ROUTE}/delete/{id}", cancellationToken);
     }
+
+    public async Task AssociatePermissionsToRoleAsync(Guid roleId, IEnumerable<Guid> permissionIds, CancellationToken cancellationToken)
+    {
+        var payload = new { RoleId = roleId, PermissionIds = permissionIds };
+        await httpClient.PostAsJsonAsync($"{ROUTE}/associate/bulk", payload, cancellationToken);
+    }
 }

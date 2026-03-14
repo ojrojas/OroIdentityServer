@@ -20,7 +20,10 @@
 {
     <FluentCard>
         <FluentStack Orientation="Orientation.Vertical" Gap="1rem">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
             <FluentTextField Label="Name" @bind-Value="role.Name.Value" />
+            <ValidationMessage For="@(() => role.Name.Value)" />
             <FluentCheckbox Label="Is Active" @bind-Value="role.IsActive" />
             <FluentButton Appearance="Appearance.Accent" OnClick="UpdateRole">Update</FluentButton>
         </FluentStack>

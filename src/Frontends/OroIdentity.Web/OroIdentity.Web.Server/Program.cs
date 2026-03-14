@@ -119,6 +119,13 @@ builder.Services.AddHttpClient<IPermissionsService, PermissionsService>(
     }
 ).AddHttpMessageHandler<TokenHandler>();
 
+builder.Services.AddHttpClient<ITenantsService, TenantsService>(
+    client => { 
+        client.BaseAddress = new Uri(identityUri) ?? 
+        throw new Exception("Missing base address environment");
+    }
+).AddHttpMessageHandler<TokenHandler>();
+
 // Sessions proxy service to aggregate and manage sessions from identity server
 builder.Services.AddHttpClient<ISessionsService, SessionsService>(
     client => {
@@ -161,6 +168,7 @@ app.UseSession();
 app.MapIdentityEndpoints();
 app.MapApplicationEndpointsV1().RequireAuthorization();
 app.MapRolesEndpointsV1().RequireAuthorization();
+    app.MapTenantsEndpointsV1().RequireAuthorization();
 app.MapRoleClaimsEndpointsV1().RequireAuthorization();
 app.MapPermissionsEndpointsV1().RequireAuthorization();
 app.MapScopesEndpointsV1().RequireAuthorization();

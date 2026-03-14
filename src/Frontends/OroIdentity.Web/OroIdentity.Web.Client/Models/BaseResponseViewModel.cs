@@ -9,5 +9,5 @@ public record BaseResponseViewModel<T>
     public T? Data { get; set; }
     public int StatusCode { get; set; } = 200;
     public string Message { get; set; } = string.Empty;
-    public List<string> Errors { get; set; } = [];
+    public List<string> Errors { get; set; } = new List<string>();
 }

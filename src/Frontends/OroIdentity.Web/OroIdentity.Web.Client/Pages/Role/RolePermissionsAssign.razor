@@ -2,7 +2,7 @@
 @using OroIdentity.Web.Client.Models
 @inject IPermissionsService PermissionsService
 @inject IRoleClaimsService RoleClaimsService
-@inject IToastService ToastService
+@inject OroIdentity.Web.Client.Interfaces.IToastService ToastService
 
 @code {
     [Parameter]
@@ -63,26 +63,11 @@
         }
 
         isAssigning = true;
-        int success = 0;
         try
         {
-            foreach (var pid in selected.ToList())
-            {
-                var perm = permissions.FirstOrDefault(p => p.PermissionId.Value == pid);
-                if (perm == null) continue;
-                try
-                {
-                    // Associate as RoleClaim of type Permission with value = permission.Name
-                    await RoleClaimsService.AssociateClaimToRoleAsync(RoleId, "Permission", perm.Name, CancellationToken.None);
-                    success++;
-                }
-                catch
-                {
-                    // continue on errors
-                }
-            }
+            await RoleClaimsService.AssociatePermissionsToRoleAsync(RoleId, selected.ToList(), CancellationToken.None);
             await LoadPermissions();
-            ToastService.ShowSuccess($"Assigned {success} permission(s) to role");
+            ToastService.ShowSuccess($"Assigned {selected.Count} permission(s) to role");
         }
         catch (Exception ex)
         {

@@ -4,9 +4,14 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentity.Web.Client.Models;
 
+using System.ComponentModel.DataAnnotations;
+
 public class NameViewModel
 {
-   public string Value { get; set; }
+    [Required(ErrorMessage = "Name is required")]
+    [StringLength(100, ErrorMessage = "Name must be at most 100 characters")]
+    public string Value { get; set; }
+
     public NameViewModel(string value)
     {
         Value = value;

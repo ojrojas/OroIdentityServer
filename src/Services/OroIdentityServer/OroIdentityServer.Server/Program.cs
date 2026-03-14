@@ -187,6 +187,7 @@ app.MapPermissionQueriesEndpointsV1()
 app.MapPermissionCommandsEndpointsV1()
 .WithTags("PermissionCommands");
 
+app.MapTenantEndpoints();
 app.MapSessionQueriesEndpointsV1()
 .WithTags("SessionQueries");
 app.MapSessionCommandsEndpointsV1()
