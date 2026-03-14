@@ -66,9 +66,13 @@ public class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
             });
 
             // Unique index to prevent duplicate role claims at database level
-            claims.HasIndex("RoleId", "ClaimType", "ClaimValue")
-                .IsUnique()
-                .HasDatabaseName("IX_RoleClaims_RoleId_ClaimType_ClaimValue_Unique");
+            // NOTE: index creation for owned type columns causes model-building conflicts at design-time
+            // (EF sometimes tries to add shadow properties with the same name as navigation properties).
+            // To avoid design-time DbContext errors when creating migrations, create the unique index
+            // using raw SQL inside the migration Up() instead of configuring it here.
+            // claims.HasIndex("RoleId", "ClaimType", "ClaimValue")
+            //     .IsUnique()
+            //     .HasDatabaseName("IX_RoleClaims_RoleId_ClaimType_ClaimValue_Unique");
         });
 
         builder.HasIndex(r => r.IsActive)
