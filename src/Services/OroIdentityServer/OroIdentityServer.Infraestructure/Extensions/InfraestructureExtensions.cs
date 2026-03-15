@@ -28,5 +28,6 @@ public static class InfraestructureExtensions
         builder.Services.AddScoped<ITenantRepository, TenantRepository>();
         builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
         builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+        builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
     }
 }
