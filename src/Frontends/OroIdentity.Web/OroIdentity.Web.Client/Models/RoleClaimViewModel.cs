@@ -6,8 +6,8 @@ namespace OroIdentity.Web.Client.Models;
 
 public class RoleClaimViewModel
 {
-    public NameViewModel ClaimType { get; set; }
-    public NameViewModel ClaimValue { get; set; }
+    public NameViewModel? ClaimType { get; set; }
+    public NameViewModel? ClaimValue { get; set; }
     public bool IsActive { get; set; } = true;
-    public IdViewModel Id { get; set; }
+    public Guid? Id { get; set; }
 }

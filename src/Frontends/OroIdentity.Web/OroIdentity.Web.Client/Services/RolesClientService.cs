@@ -32,18 +32,18 @@ internal sealed class RolesClientService(
         return response;
     }
 
-    public async Task<RoleViewModel> GetRoleByIdAsync(string roleId, CancellationToken cancellationToken)
+    public async Task<BaseResponseViewModel<RoleViewModel>?> GetRoleByIdAsync(string roleId, CancellationToken cancellationToken)
     {
         logger.LogInformation("Retrieving role with ID: {RoleId}", roleId);
-        return await httpClient.GetFromJsonAsync<RoleViewModel>($"{ROUTEROLES}/{roleId}", cancellationToken)
-               ?? new RoleViewModel() { Name = NameViewModel.Create(string.Empty) };
+        return await httpClient.GetFromJsonAsync<BaseResponseViewModel<RoleViewModel>>($"{ROUTEROLES}/{roleId}", cancellationToken)
+               ?? new BaseResponseViewModel<RoleViewModel>() { Data = new RoleViewModel() { Name = NameViewModel.Create(string.Empty) } };
     }
 
-    public async Task<RoleViewModel> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken)
+    public async Task<BaseResponseViewModel<RoleViewModel>> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken)
     {
         logger.LogInformation("Retrieving role with name: {RoleName}", roleName);
-        return await httpClient.GetFromJsonAsync<RoleViewModel>($"{ROUTEROLES}/{roleName}", cancellationToken)
-               ?? new RoleViewModel() { Name = NameViewModel.Create(string.Empty) };
+        return await httpClient.GetFromJsonAsync<BaseResponseViewModel<RoleViewModel>>($"{ROUTEROLES}/{roleName}", cancellationToken)
+               ?? new BaseResponseViewModel<RoleViewModel>() { Data = new RoleViewModel() { Name = NameViewModel.Create(string.Empty) } };
     }
 
     public async Task UpdateRoleAsync(RoleViewModel role, CancellationToken cancellationToken)

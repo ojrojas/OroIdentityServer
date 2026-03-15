@@ -10,9 +10,9 @@ namespace OroIdentity.Web.Client.Models;
 
 public class RoleViewModel
 {
-    public IdViewModel Id { get; set; } = IdViewModel.Empty();
+    public IdViewModel? Id { get; set; } 
 
-    public NameViewModel Name { get; set; } = NameViewModel.Create(string.Empty);
+    public NameViewModel? Name { get; set; } 
 
     public bool IsActive { get; set; }
 

@@ -11,9 +11,10 @@ public class TenantsService(
     ILogger<TenantsService> logger,
     HttpClient httpClient) : ITenantsService
 {
-    private readonly JsonSerializerOptions options = new()
+     private readonly JsonSerializerOptions options = new()
     {
         PropertyNameCaseInsensitive = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
 
