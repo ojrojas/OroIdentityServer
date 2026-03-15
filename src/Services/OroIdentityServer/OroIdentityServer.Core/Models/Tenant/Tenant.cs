@@ -24,6 +24,7 @@ public class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregate
     public TenantName Name { get; private set; }
     public bool IsActive { get; private set; }
     public string Slug { get; private set; }
+    public DateTime CreatedAtUtc { get; private set; }
 
     private readonly List<TenantUser> _tenantUsers = [];
     public IReadOnlyCollection<TenantUser> TenantUsers => _tenantUsers;
@@ -34,6 +35,7 @@ public class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregate
         Name = new TenantName(name);
         IsActive = true;
         Slug = GenerateSlug(name);
+        CreatedAtUtc = DateTime.UtcNow;
         RaiseDomainEvent(new TenantCreateEvent(Id));
     }
 
@@ -46,6 +48,7 @@ public class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregate
     {
         Name = null!;
         Slug = string.Empty;
+        CreatedAtUtc = DateTime.UtcNow;
     }
 
     public static Tenant Create(string name)

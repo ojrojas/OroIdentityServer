@@ -10,9 +10,10 @@ public class RolesService(
     ILogger<RolesService> logger,
     HttpClient httpClient) : IRolesService
 {
-    private readonly JsonSerializerOptions options = new()
+     private readonly JsonSerializerOptions options = new()
     {
         PropertyNameCaseInsensitive = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
 
@@ -51,16 +52,16 @@ public class RolesService(
         }
     }
 
-    public async Task<RoleViewModel> GetRoleByIdAsync(string roleId, CancellationToken cancellationToken)
+    public async Task<BaseResponseViewModel<RoleViewModel>?> GetRoleByIdAsync(string roleId, CancellationToken cancellationToken)
     {
-        return await httpClient.GetFromJsonAsync<RoleViewModel>($"roles/{roleId}", cancellationToken)
-               ?? new RoleViewModel() { Name = NameViewModel.Create(string.Empty) };
+        return await httpClient.GetFromJsonAsync<BaseResponseViewModel<RoleViewModel>>($"roles/{roleId}", cancellationToken)
+               ?? new BaseResponseViewModel<RoleViewModel>() { Data = new RoleViewModel() { Name = NameViewModel.Create(string.Empty) } };
     }
 
-    public async Task<RoleViewModel> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken)
+    public async Task<BaseResponseViewModel<RoleViewModel>> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken)
     {
-        return await httpClient.GetFromJsonAsync<RoleViewModel>($"roles/{roleName}", cancellationToken)
-               ?? new RoleViewModel() { Name = NameViewModel.Create(string.Empty) };
+        return await httpClient.GetFromJsonAsync<BaseResponseViewModel<RoleViewModel>>($"roles/{roleName}", cancellationToken)
+               ?? new BaseResponseViewModel<RoleViewModel>() { Data = new RoleViewModel() { Name = NameViewModel.Create(string.Empty) } };
     }
 
     public async Task UpdateRoleAsync(RoleViewModel role, CancellationToken cancellationToken)

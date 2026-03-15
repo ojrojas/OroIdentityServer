@@ -2,6 +2,7 @@
 @using OroIdentity.Web.Client.Interfaces
 @inject NavigationManager NavigationManager
 @inject IRoleClaimsService Service
+@inject IToastService ToastService
 @inject IJSRuntime JSRuntime
 
 @code {
@@ -9,6 +10,10 @@
     public Guid RoleId { get; set; }
 
     private List<RoleClaimViewModel> Claims = new List<RoleClaimViewModel>();
+
+    private RoleClaimInputModel newClaim = new();
+    private bool isAdding = false;
+    private bool isUpdating = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -22,6 +27,27 @@
         Claims = response.Data?.ToList() ?? new List<RoleClaimViewModel>();
     }
 
+    private async Task AddClaim()
+    {
+        if (RoleId == Guid.Empty) return;
+        isAdding = true;
+        try
+        {
+            await Service.AssociateClaimToRoleAsync(RoleId, newClaim.ClaimType!.Trim(), newClaim.ClaimValue!.Trim(), CancellationToken.None);
+            newClaim = new RoleClaimInputModel();
+            await LoadClaims();
+            ToastService.ShowSuccess("Claim added successfully");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error adding claim: {ex.Message}");
+        }
+        finally
+        {
+            isAdding = false;
+        }
+    }
+
     private void EditClaim(RoleClaimViewModel claim)
     {
         NavigationManager.NavigateTo($"/roles/edit-claim/{claim.Id.Value}");
@@ -31,19 +57,75 @@
     {
         var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Delete claim?");
         if (!confirmed) return;
-        await Service.DeleteRoleClaimAsync(claim.Id.Value, CancellationToken.None);
-        await LoadClaims();
+        try
+        {
+            await Service.DeleteRoleClaimAsync(claim.Id.Value, CancellationToken.None);
+            await LoadClaims();
+            ToastService.ShowSuccess("Claim deleted");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error deleting claim: {ex.Message}");
+        }
+    }
+
+    private async Task ToggleActive(RoleClaimViewModel claim)
+    {
+        if (claim == null) return;
+        isUpdating = true;
+        var original = claim.IsActive;
+        claim.IsActive = !original;
+        try
+        {
+            await Service.UpdateRoleClaimAsync(claim, CancellationToken.None);
+            await LoadClaims();
+            ToastService.ShowSuccess("Claim updated");
+        }
+        catch (Exception ex)
+        {
+            claim.IsActive = original;
+            ToastService.ShowError($"Error updating claim: {ex.Message}");
+        }
+        finally
+        {
+            isUpdating = false;
+        }
+    }
+
+    // Input model with validation
+    public class RoleClaimInputModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Claim type is required")]
+        public string? ClaimType { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Claim value is required")]
+        public string? ClaimValue { get; set; }
     }
 }
 
-<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
-</FluentDivider>
+<FluentCard>
+    <FluentEditForm Model="newClaim" OnValidSubmit="AddClaim">
+        <FluentStack Orientation="Orientation.Horizontal" Gap="1rem" AlignItems="AlignItems.Center">
+            <FluentTextField Label="Claim Type" @bind-Value="newClaim.ClaimType" Required="true" />
+            <FluentTextField Label="Claim Value" @bind-Value="newClaim.ClaimValue" Required="true" />
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Disabled="@isAdding">
+                @if (isAdding) { <text>Adding...</text> } else { <text>Add</text> }
+            </FluentButton>
+        </FluentStack>
+        <div style="color:red;margin-top:6px;">
+            <ValidationSummary />
+        </div>
+    </FluentEditForm>
+</FluentCard>
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
 
 <table>
     <thead>
         <tr>
             <th>Type</th>
             <th>Value</th>
+            <th>Active</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -53,10 +135,11 @@
             <tr>
                 <td>@claim.ClaimType</td>
                 <td>@claim.ClaimValue</td>
+                <td>@(claim.IsActive ? "Yes" : "No")</td>
                 <td>
                     <FluentButton Appearance="Appearance.Accent" OnClick="@(() => EditClaim(claim))">Edit</FluentButton>
-                    <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => DeleteClaim(claim))">Delete
-                    </FluentButton>
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@(async () => await ToggleActive(claim))" Disabled="@isUpdating">@(claim.IsActive ? "Disable" : "Enable")</FluentButton>
+                    <FluentButton Appearance="Appearance.Stealth" OnClick="@(async () => await DeleteClaim(claim))">Delete</FluentButton>
                 </td>
             </tr>
         }

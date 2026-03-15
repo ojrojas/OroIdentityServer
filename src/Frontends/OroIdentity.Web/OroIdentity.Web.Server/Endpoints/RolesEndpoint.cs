@@ -53,7 +53,7 @@ public static class RolesEndpoints
         return TypedResults.Ok();
     }
 
-    private static async Task<RoleViewModel?> GetRoleById(
+    private static async Task<BaseResponseViewModel<RoleViewModel>?> GetRoleById(
         HttpContext context,
         Guid roleId,
         [FromServices] IRolesService service,
@@ -63,7 +63,7 @@ public static class RolesEndpoints
         return await service.GetRoleByIdAsync(roleId.ToString(), cancellationToken);
     }
 
-    private static async Task<RoleViewModel?> GetRoleByName(
+    private static async Task<BaseResponseViewModel<RoleViewModel>?> GetRoleByName(
         HttpContext context,
         string name,
         [FromServices] IRolesService service,

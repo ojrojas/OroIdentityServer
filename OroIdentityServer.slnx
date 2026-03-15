@@ -14,4 +14,7 @@
     <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Infraestructure/OroIdentityServer.Infraestructure.csproj" />
     <Project Path="src/Services/OroIdentityServer/OroIdentityServer.Server/OroIdentityServer.Server.csproj" />
   </Folder>
+  <!-- <Folder Name="/tests/">
+    <Project Path="tests/IntegrationTests/IntegrationTests.csproj" />
+  </Folder> -->
 </Solution>

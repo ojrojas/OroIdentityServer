@@ -13,6 +13,7 @@ public class PermissionsService(
     private readonly JsonSerializerOptions options = new()
     {
         PropertyNameCaseInsensitive = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
 
