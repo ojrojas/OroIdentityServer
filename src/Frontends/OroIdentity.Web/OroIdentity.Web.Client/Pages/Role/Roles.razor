@@ -17,7 +17,7 @@
 </FluentDivider>
 <FluentDataGrid Items="roles" Style="width:100%;">
     <TemplateColumn Title="Action">
-        <FluentButton OnClick="(() => RedirectEdit(context.RoleId.Value))" Appearance="Appearance.Accent">Edit
+        <FluentButton OnClick="(() => RedirectEdit(context.Id.Value))" Appearance="Appearance.Accent">Edit
         </FluentButton>
     </TemplateColumn >
     <TemplateColumn Title="Name" SortBy="sortByName">

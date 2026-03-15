@@ -48,9 +48,9 @@ internal sealed class RolesClientService(
 
     public async Task UpdateRoleAsync(RoleViewModel role, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Updating role with ID: {RoleId}", role.RoleId);
+        logger.LogInformation("Updating role with ID: {RoleId}", role.Id);
         await httpClient.PutAsJsonAsync(ROUTEROLES, role, cancellationToken);
-        logger.LogInformation("Role with ID: {RoleId} updated successfully", role.RoleId);
+        logger.LogInformation("Role with ID: {RoleId} updated successfully", role.Id);
     }
 
    

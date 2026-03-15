@@ -10,17 +10,16 @@ namespace OroIdentity.Web.Client.Models;
 
 public class RoleViewModel
 {
-    public IdViewModel RoleId { get; set; } = IdViewModel.Empty();
+    public IdViewModel Id { get; set; } = IdViewModel.Empty();
 
     public NameViewModel Name { get; set; } = NameViewModel.Create(string.Empty);
 
     public bool IsActive { get; set; }
 
-    private readonly List<IdentificationTypeViewModel> _claims = new();
-    public IReadOnlyCollection<IdentificationTypeViewModel> Claims => _claims.AsReadOnly();
+    public List<RoleClaimViewModel> Claims { get; set; } = [];
 
-    public void AddRoleClaimViewModel(IdentificationTypeViewModel roleClaim)
+    public void AddRoleClaimViewModel(RoleClaimViewModel roleClaim)
     {
-        _claims.Add(roleClaim);
+        Claims.Add(roleClaim);
     }
 }

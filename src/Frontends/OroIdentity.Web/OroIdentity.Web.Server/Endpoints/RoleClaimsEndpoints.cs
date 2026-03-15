@@ -46,7 +46,7 @@ public static class RoleClaimsEndpoints
     {
         // payload.RoleClaim.Type and Value expected
         // Use RoleId from payload.Id or payload.RoleClaim ??? Accepting RoleClaimViewModel for simplicity
-        await service.AssociateClaimToRoleAsync(payload.Id.Value, payload.ClaimType, payload.ClaimValue, cancellationToken);
+        await service.AssociateClaimToRoleAsync(payload.Id.Value, payload.ClaimType.Value, payload.ClaimValue.Value, cancellationToken);
         return TypedResults.Ok();
     }
 

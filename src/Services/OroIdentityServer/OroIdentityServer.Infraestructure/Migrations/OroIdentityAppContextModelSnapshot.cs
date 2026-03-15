@@ -396,6 +396,9 @@ namespace OroIdentityServer.Services.OroIdentityServer.Infraestructure.Migration
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
 
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("IsActive");

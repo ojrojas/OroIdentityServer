@@ -12,8 +12,8 @@ using OroIdentityServer.Services.OroIdentityServer.Infraestructure;
 namespace OroIdentityServer.Services.OroIdentityServer.Infraestructure.Migrations
 {
     [DbContext(typeof(OroIdentityAppContext))]
-    [Migration("20260312170500_AddSessionTenant")]
-    partial class AddSessionTenant
+    [Migration("20260314215806_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -357,6 +357,11 @@ namespace OroIdentityServer.Services.OroIdentityServer.Infraestructure.Migration
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
 
+                    b.Property<string>("AuthorizationId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("AuthorizationId");
+
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -393,6 +398,9 @@ namespace OroIdentityServer.Services.OroIdentityServer.Infraestructure.Migration
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")

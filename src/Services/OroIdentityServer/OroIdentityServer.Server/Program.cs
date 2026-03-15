@@ -66,7 +66,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
             builder.Configuration["IdentityWeb:Url"],
-            builder.Configuration["IdentityAdmin:Url"]) 
+            builder.Configuration["IdentityAdmin:Url"])
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -89,8 +89,36 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
-       app.MapOpenApi();
+    app.MapOpenApi();
     app.MapScalarApiReference();
+
+    using var scope = app.Services.CreateScope();
+    var service = scope.ServiceProvider;
+
+    var context = service.GetRequiredService<OroIdentityAppContext>();
+    var applicationManager = service.GetRequiredService<IOpenIddictApplicationManager>();
+    var passwordHasher = service.GetRequiredService<IPasswordHasher>();
+
+    ArgumentNullException.ThrowIfNull(context);
+
+    //await context.Database.EnsureDeletedAsync();
+    Console.WriteLine("Applying pending migrations (if any)...");
+    await context.Database.MigrateAsync();
+    Console.WriteLine("Database migrated successfully.");
+    Console.WriteLine($"Database path: {context.Database.GetDbConnection().Database}");
+    Console.WriteLine($"Tables: {string.Join(", ", context.Model.GetEntityTypes().Select(t => t.GetTableName()))}");
+    var seedDataPath = Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "bin", "Debug", "net10.0", "Data", "seedData.json");
+    // Log configured IdentityWeb URL so we can verify what the seeder will register
+    Console.WriteLine($"Configured IdentityWeb:Url = {configuration["IdentityWeb:Url"]}");
+    Console.WriteLine($"Configured Identity:Url = {configuration["Identity:Url"]}");
+    await DatabaseSeeder.SeedAsync(
+        context,
+        applicationManager,
+        seedDataPath,
+        passwordHasher,
+        configuration);
 }
 else
 {
@@ -98,45 +126,6 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-
-#if DEBUG
-using var scope = app.Services.CreateScope();
-var service = scope.ServiceProvider;
-
-var context = service.GetRequiredService<OroIdentityAppContext>();
-var applicationManager = service.GetRequiredService<IOpenIddictApplicationManager>();
-var passwordHasher = service.GetRequiredService<IPasswordHasher>();
-
-ArgumentNullException.ThrowIfNull(context);
-
-var resetDb = configuration.GetValue<bool>("Debug:ResetDatabase", false);
-if (resetDb)
-{
-    Console.WriteLine("Deleting database...");
-    await context.Database.EnsureDeletedAsync();
-}
-
-Console.WriteLine("Applying pending migrations (if any)...");
-await context.Database.MigrateAsync();
-Console.WriteLine("Database migrated successfully.");
-Console.WriteLine($"Database path: {context.Database.GetDbConnection().Database}");
-Console.WriteLine($"Tables: {string.Join(", ", context.Model.GetEntityTypes().Select(t => t.GetTableName()))}");
-var seedDataPath = Path.Combine(
-    Directory.GetCurrentDirectory(),
-    "bin", "Debug", "net10.0", "Data", "seedData.json");
-// Log configured IdentityWeb URL so we can verify what the seeder will register
-Console.WriteLine($"Configured IdentityWeb:Url = {configuration["IdentityWeb:Url"]}");
-Console.WriteLine($"Configured Identity:Url = {configuration["Identity:Url"]}");
-await DatabaseSeeder.SeedAsync(
-    context,
-    applicationManager,
-    seedDataPath,
-    passwordHasher,
-    configuration);
-
-#endif
-
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
