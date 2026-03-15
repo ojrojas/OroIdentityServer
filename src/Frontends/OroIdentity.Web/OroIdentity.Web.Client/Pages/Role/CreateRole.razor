@@ -18,6 +18,8 @@
 </FluentDivider>
 
 <FluentEditForm Model="@newRole" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
     <!-- Action buttons above the form -->
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
         <FluentButton Appearance="Appearance.Lightweight" OnClick="Cancel">Cancel</FluentButton>
@@ -29,6 +31,7 @@
                 <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
                     <FluentLabel Typo="Typography.H5">Role information</FluentLabel>
                     <FluentTextField @bind-Value="newRole.Name.Value" Label="Role name" Required="true" />
+                    <ValidationMessage For="() => newRole.Name.Value" />
                     <FluentSelect Items="activeOptions" Style="width:100%"  @bind-Value="@optionSelected"  Label="Status"
                                   OptionText="@(opt => opt.Key)"       OptionValue="@(opt => opt.Value)"        />
                 </div>

@@ -24,8 +24,8 @@ else
 {
     <FluentCard>
         <FluentStack Orientation="Orientation.Vertical" Gap="1rem">
-            <FluentTextField Label="Claim Type" @bind-Value="claim.ClaimType" />
-            <FluentTextField Label="Claim Value" @bind-Value="claim.ClaimValue" />
+            <FluentTextField Label="Claim Type" @bind-Value="ClaimType" />
+            <FluentTextField Label="Claim Value" @bind-Value="ClaimValue" />
             <FluentButton Appearance="Appearance.Accent" OnClick="UpdateClaim">Save</FluentButton>
         </FluentStack>
     </FluentCard>
@@ -34,6 +34,8 @@ else
 @code{
     [Parameter]
     public Guid Id { get; set; }
+    private string ClaimType { get; set; } = string.Empty;
+    private string ClaimValue { get; set; } = string.Empty;
 
     private RoleClaimViewModel? claim;
 
@@ -50,6 +52,9 @@ else
     private async Task UpdateClaim()
     {
         if (claim == null) return;
+
+        claim.ClaimType = NameViewModel.Create(ClaimType);
+        claim.ClaimValue = NameViewModel.Create(ClaimValue);
         await Service.UpdateRoleClaimAsync(claim, CancellationToken.None);
         NavigationManager.NavigateTo($"/roles/{claim.Id.Value}");
     }

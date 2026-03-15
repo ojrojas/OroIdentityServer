@@ -14,21 +14,30 @@
     <FluentButton Appearance="Appearance.Accent" OnClick="RedirectToRoles">Back</FluentButton>
 </HeaderPagesComponent>
 
-<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator"></FluentDivider>
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
+</FluentDivider>
 
 <FluentCard>
     <FluentStack Orientation="Orientation.Vertical" Gap="1rem">
-        <FluentTextField Label="Claim Type" @bind-Value="claim.ClaimType" />
-        <FluentTextField Label="Claim Value" @bind-Value="claim.ClaimValue" />
+        <FluentTextField Label="Claim Type" @bind-Value="ClaimType" />
+        <FluentTextField Label="Claim Value" @bind-Value="ClaimValue" />
         <FluentButton Appearance="Appearance.Accent" OnClick="CreateClaim">Create</FluentButton>
     </FluentStack>
 </FluentCard>
 
-@code{
+@code {
     [Parameter]
     public Guid RoleId { get; set; }
+    private string ClaimType { get; set; } = string.Empty;
+    private string ClaimValue { get; set; } = string.Empty;
 
-    private RoleClaimViewModel claim = new() { Id = IdViewModel.Empty(), ClaimType = string.Empty, ClaimValue = string.Empty };
+    private RoleClaimViewModel? claim { get; set; }
+
+    protected override void OnInitialized()
+    {
+        claim ??= new RoleClaimViewModel();
+        base.OnInitialized();
+    }
 
     private void RedirectToRoles()
     {
@@ -37,7 +46,11 @@
 
     private async Task CreateClaim()
     {
-        await Service.AssociateClaimToRoleAsync(RoleId, claim.ClaimType, claim.ClaimValue, CancellationToken.None);
+        await Service.AssociateClaimToRoleAsync(
+            RoleId,
+            ClaimType,
+            ClaimValue,
+            CancellationToken.None);
         NavigationManager.NavigateTo($"/roles/{RoleId}");
     }
 }

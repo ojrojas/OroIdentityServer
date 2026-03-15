@@ -13,6 +13,7 @@ public static class RoleClaimsEndpoints
         group.MapGet("get/{id}", GetRoleClaimById);
         group.MapGet("getbyrole/{roleId:guid}", GetRoleClaimsByRoleId);
         group.MapPost("associate", AssociateClaimToRole);
+        group.MapPost("associate/bulk", AssociatePermissionsToRole);
         group.MapPut("update", UpdateRoleClaim);
         group.MapDelete("delete/{id}", DeleteRoleClaim);
 
@@ -45,9 +46,21 @@ public static class RoleClaimsEndpoints
     {
         // payload.RoleClaim.Type and Value expected
         // Use RoleId from payload.Id or payload.RoleClaim ??? Accepting RoleClaimViewModel for simplicity
-        await service.AssociateClaimToRoleAsync(payload.Id.Value, payload.ClaimType, payload.ClaimValue, cancellationToken);
+        await service.AssociateClaimToRoleAsync(payload.Id.Value, payload.ClaimType.Value, payload.ClaimValue.Value, cancellationToken);
         return TypedResults.Ok();
     }
+
+    private static async Task<IResult> AssociatePermissionsToRole(
+        HttpContext context,
+        [FromServices] IRoleClaimsService service,
+        [FromBody] BulkAssociateRequest payload,
+        CancellationToken cancellationToken)
+    {
+        await service.AssociatePermissionsToRoleAsync(payload.RoleId, payload.PermissionIds, cancellationToken);
+        return TypedResults.Ok();
+    }
+
+    private record BulkAssociateRequest(Guid RoleId, IEnumerable<Guid> PermissionIds);
 
     private static async Task<IResult> UpdateRoleClaim(
         HttpContext context,

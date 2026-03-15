@@ -20,6 +20,9 @@ public static class RoleClaimsEndpoints
         api.MapPost("/associate", AssociateClaimToRole)
             .WithName("AssociateClaimToRole");
 
+        api.MapPost("/associate/bulk", AssociatePermissionsToRole)
+            .WithName("AssociatePermissionsToRole");
+
         api.MapPut("/update", UpdateRoleClaim)
             .WithName("UpdateRoleClaim");
 
@@ -49,6 +52,12 @@ public static class RoleClaimsEndpoints
     }
 
     private static async Task<IResult> AssociateClaimToRole(AssociateClaimToRoleCommand command, ISender sender, CancellationToken cancellationToken)
+    {
+        await sender.Send(command, cancellationToken);
+        return Results.Ok();
+    }
+
+    private static async Task<IResult> AssociatePermissionsToRole(AssociatePermissionsToRoleCommand command, ISender sender, CancellationToken cancellationToken)
     {
         await sender.Send(command, cancellationToken);
         return Results.Ok();

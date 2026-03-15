@@ -45,11 +45,18 @@ builder.Services.AddHttpClient<ISessionsService, SessionsClientService>(
     client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
 );
 
+builder.Services.AddHttpClient<ITenantsService, TenantsClientService>(
+    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+);
+
 builder.Services.AddHttpClient<IRoleClaimsService, RoleClaimsClientService>(
     client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
 );
 
-builder.Services.AddFluentUIComponents();
+builder.Services.AddHttpClient<IPermissionsService, PermissionsClientService>(
+    client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+);
 
+builder.Services.AddFluentUIComponents();
 
 await builder.Build().RunAsync();

@@ -69,6 +69,12 @@ builder.Services.AddScoped<IThemeService, ThemeService>();
 
 builder.Services.AddHttpContextAccessor();
 
+// When initiating the OAuth/OpenId Connect challenge, set a flag that indicates whether the client
+// app expects a local sign-in to be performed by the callback handler. This prevents the ServiceDefaults
+// callback from creating cookies unless explicitly requested by the initiator.
+// Usage: when calling /account/login, set authentication properties Parameters["local_signin"] = "true" if a local cookie is desired.
+
+
 builder.AddServiceDefaults();
 
 builder.Services.AddHttpClient<IApplicationsService, ApplicationsService>(
@@ -107,6 +113,13 @@ builder.Services.AddHttpClient<IIdentificationTypeService, IdentificationTypesSe
 ).AddHttpMessageHandler<TokenHandler>();
 
 builder.Services.AddHttpClient<IPermissionsService, PermissionsService>(
+    client => { 
+        client.BaseAddress = new Uri(identityUri) ?? 
+        throw new Exception("Missing base address environment");
+    }
+).AddHttpMessageHandler<TokenHandler>();
+
+builder.Services.AddHttpClient<ITenantsService, TenantsService>(
     client => { 
         client.BaseAddress = new Uri(identityUri) ?? 
         throw new Exception("Missing base address environment");
@@ -155,6 +168,7 @@ app.UseSession();
 app.MapIdentityEndpoints();
 app.MapApplicationEndpointsV1().RequireAuthorization();
 app.MapRolesEndpointsV1().RequireAuthorization();
+    app.MapTenantsEndpointsV1().RequireAuthorization();
 app.MapRoleClaimsEndpointsV1().RequireAuthorization();
 app.MapPermissionsEndpointsV1().RequireAuthorization();
 app.MapScopesEndpointsV1().RequireAuthorization();

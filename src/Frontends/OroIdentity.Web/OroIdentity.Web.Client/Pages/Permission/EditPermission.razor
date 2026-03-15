@@ -24,6 +24,8 @@
 else
 {
     <FluentEditForm Model="@permission" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;">
             <FluentButton Appearance="Appearance.Lightweight" OnClick="Cancel">Cancel</FluentButton>
             <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent">Update permission</FluentButton>
@@ -34,9 +36,12 @@ else
                     <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
                         <FluentLabel Typo="Typography.H5">Permission information</FluentLabel>
                         <FluentTextField @bind-Value="permission.Name" Label="Permission name" Required="true" />
+                        <ValidationMessage For="() => permission.Name" />
                         <FluentTextField @bind-Value="permission.DisplayName" Label="Display name" />
+                        <ValidationMessage For="() => permission.DisplayName" />
                         <FluentTextField @bind-Value="permission.Description" Label="Description" />
                         <FluentTextField @bind-Value="permission.Resource" Label="Resource" />
+                        <ValidationMessage For="() => permission.Resource" />
                         <FluentCheckbox @bind-Checked="permission.IsSystem">System</FluentCheckbox>
                     </div>
                 </FluentCard>

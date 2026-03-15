@@ -1,0 +1,55 @@
+@page "/create-tenant"
+@using OroIdentity.Web.Client.Interfaces
+@using OroIdentity.Web.Client.Models
+@using System.ComponentModel.DataAnnotations
+
+@attribute [Authorize]
+
+@inject NavigationManager NavigationManager
+@inject ITenantsService Service
+@inject IToastService Toast
+
+<PageTitle>Create Tenant</PageTitle>
+
+<HeaderPagesComponent TitlePage="Create Tenant" Description="Create a new tenant">
+</HeaderPagesComponent>
+
+<FluentDivider Style="width: 100%;height:20px;" Orientation=Orientation.Horizontal Role="DividerRole.Separator">
+</FluentDivider>
+
+<FluentEditForm Model="model" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <FluentTextField @bind-Value="model.Name" Placeholder="Tenant name" Label="Name" Required="true"></FluentTextField>
+    <ValidationMessage For="@(() => model.Name)" />
+    <FluentCheckbox @bind-Checked="model.IsActive">Active</FluentCheckbox>
+    <FluentButton Type="@(Microsoft.FluentUI.AspNetCore.Components.ButtonType.Submit)" Appearance="Appearance.Accent">Create</FluentButton>
+</FluentEditForm>
+
+@code {
+    private TenantFormModel model = new();
+
+    private class TenantFormModel
+    {
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(100, ErrorMessage = "Name must be at most 100 characters")]
+        public string Name { get; set; } = string.Empty;
+
+        public bool IsActive { get; set; } = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var request = new CreateTenantRequest(model.Name, model.IsActive);
+            await Service.CreateTenantAsync(request, CancellationToken.None);
+            Toast.ShowSuccess("Tenant created");
+            NavigationManager.NavigateTo("/tenants");
+        }
+        catch (Exception ex)
+        {
+            Toast.ShowError(ex.Message);
+        }
+    }
+}

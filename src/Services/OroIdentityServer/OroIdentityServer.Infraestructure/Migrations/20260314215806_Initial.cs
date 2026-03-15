@@ -155,7 +155,8 @@ namespace OroIdentityServer.Services.OroIdentityServer.Infraestructure.Migration
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    Slug = table.Column<string>(type: "text", nullable: false)
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -332,6 +333,8 @@ namespace OroIdentityServer.Services.OroIdentityServer.Infraestructure.Migration
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AuthorizationId = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     IpAddress = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     StartedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),

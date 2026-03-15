@@ -2,6 +2,7 @@ using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Client.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Net.Http.Json;
 
 namespace OroIdentity.Web.Client.Services;
 
