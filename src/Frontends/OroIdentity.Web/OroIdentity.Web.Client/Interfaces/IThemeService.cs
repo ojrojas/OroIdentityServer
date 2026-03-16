@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace OroIdentity.Web.Client.Interfaces;
 
 public interface IThemeService

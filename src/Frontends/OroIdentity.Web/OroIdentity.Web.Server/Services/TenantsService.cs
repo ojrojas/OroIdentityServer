@@ -1,7 +1,5 @@
-using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Net.Http.Json;
 using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Client.Models;
 

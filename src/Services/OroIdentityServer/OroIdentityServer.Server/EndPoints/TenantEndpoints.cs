@@ -1,9 +1,4 @@
 // OroIdentityServer Server endpoints for Tenant management
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using OroIdentityServer.Services.OroIdentityServer.Application.Queries;
-using OroIdentityServer.Services.OroIdentityServer.Application.Commands;
-
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Endpoints;
 
 public static class TenantEndpoints

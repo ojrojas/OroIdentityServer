@@ -64,9 +64,6 @@ public static class OpenIddictExtensions
             config.AddEncryptionKey(new SymmetricSecurityKey(
                 Convert.FromBase64String(signingKey)));
 
-
-
-
             config.SetAccessTokenLifetime(TimeSpan.FromHours(1));
             config.SetRefreshTokenLifetime(TimeSpan.FromDays(30));
 

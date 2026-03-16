@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Client.Models;
-using OroIdentity.Web.Server.Services;
 
 namespace OroIdentity.Web.Server.Endpoints;
 

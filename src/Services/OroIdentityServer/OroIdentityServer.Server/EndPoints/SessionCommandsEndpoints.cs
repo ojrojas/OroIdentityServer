@@ -2,11 +2,7 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-using Microsoft.AspNetCore.Http.HttpResults;
 using OroIdentityServer.OroIdentityServer.Infraestructure.Interfaces;
-using OroIdentityServer.Services.OroIdentityServer.Core.Models;
-using OpenIddict.Abstractions;
-using OroBuildingBlocks.ServiceDefaults;
 using System.Reflection;
 
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Endpoints;

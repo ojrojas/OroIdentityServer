@@ -20,11 +20,10 @@ public static class OroIdentityWebExtensions
             opt.DefaultChallengeScheme = OpenIddictClientAspNetCoreDefaults.AuthenticationScheme;
         })
 
-        .AddBearerToken()
-
         .AddCookie(options =>
         {
             options.LoginPath = "/account/login";
+            options.Cookie.Path = "/";
             options.Cookie.SameSite = SameSiteMode.Lax;
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             options.ExpireTimeSpan = TimeSpan.FromDays(7);

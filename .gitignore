@@ -490,3 +490,6 @@ nupkgs
 # pnpm
 pnpm-lock.yaml
 pnpm-workspace.yaml
+
+
+orodientityserver-admin.db

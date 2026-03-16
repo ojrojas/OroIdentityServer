@@ -4,12 +4,7 @@ using OroIdentityServer.Services.OroIdentityServer.Server.Components.Account;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentityServer.Services.OroIdentityServer.Core.Interfaces;
 using OroBuildingBlocks.ServiceDefaults;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
-using System.IO;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +21,6 @@ builder.Services.AddDataProtection()
 // Configure authentication cookie options
 builder.Services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme, opts =>
 {
-    opts.Cookie.Name = "OroAuth";
     opts.Cookie.Path = "/";
     opts.Cookie.SameSite = SameSiteMode.Lax;
     opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;

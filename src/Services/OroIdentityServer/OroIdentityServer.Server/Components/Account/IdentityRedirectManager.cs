@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http;
 
 namespace OroIdentityServer.Services.OroIdentityServer.Server.Components.Account;
 

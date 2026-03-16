@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http;
 
 namespace OroIdentity.Web.Server.Components.Pages.Account
 {
