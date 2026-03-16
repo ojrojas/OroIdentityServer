@@ -12,7 +12,6 @@ using OroIdentity.Web.Server.Handlers;
 using OroIdentity.Web.Server.Endpoints;
 using OroBuildingBlocks.ServiceDefaults;
 using OroIdentity.Web.Client.Services;
-using System.IO;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 

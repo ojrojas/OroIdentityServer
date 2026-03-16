@@ -3,7 +3,6 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using System.Net.Http.Json;
-using System.Text.Json;
 using OroIdentity.Web.Client.Interfaces;
 using OroIdentity.Web.Client.Models;
 

@@ -3,9 +3,6 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Components.Forms;
-
 namespace OroIdentity.Web.Client.Models;
 
 public class RoleViewModel
