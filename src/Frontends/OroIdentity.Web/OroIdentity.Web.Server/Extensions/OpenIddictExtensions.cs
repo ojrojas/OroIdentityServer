@@ -26,29 +26,8 @@ public static class OpenIddictExtensions
                 .UseDbContext<DbContext>();
             })
 
-            // .AddValidation(config =>
-            // {
-            //     config.SetIssuer($"{configuration["Identity:Url"]}/");
-            //     config.AddAudiences("OroIdentityServer.Web");
-
-            //     config.UseIntrospection()
-            //     .SetClientId("OroIdentityServer.Web")
-            //     .SetClientSecret("a2344152-e928-49e7-bb3c-ee54acc96c8c");
-
-            //     // Configure encryption and signing of tokens.  testing phrase tokens ORO_IDENTITY_SERVER_PROJECT_0001
-            //     config.AddEncryptionKey(new SymmetricSecurityKey(
-            //         Convert.FromBase64String(signingKey)));
-
-            //     // Register the System.Net.Http integration.
-            //     config.UseSystemNetHttp();
-            //     config.UseAspNetCore();
-            // })
-
             .AddClient(options =>
             {
-                // Disable token storage since we don't need persistent storage for this client
-                // options.DisableTokenStorage();
-
                 // Note: this sample uses the authorization code flow,
                 // but you can enable the other flows if necessary.
                 options.AllowAuthorizationCodeFlow()
@@ -68,6 +47,10 @@ public static class OpenIddictExtensions
 
                 // Register the System.Net.Http integration.
                 options.UseSystemNetHttp();
+
+                // Add the operating system integration.
+                // options.UseSystemIntegration();
+
                 options.UseAspNetCore()
                        .EnableRedirectionEndpointPassthrough()
                        .EnablePostLogoutRedirectionEndpointPassthrough();
