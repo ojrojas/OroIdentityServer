@@ -47,7 +47,7 @@ public static class OpenIddictExtensions
             .AddClient(options =>
             {
                 // Disable token storage since we don't need persistent storage for this client
-                options.DisableTokenStorage();
+                // options.DisableTokenStorage();
 
                 // Note: this sample uses the authorization code flow,
                 // but you can enable the other flows if necessary.

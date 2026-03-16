@@ -14,6 +14,7 @@ using OroBuildingBlocks.ServiceDefaults;
 using OroIdentity.Web.Client.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,15 +29,6 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.GetFullPath(keysFolder)))
     .SetApplicationName("OroIdentityShared");
 
-// Configure authentication cookie options
-builder.Services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme, opts =>
-{
-    opts.Cookie.Name = "OroAuth";
-    opts.Cookie.Path = "/";
-    opts.Cookie.SameSite = SameSiteMode.Lax;
-    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-});
-
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
@@ -44,6 +36,8 @@ builder.Services.AddRazorComponents()
     .AddAuthenticationStateSerialization(
         options => options.SerializeAllClaims = true);
 builder.Services.AddFluentUIComponents(options => options.ValidateClassNames = false);
+
+builder.AddAppWebExtensions();
 
 builder.AddOroIdentityWebExtensions();
 
@@ -65,7 +59,6 @@ builder.Services.AddScoped<IApplicationsService, ApplicationsService>();
 
 builder.Services.AddScoped<IThemeService, ThemeService>();
 
-
 builder.Services.AddHttpContextAccessor();
 
 // When initiating the OAuth/OpenId Connect challenge, set a flag that indicates whether the client
@@ -73,72 +66,9 @@ builder.Services.AddHttpContextAccessor();
 // callback from creating cookies unless explicitly requested by the initiator.
 // Usage: when calling /account/login, set authentication properties Parameters["local_signin"] = "true" if a local cookie is desired.
 
-
 builder.AddServiceDefaults();
 
-builder.Services.AddHttpClient<IApplicationsService, ApplicationsService>(
-    client => { 
-        client.BaseAddress = new Uri(identityUri) ?? 
-        throw new Exception("Missing base address environment");
-    }
-).AddHttpMessageHandler<TokenHandler>();
-
-builder.Services.AddHttpClient<IRolesService, RolesService>(
-    client => { 
-        client.BaseAddress = new Uri(identityUri) ?? 
-        throw new Exception("Missing base address environment");
-    }
-).AddHttpMessageHandler<TokenHandler>();
-
-builder.Services.AddHttpClient<IScopesService, ScopesService>(
-    client => { 
-        client.BaseAddress = new Uri(identityUri) ?? 
-        throw new Exception("Missing base address environment");
-    }
-).AddHttpMessageHandler<TokenHandler>();
-
-builder.Services.AddHttpClient<IUsersService, UsersService>(
-    client => { 
-        client.BaseAddress = new Uri(identityUri) ?? 
-        throw new Exception("Missing base address environment");
-    }
-).AddHttpMessageHandler<TokenHandler>();
-
-builder.Services.AddHttpClient<IIdentificationTypeService, IdentificationTypesService>(
-    client => { 
-        client.BaseAddress = new Uri(identityUri) ?? 
-        throw new Exception("Missing base address environment");
-    }
-).AddHttpMessageHandler<TokenHandler>();
-
-builder.Services.AddHttpClient<IPermissionsService, PermissionsService>(
-    client => { 
-        client.BaseAddress = new Uri(identityUri) ?? 
-        throw new Exception("Missing base address environment");
-    }
-).AddHttpMessageHandler<TokenHandler>();
-
-builder.Services.AddHttpClient<ITenantsService, TenantsService>(
-    client => { 
-        client.BaseAddress = new Uri(identityUri) ?? 
-        throw new Exception("Missing base address environment");
-    }
-).AddHttpMessageHandler<TokenHandler>();
-
-// Sessions proxy service to aggregate and manage sessions from identity server
-builder.Services.AddHttpClient<ISessionsService, SessionsService>(
-    client => {
-        client.BaseAddress = new Uri(identityUri) ??
-        throw new Exception("Missing base address environment");
-    }
-).AddHttpMessageHandler<TokenHandler>();
-
-builder.Services.AddHttpClient<IRoleClaimsService, RoleClaimsService>(
-    client => {
-        client.BaseAddress = new Uri(identityUri) ??
-        throw new Exception("Missing base address environment");
-    }
-).AddHttpMessageHandler<TokenHandler>();
+builder.AddAppHttpClientExtensions(identityUri);
 
 var app = builder.Build();
 
@@ -154,6 +84,10 @@ else
     app.UseHsts();
 }
 
+await using var scope = app.Services.CreateAsyncScope();
+var context = scope.ServiceProvider.GetRequiredService<DbContext>();
+await context.Database.EnsureCreatedAsync();
+
 app.MapStaticAssets();
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
@@ -167,7 +101,7 @@ app.UseSession();
 app.MapIdentityEndpoints();
 app.MapApplicationEndpointsV1().RequireAuthorization();
 app.MapRolesEndpointsV1().RequireAuthorization();
-    app.MapTenantsEndpointsV1().RequireAuthorization();
+app.MapTenantsEndpointsV1().RequireAuthorization();
 app.MapRoleClaimsEndpointsV1().RequireAuthorization();
 app.MapPermissionsEndpointsV1().RequireAuthorization();
 app.MapScopesEndpointsV1().RequireAuthorization();

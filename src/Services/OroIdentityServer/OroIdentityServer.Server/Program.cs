@@ -21,7 +21,6 @@ builder.Services.AddDataProtection()
 // Configure authentication cookie options
 builder.Services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme, opts =>
 {
-    opts.Cookie.Name = "OroAuth";
     opts.Cookie.Path = "/";
     opts.Cookie.SameSite = SameSiteMode.Lax;
     opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;

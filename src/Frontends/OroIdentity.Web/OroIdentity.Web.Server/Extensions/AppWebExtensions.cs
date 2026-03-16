@@ -13,7 +13,7 @@ public static class AppWebExtensions
     {
         builder.Services.AddDbContext<DbContext>(options =>
         {
-            options.UseSqlite($"Filename={Path.Combine(Path.GetTempPath(), "openiddict-admin-server.db")}");
+            options.UseSqlite($"Filename={Path.Combine(builder.Environment.ContentRootPath, "orodientityserver-admin.db")}");
             options.UseOpenIddict();
         });
 
