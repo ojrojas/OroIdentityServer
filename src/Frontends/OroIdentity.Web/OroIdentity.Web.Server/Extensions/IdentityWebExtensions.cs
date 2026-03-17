@@ -17,14 +17,14 @@ public static class OroIdentityWebExtensions
         builder.Services.AddAuthentication(opt =>
         {
             opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            opt.DefaultChallengeScheme = OpenIddictClientAspNetCoreDefaults.AuthenticationScheme;
+            opt.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         })
 
         .AddCookie(options =>
         {
             options.LoginPath = "/account/login";
-            options.Cookie.Path = "/";
-            options.Cookie.SameSite = SameSiteMode.Lax;
+            options.LogoutPath = "/account/logout";
+            // options.Cookie.SameSite = SameSiteMode.Lax;
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             options.ExpireTimeSpan = TimeSpan.FromDays(7);
         });

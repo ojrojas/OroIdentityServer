@@ -8,8 +8,6 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var configuration = builder.Configuration;
 
-var openBao = builder.AddContainer("openbao", "dhi.io/openbao");
-
 var launchProfile = ShouldUseHttpForEndpoints(configuration) ? Constants.Http : Constants.Https;
 
 var seq = builder.AddSeq(Constants.Seq);

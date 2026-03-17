@@ -24,7 +24,7 @@
             await httpContext.SignOutAsync(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme);
         }
         
-        httpContext.Session.Clear();
+        @* httpContext.Session.Clear(); *@
 
         // Recuperar el returnUrl guardado en las propiedades durante el logout
         var redirectUri = result.Properties?.Items.TryGetValue("returnUrl", out var url) == true ? url : "/";

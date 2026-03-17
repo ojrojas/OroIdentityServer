@@ -5,6 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Client;
+using Quartz;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace OroIdentity.Web.Server.Extensiones;
@@ -18,12 +19,25 @@ public static class OpenIddictExtensions
 
         ArgumentException.ThrowIfNullOrEmpty(signingKey, "SymmetricSecurityKey configuration is missing");
 
+        // OpenIddict offers native integration with Quartz.NET to perform scheduled tasks
+        // (like pruning orphaned authorizations from the database) at regular intervals.
+        services.AddQuartz(options =>
+        {
+            options.UseSimpleTypeLoader();
+            options.UseInMemoryStore();
+        });
+
+        // Register the Quartz.NET service and configure it to block shutdown until jobs are complete.
+        services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+
         services.AddOpenIddict()
 
             .AddCore(options =>
             {
                 options.UseEntityFrameworkCore()
                 .UseDbContext<DbContext>();
+
+                options.UseQuartz();
             })
 
             .AddClient(options =>
@@ -45,15 +59,14 @@ public static class OpenIddictExtensions
                 // Add a development signing certificate for interactive flows
                 options.AddDevelopmentSigningCertificate();
 
-                // Register the System.Net.Http integration.
-                options.UseSystemNetHttp();
-
-                // Add the operating system integration.
-                // options.UseSystemIntegration();
 
                 options.UseAspNetCore()
+                    .EnableStatusCodePagesIntegration()
                        .EnableRedirectionEndpointPassthrough()
                        .EnablePostLogoutRedirectionEndpointPassthrough();
+               
+                options.UseSystemNetHttp()
+                       .SetProductInformation(typeof(Program).Assembly);
 
                 options.AddRegistration(new OpenIddictClientRegistration
                 {

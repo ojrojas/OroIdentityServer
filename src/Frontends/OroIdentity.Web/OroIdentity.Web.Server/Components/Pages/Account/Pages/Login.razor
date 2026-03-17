@@ -1,7 +1,8 @@
-@page "/account/login"
+@page "/account/loginIn"
 
 @layout LoginLayout
 @attribute [AllowAnonymous]
+
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
@@ -22,7 +23,6 @@
 @inject IHttpContextAccessor httpContextAccessor
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Log in</PageTitle>
 
@@ -78,7 +78,7 @@
 
         editContext = new EditContext(Input);
 
-        failedAttempts = HttpContext.Session.GetInt32("failedAttempts") ?? 0;
+        @* failedAttempts = HttpContext.Session.GetInt32("failedAttempts") ?? 0; *@
 
         if (!string.IsNullOrEmpty(ReturnUrl) && !ReturnUrl.StartsWith("/") && !Uri.IsWellFormedUriString(ReturnUrl,
         UriKind.Relative))
@@ -89,8 +89,8 @@
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
             // Clear the existing external cookies to ensure a clean login process
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignOutAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
+            @* await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme); *@
+            @* await HttpContext.SignOutAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme); *@
         }
     }
 

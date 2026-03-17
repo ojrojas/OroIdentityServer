@@ -1,6 +1,5 @@
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentity.Web.Server.Components;
-using OroIdentity.Web.Server.Components.Pages.Account;
 using OroIdentity.Web.Server.Extensiones;
 using OroIdentity.Web.Server.Services;
 using OroIdentity.Frontends.Services;
@@ -13,8 +12,8 @@ using OroIdentity.Web.Server.Endpoints;
 using OroBuildingBlocks.ServiceDefaults;
 using OroIdentity.Web.Client.Services;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using OroIdentity.Web.Server.Components.Pages.Account;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,16 +38,16 @@ builder.Services.AddFluentUIComponents(options => options.ValidateClassNames = f
 
 builder.AddAppWebExtensions();
 
-builder.AddOroIdentityWebExtensions();
+builder.Services.AddAntiforgery();
 
 builder.Services.AddDIOpenIddictApplication(configuration);
 
+builder.AddOroIdentityWebExtensions();
+
 builder.Services.AddScoped<IdentityRedirectManager>();
 
-builder.Services.AddAntiforgery();
-
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession();
+// builder.Services.AddSession();
 builder.Services.AddScoped<TokenHandler>();
 
 var identityUri = configuration.GetSection("Identity:Url").Value;
@@ -89,6 +88,7 @@ var context = scope.ServiceProvider.GetRequiredService<DbContext>();
 await context.Database.EnsureCreatedAsync();
 
 app.MapStaticAssets();
+app.UseStaticFiles();
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
@@ -96,7 +96,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseSession();
+// app.UseSession();
 
 app.MapIdentityEndpoints();
 app.MapApplicationEndpointsV1().RequireAuthorization();
