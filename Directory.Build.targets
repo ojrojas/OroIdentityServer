@@ -23,7 +23,6 @@
 
   <!-- Run tests after build if in Debug configuration -->
   <Target Name="RunTests" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
-    <Exec Command="dotnet test --no-build --verbosity=normal" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
 </Project>

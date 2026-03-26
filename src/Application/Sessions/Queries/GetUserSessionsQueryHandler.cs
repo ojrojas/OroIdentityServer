@@ -1,0 +1,30 @@
+// OroIdentityServer
+// Copyright (C) 2026 Oscar Rojas
+// Licensed under the GNU AGPL v3.0 or later.
+// See the LICENSE file in the project root for details.
+namespace OroIdentityServer.Application.Queries;
+
+public class GetUserSessionsQueryHandler(
+    ILogger<GetUserSessionsQueryHandler> logger,
+    ISessionRepository sessionRepository)
+: IQueryHandler<GetUserSessionsQuery, GetUserSessionsQueryResponse>
+{
+    public async Task<GetUserSessionsQueryResponse> HandleAsync(GetUserSessionsQuery query, CancellationToken cancellationToken)
+    {
+        var response = new GetUserSessionsQueryResponse();
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Handling GetUserSessionsQuery for UserId: {UserId}", query.UserId);
+
+        try
+        {
+            response.Data = await sessionRepository.GetSessionsByUserIdAsync(query.UserId, cancellationToken);
+            logger.LogInformation("Successfully handled GetUserSessionsQuery for UserId: {UserId}", query.UserId);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while handling GetUserSessionsQuery for UserId: {UserId}", query.UserId);
+            throw;
+        }
+    }
+}
