@@ -5,6 +5,11 @@ using Microsoft.FluentUI.AspNetCore.Components;
 using OroIdentityServer.Core.Interfaces;
 using OroBuildingBlocks.ServiceDefaults;
 using Microsoft.AspNetCore.DataProtection;
+using System.Reflection;
+using System.Collections;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,18 +59,13 @@ builder.Services.Configure<RouteOptions>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-var identityWebUrl = configuration.GetValue<string>("Identity:Url");
-var accountantsWebUrl = configuration.GetValue<string>("ACCOUNTANTS_WEB_HTTP");
-var accountantsApiUrl = configuration.GetValue<string>("ACCOUNTANTS_API_HTTPS");
+var listOfOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(
-            identityWebUrl,
-            accountantsWebUrl,
-            accountantsApiUrl)
+        policy.WithOrigins(listOfOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -81,6 +81,10 @@ builder.Services.AddSession(options =>
     options.Cookie.Path = "/";
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
+
+// Server port discovery: register provider and initializer hosted service
+builder.Services.AddSingleton<ServerPortProvider>();
+builder.Services.AddHostedService<ServerPortInitializerHostedService>();
 
 var app = builder.Build();
 
@@ -194,3 +198,141 @@ app.MapUserSessionCommandsEndpointsV1()
 .WithTags("UserSessionCommands");
 
 app.Run();
+
+// Helper: stores discovered server ports and exposes readiness
+public sealed class ServerPortProvider
+{
+    private readonly List<int> _ports = new();
+    private readonly TaskCompletionSource<bool> _ready = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    public IReadOnlyList<int> Ports => _ports.AsReadOnly();
+    public bool IsReady => _ready.Task.IsCompleted;
+    public Task WaitForReadyAsync() => _ready.Task;
+
+    internal void SetPorts(IEnumerable<int> ports)
+    {
+        _ports.Clear();
+        _ports.AddRange(ports);
+        _ready.TrySetResult(true);
+    }
+}
+
+// Hosted service: runs on startup, inspects the server (features or via reflection) and fills the provider
+public sealed class ServerPortInitializerHostedService : Microsoft.Extensions.Hosting.IHostedService
+{
+    private readonly IServiceProvider _services;
+    private readonly Microsoft.Extensions.Logging.ILogger<ServerPortInitializerHostedService> _logger;
+
+    public ServerPortInitializerHostedService(IServiceProvider services, Microsoft.Extensions.Logging.ILogger<ServerPortInitializerHostedService> logger)
+    {
+        _services = services;
+        _logger = logger;
+    }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            // ensure we don't block startup sync contexts
+            await Task.Yield();
+
+            using var scope = _services.CreateScope();
+            var provider = scope.ServiceProvider;
+            var ports = new List<int>();
+
+            // Try to get IServer and then IServerAddressesFeature
+            var server = provider.GetService(typeof(Microsoft.AspNetCore.Hosting.Server.IServer)) as Microsoft.AspNetCore.Hosting.Server.IServer;
+            if (server != null)
+            {
+                var featuresProp = server.GetType().GetProperty("Features", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var features = featuresProp?.GetValue(server) as Microsoft.AspNetCore.Http.Features.IFeatureCollection;
+                var addressesFeature = features?.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>();
+                if (addressesFeature != null)
+                {
+                    foreach (var address in addressesFeature.Addresses)
+                    {
+                        if (Uri.TryCreate(address, UriKind.Absolute, out var uri) && uri.Port > 0)
+                            ports.Add(uri.Port);
+                        else
+                        {
+                            var idx = address.LastIndexOf(':');
+                            if (idx > -1 && int.TryParse(address.Substring(idx + 1), out var p))
+                                ports.Add(p);
+                        }
+                    }
+                }
+
+                // Reflection fallback into Kestrel internals
+                if (!ports.Any() && server.GetType().FullName?.Contains("KestrelServer") == true)
+                {
+                    object kestrelOptions = null;
+                    var optionsField = server.GetType().GetField("_options", BindingFlags.Instance | BindingFlags.NonPublic);
+                    if (optionsField != null)
+                        kestrelOptions = optionsField.GetValue(server);
+                    else
+                    {
+                        var optProp = server.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                            .FirstOrDefault(p => p.PropertyType.Name.Contains("KestrelServerOptions"));
+                        if (optProp != null)
+                            kestrelOptions = optProp.GetValue(server);
+                    }
+
+                    if (kestrelOptions != null)
+                    {
+                        var listenProp = kestrelOptions.GetType().GetProperty("ListenOptions", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                        var listenOpts = listenProp?.GetValue(kestrelOptions) as IEnumerable;
+                        if (listenOpts != null)
+                        {
+                            foreach (var lo in listenOpts)
+                            {
+                                var epProp = lo.GetType().GetProperty("EndPoint", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                                var ep = epProp?.GetValue(lo) as System.Net.EndPoint;
+                                if (ep is System.Net.IPEndPoint ipe)
+                                {
+                                    ports.Add(ipe.Port);
+                                }
+                                else
+                                {
+                                    var portProp = lo.GetType().GetProperty("Port", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                                    if (portProp != null && portProp.GetValue(lo) is int p)
+                                        ports.Add(p);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Config fallback (ASPNETCORE_URLS / urls)
+            if (!ports.Any())
+            {
+                var config = provider.GetService(typeof(Microsoft.Extensions.Configuration.IConfiguration)) as Microsoft.Extensions.Configuration.IConfiguration;
+                var urls = config? ["ASPNETCORE_URLS"] ?? config?["urls"] ?? config?["Urls"];
+                if (!string.IsNullOrEmpty(urls))
+                {
+                    foreach (var part in urls.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        if (Uri.TryCreate(part, UriKind.Absolute, out var uri2) && uri2.Port > 0)
+                            ports.Add(uri2.Port);
+                        else
+                        {
+                            var idx = part.LastIndexOf(':');
+                            if (idx > -1 && int.TryParse(part.Substring(idx + 1), out var p))
+                                ports.Add(p);
+                        }
+                    }
+                }
+            }
+
+            var providerSingleton = provider.GetService(typeof(ServerPortProvider)) as ServerPortProvider;
+            providerSingleton?.SetPorts(ports.Distinct().ToList());
+            _logger.LogInformation("Server ports discovered: {ports}", string.Join(", ", ports.Distinct()));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not determine server ports via reflection.");
+        }
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+}

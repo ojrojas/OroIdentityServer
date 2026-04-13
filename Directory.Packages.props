@@ -5,7 +5,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.2.0" />
+    <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.2.2" />
     <PackageVersion Include="Aspire.Seq" Version="13.2.0" />
     <PackageVersion Include="BCrypt.Net-Next" Version="4.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.9" />
@@ -32,7 +32,7 @@
     <PackageVersion Include="OroKernel.Shared" Version="1.0.0" />
     <PackageVersion Include="OroLoggers" Version="1.0.0" />
     <PackageVersion Include="OroServiceDefaults" Version="1.0.0" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.16.1" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.18.0" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.12.6" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="9.0.0" />
     <PackageVersion Include="Serilog" Version="4.3.0" />

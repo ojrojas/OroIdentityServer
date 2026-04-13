@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Weak(!)Password123
+      POSTGRES_DB: identitydb
+    ports:
+      - "5432:5432"
+  
