@@ -4,11 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Models;
 
-public sealed class TenantName : BaseValueObject
+public sealed class TenantName(string value) : BaseValueObject
 {
-    public string Value { get; private set; }
-
-    public TenantName(string value) => Value = value;
+    public string Value { get; private set; } = value;
 
     protected override IEnumerable<object> GetEquatibilityComponents()
     {

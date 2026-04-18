@@ -4,11 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Models;
 
-public sealed class RoleClaimValue : BaseValueObject
+public sealed class RoleClaimValue(string value) : BaseValueObject
 {
-    public string Value { get; private set; }
-
-    public RoleClaimValue(string value) => Value = value;
+    public string Value { get; private set; } = value;
 
     protected override IEnumerable<object?> GetEquatibilityComponents()
     {

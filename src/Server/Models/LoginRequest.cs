@@ -5,16 +5,9 @@
 
 namespace OroIdentityServer.Server.Models;
 
-public class LoginRequest
+public class LoginRequest(string userName, string password, bool rememberMe)
 {
-    public string UserName { get; set; }
-    public string Password { get; set; }
-    public bool RememberMe { get; set; }
-
-    public LoginRequest(string userName, string password, bool rememberMe)
-    {
-        UserName = userName;
-        Password = password;
-        RememberMe = rememberMe;
-    }
+    public string UserName { get; set; } = userName;
+    public string Password { get; set; } = password;
+    public bool RememberMe { get; set; } = rememberMe;
 }

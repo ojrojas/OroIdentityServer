@@ -36,3 +36,5 @@ global using Microsoft.AspNetCore.Authorization;
 global using OpenIddict.Validation.AspNetCore;
 global using OroIdentityServer.Core.Models;
 global using OroBuildingBlocks.Loggers;
+global using System.Collections;
+global using System.Reflection;

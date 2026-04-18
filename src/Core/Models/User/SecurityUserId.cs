@@ -4,14 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Models;
 
-public sealed class SecurityUserId : BaseValueObject
+public sealed class SecurityUserId(Guid value) : BaseValueObject
 {
-    public Guid Value { get; private set; }
-
-    public SecurityUserId(Guid value)
-    {
-        Value = value;
-    }
+    public Guid Value { get; private set; } = value;
 
     public static SecurityUserId New() => new(Guid.CreateVersion7());
 

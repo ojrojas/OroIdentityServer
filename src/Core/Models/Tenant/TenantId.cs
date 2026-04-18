@@ -4,11 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Models;
 
-public sealed class TenantId : BaseValueObject
+public sealed class TenantId(Guid value) : BaseValueObject
 {
-    public Guid Value { get; private set; }
-
-    public TenantId(Guid value) => Value = value;
+    public Guid Value { get; private set; } = value;
 
     public static TenantId New() => new(Guid.CreateVersion7());
     protected override IEnumerable<object> GetEquatibilityComponents()
