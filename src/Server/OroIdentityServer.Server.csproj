@@ -10,11 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OroIdentityServer.Application\OroIdentityServer.Application.csproj" />
-    <ProjectReference Include="..\Application\OroIdentityServer.Application.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
@@ -29,5 +24,9 @@
     <PackageReference Include="OroLoggers" />
     <PackageReference Include="OroServiceDefaults" />
     <PackageReference Include="Quartz.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Application/OroIdentityServer.Application.csproj" />
   </ItemGroup>
 </Project>

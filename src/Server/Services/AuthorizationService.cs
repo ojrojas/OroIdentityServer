@@ -473,6 +473,11 @@ public class AuthorizationService(
             claims[Claims.PreferredUsername] = user?.Data?.Name ?? user?.Data?.UserName;
         }
 
+        if(user?.Data?.TenantId?.Value != null)
+        {
+            claims["tenant_id"] = user.Data.TenantId.Value.ToString();
+        }
+
         return TypedResults.Ok(claims);
     }
 }

@@ -85,7 +85,7 @@ public sealed class ServerPortInitializerHostedService(IServiceProvider services
             // Config fallback (ASPNETCORE_URLS / urls)
             if (ports.Count == 0)
             {
-                var config = provider.GetService(typeof(Microsoft.Extensions.Configuration.IConfiguration)) as Microsoft.Extensions.Configuration.IConfiguration;
+                var config = provider.GetService(typeof(IConfiguration)) as IConfiguration;
                 var urls = config? ["ASPNETCORE_URLS"] ?? config?["urls"] ?? config?["Urls"];
                 if (!string.IsNullOrEmpty(urls))
                 {

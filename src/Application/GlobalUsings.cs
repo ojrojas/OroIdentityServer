@@ -18,3 +18,4 @@ global using System.Text.Json;
 global using Microsoft.IdentityModel.Tokens;
 global using System.Net;
 global using OroIdentityServer.Application.Commands;
+global using OroIdentityServer.Application.Abstractions.Mappers;
