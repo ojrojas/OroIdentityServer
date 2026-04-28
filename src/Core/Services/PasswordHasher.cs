@@ -4,21 +4,19 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Services;
 
-using BCrypt.Net;
-
 public class PasswordHasher : IPasswordHasher
 {
     public async ValueTask<string> HashPassword(string password)
     {
         // Use BCrypt to hash the password with a work factor of 12 (specialized configuration)
-        string hashedPassword = BCrypt.HashPassword(password, workFactor: 12);
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12);
         return await Task.FromResult(hashedPassword);
     }
 
     public async ValueTask<bool> VerifyPassword(string password, string hashedPassword)
     {
         // Use BCrypt to verify the password against the hashed password
-        bool isValid = BCrypt.Verify(password, hashedPassword);
+        bool isValid = BCrypt.Net.BCrypt.Verify(password, hashedPassword);
         return await Task.FromResult(isValid);
     }
 }

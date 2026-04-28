@@ -1,4 +1,6 @@
 // OroIdentityServer Server endpoints for Tenant management
+using OroIdentityServer.Core.Shared;
+
 namespace OroIdentityServer.Server.Endpoints;
 
 public static class TenantEndpoints

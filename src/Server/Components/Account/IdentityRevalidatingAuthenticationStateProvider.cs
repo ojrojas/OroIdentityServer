@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.Extensions.Options;
+using OroIdentityServer.Core.Modules.Users.Aggregates;
 
 namespace OroIdentityServer.Server.Components.Account;
 

@@ -5,8 +5,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" />
     <PackageReference Include="OpenIddict.Abstractions" />
     <PackageReference Include="OroCQRS" />
+    <PackageReference Include="OroEventBus" />
+    <PackageReference Include="OroEventBusRabbitMQ" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Modules/IdentificationTypes/DTOs/" />
+    <Folder Include="Modules/Permissions/DTOs/" />
+    <Folder Include="Modules/Roles/DTOs/" />
+    <Folder Include="Modules/Sessions/DTOs/" />
+    <Folder Include="Modules/Users/DTOs/" />
+    <Folder Include="Modules/UserSessions/DTOs/" />
   </ItemGroup>
 
   <PropertyGroup>

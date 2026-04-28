@@ -2,6 +2,9 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.Core.Modules.RoleClaims.Entities;
+using OroIdentityServer.Core.Modules.RoleClaims.ValueObjects;
+
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Data;
 
 public static class DatabaseSeeder
@@ -170,7 +173,7 @@ public static class DatabaseSeeder
             {
                 descriptor.RedirectUris.Add(new Uri($"{configuredWeb}/auth/callback"));
                 descriptor.RedirectUris.Add(new Uri($"{configuredWeb}/"));
-                descriptor.PostLogoutRedirectUris.Add(new Uri($"{configuredWeb}/"));
+                descriptor.PostLogoutRedirectUris.Add(new Uri($"{configuredWeb}"));
             }
 
             foreach (var origin in webOrigins)

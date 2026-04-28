@@ -2,10 +2,12 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.Core.Modules.RoleClaims.Entities;
+
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Repositories;
 
 public class RolesRepository(
-    ILogger<RolesRepository> logger, 
+    ILogger<RolesRepository> logger,
     IRepository<Role> repository,
     OroIdentityAppContext context) : IRolesRepository
 {
@@ -69,13 +71,13 @@ public class RolesRepository(
         return result;
     }
 
-    public async Task AddRoleClaimAsync(RoleId roleId, RoleClaimType claimType, RoleClaimValue claimValue, CancellationToken cancellationToken)
+    public async Task AddRoleClaimAsync(RoleClaim roleClaim, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Entering AddRoleClaimAsync for roleId: {RoleId}", roleId);
-        var role = await repository.GetByIdAsync(roleId, cancellationToken);
+        logger.LogInformation("Entering AddRoleClaimAsync for roleId: {RoleId}", roleClaim.Id);
+        var role = await repository.GetByIdAsync(roleClaim.Id, cancellationToken);
         if (role != null)
         {
-            var newClaim = new RoleClaim(claimType, claimValue);
+            var newClaim = new RoleClaim(roleClaim.ClaimType, roleClaim.ClaimValue);
             role.AddClaim(newClaim);
             await repository.UpdateAsync(role, cancellationToken);
         }
@@ -98,7 +100,7 @@ public class RolesRepository(
         logger.LogInformation("Exiting DeleteRoleClaimAsync");
     }
 
-    public async Task UpdateRoleClaimAsync(Guid claimId, RoleClaimType newClaimType, RoleClaimValue newClaimValue, CancellationToken cancellationToken)
+    public async Task UpdateRoleClaimAsync(Guid claimId, RoleClaim roleClaim, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering UpdateRoleClaimAsync with claimId: {ClaimId}", claimId);
         var role = await context.Roles.FirstOrDefaultAsync(r => r.Claims.Any(c => c.Id == claimId), cancellationToken);
@@ -108,7 +110,7 @@ public class RolesRepository(
             if (existingClaim != null)
             {
                 role.RemoveClaim(existingClaim);
-                var newClaim = new RoleClaim(newClaimType, newClaimValue);
+                var newClaim = RoleClaim.From(claimId, roleClaim.ClaimType.Value, roleClaim.ClaimValue.Value, roleClaim.IsActive);
                 role.AddClaim(newClaim);
                 await repository.UpdateAsync(role, cancellationToken);
             }

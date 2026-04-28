@@ -1,0 +1,13 @@
+// OroIdentityServer
+// Copyright (C) 2026 Oscar Rojas
+// Licensed under the GNU AGPL v3.0 or later.
+// See the LICENSE file in the project root for details.
+namespace OroIdentityServer.Application.Modules.Roles.DTOs;
+
+public sealed record RoleDto
+{
+    private readonly IList<RoleClaim> _claims = [];
+    public bool IsActive { get; private set; }
+    public RoleName? Name { get; private set; }
+    public IReadOnlyCollection<RoleClaim> Claims => _claims.AsReadOnly();
+}

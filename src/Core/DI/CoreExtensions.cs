@@ -14,5 +14,4 @@ public static class CoreExtensions
         builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
         return builder;
     }
-
 }
