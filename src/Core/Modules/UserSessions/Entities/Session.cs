@@ -24,7 +24,7 @@ public sealed class Session : BaseEntity<Session, SessionId>, IAuditableEntity, 
 
     public Session(SessionId? id, UserId userId, TenantId tenantId, string ipAddress, string country, DateTime startedAtUtc, string? authorizationId)
     {
-        Id = id ?? SessionId.Create(null);
+        Id = id ?? SessionId.New(null);
         UserId = userId;
         TenantId = tenantId;
         AuthorizationId = authorizationId;
@@ -35,7 +35,7 @@ public sealed class Session : BaseEntity<Session, SessionId>, IAuditableEntity, 
 
     public static Session Create(UserId userId, string ipAddress, string country, TenantId tenantId, string? authorizationId = null)
     {
-        return new Session(SessionId.Create(null), userId, tenantId, ipAddress, country, DateTime.UtcNow, authorizationId);
+        return new Session(SessionId.New(null), userId, tenantId, ipAddress, country, DateTime.UtcNow, authorizationId);
     }
 
     public void End(DateTime endedAtUtc)

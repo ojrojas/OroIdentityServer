@@ -15,9 +15,17 @@ public class GetPermissionsQueryHandler(
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling GetPermissionsQuery");
 
+        var permissions = await permissionRepository.GetAllPermissionsAsync(cancellationToken);
+
         try
         {
-            response.Data = await permissionRepository.GetAllPermissionsAsync(cancellationToken);
+            response.Data = permissions.Select(p => new PermissionDto(
+                p.Id.Value, 
+                p.Name, 
+                p.DisplayName, 
+                p.Description, 
+                p.Resource, 
+                p.IsSystem));
             logger.LogInformation("Successfully handled GetPermissionsQuery");
             return response;
         }

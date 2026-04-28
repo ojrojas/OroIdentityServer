@@ -14,7 +14,7 @@ public class GetUserSessionsByUserQueryHandler(
         logger.LogInformation("Handling GetUserSessionsByUserQuery for UserId: {UserId}", query.UserId);
         try
         {
-            var sessions = await userSessionRepository.GetSessionsByUserIdAsync(query.UserId, cancellationToken);
+            var sessions = await userSessionRepository.GetSessionsByUserIdAsync(new (query.UserId), cancellationToken);
             logger.LogInformation("Retrieved {Count} sessions for user {UserId}", sessions?.Count() ?? 0, query.UserId);
             return sessions;
         }

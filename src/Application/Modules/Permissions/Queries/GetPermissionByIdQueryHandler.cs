@@ -15,9 +15,19 @@ public class GetPermissionByIdQueryHandler(
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling GetPermissionByIdQuery with Id: {Id}", query.PermissionId);
 
+        var permission = await permissionRepository.GetPermissionByIdAsync(PermissionId.New(query.PermissionId), cancellationToken);
+
         try
         {
-            response.Data = await permissionRepository.GetPermissionByIdAsync(query.PermissionId, cancellationToken);
+            response.Data = new PermissionDto(
+                permission.Id.Value,
+                permission.Name,
+                permission.DisplayName,
+                permission.Description,
+                permission.Resource,
+                permission.IsSystem
+            );
+            
             logger.LogInformation("Successfully handled GetPermissionByIdQuery for Id: {Id}", query.PermissionId);
             return response;
         }

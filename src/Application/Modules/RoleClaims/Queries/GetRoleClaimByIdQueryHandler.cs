@@ -15,7 +15,7 @@ public class GetRoleClaimByIdQueryHandler(ILogger<GetRoleClaimByIdQueryHandler> 
         _logger.LogInformation("Handling GetRoleClaimByIdQuery for RoleClaimId: {RoleClaimId}", query.Id);
 
         // Convert RoleClaimId to Guid before calling the repository method
-        var roleClaim = await _roleRepository.GetRoleClaimByIdAsync(query.Id.Value, cancellationToken);
+        var roleClaim = await _roleRepository.GetRoleClaimByIdAsync(query.Id, cancellationToken);
 
         if (roleClaim == null)
         {
@@ -31,7 +31,11 @@ public class GetRoleClaimByIdQueryHandler(ILogger<GetRoleClaimByIdQueryHandler> 
 
         return new GetRoleClaimByIdResponse
         {
-            Data = roleClaim
+            Data = new RoleClaimDto(
+                roleClaim.Id, 
+                roleClaim.ClaimType.Value, 
+                roleClaim.ClaimValue.Value, 
+                roleClaim.IsActive)
         };
     }
 }

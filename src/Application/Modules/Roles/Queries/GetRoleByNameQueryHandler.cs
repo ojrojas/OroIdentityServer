@@ -29,9 +29,23 @@ public class GetRoleByNameQueryHandler(
 
             logger.LogInformation("Successfully retrieved role with name: {RoleName}", query.Name);
 
+            var roleDto = new RoleDto();
+                
+                roleDto.Id = role.Id.Value;
+                    roleDto.Name = role.Name;
+                    roleDto.IsActive = role.IsActive;
+                    Claims = role.Claims.Select(c => new RoleClaimDto
+                    (
+                        Id = c.Id,
+                        ClaimType = c.ClaimType.Value,
+                        ClaimValue = c.ClaimValue.Value,
+                        IsActive = c.IsActive
+                    ))                
+                }
+
             return Task.FromResult(new GetRoleByNameResponse
             {
-                Data = role,
+                Data = roleDto
             });
         }
         catch (Exception ex)

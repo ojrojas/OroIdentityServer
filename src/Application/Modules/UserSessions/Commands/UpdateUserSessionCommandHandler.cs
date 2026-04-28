@@ -14,7 +14,7 @@ public class UpdateUserSessionCommandHandler(
         logger.LogInformation("Handling UpdateUserSessionCommand for SessionId: {SessionId}", command.SessionId);
         try
         {
-            var session = await userSessionRepository.GetUserSessionByIdAsync(command.SessionId, cancellationToken);
+            var session = await userSessionRepository.GetUserSessionByIdAsync(new (command.SessionId), cancellationToken);
             if (session == null)
             {
                 logger.LogWarning("Session not found: {SessionId}", command.SessionId);

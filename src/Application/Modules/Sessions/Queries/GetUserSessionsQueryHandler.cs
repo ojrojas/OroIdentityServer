@@ -15,9 +15,22 @@ public class GetUserSessionsQueryHandler(
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling GetUserSessionsQuery for UserId: {UserId}", query.UserId);
 
+            var sessions = await sessionRepository.GetSessionsByUserIdAsync(new(query.UserId), cancellationToken);
+
         try
         {
-            response.Data = await sessionRepository.GetSessionsByUserIdAsync(query.UserId, cancellationToken);
+            response.Data = sessions.Select(s => new SessionDto
+            {
+                UserId = s.UserId.Value,
+                SessionId = s.Id.Value,
+                TenantId = s.TenantId.Value,
+                StartedAtUtc = s.StartedAtUtc,
+                EndedAtUtc = s.EndedAtUtc,
+                AuthorizationId = s.AuthorizationId,
+                Country = s.Country,
+                IpAddress = s.IpAddress,
+                
+            });
             logger.LogInformation("Successfully handled GetUserSessionsQuery for UserId: {UserId}", query.UserId);
             return response;
         }

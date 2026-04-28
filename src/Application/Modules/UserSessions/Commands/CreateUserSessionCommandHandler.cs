@@ -14,7 +14,7 @@ public class CreateUserSessionCommandHandler(
         logger.LogInformation("Handling CreateUserSessionCommand for UserId: {UserId}", command.UserId);
         try
         {
-            var session = UserSession.CreateNewSession(command.UserId, command.Device, command.SessionToken, command.ExpiresAt, command.IpAddress, command.UserAgent, command.Location);
+            var session = UserSession.CreateNewSession(new (command.UserId), command.Device, command.SessionToken, command.ExpiresAt, command.IpAddress, command.UserAgent, command.Location);
             await userSessionRepository.AddUserSessionAsync(session, cancellationToken);
             logger.LogInformation("Created user session {SessionId} for user {UserId}", session.Id, command.UserId);
         }

@@ -14,7 +14,7 @@ public class GetRoleClaimsByRoleIdQueryHandler(ILogger<GetRoleClaimsByRoleIdQuer
     {
         _logger.LogInformation("Handling GetRoleClaimsByRoleIdQuery for RoleId: {RoleId}", query.RoleId);
 
-        var roleClaims = await _roleRepository.GetRoleClaimsByRoleIdAsync(query.RoleId, cancellationToken);
+        var roleClaims = await _roleRepository.GetRoleClaimsByRoleIdAsync(new(query.RoleId), cancellationToken);
 
         _logger.LogInformation("Successfully retrieved RoleClaims for RoleId: {RoleId}", query.RoleId);
 

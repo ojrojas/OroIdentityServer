@@ -15,7 +15,7 @@ public class UpdateRoleCommandHandler(
 
         try
         {
-            var role = await roleRepository.GetRoleByIdAsync(command.Id, cancellationToken);
+            var role = await roleRepository.GetRoleByIdAsync(new(command.Id), cancellationToken);
 
             if (role == null)
             {
@@ -23,7 +23,7 @@ public class UpdateRoleCommandHandler(
                 throw new KeyNotFoundException("Role not found.");
             }
 
-            role.UpdateName(command.RoleName);
+            role.UpdateName(new (command.RoleName));
             await roleRepository.UpdateRoleAsync(role, cancellationToken);
 
             logger.LogInformation("Successfully updated role with Id: {RoleId}", command.Id);

@@ -6,12 +6,12 @@ namespace OroIdentityServer.Application.Modules.Sessions.DTOs;
 
 public class SessionDto
 {
-    public Guid UserId { get; private set; }
+    public Guid UserId { get; set; }
     public User? User { get; set; }
-    public Guid TenantId { get; private set; }
-    public string? AuthorizationId { get; private set; }
-    public string IpAddress { get; private set; } = string.Empty;
-    public string Country { get; private set; } = string.Empty;
-    public DateTime StartedAtUtc { get; private set; }
-    public DateTime? EndedAtUtc { get; private set; }
+    public Guid TenantId { get; set; }
+    public string? AuthorizationId { get; set; }
+    public string IpAddress { get; set; } = string.Empty;
+    public string Country { get; set; } = string.Empty;
+    public DateTime StartedAtUtc { get; set; }
+    public DateTime? EndedAtUtc { get; set; }
 }
