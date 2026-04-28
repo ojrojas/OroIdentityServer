@@ -15,14 +15,14 @@ public class DeleteIdentificationTypeCommandHandler(
         {
             logger.LogInformation("Starting delete process for IdentificationType with ID {Id}", command.Id);
 
-            var identificationTypeExist = await repository.GetIdentificationTypeByIdAsync(command.Id, cancellationToken);
+            var identificationTypeExist = await repository.GetIdentificationTypeByIdAsync(new(command.Id), cancellationToken);
             if (identificationTypeExist == null)
             {
                 logger.LogWarning("IdentificationType with ID {Id} not found", command.Id);
                 throw new KeyNotFoundException($"IdentificationType with ID {command.Id} not found.");
             }
 
-            await repository.DeleteIdentificationTypeAsync(command.Id, cancellationToken);
+            await repository.DeleteIdentificationTypeAsync(identificationTypeExist.Id, cancellationToken);
 
             logger.LogInformation("Successfully deleted IdentificationType with ID {Id}", command.Id);
         }

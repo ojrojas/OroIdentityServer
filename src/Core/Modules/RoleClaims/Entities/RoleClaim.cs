@@ -30,7 +30,7 @@ public class RoleClaim
 
     public static RoleClaim From(Guid id, string claimType, string claimValue, bool isActive)
     {
-        return new RoleClaim(id, new RoleClaimType(claimType), new RoleClaimValue(claimValue), isActive);
+        return new RoleClaim(id, new(claimType), new(claimValue), isActive);
     }
 
     public RoleClaimType ClaimType { get; private set; }

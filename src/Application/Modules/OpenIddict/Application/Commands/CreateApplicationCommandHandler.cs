@@ -13,32 +13,32 @@ public class CreateApplicationCommandHandler(
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(command.descriptor.ClientId))
+            if (string.IsNullOrWhiteSpace(command.Descriptor.ClientId))
             {
                 logger.LogError("ClientId is null or empty. Cannot create application.");
-                throw new ArgumentException("ClientId cannot be null or empty.", nameof(command.descriptor.ClientId));
+                throw new ArgumentException("ClientId cannot be null or empty.", nameof(command.Descriptor.ClientId));
             }
 
             // Check if the application already exists
             var existingApplication = await applicationManager.FindByClientIdAsync(
-                command.descriptor.ClientId, cancellationToken);
+                command.Descriptor.ClientId, cancellationToken);
 
             if (existingApplication != null)
             {
-                logger.LogWarning("Application with ClientId {ClientId} already exists.", command.descriptor.ClientId);
+                logger.LogWarning("Application with ClientId {ClientId} already exists.", command.Descriptor.ClientId);
                 return;
             }
 
-            var descriptor = command.descriptor.ToOpenIddict();
+            var descriptor = command.Descriptor.ToOpenIddict();
 
             // Create the application
             await applicationManager.CreateAsync(descriptor, cancellationToken);
 
-            logger.LogInformation("Application with ClientId {ClientId} created successfully.", command.descriptor.ClientId);
+            logger.LogInformation("Application with ClientId {ClientId} created successfully.", command.Descriptor.ClientId);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while creating the application with ClientId {ClientId}.", command.descriptor.ClientId);
+            logger.LogError(ex, "An error occurred while creating the application with ClientId {ClientId}.", command.Descriptor.ClientId);
             throw;
         }
     }

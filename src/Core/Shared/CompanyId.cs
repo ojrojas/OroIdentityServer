@@ -9,8 +9,6 @@ public sealed class CompanyId(Guid value) : BaseValueObject
     public Guid Value { get; private set; } = value;
 
     public static CompanyId New() => new(Guid.CreateVersion7());
-    public static CompanyId From(Guid value) => new(value);
-
     protected override IEnumerable<object> GetEquatibilityComponents()
     {
         yield return Value;

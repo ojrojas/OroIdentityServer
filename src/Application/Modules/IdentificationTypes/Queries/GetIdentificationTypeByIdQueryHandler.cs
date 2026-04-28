@@ -17,7 +17,7 @@ public class GetIdentificationTypeByIdQueryHandler(
         try
         {
             var identificationType = await identificationTypeRepository.GetIdentificationTypeByIdAsync(
-                query.Id, cancellationToken);
+                new(query.Id), cancellationToken);
 
             if (identificationType == null)
             {
@@ -35,7 +35,7 @@ public class GetIdentificationTypeByIdQueryHandler(
 
             return new GetIdentificationTypeByIdResponse
             {
-                Data = new IdentificationTypeDto(
+                Data = new(
                     identificationType.Id.Value,                    
                     identificationType.Name.Value,
                     identificationType.IsActive,

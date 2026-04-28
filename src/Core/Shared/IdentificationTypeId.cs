@@ -7,8 +7,8 @@ namespace OroIdentityServer.Core.Shared;
 public sealed class IdentificationTypeId(Guid value) : BaseValueObject
 {
     public Guid Value { get; private set; } = value;
-
     public static IdentificationTypeId New() => new(Guid.CreateVersion7());
+
     protected override IEnumerable<object> GetEquatibilityComponents()
     {
         yield return Value;

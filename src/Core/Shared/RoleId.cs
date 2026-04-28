@@ -7,9 +7,8 @@ namespace OroIdentityServer.Core.Shared;
 public class RoleId(Guid value) : BaseValueObject
 {
     public Guid Value { get; private set; } = value;
-
     public static RoleId New() => new(Guid.CreateVersion7());
-    public static RoleId From(Guid Id) => new(Id);
+    
     protected override IEnumerable<object> GetEquatibilityComponents()
     {
         yield return Value;

@@ -13,7 +13,7 @@ public class GetApplicationsQueryHandler(
     {
         try
         {
-            var applications = new List<OpenIddictApplicationDescriptor>();
+            List<OpenIddictApplicationDescriptor> applications = [];
 
             await foreach (var application in applicationManager.ListAsync(cancellationToken: cancellationToken))
             {

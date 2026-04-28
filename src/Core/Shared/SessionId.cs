@@ -7,11 +7,7 @@ namespace OroIdentityServer.Core.Shared;
 public sealed class SessionId(Guid value) : BaseValueObject
 {
     public Guid Value { get; private set; } = value;
-
-    public static SessionId Create(Guid? value)
-    {
-        return new SessionId(value ?? Guid.NewGuid());
-    }
+    public static SessionId New(Guid? value)=> new(value ?? Guid.NewGuid());
 
     protected override IEnumerable<object?> GetEquatibilityComponents()
     {

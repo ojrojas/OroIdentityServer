@@ -7,9 +7,7 @@ namespace OroIdentityServer.Core.Shared;
 public sealed class TenantId(Guid value) : BaseValueObject
 {
     public Guid Value { get; private set; } = value;
-
     public static TenantId New() => new(Guid.CreateVersion7());
-    public static TenantId From(Guid value) => new(value);
 
     protected override IEnumerable<object> GetEquatibilityComponents()
     {

@@ -4,8 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Application.Modules.IdentificationTypes.Commands;
 
-public record CreateIdentificationTypeCommand(string Name)
-: ICommand
+public record CreateIdentificationTypeCommand(string Name) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();
 }

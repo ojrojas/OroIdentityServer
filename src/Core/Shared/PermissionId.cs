@@ -11,11 +11,7 @@ namespace OroIdentityServer.Core.Shared;
 public sealed class PermissionId(Guid value) : BaseValueObject
 {
     public Guid Value { get; private set; } = value;
-
-    public static PermissionId Create(Guid? value)
-    {
-        return new PermissionId(value ?? Guid.NewGuid());
-    }
+    public static PermissionId New(Guid? value) => new(value ?? Guid.NewGuid());
 
     protected override IEnumerable<object?> GetEquatibilityComponents()
     {

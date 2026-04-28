@@ -27,7 +27,6 @@ public class GetScopesQueryHandler(
                 {
                     descriptor.Resources.Add(res);
                 }
-
             }
 
             logger.LogInformation("Retrieved {Count} scopes successfully.", scopes.Count);

@@ -16,7 +16,7 @@ public class CreatePermissionCommandHandler(
 
         try
         {
-            var permission = Permission.Create(null, command.TenantId, command.Name, command.DisplayName, command.Description, command.Resource, command.IsSystem);
+            var permission = Permission.Create(null, new(command.TenantId), command.Name, command.DisplayName, command.Description, command.Resource, command.IsSystem);
             await permissionRepository.AddPermissionAsync(permission, cancellationToken);
             logger.LogInformation("Successfully created permission with Name: {Name}", command.Name);
         }

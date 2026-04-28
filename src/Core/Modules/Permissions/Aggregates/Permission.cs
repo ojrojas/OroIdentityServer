@@ -23,7 +23,7 @@ public sealed class Permission : BaseEntity<Permission, PermissionId>, IAuditabl
 
     public Permission(PermissionId? id, TenantId tenantId, string name, string displayName, string? description, string resource, bool isSystem)
     {
-        Id = id ?? PermissionId.Create(null);
+        Id = id ?? PermissionId.New(null);
         TenantId = tenantId;
         Name = name;
         DisplayName = displayName;

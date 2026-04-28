@@ -6,5 +6,5 @@ namespace OroIdentityServer.Application.Modules.Openddict.Queries;
 
 public record GetScopesQuery() : IQuery<IEnumerable<OpenIddictScopeDescriptor>>
 {
-    public Guid CorrelationId()=> Guid.NewGuid();
+    public Guid CorrelationId() => Guid.NewGuid();
 }

@@ -1,9 +1,18 @@
 <Solution>
-  <Folder Name="/src/">
+  <Folder Name="/examples/">
+    <Project Path="examples/AppHost/AppHost.csproj" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Application/">
     <Project Path="src/Application/OroIdentityServer.Application.csproj" />
+  </Folder>
+  <Folder Name="/src/Core/">
     <Project Path="src/Core/OroIdentityServer.Core.csproj" />
+  </Folder>
+  <Folder Name="/src/Infraestructure/">
     <Project Path="src/Infraestructure/OroIdentityServer.Infraestructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Server/">
     <Project Path="src/Server/OroIdentityServer.Server.csproj" />
   </Folder>
-  <Folder Name="/src/Server/" />
 </Solution>
