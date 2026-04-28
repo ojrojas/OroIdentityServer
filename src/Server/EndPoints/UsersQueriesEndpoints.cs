@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.Application.Modules.Users.Queries;
+
 namespace OroIdentityServer.Server.Endpoints;
 
 public static class UsersQueriesEndpoints
@@ -40,7 +42,7 @@ public static class UsersQueriesEndpoints
            CancellationToken cancellationToken
            )
     {
-        return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(new(id)), cancellationToken));
+        return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(id), cancellationToken));
     }
 
     private static async Task<Results<Ok<GetUserByEmailResponse>, BadRequest<string>, ProblemHttpResult>> 
@@ -87,7 +89,7 @@ public static class UsersQueriesEndpoints
             return TypedResults.BadRequest("Invalid or missing user identifier in claims.");
         }
 
-        return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(new(userGuid)), cancellationToken));
+        return TypedResults.Ok(await sender.Send(new GetUserByIdQuery(userGuid), cancellationToken));
 
     }
 }

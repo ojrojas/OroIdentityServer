@@ -19,7 +19,7 @@ public class AssociatePermissionsToRoleCommandHandler(
     {
         _logger.LogInformation("Handling AssociatePermissionsToRoleCommand for RoleId: {RoleId}, Count: {Count}", command.RoleId, command.PermissionIds?.Count() ?? 0);
 
-        var role = await _rolesRepository.GetRoleByIdAsync(RoleId.From(command.RoleId), cancellationToken);
+        var role = await _rolesRepository.GetRoleByIdAsync(new(command.RoleId), cancellationToken);
         if (role == null)
         {
             _logger.LogWarning("Role not found for Id: {RoleId}", command.RoleId);
@@ -27,18 +27,18 @@ public class AssociatePermissionsToRoleCommandHandler(
         }
 
         // Load existing claims to prevent duplicates
-        var existingClaims = await _rolesRepository.GetRoleClaimsByRoleIdAsync(RoleId.From(command.RoleId), cancellationToken);
+        var existingClaims = await _rolesRepository.GetRoleClaimsByRoleIdAsync(new(command.RoleId), cancellationToken);
         var existingPermissionValues = new HashSet<string>(
             existingClaims
                 .Where(rc => rc.ClaimType != null && rc.ClaimType.Value == "Permission")
                 .Select(rc => rc.ClaimValue?.Value ?? string.Empty),
             StringComparer.OrdinalIgnoreCase);
 
-        foreach (var pid in command.PermissionIds ?? Enumerable.Empty<PermissionId>())
+        foreach (var pid in command.PermissionIds ?? [])
         {
             try
             {
-                var perm = await _permissionRepository.GetPermissionByIdAsync(pid, cancellationToken);
+                var perm = await _permissionRepository.GetPermissionByIdAsync(new(pid), cancellationToken);
                 if (perm == null) continue;
 
                 if (existingPermissionValues.Contains(perm.Name))

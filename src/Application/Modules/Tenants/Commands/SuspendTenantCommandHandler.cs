@@ -16,10 +16,9 @@ public sealed class SuspendTenantCommandHandler(
 
         try
         {
-            var tenant = await tenantRepository.GetByIdAsync(TenantId.From(command.TenantId), ct)
+            var tenant = await tenantRepository.GetByIdAsync(new(command.TenantId), ct)
                 ?? throw new InvalidOperationException($"Tenant '{command.TenantId}' not found.");
 
-            tenant.Suspend();
 
             await tenantRepository.UpdateAsync(tenant, ct);
 

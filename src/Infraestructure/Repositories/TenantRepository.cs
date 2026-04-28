@@ -9,9 +9,9 @@ public class TenantRepository(
     IRepository<Tenant> repository,
     OroIdentityAppContext context) : ITenantRepository
 {
-     public DbSet<Tenant> CurrentContext => context.Set<Tenant>();
+    public DbSet<Tenant> CurrentContext => context.Set<Tenant>();
 
-    public async Task<Tenant?> GetByIdAsync<TId>(TId id, CancellationToken cancellationToken) where TId : notnull
+    public async Task<Tenant?> GetByIdAsync(TenantId id, CancellationToken cancellationToken)
     {
         try
         {

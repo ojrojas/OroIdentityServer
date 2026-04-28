@@ -21,10 +21,7 @@ public sealed class CreateTenantCommandHandler(
             if (await tenantRepository.SlugExistsAsync(slug, ct))
                 throw new InvalidOperationException($"A tenant with slug '{command.Slug}' already exists.");
 
-            var tenant = new Tenant(
-                new TenantName(command.Name),
-                slug,
-                UserId.From(command.OwnerId));
+            var tenant = Tenant.Create(command.Name);
 
             await tenantRepository.AddAsync(tenant, ct);
 

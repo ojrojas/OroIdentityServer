@@ -16,15 +16,15 @@ public class DeleteRoleCommandHandler(IRolesRepository roleRepository, ILogger<D
         try
         {
             // Validate if role exists
-            var role = await _roleRepository.GetRoleByIdAsync(command.Id, cancellationToken);
+            var role = await _roleRepository.GetRoleByIdAsync(new(command.Id), cancellationToken);
             if (role == null)
                 throw new InvalidOperationException("Role not found.");
 
             // Delete the role
-            await _roleRepository.DeleteRoleAsync(command.Id, cancellationToken);
+            await _roleRepository.DeleteRoleAsync(new(command.Id), cancellationToken);
 
             // Raise domain event
-            role.RaiseDomainEvent(new RoleDeletedEvent(command.Id));
+            role.RaiseDomainEvent(new RoleDeletedEvent(new(command.Id)));
 
             _logger.LogInformation("Successfully deleted role with Id: {RoleId}", command.Id);
         }

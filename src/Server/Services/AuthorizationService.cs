@@ -5,6 +5,8 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Primitives;
 using OroBuildingBlocks.ServiceDefaults;
+using OroIdentityServer.Application.Modules.Sessions.Commands;
+using OroIdentityServer.Application.Modules.Users.Queries;
 using OroIdentityServer.OroIdentityServer.Infraestructure.Interfaces;
 namespace OroIdentityServer.Server.Services;
 
@@ -63,7 +65,7 @@ public class AuthorizationService(
 
         ArgumentNullException.ThrowIfNull(userId);
 
-        var user = await sender.Send(new GetUserByIdQuery(new(Guid.Parse(userId))), cancellationToken);
+        var user = await sender.Send(new GetUserByIdQuery(Guid.Parse(userId)), cancellationToken);
         if (user == null)
         {
             return new LoginResponse(ResultTypes.Challenge, null, new AuthenticationProperties
@@ -162,7 +164,7 @@ public class AuthorizationService(
                     var ip = requested.Context.Connection.RemoteIpAddress?.ToString() ??
                              requested.Context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "unknown";
                     var country = "unknown";
-                    await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country, user.Data!.TenantId, authorizationId), cancellationToken);
+                    await sender.Send(new CreateSessionCommand(user.Data!.Id.Value, ip, country, user.Data!.TenantId.Value, authorizationId), cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -198,7 +200,7 @@ public class AuthorizationService(
             ArgumentNullException.ThrowIfNull(valueId);
 
             var userId = result.Principal!.GetClaim(Claims.Subject);
-            var user = await sender.Send(new GetUserByIdQuery(new(Guid.Parse(userId))), cancellationToken);
+            var user = await sender.Send(new GetUserByIdQuery(Guid.Parse(userId)), cancellationToken);
             if (user is null)
             {
                 return new LoginResponse(ResultTypes.Forbid, null, Properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -313,7 +315,7 @@ public class AuthorizationService(
                 nameType: Claims.Name,
                 roleType: Claims.Role);
 
-            identity.SetClaim(Claims.Subject, user?.Data?.Id.Value.ToString())
+            identity.SetClaim(Claims.Subject, user?.Data.Id.ToString())
                     .SetClaim(Claims.Email, user?.Data?.Email)
                     .SetClaim(Claims.Name, $"{user?.Data?.Name} {user?.Data?.LastName}")
                     .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
@@ -328,7 +330,7 @@ public class AuthorizationService(
                 var ip = requested.Context.Connection.RemoteIpAddress?.ToString() ??
                          requested.Context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "unknown";
                 var country = "unknown";
-                await sender.Send(new CreateSessionCommand(user.Data!.Id, ip, country, user?.Data?.TenantId), cancellationToken);
+                await sender.Send(new CreateSessionCommand(user.Data.Id, ip, country, user.Data.TenantId), cancellationToken);
             }
             catch (Exception ex)
             {
@@ -385,7 +387,7 @@ public class AuthorizationService(
         nameType: Claims.Name,
         roleType: Claims.Role);
 
-        identity.SetClaim(Claims.Subject, user?.Data?.Id.Value.ToString())
+        identity.SetClaim(Claims.Subject, user?.Data?.Id.ToString())
                         .SetClaim(Claims.Email, user?.Data?.Email)
                         .SetClaim(Claims.Name, $"{user?.Data?.Name} {user?.Data?.LastName}")
                         .SetClaim(Claims.PreferredUsername, user?.Data?.UserName)
@@ -393,7 +395,7 @@ public class AuthorizationService(
                             [.. user.Data.Roles.Select(r => r.RoleId.Value.ToString())]);
 
         // Add tenant claim
-        identity.SetClaim("tenant_id", user?.Data?.TenantId?.Value.ToString());
+        identity.SetClaim("tenant_id", user?.Data?.TenantId.ToString());
 
         identity.SetScopes(new[]
         {
@@ -448,7 +450,7 @@ public class AuthorizationService(
 
         ArgumentNullException.ThrowIfNull(userId);
 
-        var user = await sender.Send(new GetUserByIdQuery(new(Guid.Parse(userId))), cancellationToken);
+        var user = await sender.Send(new GetUserByIdQuery(Guid.Parse(userId)), cancellationToken);
         if (user == null)
         {
             return new LoginResponse(ResultTypes.Challenge, null, new AuthenticationProperties

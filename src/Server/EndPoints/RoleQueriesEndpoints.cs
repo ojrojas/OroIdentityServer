@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Server.Endpoints;
 
+using global::OroIdentityServer.Application.Modules.Roles.Queries;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 public static class RoleQueriesEndpoints
@@ -46,7 +47,7 @@ public static class RoleQueriesEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetRoleByIdQuery(new(id)), cancellationToken);
+        var result = await sender.Send(new GetRoleByIdQuery(id), cancellationToken);
         return result.Data != null ? TypedResults.Ok(result) : TypedResults.NotFound();
     }
 

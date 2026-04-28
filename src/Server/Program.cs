@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OroBuildingBlocks.ServiceDefaults;
 using OroIdentityServer.Core.Interfaces;
+using OroIdentityServer.Server.Components;
 using OroIdentityServer.Server.Components.Account;
 using OroIdentityServer.Server.Helpers;
 using OroIdentityServer.Server.Services;

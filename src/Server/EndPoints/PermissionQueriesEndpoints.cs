@@ -2,9 +2,9 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-namespace OroIdentityServer.Server.Endpoints;
+using OroIdentityServer.Application.Modules.Permissions.Queries;
 
-using Microsoft.AspNetCore.Http.HttpResults;
+namespace OroIdentityServer.Server.Endpoints;
 
 public static class PermissionQueriesEndpoints
 {
@@ -41,7 +41,7 @@ public static class PermissionQueriesEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetPermissionByIdQuery(new(id)), cancellationToken);
+        var result = await sender.Send(new GetPermissionByIdQuery(id), cancellationToken);
         return result.Data != null ? TypedResults.Ok(result) : TypedResults.NotFound();
     }
 }

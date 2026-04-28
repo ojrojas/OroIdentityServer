@@ -6,7 +6,7 @@ namespace OroIdentityServer.Core.Modules.Tenants.Aggregates;
 
 public class TenantUser
 {
-    public  TenantUserId TenantUserId {get;set;}
+    public TenantUserId TenantUserId { get; set; }
     public TenantId? TenantId { get; private set; }
     public UserId? UserId { get; private set; }
     public bool IsOwner { get; private set; }
@@ -42,7 +42,7 @@ public class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregate
 
     private static TenantSlug GenerateSlug(string name)
     {
-        var setSlug =  name.ToLower().Replace(" ", "-");
+        var setSlug = name.ToLower().Replace(" ", "-");
         return new TenantSlug(setSlug);
     }
 
@@ -61,6 +61,17 @@ public class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregate
         return Tenant;
     }
 
+    public static Tenant From(Guid id, string name, string slug, bool isActive, DateTime createdAtUtc)
+    {
+        return new Tenant
+        {
+            Id = new TenantId(id),
+            Name = new TenantName(name),
+            Slug = new TenantSlug(slug),
+            IsActive = isActive,
+            CreatedAtUtc = createdAtUtc
+        };
+    }
 
     public void Deactive()
     {

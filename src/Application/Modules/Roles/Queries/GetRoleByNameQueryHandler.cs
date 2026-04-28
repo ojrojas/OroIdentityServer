@@ -1,11 +1,10 @@
-
 namespace OroIdentityServer.Application.Modules.Roles.Queries;
 
 
 public class GetRoleByNameQueryHandler(
     ILogger<GetRoleByNameQueryHandler> logger,
     IRolesRepository roleRepository
-    )  : IQueryHandler<GetRoleByNameQuery, GetRoleByNameResponse>
+    ) : IQueryHandler<GetRoleByNameQuery, GetRoleByNameResponse>
 {
     public Task<GetRoleByNameResponse> HandleAsync(GetRoleByNameQuery query, CancellationToken cancellationToken)
     {
@@ -29,23 +28,15 @@ public class GetRoleByNameQueryHandler(
 
             logger.LogInformation("Successfully retrieved role with name: {RoleName}", query.Name);
 
-            var roleDto = new RoleDto();
-                
-                roleDto.Id = role.Id.Value;
-                    roleDto.Name = role.Name;
-                    roleDto.IsActive = role.IsActive;
-                    Claims = role.Claims.Select(c => new RoleClaimDto
-                    (
-                        Id = c.Id,
-                        ClaimType = c.ClaimType.Value,
-                        ClaimValue = c.ClaimValue.Value,
-                        IsActive = c.IsActive
-                    ))                
-                }
-
             return Task.FromResult(new GetRoleByNameResponse
             {
-                Data = roleDto
+                Data = new RoleDto(
+                  role.Id.Value,
+                  role.IsActive,
+                  role.Name,
+                  role.Claims.Select(
+                    c => new RoleClaimDto(c.Id, c.ClaimType.Value, c.ClaimValue.Value, c.IsActive))
+                )
             });
         }
         catch (Exception ex)

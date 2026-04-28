@@ -21,7 +21,7 @@ public class TerminateSessionCommandHandler(
         Session? session = null;
         try
         {
-            session = await sessionRepository.GetSessionByIdAsync(command.SessionId, cancellationToken);
+            session = await sessionRepository.GetSessionByIdAsync(new(command.SessionId), cancellationToken);
             if (session == null)
                 throw new InvalidOperationException("Session not found.");
 
@@ -338,7 +338,7 @@ public class TerminateSessionCommandHandler(
 
         // Finally mark session ended locally
         session.End(DateTime.UtcNow);
-        await sessionRepository.EndSessionAsync(command.SessionId, DateTime.UtcNow, cancellationToken);
+        await sessionRepository.EndSessionAsync(new(command.SessionId), DateTime.UtcNow, cancellationToken);
 
         logger.LogInformation("Successfully terminated session with Id: {SessionId}", command.SessionId);
     }

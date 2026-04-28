@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.Application.Modules.IdentificationTypes.Commands;
+
 namespace OroIdentityServer.Server.Endpoints;
 
 public static class IdentificationTypeCommandsEndpoints
@@ -43,7 +45,7 @@ public static class IdentificationTypeCommandsEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        await sender.Send(new DeleteIdentificationTypeCommand(new(id)), cancellationToken);
+        await sender.Send(new DeleteIdentificationTypeCommand(id), cancellationToken);
         return TypedResults.Ok();
     }
 

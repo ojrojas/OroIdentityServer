@@ -3,8 +3,8 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 
-using OroIdentityServer.Core.Modules.RoleClaims.ValueObjects;
-
+using OroIdentityServer.Application.Modules.RoleClaims.Commands;
+using OroIdentityServer.Application.Modules.RoleClaims.Queries;
 namespace OroIdentityServer.OroIdentityServer.Api.EndPoints;
 
 public static class RoleClaimsEndpoints
@@ -39,7 +39,7 @@ public static class RoleClaimsEndpoints
         return api;
     }
 
-    private static async Task<IResult> GetRoleClaimById(RoleClaimId id, ISender sender, CancellationToken cancellationToken)
+    private static async Task<IResult> GetRoleClaimById(Guid id, ISender sender, CancellationToken cancellationToken)
     {
         var query = new GetRoleClaimByIdQuery(id);
         var result = await sender.Send(query, cancellationToken);
@@ -48,7 +48,7 @@ public static class RoleClaimsEndpoints
 
     private static async Task<IResult> GetRoleClaimsByRoleId(Guid roleId, ISender sender, CancellationToken cancellationToken)
     {
-        var query = new GetRoleClaimsByRoleIdQuery(new(roleId));
+        var query = new GetRoleClaimsByRoleIdQuery(roleId);
         var result = await sender.Send(query, cancellationToken);
         return Results.Ok(result);
     }
@@ -71,7 +71,7 @@ public static class RoleClaimsEndpoints
         return Results.Ok();
     }
 
-    private static async Task<IResult> DeleteRoleClaim(RoleClaimId id, ISender sender, CancellationToken cancellationToken)
+    private static async Task<IResult> DeleteRoleClaim(Guid id, ISender sender, CancellationToken cancellationToken)
     {
         var command = new DeleteRoleClaimCommand(id);
         await sender.Send(command, cancellationToken);

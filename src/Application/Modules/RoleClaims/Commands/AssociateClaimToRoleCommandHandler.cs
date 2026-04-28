@@ -18,7 +18,7 @@ public class AssociateClaimToRoleCommandHandler(
 
         try
         {
-            var role = await _roleRepository.GetRoleByIdAsync(RoleId.From(command.RoleId), cancellationToken);
+            var role = await _roleRepository.GetRoleByIdAsync(new(command.RoleId), cancellationToken);
 
             if (role == null)
             {

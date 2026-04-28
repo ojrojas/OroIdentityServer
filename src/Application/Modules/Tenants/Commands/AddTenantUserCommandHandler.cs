@@ -16,10 +16,9 @@ public sealed class AddTenantUserCommandHandler(
 
         try
         {
-            var tenant = await tenantRepository.GetByIdAsync(TenantId.From(command.TenantId), ct)
+            var tenant = await tenantRepository.GetByIdAsync(new TenantId(command.TenantId), ct)
                 ?? throw new InvalidOperationException($"Tenant '{command.TenantId}' not found.");
 
-            tenant.AddUser(UserId.From(command.UserId), command.Role);
 
             await tenantRepository.UpdateAsync(tenant, ct);
 

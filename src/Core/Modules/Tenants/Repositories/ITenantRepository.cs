@@ -7,9 +7,16 @@ namespace OroIdentityServer.Core.Modules.Tenants.Repositories;
 /// <summary>
 /// Repository for managing Tenant aggregates.
 /// </summary>
-public interface ITenantRepository : IRepository<Tenant>
+public interface ITenantRepository
 {
+    Task AddAsync(Tenant entity, CancellationToken cancellationToken);
+    Task DeleteAsync(Tenant entity, CancellationToken cancellationToken);
+    Task<IEnumerable<Tenant>> FindAsync(System.Linq.Expressions.Expression<Func<Tenant, bool>> predicate, CancellationToken cancellationToken);
+    Task<Tenant?> FindSingleAsync(System.Linq.Expressions.Expression<Func<Tenant, bool>> predicate, CancellationToken cancellationToken);
+    Task<IEnumerable<Tenant>> GetAllAsync(CancellationToken cancellationToken);
+    Task<Tenant?> GetByIdAsync(TenantId id, CancellationToken cancellationToken);
     Task<Tenant?> GetBySlugAsync(TenantSlug slug, CancellationToken ct);
     Task<IEnumerable<Tenant>> GetByUserIdAsync(UserId userId, CancellationToken ct);
     Task<bool> SlugExistsAsync(TenantSlug slug, CancellationToken ct);
+    Task UpdateAsync(Tenant entity, CancellationToken cancellationToken);
 }

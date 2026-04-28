@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Server.Endpoints;
 
+using global::OroIdentityServer.Application.Modules.Sessions.Queries;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 public static class SessionQueriesEndpoints
@@ -29,7 +30,7 @@ public static class SessionQueriesEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetUserSessionsQuery(new(userId)), cancellationToken);
+        var result = await sender.Send(new GetUserSessionsQuery(userId), cancellationToken);
         return TypedResults.Ok(result);
     }
 }

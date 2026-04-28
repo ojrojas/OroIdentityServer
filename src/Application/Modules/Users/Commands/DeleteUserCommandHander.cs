@@ -17,12 +17,12 @@ public class DeleteUserCommandHander(
         try
         {
             // Validate if user exists
-            var user = await userRepository.GetUserByIdAsync(command.Id, cancellationToken);
+            var user = await userRepository.GetUserByIdAsync(new(command.Id), cancellationToken);
             if (user == null)
                 throw new InvalidOperationException("User not found.");
 
             // Delete the user
-            await userRepository.DeleteUserAsync(command.Id, cancellationToken);
+            await userRepository.DeleteUserAsync(new(command.Id), cancellationToken);
 
             logger.LogInformation("Successfully handled DeleteUserCommand for Id: {Id}", command.Id);
         }

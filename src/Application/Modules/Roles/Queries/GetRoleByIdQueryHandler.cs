@@ -16,7 +16,7 @@ public class GetRoleByIdQueryHandler(
 
         try
         {
-            var role = await roleRepository.GetRoleByIdAsync(query.Id, cancellationToken);
+            var role = await roleRepository.GetRoleByIdAsync(new(query.Id), cancellationToken);
 
             if (role == null)
             {
@@ -34,7 +34,8 @@ public class GetRoleByIdQueryHandler(
 
             return new GetRoleByIdResponse
             {
-                Data = role
+                Data = new(role.Id.Value, role.IsActive, role.Name, role.Claims.Select(
+                    c => new RoleClaimDto(c.Id, c.ClaimType.Value, c.ClaimValue.Value, c.IsActive)))
             };
         }
         catch (Exception ex)

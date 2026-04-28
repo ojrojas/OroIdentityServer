@@ -22,7 +22,7 @@ public class GetUserByIdQueryHandler(
     {
         GetUserByIdQueryResponse response = new();
         logger.LogInformation("Handling GetUserByIdQuery with Id: {Id}", query.Id.ToString());
-        response.Data = await repository.GetUserByIdAsync(query.Id, cancellationToken);
+        response.Data = await repository.GetUserByIdAsync(new(query.Id), cancellationToken);
         logger.LogInformation("Successfully handled GetUserByIdQuery");
         return response;
     }

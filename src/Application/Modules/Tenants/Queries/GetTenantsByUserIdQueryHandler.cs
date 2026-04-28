@@ -15,7 +15,7 @@ public sealed class GetTenantsByUserIdQueryHandler(
 
         try
         {
-            var tenants = await tenantRepository.GetByUserIdAsync(UserId.From(query.UserId), ct);
+            var tenants = await tenantRepository.GetByUserIdAsync(new(query.UserId), ct);
 
             var dtos = tenants.Select(t => new TenantDto(
                 t.Id.Value,

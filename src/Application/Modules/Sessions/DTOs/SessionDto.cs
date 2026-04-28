@@ -6,6 +6,7 @@ namespace OroIdentityServer.Application.Modules.Sessions.DTOs;
 
 public class SessionDto
 {
+    public Guid SessionId { get; set; }
     public Guid UserId { get; set; }
     public User? User { get; set; }
     public Guid TenantId { get; set; }

@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.Application.Modules.Users.Commands;
+
 namespace OroIdentityServer.Server.Endpoints;
 
 public static class UsersCommandsEndpoints
@@ -36,7 +38,7 @@ public static class UsersCommandsEndpoints
            [FromServices] ISender sender,
            CancellationToken cancellationToken)
     {
-        await sender.Send(new DeleteUserCommand(new(id)), cancellationToken);
+        await sender.Send(new DeleteUserCommand(id), cancellationToken);
         return TypedResults.Ok();
     }
 

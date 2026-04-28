@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.Application.Modules.IdentificationTypes.Queries;
+
 namespace OroIdentityServer.Server.Endpoints;
 
 public static class IdentificationTypeQueriesEndpoints
@@ -32,7 +34,7 @@ public static class IdentificationTypeQueriesEndpoints
         ISender sender,
         CancellationToken cancellationToken)
     {
-        var query = new GetIdentificationTypeByIdQuery(new(id));
+        var query = new GetIdentificationTypeByIdQuery(id);
         var result = await sender.Send(query, cancellationToken);
         return Results.Ok(result);
     }

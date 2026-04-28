@@ -25,11 +25,12 @@ public class GetRolesQueryHandler(
             return new GetRolesResponse
             {
                 Data = roles.Select(r => new RoleDto
-                {
-                    Id = r.Id.Value,
-                    Name = r.Name,
-                    IsActive = r.IsActive
-                }),
+                (
+                    r.Id.Value,
+                     r.IsActive,
+                     r.Name,
+                     r.Claims.Select(c=> new RoleClaimDto(c.Id, c.ClaimType.Value, c.ClaimValue.Value, c.IsActive)).ToList()
+                )),
                 StatusCode = 200,
                 Message = "Roles retrieved successfully."
             };

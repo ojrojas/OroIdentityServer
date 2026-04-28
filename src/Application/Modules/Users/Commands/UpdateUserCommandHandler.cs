@@ -17,7 +17,7 @@ public class UpdateUserCommandHandler(
         try
         {
             // Retrieve the existing user
-            var user = await userRepository.GetUserByIdAsync(command.UserId, cancellationToken);
+            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken);
             if (user == null)
                 throw new InvalidOperationException("User not found.");
 
@@ -29,15 +29,15 @@ public class UpdateUserCommandHandler(
                 command.UserName,
                 command.Email,
                 command.Identification,
-                command.IdentificationTypeId,
-                command.TenantId
+                new(command.IdentificationTypeId),
+                new(command.TenantId)
             );
 
             // Persist changes
             await userRepository.UpdateUserAsync(user, cancellationToken);
 
             logger.LogInformation("Successfully updated user with UserId: {UserId}", command.UserId);
-            return new UpdateUserResponse { StatusCode = (int)HttpStatusCode.OK, Data = user };
+            return new UpdateUserResponse { StatusCode = (int)HttpStatusCode.OK, Data = new() };
         }
         catch (Exception ex)
         {

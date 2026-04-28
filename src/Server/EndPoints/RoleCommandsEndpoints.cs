@@ -2,9 +2,9 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-namespace OroIdentityServer.Server.Endpoints;
+using OroIdentityServer.Application.Modules.Roles.Commands;
 
-using Microsoft.AspNetCore.Http.HttpResults;
+namespace OroIdentityServer.Server.Endpoints;
 
 public static class RoleCommandsEndpoints
 {
@@ -54,7 +54,7 @@ public static class RoleCommandsEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        await sender.Send(new DeleteRoleCommand(new(id)), cancellationToken);
+        await sender.Send(new DeleteRoleCommand(id), cancellationToken);
         return TypedResults.Ok();
     }
 }

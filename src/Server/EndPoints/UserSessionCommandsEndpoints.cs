@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.Application.Modules.UserSessions.Commands;
 using OroIdentityServer.Core.Modules.UserSessions.ValueObjects;
 using OroIdentityServer.Core.Shared;
 
@@ -38,9 +39,9 @@ public static class UserSessionCommandsEndpoints
         CancellationToken cancellationToken)
     {
         // Ensure path id matches body user id if provided
-        if (request.UserId == null || request.UserId.Value != id)
+        if (request.UserId == null || request.UserId != id)
         {
-            request = request with { UserId = new UserId(id) };
+            request = request with { UserId = id };
         }
 
         await sender.Send(request, cancellationToken);
@@ -53,7 +54,7 @@ public static class UserSessionCommandsEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        await sender.Send(new UpdateUserSessionCommand(new UserSessionId(id)), cancellationToken);
+        await sender.Send(new UpdateUserSessionCommand(id), cancellationToken);
         return TypedResults.Ok();
     }
 
@@ -63,7 +64,7 @@ public static class UserSessionCommandsEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        await sender.Send(new DeactivateUserSessionCommand(new UserSessionId(id)), cancellationToken);
+        await sender.Send(new DeactivateUserSessionCommand(id), cancellationToken);
         return TypedResults.Ok();
     }
 }

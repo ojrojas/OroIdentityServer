@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OroIdentityServer.Application.Modules.UserSessions.Queries;
 using OroIdentityServer.Core.Modules.UserSessions.Aggregates;
 using OroIdentityServer.Core.Shared;
 
@@ -30,7 +31,7 @@ public static class UserSessionQueriesEndpoints
         [FromServices] ISender sender,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetUserSessionsByUserQuery(new UserId(id)), cancellationToken);
+        var result = await sender.Send(new GetUserSessionsByUserQuery(id), cancellationToken);
         return TypedResults.Ok(result);
     }
 }

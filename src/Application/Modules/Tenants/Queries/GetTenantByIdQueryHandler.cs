@@ -15,7 +15,7 @@ public sealed class GetTenantByIdQueryHandler(
 
         try
         {
-            var tenant = await tenantRepository.GetByIdAsync(TenantId.From(query.TenantId), ct);
+            var tenant = await tenantRepository.GetByIdAsync(new(query.TenantId), ct);
 
             if (tenant is null)
             {
@@ -36,7 +36,7 @@ public sealed class GetTenantByIdQueryHandler(
                 tenant.TenantUsers.Count,
                 tenant.TenantUsers.Select(u => new TenantUserDto(
                     u.UserId.Value,
-                    u.UserRoles.Select(r => r.RoleId.Value).ToList(),
+                    u.UserRoles.FirstOrDefault().RoleId.Value,
                     u.IsActive,
                     u.JoinedAtUtc)).ToList(),
                 null);

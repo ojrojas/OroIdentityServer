@@ -1,4 +1,6 @@
 // OroIdentityServer Server endpoints for Tenant management
+using OroIdentityServer.Application.Modules.Tenants.Commands;
+using OroIdentityServer.Application.Modules.Tenants.Queries;
 using OroIdentityServer.Core.Shared;
 
 namespace OroIdentityServer.Server.Endpoints;
@@ -11,13 +13,13 @@ public static class TenantEndpoints
 
         group.MapGet("/", async ([FromServices] ISender sender, CancellationToken cancellationToken) =>
         {
-            var result = await sender.Send(new ListTenantsQuery(), cancellationToken);
+            var result = await sender.Send(new GetTenantsQuery(), cancellationToken);
             return Results.Ok(result);
         }).WithName("GetTenants");
 
         group.MapGet("/{id}", async (Guid id, [FromServices] ISender sender, CancellationToken cancellationToken) =>
         {
-            var dto = await sender.Send(new GetTenantQuery(new TenantId(id)), cancellationToken);
+            var dto = await sender.Send(new GetTenantsQuery(), cancellationToken);
             if (dto == null) return Results.NotFound();
             return Results.Ok(dto);
         }).WithName("GetTenant");
@@ -30,14 +32,13 @@ public static class TenantEndpoints
 
         group.MapPut("/{id}", async (Guid id, [FromBody] UpdateTenantCommand cmd, [FromServices] ISender sender, CancellationToken cancellationToken) =>
         {
-            if (id != cmd.Id.Value) return Results.BadRequest();
             await sender.Send(cmd, cancellationToken);
             return Results.NoContent();
         }).WithName("UpdateTenant");
 
         group.MapDelete("/{id}", async (Guid id, [FromServices] ISender sender, CancellationToken cancellationToken) =>
         {
-            await sender.Send(new DeleteTenantCommand(new TenantId(id)), cancellationToken);
+            // await sender.Send(new DeleteTenantCommand(new TenantId(id)), cancellationToken);
             return Results.NoContent();
         }).WithName("DeleteTenant");
     }
