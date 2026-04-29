@@ -1,7 +1,6 @@
 // OroIdentityServer Server endpoints for Tenant management
 using OroIdentityServer.Application.Modules.Tenants.Commands;
 using OroIdentityServer.Application.Modules.Tenants.Queries;
-using OroIdentityServer.Core.Shared;
 
 namespace OroIdentityServer.Server.Endpoints;
 

@@ -20,7 +20,7 @@ public class UpdatePermissionCommandHandler(
             if (permission == null)
                 throw new InvalidOperationException("Permission not found.");
 
-            permission.Update(command.Name, command.DisplayName, command.Description, command.Resource);
+            permission.Update(command.Provider, command.Description, command.Action, command.Resource, command.IsSystem);
             await permissionRepository.UpdatePermissionAsync(permission, cancellationToken);
 
             logger.LogInformation("Successfully updated permission with Id: {Id}", command.PermissionId);

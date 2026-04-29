@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Roles.DomainEvents;
 
-public sealed record RoleClaimRemovedEvent(RoleId RoleId, RoleClaimType ClaimType, RoleClaimValue ClaimValue) : DomainEventBase;
+public sealed record RolePermissionAddedEvent(RoleId RoleId, PermissionId PermissionId) : DomainEventBase;

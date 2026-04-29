@@ -6,7 +6,7 @@ namespace OroIdentityServer.Application.Modules.Roles.Commands;
 
 public class UpdateRoleCommandHandler(
     ILogger<UpdateRoleCommandHandler> logger,
-    IRolesRepository roleRepository
+    IRoleRepository roleRepository
     ) : ICommandHandler<UpdateRoleCommand>
 {
     public async Task HandleAsync(UpdateRoleCommand command, CancellationToken cancellationToken)
@@ -15,7 +15,7 @@ public class UpdateRoleCommandHandler(
 
         try
         {
-            var role = await roleRepository.GetRoleByIdAsync(new(command.Id), cancellationToken);
+            var role = await roleRepository.GetByIdAsync(new(command.Id), cancellationToken);
 
             if (role == null)
             {
@@ -24,7 +24,7 @@ public class UpdateRoleCommandHandler(
             }
 
             role.UpdateName(new (command.RoleName));
-            await roleRepository.UpdateRoleAsync(role, cancellationToken);
+            await roleRepository.UpdateAsync(role, cancellationToken);
 
             logger.LogInformation("Successfully updated role with Id: {RoleId}", command.Id);
         }

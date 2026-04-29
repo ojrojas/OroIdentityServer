@@ -5,22 +5,19 @@
 namespace OroIdentityServer.Application.Modules.Roles.Queries;
 
 public class GetRolesQueryHandler(
-    ILogger<GetRolesQueryHandler> logger, IRolesRepository roleRepository
+    ILogger<GetRolesQueryHandler> logger, IRoleRepository roleRepository
     )
     : IQueryHandler<GetRolesQuery, GetRolesResponse>
 {
-    private readonly IRolesRepository _roleRepository = roleRepository;
-    private readonly ILogger<GetRolesQueryHandler> _logger = logger;
-
     public async Task<GetRolesResponse> HandleAsync(GetRolesQuery query, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Handling GetRolesQuery");
+        logger.LogInformation("Handling GetRolesQuery");
 
         try
         {
-            var roles = await _roleRepository.GetAllRolesAsync(cancellationToken);
+            var roles = await roleRepository.GetAllAsync(cancellationToken);
 
-            _logger.LogInformation("Successfully retrieved roles");
+            logger.LogInformation("Successfully retrieved roles");
 
             return new GetRolesResponse
             {
@@ -29,7 +26,8 @@ public class GetRolesQueryHandler(
                     r.Id.Value,
                      r.IsActive,
                      r.Name,
-                     r.Claims.Select(c=> new RoleClaimDto(c.Id, c.ClaimType.Value, c.ClaimValue.Value, c.IsActive)).ToList()
+                     [.. r.RolePermissions.Select(rp => new RolePermissionDto(
+                        rp.RoleId.Value, rp.PermissionId.Value))]
                 )),
                 StatusCode = 200,
                 Message = "Roles retrieved successfully."
@@ -37,7 +35,7 @@ public class GetRolesQueryHandler(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while retrieving roles");
+            logger.LogError(ex, "An error occurred while retrieving roles");
 
             return new GetRolesResponse
             {

@@ -3,8 +3,6 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using OroIdentityServer.Application.Modules.UserSessions.Commands;
-using OroIdentityServer.Core.Modules.UserSessions.ValueObjects;
-using OroIdentityServer.Core.Shared;
 
 namespace OroIdentityServer.Server.Endpoints;
 

@@ -73,7 +73,7 @@
   <ItemGroup>
     <PackageVersion Include="OroEventBus" Version="1.0.0" />
     <PackageVersion Include="OroEventBusRabbitMQ" Version="1.0.0" />
-    <PackageVersion Include="OroKernel.Shared" Version="1.0.0" />
+    <PackageVersion Include="OroKernel.Shared" Version="1.0.1" />
     <PackageVersion Include="OroLoggers" Version="1.0.0" />
     <PackageVersion Include="OroServiceDefaults" Version="1.0.0" />
     <PackageVersion Include="OroCQRS" Version="1.0.0" />

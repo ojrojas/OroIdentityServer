@@ -3,7 +3,7 @@ namespace OroIdentityServer.Application.Modules.Roles.Queries;
 
 public class GetRoleByNameQueryHandler(
     ILogger<GetRoleByNameQueryHandler> logger,
-    IRolesRepository roleRepository
+    IRoleRepository roleRepository
     ) : IQueryHandler<GetRoleByNameQuery, GetRoleByNameResponse>
 {
     public Task<GetRoleByNameResponse> HandleAsync(GetRoleByNameQuery query, CancellationToken cancellationToken)
@@ -12,7 +12,7 @@ public class GetRoleByNameQueryHandler(
 
         try
         {
-            var role = roleRepository.GetRoleByNameAsync(query.Name, cancellationToken).Result;
+            var role = roleRepository.GetRoleByNameAsync(new(query.Name), cancellationToken).Result;
 
             if (role == null)
             {
@@ -34,8 +34,8 @@ public class GetRoleByNameQueryHandler(
                   role.Id.Value,
                   role.IsActive,
                   role.Name,
-                  role.Claims.Select(
-                    c => new RoleClaimDto(c.Id, c.ClaimType.Value, c.ClaimValue.Value, c.IsActive))
+                  role.RolePermissions.Select(
+                    rp => new RolePermissionDto(rp.RoleId.Value, rp.PermissionId.Value))
                 )
             });
         }

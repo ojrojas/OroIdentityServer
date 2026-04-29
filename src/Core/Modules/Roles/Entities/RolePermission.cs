@@ -4,11 +4,20 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Roles.Entities;
 
-public class RolePermission
+public class RolePermission 
 {
-    public RoleId? RoleId { get; set; }
-    public PermissionId? PermissionId { get; set; }
+    private RolePermission()
+    {
+        RoleId = default!;
+        PermissionId = default!;
+    }
 
-    public Role Role { get; set; } = null!;
-    public Permission Permission { get; set; } = null!;
+    public RolePermission(RoleId roleId, PermissionId permissionId)
+    {
+        RoleId = roleId;
+        PermissionId = permissionId;
+    }
+
+    public RoleId RoleId { get; private set; }
+    public PermissionId PermissionId { get; private set; }
 }

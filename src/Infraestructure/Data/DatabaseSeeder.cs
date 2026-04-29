@@ -2,9 +2,6 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-using OroIdentityServer.Core.Modules.RoleClaims.Entities;
-using OroIdentityServer.Core.Modules.RoleClaims.ValueObjects;
-
 namespace OroIdentityServer.OroIdentityServer.Infraestructure.Data;
 
 public static class DatabaseSeeder
@@ -15,7 +12,7 @@ public static class DatabaseSeeder
         string jsonFilePath,
         IPasswordHasher passwordHasher,
         IConfiguration configuration,
-        IOpenIddictScopeManager? scopeManager = null)
+        IOpenIddictScopeManager? scopeManager = null, CancellationToken cancellationToken = default)
     {
         Guid userCreateId = Guid.CreateVersion7();
         if (!File.Exists(jsonFilePath))
@@ -23,7 +20,7 @@ public static class DatabaseSeeder
             throw new FileNotFoundException($"Seed data file not found: {jsonFilePath}");
         }
 
-        var jsonData = await File.ReadAllTextAsync(jsonFilePath);
+        var jsonData = await File.ReadAllTextAsync(jsonFilePath, cancellationToken);
         var seedData = JsonSerializer.Deserialize<SeedData>(jsonData) ?? throw new InvalidOperationException("Failed to deserialize seed data.");
         if (!context.IdentificationTypes.Any())
         {
@@ -36,7 +33,7 @@ public static class DatabaseSeeder
             context.Tenants.Add(new Tenant(new (seedData.Tenant)));
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
 
         if (!context.Users.Any())
         {
@@ -44,7 +41,7 @@ public static class DatabaseSeeder
             {
                 var securityUser = SecurityUser.Create(await passwordHasher.HashPassword(user.PasswordHash));
                 context.SecurityUsers.Add(securityUser);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellationToken);
 
                 var newUser = new User(
                     new UserId(Guid.CreateVersion7()),
@@ -60,21 +57,25 @@ public static class DatabaseSeeder
                 newUser.AssignSecurityUser(securityUser);
                 context.Users.Add(newUser);
             }
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
+        }
+
+        if(!context.Permissions.Any())
+        {
+            Permission permission = Permission.Create("System", "Full access to all resources and actions.", "*", "*", true);
+            context.Permissions.Add(permission);
+            await context.SaveChangesAsync(cancellationToken);
         }
 
         if (!context.Roles.Any())
         {
             foreach (var role in seedData.Roles)
             {
-                var newRole = new Role(role.Name);
-                foreach (var roleClaim in role.RoleClaims)
-                {
-                    newRole.AddClaim(new RoleClaim(new RoleClaimType(roleClaim.ClaimType), new RoleClaimValue(roleClaim.ClaimValue)));
-                }
+                var newRole = new Role(new(role.Name));
+                await context.Permissions.ForEachAsync(x => newRole.AddPermission(x), cancellationToken);
                 context.Roles.Add(newRole);
             }
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
         }
 
         if (!context.UserRoles.Any())
@@ -100,7 +101,7 @@ public static class DatabaseSeeder
         }
 
         // Register OpenIddict application for server-side web client
-        if (await applicationManager.FindByClientIdAsync("OroIdentityServer.Web") == null)
+        if (await applicationManager.FindByClientIdAsync("OroIdentityServer.Web", cancellationToken) == null)
         {
             await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
             {
@@ -131,11 +132,11 @@ public static class DatabaseSeeder
                 },
                 RedirectUris = { new Uri($"{configuration["Identity:Url"]}/signin-oidc") },
                 PostLogoutRedirectUris = { new Uri($"{configuration["Identity:Url"]}/signout-callback-oidc") }
-            });
+            }, cancellationToken);
         }
 
         // Register OpenIddict application for OroAccountants Angular SPA
-        if (await applicationManager.FindByClientIdAsync("OroAccountants.Web") == null)
+        if (await applicationManager.FindByClientIdAsync("OroAccountants.Web", cancellationToken) == null)
         {
             var descriptor = new OpenIddictApplicationDescriptor
             {
@@ -185,11 +186,11 @@ public static class DatabaseSeeder
                 descriptor.PostLogoutRedirectUris.Add(new Uri($"{origin}/"));
             }
 
-            await applicationManager.CreateAsync(descriptor);
+            await applicationManager.CreateAsync(descriptor, cancellationToken);
         }
 
         // Register OpenIddict application for OroAccountants Core API (server-to-server)
-        if (await applicationManager.FindByClientIdAsync("OroAccountants.Api") == null)
+        if (await applicationManager.FindByClientIdAsync("OroAccountants.Api", cancellationToken) == null)
         {
             await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
             {
@@ -204,7 +205,7 @@ public static class DatabaseSeeder
                     OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
                     OpenIddictConstants.Permissions.Prefixes.Scope + "ai-api",
                 }
-            });
+            }, cancellationToken);
         }
 
         // Register OpenIddict application for OroAccountants AI API (server-to-server)
@@ -228,28 +229,28 @@ public static class DatabaseSeeder
         // Register custom scopes for OroAccountants APIs
         if (scopeManager != null)
         {
-            if (await scopeManager.FindByNameAsync("accountants-api") == null)
+            if (await scopeManager.FindByNameAsync("accountants-api", cancellationToken) == null)
             {
                 await scopeManager.CreateAsync(new OpenIddictScopeDescriptor
                 {
                     Name = "accountants-api",
                     DisplayName = "OroAccountants Core API Access",
                     Resources = { "OroAccountants.Api" }
-                });
+                }, cancellationToken);
             }
 
-            if (await scopeManager.FindByNameAsync("ai-api") == null)
+            if (await scopeManager.FindByNameAsync("ai-api", cancellationToken) == null)
             {
                 await scopeManager.CreateAsync(new OpenIddictScopeDescriptor
                 {
                     Name = "ai-api",
                     DisplayName = "OroAccountants AI Service API Access",
                     Resources = { "OroAccountants.AI" }
-                });
+                }, cancellationToken);
             }
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     private static async Task EnsureApplicationAsync(
@@ -322,11 +323,5 @@ public class SeedRole
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public List<SeedRoleClaim> RoleClaims { get; set; } = [];
 }
 
-public class SeedRoleClaim
-{
-    public string ClaimType { get; set; } = string.Empty;
-    public string ClaimValue { get; set; } = string.Empty;
-}

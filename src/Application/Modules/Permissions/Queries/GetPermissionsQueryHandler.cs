@@ -21,9 +21,9 @@ public class GetPermissionsQueryHandler(
         {
             response.Data = permissions.Select(p => new PermissionDto(
                 p.Id.Value, 
-                p.Name, 
-                p.DisplayName, 
-                p.Description, 
+                p.Name,
+                p.Description,
+                p.Action, 
                 p.Resource, 
                 p.IsSystem));
             logger.LogInformation("Successfully handled GetPermissionsQuery");

@@ -5,9 +5,9 @@
 namespace OroIdentityServer.Application.Modules.Permissions.DTOs;
 
 public sealed record PermissionDto(
-    Guid PermissionId, 
-    string Name,
-    string DisplayName,
+   Guid PermissionId,
+    string Provider,
     string? Description,
+    string Action,
     string Resource,
     bool IsSystem);

@@ -15,14 +15,12 @@ public class PermissionEntityConfiguration : IEntityTypeConfiguration<Permission
             .HasConversion(id => id.Value, value => new PermissionId(value))
             .HasColumnName("Id");
 
-        builder.Property(p => p.TenantId)
-            .HasConversion(id => id!.Value, value => new TenantId(value))
-            .HasColumnName("TenantId");
-
         builder.Property(p => p.Name).HasMaxLength(100).IsRequired();
-        builder.Property(p => p.DisplayName).HasMaxLength(200).IsRequired();
+        builder.Property(p => p.Provider).HasMaxLength(200).IsRequired();
         builder.Property(p => p.Description).HasMaxLength(1000);
+        builder.Property(p => p.Action).HasMaxLength(200).IsRequired();
         builder.Property(p => p.Resource).HasMaxLength(200).IsRequired();
+        builder.Property(p => p.Scope).HasMaxLength(200).IsRequired();
         builder.Property(p => p.IsSystem).IsRequired();
     }
 }
