@@ -17,6 +17,7 @@ public class CreatePermissionCommandHandler(
                 command.Provider, 
                 command.Resource, 
                 command.Action);
+                
         try
         {
             var permission = Permission.Create(
