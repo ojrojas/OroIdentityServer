@@ -2,22 +2,25 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OroIdentityServer.Infraestructure;
 
 #nullable disable
 
-namespace OroIdentityServer.Infraestructure.Migrations
+namespace OroIdentityServer.Infraestructure.Data.Migrations
 {
     [DbContext(typeof(OroIdentityAppContext))]
-    partial class OroIdentityAppContextModelSnapshot : ModelSnapshot
+    [Migration("20260429220311_initial")]
+    partial class initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.4")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -230,11 +233,14 @@ namespace OroIdentityServer.Infraestructure.Migrations
                     b.ToTable("OpenIddictTokens", (string)null);
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.IdentificationType", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates.IdentificationType", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
@@ -248,20 +254,20 @@ namespace OroIdentityServer.Infraestructure.Migrations
                     b.ToTable("IdentificationTypes", (string)null);
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.Permission", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Permissions.Aggregates.Permission", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("DisplayName")
+                    b.Property<string>("Action")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<bool>("IsSystem")
                         .HasColumnType("boolean");
@@ -271,21 +277,27 @@ namespace OroIdentityServer.Infraestructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<string>("Resource")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("TenantId");
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Permissions", (string)null);
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.Role", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -303,7 +315,7 @@ namespace OroIdentityServer.Infraestructure.Migrations
                     b.ToTable("Roles", (string)null);
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.RolePermission", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Roles.Entities.RolePermission", b =>
                 {
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uuid");
@@ -313,42 +325,31 @@ namespace OroIdentityServer.Infraestructure.Migrations
 
                     b.HasKey("RoleId", "PermissionId");
 
-                    b.HasIndex("PermissionId");
-
                     b.ToTable("RolePermissions", (string)null);
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.SecurityUser", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Tenants.Aggregates.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
 
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("LockoutEnd")
+                    b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SecurityStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("text");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsActive");
 
                     b.HasKey("Id");
 
-                    b.ToTable("SecurityUsers", (string)null);
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_Tenants_IsActive");
+
+                    b.ToTable("Tenants", (string)null);
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.Session", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.UserSessions.Entities.Session", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -390,32 +391,7 @@ namespace OroIdentityServer.Infraestructure.Migrations
                     b.ToTable("Sessions", (string)null);
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.Tenant", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("Id");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("IsActive");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsActive")
-                        .HasDatabaseName("IX_Tenants_IsActive");
-
-                    b.ToTable("Tenants", (string)null);
-                });
-
-            modelBuilder.Entity("OroIdentityServer.Core.Models.User", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Aggregates.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -477,7 +453,37 @@ namespace OroIdentityServer.Infraestructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.UserRole", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Entities.SecurityUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SecurityStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SecurityUsers", (string)null);
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Entities.UserRole", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -601,9 +607,9 @@ namespace OroIdentityServer.Infraestructure.Migrations
                     b.Navigation("Authorization");
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.IdentificationType", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates.IdentificationType", b =>
                 {
-                    b.OwnsOne("OroIdentityServer.Core.Models.IdentificationTypeName", "Name", b1 =>
+                    b.OwnsOne("OroIdentityServer.Core.Modules.IdentificationTypes.ValueObjects.IdentificationTypeName", "Name", b1 =>
                         {
                             b1.Property<Guid>("IdentificationTypeId")
                                 .HasColumnType("uuid");
@@ -630,78 +636,9 @@ namespace OroIdentityServer.Infraestructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.Role", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", b =>
                 {
-                    b.OwnsMany("OroIdentityServer.Core.Models.RoleClaim", "Claims", b1 =>
-                        {
-                            b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid")
-                                .HasColumnName("Id");
-
-                            b1.Property<bool>("IsActive")
-                                .HasColumnType("boolean")
-                                .HasColumnName("IsActive");
-
-                            b1.Property<Guid>("RoleId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("RoleId");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("RoleId");
-
-                            b1.ToTable("RoleClaims", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("RoleId");
-
-                            b1.OwnsOne("OroIdentityServer.Core.Models.RoleClaimType", "ClaimType", b2 =>
-                                {
-                                    b2.Property<Guid>("RoleClaimId")
-                                        .HasColumnType("uuid");
-
-                                    b2.Property<string>("Value")
-                                        .IsRequired()
-                                        .HasMaxLength(100)
-                                        .HasColumnType("character varying(100)")
-                                        .HasColumnName("ClaimType");
-
-                                    b2.HasKey("RoleClaimId");
-
-                                    b2.ToTable("RoleClaims");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("RoleClaimId");
-                                });
-
-                            b1.OwnsOne("OroIdentityServer.Core.Models.RoleClaimValue", "ClaimValue", b2 =>
-                                {
-                                    b2.Property<Guid>("RoleClaimId")
-                                        .HasColumnType("uuid");
-
-                                    b2.Property<string>("Value")
-                                        .IsRequired()
-                                        .HasMaxLength(500)
-                                        .HasColumnType("character varying(500)")
-                                        .HasColumnName("ClaimValue");
-
-                                    b2.HasKey("RoleClaimId");
-
-                                    b2.ToTable("RoleClaims");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("RoleClaimId");
-                                });
-
-                            b1.Navigation("ClaimType")
-                                .IsRequired();
-
-                            b1.Navigation("ClaimValue")
-                                .IsRequired();
-                        });
-
-                    b.OwnsOne("OroIdentityServer.Core.Models.RoleName", "Name", b1 =>
+                    b.OwnsOne("OroIdentityServer.Core.Shared.RoleName", "Name", b1 =>
                         {
                             b1.Property<Guid>("RoleId")
                                 .HasColumnType("uuid");
@@ -720,44 +657,22 @@ namespace OroIdentityServer.Infraestructure.Migrations
                                 .HasForeignKey("RoleId");
                         });
 
-                    b.Navigation("Claims");
-
-                    b.Navigation("Name");
+                    b.Navigation("Name")
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.RolePermission", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Roles.Entities.RolePermission", b =>
                 {
-                    b.HasOne("OroIdentityServer.Core.Models.Permission", "Permission")
-                        .WithMany()
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OroIdentityServer.Core.Models.Role", "Role")
-                        .WithMany()
+                    b.HasOne("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", null)
+                        .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.Session", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Tenants.Aggregates.Tenant", b =>
                 {
-                    b.HasOne("OroIdentityServer.Core.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("OroIdentityServer.Core.Models.Tenant", b =>
-                {
-                    b.OwnsOne("OroIdentityServer.Core.Models.TenantName", "Name", b1 =>
+                    b.OwnsOne("OroIdentityServer.Core.Modules.Tenants.ValueObjects.TenantName", "Name", b1 =>
                         {
                             b1.Property<Guid>("TenantId")
                                 .HasColumnType("uuid");
@@ -780,23 +695,56 @@ namespace OroIdentityServer.Infraestructure.Migrations
                                 .HasForeignKey("TenantId");
                         });
 
+                    b.OwnsOne("OroIdentityServer.Core.Modules.Tenants.ValueObjects.TenantSlug", "Slug", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("Slug");
+
+                            b1.HasKey("TenantId");
+
+                            b1.ToTable("Tenants");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId");
+                        });
+
                     b.Navigation("Name")
+                        .IsRequired();
+
+                    b.Navigation("Slug")
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.User", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.UserSessions.Entities.Session", b =>
                 {
-                    b.HasOne("OroIdentityServer.Core.Models.IdentificationType", "IdentificationType")
+                    b.HasOne("OroIdentityServer.Core.Modules.Users.Aggregates.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Aggregates.User", b =>
+                {
+                    b.HasOne("OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates.IdentificationType", "IdentificationType")
                         .WithMany()
                         .HasForeignKey("IdentificationTypeId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("OroIdentityServer.Core.Models.SecurityUser", "SecurityUser")
+                    b.HasOne("OroIdentityServer.Core.Modules.Users.Entities.SecurityUser", "SecurityUser")
                         .WithOne()
-                        .HasForeignKey("OroIdentityServer.Core.Models.User", "SecurityUserId")
+                        .HasForeignKey("OroIdentityServer.Core.Modules.Users.Aggregates.User", "SecurityUserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("OroIdentityServer.Core.Models.Tenant", "Tenant")
+                    b.HasOne("OroIdentityServer.Core.Modules.Tenants.Aggregates.Tenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -808,15 +756,15 @@ namespace OroIdentityServer.Infraestructure.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.UserRole", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Entities.UserRole", b =>
                 {
-                    b.HasOne("OroIdentityServer.Core.Models.Role", null)
+                    b.HasOne("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OroIdentityServer.Core.Models.User", null)
+                    b.HasOne("OroIdentityServer.Core.Modules.Users.Aggregates.User", null)
                         .WithMany("Roles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -846,7 +794,12 @@ namespace OroIdentityServer.Infraestructure.Migrations
                     b.Navigation("Tokens");
                 });
 
-            modelBuilder.Entity("OroIdentityServer.Core.Models.User", b =>
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Aggregates.User", b =>
                 {
                     b.Navigation("Roles");
                 });

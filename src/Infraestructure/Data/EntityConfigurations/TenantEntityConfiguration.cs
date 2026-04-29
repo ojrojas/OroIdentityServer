@@ -30,6 +30,13 @@ public class TenantEntityConfiguration : IEntityTypeConfiguration<Tenant>
                 .HasDatabaseName("IX_Tenants_Name");
         });
 
+        builder.OwnsOne(t => t.Slug, slug => {
+            slug.Property(s => s.Value)
+            .HasColumnName("Slug")
+            .HasMaxLength(100)
+            .IsRequired();
+        });
+
         // builder.HasIndex(it => it.Name.Value)
         //     .HasDatabaseName("IX_Tenants_Name")
         //     .IsUnique();

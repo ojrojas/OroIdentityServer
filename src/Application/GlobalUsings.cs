@@ -47,3 +47,4 @@ global using OroIdentityServer.Core.Modules.Tenants.Aggregates;
 global using OroIdentityServer.Application.Modules.Tenants.Interfaces;
 global using OroIdentityServer.Application.Modules.Sessions.DTOs;
 global using OroIdentityServer.Application.Modules.Users.DTOs;
+global using OroBuildingBlocks.EventBusRabbitMQ;

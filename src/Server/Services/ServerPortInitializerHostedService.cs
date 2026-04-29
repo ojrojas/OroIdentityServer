@@ -35,7 +35,7 @@ public sealed class ServerPortInitializerHostedService(IServiceProvider services
                         else
                         {
                             var idx = address.LastIndexOf(':');
-                            if (idx > -1 && int.TryParse(address.Substring(idx + 1), out var p))
+                            if (idx > -1 && int.TryParse(address.AsSpan(idx + 1), out var p))
                                 ports.Add(p);
                         }
                     }
@@ -96,7 +96,7 @@ public sealed class ServerPortInitializerHostedService(IServiceProvider services
                         else
                         {
                             var idx = part.LastIndexOf(':');
-                            if (idx > -1 && int.TryParse(part.Substring(idx + 1), out var p))
+                            if (idx > -1 && int.TryParse(part.AsSpan(idx + 1), out var p))
                                 ports.Add(p);
                         }
                     }

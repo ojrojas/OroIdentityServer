@@ -19,7 +19,6 @@ public class OroIdentityAppContext(
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-       
         builder.ApplyConfiguration(new UserEntityConfiguration());
         builder.ApplyConfiguration(new RoleEntityConfiguration());
         builder.ApplyConfiguration(new IdentificationTypeEntityConfiguration());
@@ -30,6 +29,5 @@ public class OroIdentityAppContext(
         builder.ApplyConfiguration(new PermissionEntityConfiguration());
         builder.ApplyConfiguration(new RolePermissionEntityConfiguration());
         builder.ApplyConfiguration(new SessionEntityConfiguration());
-
     }
 }

@@ -26,17 +26,16 @@ public class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
                 .HasMaxLength(100)
                 .IsRequired()
                 ;
-        })
-        .HasIndex(r => r.Name.Value).IsUnique();
+        });
 
         builder.Metadata
-            .FindNavigation(nameof(Role.RolePermissions))!
-            .SetPropertyAccessMode(PropertyAccessMode.Field);
+         .FindNavigation(nameof(Role.RolePermissions))!
+         .SetPropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.HasMany(typeof(RolePermission), "_rolePermissions")
-            .WithOne()
-            .HasForeignKey(nameof(RolePermission.RoleId))
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(r => r.RolePermissions)
+        .WithOne()
+        .HasForeignKey(nameof(RolePermission.RoleId))
+        .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(r => r.IsActive)
             .HasDatabaseName("IX_Roles_IsActive");
