@@ -9,10 +9,11 @@ namespace OroIdentityServer.Core.Modules.Permissions.Aggregates;
 /// </summary>
 public sealed class Permission : BaseEntity<Permission, PermissionId>, IAuditableEntity, IAggregateRoot
 {
-    public TenantId TenantId { get; private set; }
-    public string Name { get; private set; } = string.Empty;
-    public string DisplayName { get; private set; } = string.Empty;
+    public string Name => $"{Provider}.{Resource}.{Action}";
+    public string Provider { get; private set; } = string.Empty;
     public string? Description { get; private set; }
+    public string? Action { get; private set; }
+
     public string Resource { get; private set; } = string.Empty;
     public bool IsSystem { get; private set; }
 
