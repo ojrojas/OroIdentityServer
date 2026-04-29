@@ -6,6 +6,11 @@ namespace OroIdentityServer.Core.Modules.RoleClaims.Entities;
 
 public class RoleClaim
 {
+    public RoleClaimType ClaimType { get; private set; }
+    public RoleClaimValue ClaimValue { get; private set; }
+    public bool IsActive { get; private set; } = true;
+    public Guid Id { get; private set; }
+
     private RoleClaim()
     {
         ClaimType = null!;
@@ -32,11 +37,6 @@ public class RoleClaim
     {
         return new RoleClaim(id, new(claimType), new(claimValue), isActive);
     }
-
-    public RoleClaimType ClaimType { get; private set; }
-    public RoleClaimValue ClaimValue { get; private set; }
-    public bool IsActive { get; private set; } = true;
-    public Guid Id { get; private set; }
 
     // Add validation logic to RoleClaim
     public void Validate()

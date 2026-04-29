@@ -7,9 +7,13 @@ namespace OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 public class IdentificationType :
 BaseEntity<IdentificationType, IdentificationTypeId>, IAuditableEntity, IAggregateRoot
 {
+    public IdentificationTypeName Name { get; private set; }
+    public bool IsActive { get; private set; }
+    public DateTime CreatedAtUtc { get; private set; } = DateTime.UtcNow;
+    
     public IdentificationType(string name) : base()
     {
-        Id = IdentificationTypeId.New();
+        Id = IdentificationTypeId.New(null);
         Name = new IdentificationTypeName(name);
         IsActive = true;
         RaiseDomainEvent(new IdentificationTypeCreateEvent(Id));
@@ -17,27 +21,16 @@ BaseEntity<IdentificationType, IdentificationTypeId>, IAuditableEntity, IAggrega
 
     private IdentificationType()
     {
+        Id = null!;
         Name = null!;
+        CreatedAtUtc = new DateTime();
     }
 
     public static IdentificationType Create(string name)
     {
-
         var identificationType = new IdentificationType(name);
         identificationType.Validate();
         return identificationType;
-    }
-
-    public IdentificationTypeName Name { get; private set; }
-    public bool IsActive { get; private set; }
-    public DateTime CreatedAtUtc {get;private set;} = DateTime.UtcNow;
-
-    public void Deactive()
-    {
-        if (!IsActive) return;
-
-        IsActive = false;
-        RaiseDomainEvent(new IdentificationTypeDeactiveEvent(Id));
     }
 
     // Add validation logic to IdentificationType

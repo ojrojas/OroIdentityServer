@@ -15,6 +15,7 @@ public sealed class Permission : BaseEntity<Permission, PermissionId>, IAuditabl
 
     private Permission()
     {
+        Id = null!;
         TenantId = default!;
         Name = string.Empty;
         DisplayName = string.Empty;
