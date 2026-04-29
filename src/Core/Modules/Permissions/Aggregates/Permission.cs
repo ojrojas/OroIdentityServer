@@ -4,6 +4,9 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Permissions.Aggregates;
 
+/// <summary>
+/// Represents a permission within the system, defining access rights to resources and actions
+/// </summary>
 public sealed class Permission : BaseEntity<Permission, PermissionId>, IAuditableEntity, IAggregateRoot
 {
     public TenantId TenantId { get; private set; }
