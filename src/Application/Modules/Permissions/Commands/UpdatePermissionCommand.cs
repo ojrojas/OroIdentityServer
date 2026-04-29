@@ -9,10 +9,11 @@ namespace OroIdentityServer.Application.Modules.Permissions.Commands;
 /// </summary>
 public record UpdatePermissionCommand(
     Guid PermissionId,
-    string Name,
-    string DisplayName,
-    string? Description,
-    string Resource
+    string Provider, 
+    string? Description, 
+    string Action, 
+    string Resource, 
+    bool IsSystem
 ) : ICommand
 {
     public Guid CorrelationId() => Guid.NewGuid();

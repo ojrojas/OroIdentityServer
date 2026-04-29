@@ -22,8 +22,8 @@ public class GetPermissionByIdQueryHandler(
             response.Data = new PermissionDto(
                 permission.Id.Value,
                 permission.Name,
-                permission.DisplayName,
                 permission.Description,
+                permission.Action,
                 permission.Resource,
                 permission.IsSystem
             );

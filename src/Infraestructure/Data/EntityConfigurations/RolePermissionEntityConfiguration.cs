@@ -8,18 +8,24 @@ public class RolePermissionEntityConfiguration : IEntityTypeConfiguration<RolePe
 {
     public void Configure(EntityTypeBuilder<RolePermission> builder)
     {
-        builder.ToTable("RolePermissions");
+       builder.ToTable("RolePermissions");
 
         builder.HasKey(rp => new { rp.RoleId, rp.PermissionId });
 
-        builder.HasOne(rp => rp.Role)
-            .WithMany()
-            .HasForeignKey(rp => rp.RoleId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(rp => rp.RoleId)
+            .IsRequired();
 
-        builder.HasOne(rp => rp.Permission)
-            .WithMany()
-            .HasForeignKey(rp => rp.PermissionId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(rp => rp.PermissionId)
+            .IsRequired();
+
+        builder.Property(rp => rp.RoleId)
+            .HasConversion(
+                id => id.Value,
+                value => new RoleId(value));
+
+        builder.Property(rp => rp.PermissionId)
+            .HasConversion(
+                id => id.Value,
+                value => new PermissionId(value));
     }
 }

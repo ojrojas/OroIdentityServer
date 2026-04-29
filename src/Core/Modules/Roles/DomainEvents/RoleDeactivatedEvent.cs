@@ -2,7 +2,6 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+namespace OroIdentityServer.Core.Modules.Roles.DomainEvents;
 
-namespace OroIdentityServer.Application.Modules.RoleClaims.Queries;
-
-public record GetRoleClaimsByRoleIdResponse : BaseResponse<IEnumerable<RoleClaim>>{}
+public sealed record RoleDeactivatedEvent(RoleId RoleId) : DomainEventBase;

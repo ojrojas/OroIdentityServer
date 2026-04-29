@@ -2,12 +2,11 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-
 namespace OroIdentityServer.Application.Modules.Roles.Queries;
 
 public class GetRoleByIdQueryHandler(
     ILogger<GetRoleByIdQueryHandler> logger,
-    IRolesRepository roleRepository ) 
+    IRoleRepository roleRepository ) 
     : IQueryHandler<GetRoleByIdQuery, GetRoleByIdResponse>
 {
     public async Task<GetRoleByIdResponse> HandleAsync(GetRoleByIdQuery query, CancellationToken cancellationToken)
@@ -16,7 +15,7 @@ public class GetRoleByIdQueryHandler(
 
         try
         {
-            var role = await roleRepository.GetRoleByIdAsync(new(query.Id), cancellationToken);
+            var role = await roleRepository.GetByIdAsync(new(query.Id), cancellationToken);
 
             if (role == null)
             {
@@ -34,8 +33,8 @@ public class GetRoleByIdQueryHandler(
 
             return new GetRoleByIdResponse
             {
-                Data = new(role.Id.Value, role.IsActive, role.Name, role.Claims.Select(
-                    c => new RoleClaimDto(c.Id, c.ClaimType.Value, c.ClaimValue.Value, c.IsActive)))
+                Data = new(role.Id.Value, role.IsActive, role.Name, role.RolePermissions
+                    .Select(r => new RolePermissionDto(r.RoleId.Value, r.PermissionId.Value)))
             };
         }
         catch (Exception ex)

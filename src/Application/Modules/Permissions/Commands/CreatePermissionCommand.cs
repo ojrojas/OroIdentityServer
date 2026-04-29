@@ -8,11 +8,11 @@ namespace OroIdentityServer.Application.Modules.Permissions.Commands;
 /// Command to create a new permission.
 /// </summary>
 public record CreatePermissionCommand(
-    Guid TenantId,
-    string Name,
-    string DisplayName,
-    string? Description,
-    string Resource,
+    Guid PermissionId,
+    string Provider, 
+    string? Description, 
+    string Action, 
+    string Resource, 
     bool IsSystem
 ) : ICommand
 {

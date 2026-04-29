@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Application.Modules.Roles.DTOs;
 
-public sealed record RoleDto(Guid Id, bool IsActive, RoleName? Name, IEnumerable<RoleClaimDto> Claims);
+public sealed record RoleDto(Guid Id, bool IsActive, RoleName? Name, IEnumerable<RolePermissionDto> Claims);

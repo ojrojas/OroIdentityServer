@@ -10,8 +10,6 @@ global using OroIdentityServer.Core.Modules.IdentificationTypes.DomainEvents;
 global using OroIdentityServer.Core.Modules.IdentificationTypes.ValueObjects;
 global using OroIdentityServer.Core.Modules.Permissions.Aggregates;
 global using OroIdentityServer.Core.Modules.Permissions.DoaminEvents;
-global using OroIdentityServer.Core.Modules.RoleClaims.Entities;
-global using OroIdentityServer.Core.Modules.RoleClaims.ValueObjects;
 global using OroIdentityServer.Core.Modules.Roles.Aggregates;
 global using OroIdentityServer.Core.Modules.Roles.DomainEvents;
 global using OroIdentityServer.Core.Modules.Tenants.Aggregates;
@@ -35,9 +33,6 @@ global using OroIdentityServer.Core.Modules.UserPreferences.ValueObjects;
 global using OroIdentityServer.Core.Modules.UserPreferences.Entities;
 global using OroIdentityServer.Core.Modules.UserPreferences.Aggregates;
 global using OroIdentityServer.Core.Modules.UserPreferences.Events;
-
 global using System.Text.RegularExpressions;
-
-
-
-
+global using OroIdentityServer.Core.Modules.Roles.Entities;
+global using OroKernel.Shared.Exceptions;

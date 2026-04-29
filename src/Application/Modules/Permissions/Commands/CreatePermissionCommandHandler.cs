@@ -12,17 +12,31 @@ public class CreatePermissionCommandHandler(
     public async Task HandleAsync(CreatePermissionCommand command, CancellationToken cancellationToken)
     {
         if (logger.IsEnabled(LogLevel.Information))
-            logger.LogInformation("Handling CreatePermissionCommand for Name: {Name}", command.Name);
-
+            logger.LogInformation(
+                "Handling CreatePermissionCommand for Name: {Provider} {Resource} {Action}", 
+                command.Provider, 
+                command.Resource, 
+                command.Action);
+                
         try
         {
-            var permission = Permission.Create(null, new(command.TenantId), command.Name, command.DisplayName, command.Description, command.Resource, command.IsSystem);
+            var permission = Permission.Create(
+                command.Provider, 
+                command.Description, 
+                command.Action, 
+                command.Resource, 
+                command.IsSystem);
             await permissionRepository.AddPermissionAsync(permission, cancellationToken);
-            logger.LogInformation("Successfully created permission with Name: {Name}", command.Name);
+            logger.LogInformation("Successfully created permission with Name: {Provider} {Resource} {Action}", 
+                command.Provider, 
+                command.Resource, 
+                command.Action);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while handling CreatePermissionCommand for Name: {Name}", command.Name);
+            logger.LogError(ex, "An error occurred while handling CreatePermissionCommand for Name: {Provider} {Resource} {Action}", command.Provider, 
+                command.Resource, 
+                command.Action);
             throw;
         }
     }

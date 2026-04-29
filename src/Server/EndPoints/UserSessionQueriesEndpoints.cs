@@ -4,7 +4,6 @@
 // See the LICENSE file in the project root for details.
 using OroIdentityServer.Application.Modules.UserSessions.Queries;
 using OroIdentityServer.Core.Modules.UserSessions.Aggregates;
-using OroIdentityServer.Core.Shared;
 
 namespace OroIdentityServer.Server.Endpoints;
 

@@ -4,9 +4,11 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Application.Modules.Roles.Commands;
 
-public class DeleteRoleCommandHandler(IRolesRepository roleRepository, ILogger<DeleteRoleCommandHandler> logger) : ICommandHandler<DeleteRoleCommand>
+public class DeleteRoleCommandHandler(
+    IRoleRepository roleRepository, ILogger<DeleteRoleCommandHandler> logger)
+    : ICommandHandler<DeleteRoleCommand>
 {
-    private readonly IRolesRepository _roleRepository = roleRepository;
+    private readonly IRoleRepository _roleRepository = roleRepository;
     private readonly ILogger<DeleteRoleCommandHandler> _logger = logger;
 
     public async Task HandleAsync(DeleteRoleCommand command, CancellationToken cancellationToken)
@@ -16,12 +18,11 @@ public class DeleteRoleCommandHandler(IRolesRepository roleRepository, ILogger<D
         try
         {
             // Validate if role exists
-            var role = await _roleRepository.GetRoleByIdAsync(new(command.Id), cancellationToken);
-            if (role == null)
-                throw new InvalidOperationException("Role not found.");
+            var role = await _roleRepository.GetByIdAsync(new(command.Id), cancellationToken) 
+                ?? throw new InvalidOperationException("Role not found.");
 
             // Delete the role
-            await _roleRepository.DeleteRoleAsync(new(command.Id), cancellationToken);
+            await _roleRepository.DeleteAsync(new(command.Id), cancellationToken);
 
             // Raise domain event
             role.RaiseDomainEvent(new RoleDeletedEvent(new(command.Id)));

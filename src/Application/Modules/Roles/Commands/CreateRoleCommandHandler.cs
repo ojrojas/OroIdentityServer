@@ -12,7 +12,7 @@ namespace OroIdentityServer.Application.Modules.Roles.Commands;
 /// </remarks>
 /// <param name="roleRepository">The repository used to manage roles.</param>
 public class CreateRoleCommandHandler(
-    ILogger<CreateRoleCommandHandler> logger, IRolesRepository roleRepository
+    ILogger<CreateRoleCommandHandler> logger, IRoleRepository roleRepository
     ) : ICommandHandler<CreateRoleCommand>
 {
     public async Task HandleAsync(CreateRoleCommand command, CancellationToken cancellationToken)
@@ -21,16 +21,17 @@ public class CreateRoleCommandHandler(
 
         try
         {
+            RoleName roleName = new(command.RoleName);
             // Validate if role already exists
-            var existingRole = await roleRepository.GetRoleByNameAsync(command.RoleName, cancellationToken);
+            var existingRole = await roleRepository.GetRoleByNameAsync(roleName, cancellationToken);
             if (existingRole != null)
                 throw new InvalidOperationException("Role with the given name already exists.");
 
             // Create the Role object
-            var role = new Role(command.RoleName);
+            var role = new Role(roleName);
 
             // Add the role to the repository
-            await roleRepository.AddRoleAsync(role, cancellationToken);
+            await roleRepository.AddAsync(role, cancellationToken);
 
             logger.LogInformation("Successfully created role with RoleName: {RoleName}", command.RoleName);
         }

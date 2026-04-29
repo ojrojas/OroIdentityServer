@@ -4,70 +4,68 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Roles.Aggregates;
 
-public sealed class Role : BaseEntity<Role, RoleId>, IAuditableEntity, IAggregateRoot
+public sealed class Role : BaseEntity<Role, RoleId>, IAggregateRoot
 {
-    private readonly IList<RoleClaim> _claims = [];
+    private readonly IList<RolePermission> _rolePermissions = [];
 
     public bool IsActive { get; private set; }
-    public RoleName? Name { get; private set; }
+    public RoleName Name { get; private set; }
 
-    public IReadOnlyCollection<RoleClaim> Claims => _claims.AsReadOnly();
+    public IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.AsReadOnly();
 
-    public void AddClaim(RoleClaim claim)
+    private Role() { }
+
+    public Role(RoleName name)
     {
-        _claims.Add(claim);
-        RaiseDomainEvent(new RoleClaimAddedEvent(Id, claim.ClaimType, claim.ClaimValue));
+        Id = RoleId.New();
+        Name = name ?? throw new DomainException("role.name.required", "Role name is required");
+        IsActive = true;
+
+        RaiseDomainEvent(new RoleCreateEvent(Id));
     }
 
-    public void RemoveClaim(RoleClaim claim)
+    public void AddPermission(Permission permission)
     {
-        if (_claims.Remove(claim))
-        {
-            RaiseDomainEvent(new RoleClaimRemovedEvent(Id, claim.ClaimType, claim.ClaimValue));
-        }
+        if (!IsActive)
+            throw new DomainException("role.inactive", "Cannot modify an inactive role");
+
+        if (_rolePermissions.Any(p => p.PermissionId == permission.Id))
+            throw new DomainException("role.permission.duplicate", "Permission already assigned");
+
+        _rolePermissions.Add(new RolePermission(Id, permission.Id));
+        RaiseDomainEvent(new RolePermissionAddedEvent(Id, permission.Id));
+    }
+
+    public void RemovePermission(PermissionId permissionId)
+    {
+        if (!IsActive)
+            throw new DomainException("role.inactive", "Cannot modify an inactive role");
+
+        var existing = _rolePermissions
+            .FirstOrDefault(p => p.PermissionId == permissionId)
+            ?? throw new DomainException("role.permission.not_found", "Permission not found in role");
+
+        _rolePermissions.Remove(existing);
+        RaiseDomainEvent(new RolePermissionRemovedEvent(Id, permissionId));
     }
 
     public void UpdateName(RoleName newName)
     {
-        if (newName == null || string.IsNullOrWhiteSpace(newName.Value))
-            throw new ArgumentException("New name cannot be null or empty.");
+        if (newName == null)
+            throw new DomainException("role.name.required", "Role name is required");
 
-        if (Name != null && Name.Equals(newName)) return; // Avoid unnecessary updates
+        if (Name.Equals(newName)) return;
 
         Name = newName;
         RaiseDomainEvent(new RoleUpdatedEvent(Id, newName));
     }
 
-    public void Validate()
+    public void Deactivate()
     {
-        if (Name == null || string.IsNullOrWhiteSpace(Name.Value))
-            throw new ArgumentException("Role name cannot be empty.");
-    }
-
-    public Role(string roleName)
-    {
-        if (string.IsNullOrWhiteSpace(roleName))
-            throw new ArgumentException("RoleName cannot be null or empty.");
-
-        Id = RoleId.New();
-        Name = new RoleName(roleName);
-        IsActive = true;
-        Validate();
-        RaiseDomainEvent(new RoleCreateEvent(Id));
-    }
-
-    private Role() { }
-
-    public void Deactive()
-    {
-        if(!IsActive) return;
+        if (!IsActive)
+            throw new DomainException("role.already_inactive", "Role is already inactive");
 
         IsActive = false;
-        RaiseDomainEvent(new RoleDeactiveEvent(Id));
-    }
-
-    public void Delete()
-    {
-        RaiseDomainEvent(new RoleDeletedEvent(Id));
+        RaiseDomainEvent(new RoleDeactivatedEvent(Id));
     }
 }

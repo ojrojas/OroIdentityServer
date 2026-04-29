@@ -41,4 +41,3 @@ global using OroIdentityServer.OroIdentityServer.Infraestructure.Specifications;
 global using OroKernel.Shared.Data;
 global using OroKernel.Shared.Interfaces;
 global using OroKernel.Shared.Options;
-global using System.Linq.Expressions;
