@@ -2,8 +2,6 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-using OroKernel.Shared.Exceptions;
-
 namespace OroIdentityServer.Core.Modules.Permissions.Aggregates;
 
 /// <summary>
@@ -30,7 +28,7 @@ public sealed class Permission : BaseEntity<Permission, PermissionId>, IAuditabl
     public Permission(PermissionId? id, string provider, string? description, string action, string resource, bool isSystem)
     {
         if (string.IsNullOrWhiteSpace(action))
-            throw new DomainException("409", "Action cannot be empty.");
+            throw new DomainException("Error Action", "Action cannot be empty.");
         Id = id ?? PermissionId.New(null);
         Provider = provider;
         Description = description;
