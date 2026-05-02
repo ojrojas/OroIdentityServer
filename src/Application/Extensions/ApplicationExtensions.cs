@@ -9,6 +9,6 @@ public static class ApplicationExtensions
     public static void AddApplicationExtensions(this IHostApplicationBuilder builder, IConfiguration configuration)
     {
         builder.Services.AddCqrsHandlers();
-         builder.AddRabbitMqEventBus("oroeventdrivenexchange");
+        builder.AddRabbitMqEventBus("oroeventdrivenexchange");
     }
 }
