@@ -11,10 +11,12 @@ var identityServer = builder.AddProject<Projects.OroIdentityServer_Server>("iden
     .WaitFor(identityDb);
 
 // -- Frontend Identity Admin --
-var identityAdmin = builder.AddPnpmApp(name: "identity-admin", workingDirectory: "../Frontends/identity-admin");
+var identityAdmin = builder.AddPnpmApp(
+    name: "identity-admin", 
+    workingDirectory: "../Frontends/oroidentity-admin");
+
 identityAdmin .WithPnpmPackageInstallation()
     .WithHttpEndpoint(30645, 4200);
-
 
 identityServer.WithEnvironment("ACCOUNTANTS_WEB_HTTP", identityAdmin.GetEndpoint("http"));
 
