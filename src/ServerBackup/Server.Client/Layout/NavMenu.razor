@@ -1,0 +1,91 @@
+<nav class="nav">
+    <NavLink class="nav-item" href="" Match="NavLinkMatch.All">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+        Dashboard
+    </NavLink>
+
+    <NavLink class="nav-item" href="products">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+            <path d="M21 8l-9-5-9 5v8l9 5 9-5V8z" />
+            <path d="M3 8l9 5 9-5" />
+            <path d="M12 13v8" />
+        </svg>
+        Products
+    </NavLink>
+
+    <button class="nav-item" @onclick="() => _customersOpen = !_customersOpen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        Customers
+        <svg class="chevron @(_customersOpen ? "open" : "")" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6" />
+        </svg>
+    </button>
+    @if (_customersOpen)
+    {
+        <div class="nav-sub">
+            <a href="customers">Overview</a>
+            <a href="customers">Customer list</a>
+        </div>
+    }
+
+    <NavLink class="nav-item" href="shop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+        </svg>
+        Shop
+    </NavLink>
+
+    <button class="nav-item" @onclick="() => _incomeOpen = !_incomeOpen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+        </svg>
+        Income
+        <svg class="chevron @(_incomeOpen ? "open" : "")" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6" />
+        </svg>
+    </button>
+    @if (_incomeOpen)
+    {
+        <div class="nav-sub">
+            <a href="income">Earning</a>
+            <a href="income">Refunds</a>
+            <a href="income">Payouts</a>
+            <a href="income">Statements</a>
+        </div>
+    }
+
+    <NavLink class="nav-item" href="promote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+            <path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8 2 9.2h7.6z" />
+        </svg>
+        Promote
+    </NavLink>
+</nav>
+
+
+@code {
+    private bool _dark;
+    private bool _customersOpen;
+    private bool _incomeOpen;
+}

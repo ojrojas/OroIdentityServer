@@ -1,0 +1,87 @@
+@page "/applications"
+@rendermode InteractiveAuto
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "AdminOnly")]
+@inject IApplicationsClient Client
+
+<PageTitle>OAuth Apps — OroIdentityServer</PageTitle>
+
+<div class="page-header">
+    <h1>OAuth applications</h1>
+    <p>Manage OAuth 2.0 / OpenID Connect clients.</p>
+</div>
+
+<div class="page-toolbar">
+    <input class="search-input" @bind-value="_search" placeholder="Search by client ID or name..." />
+    <div class="toolbar-spacer"></div>
+    <button class="btn btn-primary" @onclick="() => _editing = new()">+ New application</button>
+</div>
+
+<ToastMessage Message="@_toastMsg" Type="@_toastType" OnDismiss="() => _toastMsg = null" />
+
+@if (_items is null) { <div class="text-center py-8"><span class="spinner"></span></div> }
+else if (_filtered.Count() == 0) { <div class="empty-state"><div class="empty-icon">&#9679;</div><div class="empty-title">No applications</div><div class="empty-desc">@(string.IsNullOrWhiteSpace(_search) ? "Register your first OAuth client." : "Try a different search.")</div></div> }
+else
+{
+    <div class="card"><div class="table-wrap"><table class="table">
+        <thead><tr><th>Client ID</th><th>Display name</th><th>Type</th><th></th></tr></thead>
+        <tbody>@foreach (var a in _filtered) { <tr>
+            <td class="font-medium">@a.ClientId</td><td>@a.DisplayName</td>
+            <td><span class="badge badge-ghost">@a.ClientType</span></td>
+            <td><div class="action-group"><button class="table-action table-action-delete" @onclick="() => ConfirmDelete(a)" title="Delete">&#128465;</button></div></td>
+        </tr>}</tbody>
+    </table></div></div>
+}
+
+@if (_editing is not null)
+{
+    <div class="overlay"><div class="dialog" style="min-width:520px;">
+        <h2>@(string.IsNullOrWhiteSpace(_editing.ClientId) ? "New application" : "Edit application")</h2>
+        <EditForm Model="_editing" OnValidSubmit="Save"><div class="form-row">
+            <div class="input-group"><label class="label">Client ID</label><input class="input" @bind-value="_editing.ClientId" required /></div>
+            <div class="input-group"><label class="label">Display name</label><input class="input" @bind-value="_editing.DisplayName" /></div>
+            <div class="input-group"><label class="label">Client type</label><input class="input" @bind-value="_editing.ClientType" placeholder="public / confidential" /></div>
+            <div class="input-group"><label class="label">Application type</label><input class="input" @bind-value="_editing.ApplicationType" placeholder="web / native" /></div>
+            <div class="input-group"><label class="label">Client secret</label><input class="input" @bind-value="_editing.ClientSecret" type="password" /></div>
+        </div>
+        <div class="input-group mt-4"><label class="label">Redirect URIs (one per line)</label><textarea class="textarea" rows="3" @bind-value="_redirectUrisText" @bind-value:event="oninput"></textarea></div>
+        <div class="input-group"><label class="label">Permissions (one per line)</label><textarea class="textarea" rows="4" @bind-value="_permissionsText" @bind-value:event="oninput"></textarea></div>
+        <div class="dialog-actions"><button type="button" class="btn btn-ghost" @onclick="() => { _editing = null; _redirectUrisText = _permissionsText = string.Empty; }">Cancel</button><button type="submit" class="btn btn-primary">Save application</button></div>
+        </EditForm>
+    </div></div>
+}
+
+@if (_confirmDelete is not null)
+{
+    <div class="overlay"><div class="dialog" style="min-width:360px;">
+        <h2>Delete application</h2>
+        <p class="text-secondary" style="margin:0 0 var(--space-4);font-size:13px;">Delete <strong>@_confirmDelete.ClientId</strong>?</p>
+        <div class="dialog-actions"><button class="btn btn-ghost" @onclick="() => _confirmDelete = null">Cancel</button><button class="btn btn-danger" @onclick="DeleteConfirmed">Delete</button></div>
+    </div></div>
+}
+
+@code {
+    private IReadOnlyList<ApplicationDto>? _items;
+    private ApplicationDto? _editing, _confirmDelete;
+    private string _search = string.Empty;
+    private string _redirectUrisText = string.Empty;
+    private string _permissionsText = string.Empty;
+    private string? _toastMsg;
+    private string _toastType = "success";
+
+    private IEnumerable<ApplicationDto> _filtered => _items?.Where(a =>
+        string.IsNullOrWhiteSpace(_search) || a.ClientId?.Contains(_search, StringComparison.OrdinalIgnoreCase) == true || a.DisplayName?.Contains(_search, StringComparison.OrdinalIgnoreCase) == true) ?? [];
+
+    protected override async Task OnInitializedAsync() => await Reload();
+    private async Task Reload() => _items = await Client.GetAllAsync();
+
+    private async Task Save() {
+        if (_editing is null) return;
+        _editing.RedirectUris = _redirectUrisText.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        _editing.Permissions = _permissionsText.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        await Client.CreateAsync(_editing); _editing = null; _redirectUrisText = _permissionsText = string.Empty; await Reload(); Toast("Application created");
+    }
+
+    private void ConfirmDelete(ApplicationDto a) => _confirmDelete = a;
+    private async Task DeleteConfirmed() { if (_confirmDelete is null) return; await Client.DeleteAsync(_confirmDelete.ClientId!); _confirmDelete = null; await Reload(); Toast("Application deleted"); }
+    private void Toast(string m) { _toastMsg = m; _toastType = "success"; }
+}

@@ -1,0 +1,227 @@
+
+:root {
+  /* Brand palette */
+  --oro-primary: #1a6b3a;
+  --oro-primary-light: #2d9652;
+  --oro-primary-dark: #0f4024;
+  --oro-accent: #d4a017;
+  --oro-accent-light: #f0c040;
+
+  /* Neutral */
+  --oro-bg: #f8f9fa;
+  --oro-surface: #ffffff;
+  --oro-surface-raised: #ffffff;
+  --oro-border: #e2e8f0;
+  --oro-border-strong: #cbd5e1;
+
+  /* Text */
+  --oro-text-primary: #1e293b;
+  --oro-text-secondary: #64748b;
+  --oro-text-muted: #94a3b8;
+  --oro-text-inverse: #ffffff;
+
+  /* Semantic */
+  --oro-success: #16a34a;
+  --oro-success-bg: #dcfce7;
+  --oro-warning: #d97706;
+  --oro-warning-bg: #fef3c7;
+  --oro-danger: #dc2626;
+  --oro-danger-bg: #fee2e2;
+  --oro-info: #0284c7;
+  --oro-info-bg: #e0f2fe;
+
+  /* Priority */
+  --oro-priority-critical: #dc2626;
+  --oro-priority-high: #ea580c;
+  --oro-priority-medium: #d97706;
+  --oro-priority-low: #16a34a;
+
+  /* Spacing */
+  --oro-space-1: 0.25rem;
+  --oro-space-2: 0.5rem;
+  --oro-space-3: 0.75rem;
+  --oro-space-4: 1rem;
+  --oro-space-5: 1.25rem;
+  --oro-space-6: 1.5rem;
+  --oro-space-8: 2rem;
+  --oro-space-10: 2.5rem;
+  --oro-space-12: 3rem;
+
+  /* Typography */
+  --oro-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --oro-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --oro-text-xs: 0.75rem;
+  --oro-text-sm: 0.875rem;
+  --oro-text-base: 1rem;
+  --oro-text-lg: 1.125rem;
+  --oro-text-xl: 1.25rem;
+  --oro-text-2xl: 1.5rem;
+  --oro-text-3xl: 1.875rem;
+
+  /* Radius */
+  --oro-radius-sm: 0.25rem;
+  --oro-radius: 0.5rem;
+  --oro-radius-lg: 0.75rem;
+  --oro-radius-xl: 1rem;
+  --oro-radius-full: 9999px;
+
+  /* Shadow */
+  --oro-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --oro-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --oro-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --oro-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Transitions */
+  --oro-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --oro-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  --oro-sidebar-width: 260px;
+  --oro-sidebar-collapsed: 64px;
+  --oro-header-height: 60px;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --oro-bg: #0f172a;
+  --oro-surface: #1e293b;
+  --oro-surface-raised: #334155;
+  --oro-border: #334155;
+  --oro-border-strong: #475569;
+  --oro-text-primary: #f1f5f9;
+  --oro-text-secondary: #94a3b8;
+  --oro-text-muted: #64748b;
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--oro-font-sans);
+  font-size: var(--oro-text-base);
+  color: var(--oro-text-primary);
+  background-color: var(--oro-bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   Utility classes (Ethereal Studio primitives)
+   ============================================================ */
+
+.oro-card {
+  background: var(--oro-surface);
+  border: 1px solid var(--oro-border);
+  border-radius: var(--oro-radius-lg);
+  padding: var(--oro-space-6);
+  box-shadow: var(--oro-shadow-sm);
+}
+
+.oro-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--oro-space-2);
+  padding: var(--oro-space-2) var(--oro-space-4);
+  border-radius: var(--oro-radius);
+  font-size: var(--oro-text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all var(--oro-transition);
+  text-decoration: none;
+}
+
+.oro-btn-primary {
+  background: var(--oro-primary);
+  color: var(--oro-text-inverse);
+}
+.oro-btn-primary:hover { background: var(--oro-primary-light); }
+
+.oro-btn-secondary {
+  background: var(--oro-surface);
+  color: var(--oro-text-primary);
+  border: 1px solid var(--oro-border);
+}
+.oro-btn-secondary:hover { background: var(--oro-bg); }
+
+.oro-btn-danger {
+  background: var(--oro-danger);
+  color: var(--oro-text-inverse);
+}
+
+.oro-btn-ghost {
+  background: transparent;
+  color: var(--oro-text-secondary);
+  border: 1px solid transparent;
+}
+.oro-btn-ghost:hover { background: var(--oro-bg); color: var(--oro-text-primary); }
+
+.oro-input {
+  width: 100%;
+  padding: var(--oro-space-2) var(--oro-space-3);
+  border: 1px solid var(--oro-border-strong);
+  border-radius: var(--oro-radius);
+  font-size: var(--oro-text-sm);
+  color: var(--oro-text-primary);
+  background: var(--oro-surface);
+  transition: border-color var(--oro-transition);
+  outline: none;
+}
+.oro-input:focus { border-color: var(--oro-primary); box-shadow: 0 0 0 3px rgb(26 107 58 / 0.1); }
+
+.oro-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem var(--oro-space-2);
+  border-radius: var(--oro-radius-full);
+  font-size: var(--oro-text-xs);
+  font-weight: 600;
+}
+
+.oro-badge-success { background: var(--oro-success-bg); color: var(--oro-success); }
+.oro-badge-warning { background: var(--oro-warning-bg); color: var(--oro-warning); }
+.oro-badge-danger  { background: var(--oro-danger-bg);  color: var(--oro-danger); }
+.oro-badge-info    { background: var(--oro-info-bg);    color: var(--oro-info); }
+
+/* Priority badges */
+.priority-critical { color: var(--oro-priority-critical); }
+.priority-high     { color: var(--oro-priority-high); }
+.priority-medium   { color: var(--oro-priority-medium); }
+.priority-low      { color: var(--oro-priority-low); }
+
+/* Layout helpers */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: var(--oro-space-2); }
+.gap-4 { gap: var(--oro-space-4); }
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.text-sm { font-size: var(--oro-text-sm); }
+.text-muted { color: var(--oro-text-secondary); }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+/* Spinner */
+.oro-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--oro-border);
+  border-top-color: var(--oro-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Responsive breakpoints */
+/* Desktop: 1280px+, Tablet: 768px–1279px */
+@media (max-width: 1023px) {
+  :root { --oro-sidebar-width: 0px; }
+}

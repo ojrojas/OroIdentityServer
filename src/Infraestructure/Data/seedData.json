@@ -1,0 +1,44 @@
+{
+  "IdentificationType": "Passport",
+  "Tenant": "OroIdentityServer",
+  "Users": [
+    {
+      "Name": "Pepe",
+      "LastName": "Perez",
+      "UserName": "pepe.perez",
+      "Email": "pepe@example.com",
+      "Identification": "123456789",
+      "PasswordHash": "Abc123456#"
+    },
+    {
+      "Name": "Maria",
+      "LastName": "Martinez",
+      "UserName": "maria.martinez",
+      "Email": "maria@example.com",
+      "Identification": "987654321",
+      "PasswordHash": "Abc123456#"
+    }
+  ],
+  "Roles": [
+    {
+      "Name": "Administrator",
+      "Description": "Administrator role",
+      "RoleClaims": [
+        {
+          "ClaimType": "Permission",
+          "ClaimValue": "Administrator"
+        }
+      ]
+    },
+    {
+      "Name": "User",
+      "Description": "User role",
+      "RoleClaims": [
+        {
+          "ClaimType": "Permission",
+          "ClaimValue": "User"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+// OroIdentityServer
+// Copyright (C) 2026 Oscar Rojas
+// Licensed under the GNU AGPL v3.0 or later.
+// See the LICENSE file in the project root for details.
+namespace OroIdentityServer.Application.Modules.Permissions.Commands;
+
+/// <summary>
+/// Command to create a new permission.
+/// </summary>
+public record CreatePermissionCommand(
+    Guid PermissionId,
+    string Provider, 
+    string? Description, 
+    string Action, 
+    string Resource, 
+    bool IsSystem
+) : ICommand
+{
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
+}

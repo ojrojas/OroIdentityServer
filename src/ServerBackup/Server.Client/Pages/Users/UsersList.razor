@@ -1,0 +1,149 @@
+@page "/users"
+@rendermode InteractiveAuto
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "AdminOnly")]
+@inject IUsersClient Client
+
+<PageTitle>Users — OroIdentityServer</PageTitle>
+
+<div class="page-header">
+    <h1>Users</h1>
+    <p>Manage user accounts and identities.</p>
+</div>
+
+<div class="page-toolbar">
+    <input class="search-input" @bind-value="_search" placeholder="Search by name or email..." />
+    <div class="toolbar-spacer"></div>
+    <button class="btn btn-primary" @onclick="() => ShowEditor(new())">+ New user</button>
+</div>
+
+<ToastMessage Message="@_toastMsg" Type="@_toastType" OnDismiss="() => _toastMsg = null" />
+
+@if (_loading)
+{
+    <div class="text-center py-8"><span class="spinner"></span></div>
+}
+else if (_users is null || _users.Count == 0)
+{
+    <div class="empty-state">
+        <div class="empty-icon">&#9783;</div>
+        <div class="empty-title">No users yet</div>
+        <div class="empty-desc">Create your first user to get started.</div>
+        <button class="btn btn-primary mt-4" @onclick="() => ShowEditor(new())">+ New user</button>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr><th>User name</th><th>Email</th><th>ID</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in _filtered)
+                    {
+                        <tr>
+                            <td class="font-medium">@u.UserName</td>
+                            <td class="text-secondary">@u.Email</td>
+                            <td class="text-secondary">@u.Identification</td>
+                            <td><span class="status status-active">Active</span></td>
+                            <td>
+                                <div class="action-group">
+                                    <button class="table-action table-action-delete" @onclick="() => ConfirmDelete(u)" title="Delete">&#128465;</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (_editing is not null)
+{
+    <div class="overlay">
+        <div class="dialog" style="min-width:480px;">
+            <h2>New user</h2>
+            <EditForm Model="_editing" OnValidSubmit="Save">
+                <DataAnnotationsValidator />
+                <div class="form-row">
+                    <div class="input-group"><label class="label">User name</label><input class="input" @bind-value="_editing.UserName" required /></div>
+                    <div class="input-group"><label class="label">Email</label><input class="input" @bind-value="_editing.Email" required type="email" /></div>
+                    <div class="input-group"><label class="label">First name</label><input class="input" @bind-value="_editing.Name" required /></div>
+                    <div class="input-group"><label class="label">Last name</label><input class="input" @bind-value="_editing.LastName" /></div>
+                    <div class="input-group"><label class="label">Identification</label><input class="input" @bind-value="_editing.Identification" /></div>
+                    <div class="input-group"><label class="label">Password</label><input class="input" @bind-value="_editing.Password" type="password" /></div>
+                </div>
+                <div class="dialog-actions">
+                    <button type="button" class="btn btn-ghost" @onclick="() => _editing = null">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save user</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@if (_confirmDelete is not null)
+{
+    <div class="overlay">
+        <div class="dialog" style="min-width:360px;">
+            <h2>Delete user</h2>
+            <p class="text-secondary" style="margin:0 0 var(--space-4);font-size:13px;">Are you sure you want to delete <strong>@_confirmDelete.UserName</strong>? This action cannot be undone.</p>
+            <div class="dialog-actions">
+                <button type="button" class="btn btn-ghost" @onclick="() => _confirmDelete = null">Cancel</button>
+                <button type="button" class="btn btn-danger" @onclick="DeleteConfirmed">Delete</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _loading = true;
+    private IReadOnlyList<UserDto>? _users;
+    private CreateUserModel? _editing;
+    private UserDto? _confirmDelete;
+    private string _search = string.Empty;
+    private string? _toastMsg;
+    private string _toastType = "success";
+
+    private IEnumerable<UserDto> _filtered => _users?.Where(u =>
+        string.IsNullOrWhiteSpace(_search) ||
+        u.UserName?.Contains(_search, StringComparison.OrdinalIgnoreCase) == true ||
+        u.Email?.Contains(_search, StringComparison.OrdinalIgnoreCase) == true
+    ) ?? [];
+
+    protected override async Task OnInitializedAsync() => await Reload();
+
+    private async Task Reload()
+    {
+        _loading = true;
+        try { _users = await Client.GetAllAsync(); }
+        finally { _loading = false; }
+    }
+
+    private void ShowEditor(CreateUserModel model) => _editing = model;
+
+    private async Task Save()
+    {
+        if (_editing is null) return;
+        await Client.CreateAsync(_editing);
+        _editing = null;
+        await Reload();
+        Toast("User created successfully");
+    }
+
+    private void ConfirmDelete(UserDto u) => _confirmDelete = u;
+
+    private async Task DeleteConfirmed()
+    {
+        if (_confirmDelete is null) return;
+        var name = _confirmDelete.UserName;
+        await Client.DeleteAsync(_confirmDelete.Id);
+        _confirmDelete = null;
+        await Reload();
+        Toast($"User '{name}' deleted");
+    }
+
+    private void Toast(string msg) { _toastMsg = msg; _toastType = "success"; }
+}

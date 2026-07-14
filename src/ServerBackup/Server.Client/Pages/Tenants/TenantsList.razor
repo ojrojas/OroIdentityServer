@@ -1,0 +1,70 @@
+@page "/tenants"
+@rendermode InteractiveAuto
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "AdminOnly")]
+@inject ITenantsClient Client
+
+<PageTitle>Tenants — OroIdentityServer</PageTitle>
+
+<div class="page-header">
+    <h1>Tenants</h1>
+    <p>Manage multi-tenant organizations.</p>
+</div>
+
+<div class="page-toolbar">
+    <input class="search-input" @bind-value="_lookupId" placeholder="Search by tenant ID..." style="min-width:280px" />
+    <button class="btn btn-primary" @onclick="Lookup">Search</button>
+    <div class="toolbar-spacer"></div>
+    <button class="btn btn-ghost" @onclick="() => _showCreate = true">+ New tenant</button>
+</div>
+
+<ToastMessage Message="@_toastMsg" Type="@_toastType" OnDismiss="() => _toastMsg = null" />
+
+@if (_showCreate)
+{
+    <div class="card mb-4" style="padding:var(--space-4);">
+        <EditForm Model="_model" OnValidSubmit="Create"><div class="flex gap-2" style="flex-wrap:wrap;">
+            <input class="input" @bind-value="_model.Name" placeholder="Name" required style="width:200px" />
+            <input class="input" @bind-value="_model.Slug" placeholder="Slug" required style="width:150px" />
+            <div class="flex gap-2"><button type="submit" class="btn btn-primary btn-sm">Save</button><button type="button" class="btn btn-ghost btn-sm" @onclick="() => { _showCreate = false; _model = new(); }">Cancel</button></div>
+        </div></EditForm>
+    </div>
+}
+
+@if (_tenant is not null)
+{
+    <div class="card mb-4">
+        <div class="card-header"><h3>@_tenant.Name</h3><span class="status @(_tenant.IsActive ? "status-active" : "status-inactive")">@(_tenant.IsActive ? "Active" : "Inactive")</span></div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 20px;font-size:13px;">
+            <span class="text-secondary">Slug</span><span class="font-medium">@_tenant.Slug</span>
+            <span class="text-secondary">Users</span><span class="font-medium">@_tenant.UserCount</span>
+            <span class="text-secondary">Created</span><span class="font-medium">@_tenant.CreatedAtUtc.ToString("yyyy-MM-dd")</span>
+        </div>
+        <div class="flex gap-2 mt-4">
+            <button class="btn btn-sm btn-primary" @onclick="() => Activate(_tenant.Id)" disabled="@(_tenant.IsActive)">Activate</button>
+            <button class="btn btn-sm btn-ghost" @onclick="() => Suspend(_tenant.Id)" disabled="@(!_tenant.IsActive)">Suspend</button>
+        </div>
+    </div>
+}
+else if (!_lookedUp)
+{
+    <div class="empty-state"><div class="empty-icon">&#9632;</div><div class="empty-title">Search for a tenant</div><div class="empty-desc">Enter a tenant ID above and click Search.</div></div>
+}
+else
+{
+    <div class="empty-state"><div class="empty-icon">&#9632;</div><div class="empty-title">Tenant not found</div><div class="empty-desc">No tenant with that ID exists.</div></div>
+}
+
+@code {
+    private CreateTenantModel _model = new();
+    private string _lookupId = string.Empty;
+    private TenantDto? _tenant;
+    private bool _showCreate, _lookedUp;
+    private string? _toastMsg;
+    private string _toastType = "success";
+
+    private async Task Create() { await Client.CreateAsync(_model); _model = new(); _showCreate = false; Toast("Tenant created"); }
+    private async Task Activate(Guid id) { await Client.ActivateAsync(id); await Lookup(); Toast("Tenant activated"); }
+    private async Task Suspend(Guid id) { await Client.SuspendAsync(id); await Lookup(); Toast("Tenant suspended"); }
+    private async Task Lookup() { _lookedUp = true; if (Guid.TryParse(_lookupId, out var id)) _tenant = await Client.GetByIdAsync(id); }
+    private void Toast(string m) { _toastMsg = m; _toastType = "success"; }
+}

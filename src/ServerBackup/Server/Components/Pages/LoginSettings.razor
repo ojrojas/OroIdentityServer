@@ -1,0 +1,144 @@
+@page "/login-settings"
+@attribute [AllowAnonymous]
+
+<PageTitle>Login Settings — OroIdentityServer</PageTitle>
+
+<div class="page-header">
+    <h1>Login settings</h1>
+    <p>Customize the appearance and layout of the sign-in page.</p>
+</div>
+
+<div class="card mb-6">
+    <div class="card-header"><h3>Background</h3></div>
+    <div class="form-row">
+        <div class="input-group">
+            <label class="label">Type</label>
+            <select class="input" @bind="_config.BackgroundType">
+                <option value="color">Solid color</option>
+                <option value="gradient">Gradient</option>
+                <option value="image">Image URL</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="label">Value</label>
+            @if (_config.BackgroundType == "color")
+            {
+                <div class="flex gap-2 items-center">
+                    <input type="color" class="input" style="width:48px;height:40px;padding:2px" @bind="_config.BackgroundValue" />
+                    <input class="input" @bind="_config.BackgroundValue" style="flex:1" />
+                </div>
+            }
+            else if (_config.BackgroundType == "gradient")
+            {
+                <input class="input" @bind="_config.BackgroundValue" placeholder="#667eea 0%, #764ba2 100%" />
+            }
+            else
+            {
+                <input class="input" @bind="_config.BackgroundValue" placeholder="https://images.unsplash.com/..." />
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card mb-6">
+    <div class="card-header"><h3>Form</h3></div>
+    <div class="form-row">
+        <div class="input-group">
+            <label class="label">Position</label>
+            <select class="input" @bind="_config.FormPosition">
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="label">Width (px)</label>
+            <input class="input" type="number" @bind="_config.FormWidth" min="320" max="600" />
+        </div>
+    </div>
+    <div class="form-row mt-4">
+        <div class="input-group">
+            <label class="label">Form background</label>
+            <div class="flex gap-2 items-center">
+                <input type="color" class="input" style="width:48px;height:40px;padding:2px" @bind="_config.FormBackground" />
+                <input class="input" @bind="_config.FormBackground" style="flex:1" />
+            </div>
+        </div>
+        <div class="input-group">
+            <label class="label">Border color</label>
+            <div class="flex gap-2 items-center">
+                <input type="color" class="input" style="width:48px;height:40px;padding:2px" @bind="_config.FormBorderColor" />
+                <input class="input" @bind="_config.FormBorderColor" style="flex:1" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-6">
+    <div class="card-header"><h3>Colors</h3></div>
+    <div class="form-row form-row-3">
+        <div class="input-group">
+            <label class="label">Accent (button)</label>
+            <div class="flex gap-2 items-center">
+                <input type="color" class="input" style="width:48px;height:40px;padding:2px" @bind="_config.AccentColor" />
+                <input class="input" @bind="_config.AccentColor" style="flex:1" />
+            </div>
+        </div>
+        <div class="input-group">
+            <label class="label">Text</label>
+            <div class="flex gap-2 items-center">
+                <input type="color" class="input" style="width:48px;height:40px;padding:2px" @bind="_config.TextColor" />
+                <input class="input" @bind="_config.TextColor" style="flex:1" />
+            </div>
+        </div>
+        <div class="input-group">
+            <label class="label">Secondary text</label>
+            <div class="flex gap-2 items-center">
+                <input type="color" class="input" style="width:48px;height:40px;padding:2px" @bind="_config.TextSecondaryColor" />
+                <input class="input" @bind="_config.TextSecondaryColor" style="flex:1" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="flex gap-2 justify-end">
+    <button class="btn btn-ghost" @onclick="Reset">Reset to defaults</button>
+    <button class="btn btn-primary" @onclick="Save">Apply &amp; preview</button>
+</div>
+
+@code {
+    private LoginConfig _config = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        try
+        {
+            var json = await JSRuntime.InvokeAsync<string>("__getLoginConfig");
+            if (!string.IsNullOrEmpty(json))
+            {
+                var saved = System.Text.Json.JsonSerializer.Deserialize<LoginConfig>(json);
+                if (saved is not null) _config = saved;
+            }
+        }
+        catch { }
+    }
+
+    private async Task Save()
+    {
+        var json = System.Text.Json.JsonSerializer.Serialize(_config);
+        await JSRuntime.InvokeVoidAsync("__saveLoginConfig", _config);
+    }
+
+    private async Task Reset()
+    {
+        _config = new LoginConfig();
+        await Save();
+    }
+
+    [Inject] private IJSRuntime JSRuntime { get; set; } = null!;
+}

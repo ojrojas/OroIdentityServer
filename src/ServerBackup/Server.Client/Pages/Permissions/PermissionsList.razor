@@ -1,0 +1,85 @@
+@page "/permissions"
+@rendermode InteractiveAuto
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "AdminOnly")]
+@inject IPermissionsClient Client
+
+<PageTitle>Permissions — OroIdentityServer</PageTitle>
+
+<div class="page-header">
+    <h1>Permissions</h1>
+    <p>Manage system permissions and access policies.</p>
+</div>
+
+<div class="page-toolbar">
+    <input class="search-input" @bind-value="_search" placeholder="Search permissions..." />
+    <select class="filter-select" @bind="_filterSystem"><option value="">All types</option><option value="system">System</option><option value="custom">Custom</option></select>
+    <div class="toolbar-spacer"></div>
+    <button class="btn btn-primary" @onclick="() => _showNew = true">+ New permission</button>
+</div>
+
+<ToastMessage Message="@_toastMsg" Type="@_toastType" OnDismiss="() => _toastMsg = null" />
+
+@if (_showNew)
+{
+    <div class="card mb-4" style="padding:var(--space-4);">
+        <EditForm Model="_model" OnValidSubmit="Create"><div class="flex gap-2" style="flex-wrap:wrap;">
+            <input class="input" @bind-value="_model.Provider" placeholder="Provider" style="width:140px" required />
+            <input class="input" @bind-value="_model.Action" placeholder="Action" style="width:140px" required />
+            <input class="input" @bind-value="_model.Resource" placeholder="Resource" style="width:140px" required />
+            <input class="input" @bind-value="_model.Description" placeholder="Description" style="width:200px" />
+            <div class="flex gap-2"><button type="submit" class="btn btn-primary btn-sm">Save</button><button type="button" class="btn btn-ghost btn-sm" @onclick="() => { _showNew = false; _model = new(); }">Cancel</button></div>
+        </div></EditForm>
+    </div>
+}
+
+@if (_items is null) { <div class="text-center py-8"><span class="spinner"></span></div> }
+else if (_filtered.Count() == 0) { <div class="empty-state"><div class="empty-icon">&#9881;</div><div class="empty-title">No permissions</div><div class="empty-desc">@(string.IsNullOrWhiteSpace(_search) && string.IsNullOrWhiteSpace(_filterSystem) ? "Create your first permission." : "Try different filters.")</div></div> }
+else
+{
+    <div class="card">
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Provider</th><th>Action</th><th>Resource</th><th>Type</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var p in _filtered) { <tr>
+                        <td class="font-medium">@p.Provider</td><td>@p.Action</td>
+                        <td class="text-secondary">@p.Resource</td>
+                        <td><span class="badge @(p.IsSystem ? "badge-ghost" : "badge-green")">@(p.IsSystem ? "System" : "Custom")</span></td>
+                        <td><div class="action-group"><button class="table-action table-action-delete" @onclick="() => ConfirmDelete(p)" title="Delete">&#128465;</button></div></td>
+                    </tr> }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (_confirmDelete is not null)
+{
+    <div class="overlay"><div class="dialog" style="min-width:360px;">
+        <h2>Delete permission</h2>
+        <p class="text-secondary" style="margin:0 0 var(--space-4);font-size:13px;">Delete <strong>@_confirmDelete.Action</strong> on <strong>@_confirmDelete.Resource</strong>?</p>
+        <div class="dialog-actions"><button class="btn btn-ghost" @onclick="() => _confirmDelete = null">Cancel</button><button class="btn btn-danger" @onclick="DeleteConfirmed">Delete</button></div>
+    </div></div>
+}
+
+@code {
+    private IReadOnlyList<PermissionDto>? _items;
+    private PermissionUpsertModel _model = new();
+    private PermissionDto? _confirmDelete;
+    private string _search = string.Empty;
+    private string _filterSystem = string.Empty;
+    private bool _showNew;
+    private string? _toastMsg;
+    private string _toastType = "success";
+
+    private IEnumerable<PermissionDto> _filtered => _items?.Where(p =>
+        (string.IsNullOrWhiteSpace(_search) || p.Provider.Contains(_search, StringComparison.OrdinalIgnoreCase) || p.Action.Contains(_search, StringComparison.OrdinalIgnoreCase) || p.Resource.Contains(_search, StringComparison.OrdinalIgnoreCase)) &&
+        (string.IsNullOrWhiteSpace(_filterSystem) || (_filterSystem == "system" && p.IsSystem) || (_filterSystem == "custom" && !p.IsSystem))) ?? [];
+
+    protected override async Task OnInitializedAsync() => await Reload();
+    private async Task Reload() => _items = await Client.GetAllAsync();
+    private async Task Create() { await Client.CreateAsync(_model); _model = new(); _showNew = false; await Reload(); Toast("Permission created"); }
+    private void ConfirmDelete(PermissionDto p) => _confirmDelete = p;
+    private async Task DeleteConfirmed() { if (_confirmDelete is null) return; await Client.DeleteAsync(_confirmDelete.PermissionId); _confirmDelete = null; await Reload(); Toast("Permission deleted"); }
+    private void Toast(string m) { _toastMsg = m; _toastType = "success"; }
+}

@@ -1,0 +1,49 @@
+@page "/Account/Login"
+@layout LoginLayout
+@attribute [AllowAnonymous]
+
+<div class="login-page">
+    <FluentCard class="login-card">
+        <div class="login-card-header">
+            <span class="login-icon">
+                <FluentIcon Value="@(new Icons.Regular.Size24.LockClosed())" />
+            </span>
+            <h1>Sign In</h1>
+            <p class="login-subtitle">Enter your credentials to access the admin panel</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Error))
+        {
+            <div class="login-error">
+                <FluentIcon Value="@(new Icons.Regular.Size20.DismissCircle())" Color="@Color.Error" />
+                <span>Invalid credentials. Please try again.</span>
+            </div>
+        }
+
+        <form action="/auth/login" method="post" class="login-form">
+            <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+
+            <FluentTextField
+                Name="LoginIdentifier"
+                Placeholder="you@example.com"
+                Required="true"
+                Autofocus="true"
+                Class="login-field" />
+
+            <FluentPasswordField
+                Name="Password"
+                Placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                Required="true"
+                Class="login-field" />
+
+            <FluentButton Type="@ButtonType.Submit" Appearance="@Appearance.Accent" FullWidth="true" Class="login-btn">
+                Sign In
+            </FluentButton>
+        </form>
+    </FluentCard>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+}

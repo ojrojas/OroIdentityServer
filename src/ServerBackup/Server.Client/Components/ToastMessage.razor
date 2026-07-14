@@ -1,0 +1,28 @@
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="toast-inline toast-inline-@Type" @onclick="Dismiss">
+        <span class="toast-icon">@(Type == "success" ? "✓" : "⚠")</span>
+        <span>@Message</span>
+    </div>
+}
+
+@code {
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public string Type { get; set; } = "success";
+    [Parameter] public EventCallback OnDismiss { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(Message))
+            _ = AutoDismiss();
+    }
+
+    private async Task AutoDismiss()
+    {
+        await Task.Delay(3000);
+        await OnDismiss.InvokeAsync();
+        StateHasChanged();
+    }
+
+    private async Task Dismiss() => await OnDismiss.InvokeAsync();
+}

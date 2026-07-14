@@ -1,0 +1,40 @@
+@page "/login"
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+
+<PageTitle>Sign In — OroIdentityServer</PageTitle>
+
+<div class="login-page">
+    <div class="login-window">
+        <div class="login-body">
+            <div class="login-icon">O</div>
+            <h1>Welcome back</h1>
+            <p class="subtitle">Sign in to your admin account</p>
+
+            @if (!string.IsNullOrEmpty(Error))
+            {
+                <div class="alert alert-error"><strong>&#9888;</strong> Invalid credentials</div>
+            }
+
+            <form class="login-form" action="/auth/login" method="post">
+                <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+                <div>
+                    <label class="label" for="loginIdentifier">User or email</label>
+                    <input class="input" id="loginIdentifier" name="loginIdentifier"
+                           placeholder="you@example.com" required autofocus />
+                </div>
+                <div>
+                    <label class="label" for="password">Password</label>
+                    <input class="input" id="password" name="password" type="password"
+                           placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required />
+                </div>
+                <button class="btn btn-primary w-full" type="submit">Sign In</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+}
