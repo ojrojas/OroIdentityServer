@@ -4,8 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 
-public class IdentificationType :
-BaseEntity<IdentificationType, IdentificationTypeId>, IAuditableEntity, IAggregateRoot
+public class IdentificationType : AggregateRoot< IdentificationTypeId>, IAuditableEntity, IAggregateRoot
 {
     public IdentificationTypeName Name { get; private set; }
     public bool IsActive { get; private set; }
