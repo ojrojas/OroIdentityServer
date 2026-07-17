@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Tenants.Entities;
 
-public sealed class TenantUser : BaseEntity<TenantUser, TenantUserId>
+public sealed class TenantUser : Entity<TenantUserId>
 {
     public TenantId TenantId { get; private set; } = null!;
     public UserId UserId { get; private set; } = null!;

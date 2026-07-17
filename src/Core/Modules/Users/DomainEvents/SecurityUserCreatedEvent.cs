@@ -5,4 +5,4 @@
 namespace OroIdentityServer.Core.Modules.Users.DomainEvents;
 
 // Add domain events
-public sealed record SecurityUserCreatedEvent(SecurityUserId SecurityUserId) : DomainEventBase;
+public sealed record SecurityUserCreatedEvent(SecurityUserId SecurityUserId)     : DomainEvent;

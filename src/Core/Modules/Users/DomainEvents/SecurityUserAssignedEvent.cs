@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Users.DomainEvents;
 
-public sealed record SecurityUserAssignedEvent(UserId UserId, SecurityUserId SecurityUserId) : DomainEventBase;
+public sealed record SecurityUserAssignedEvent(UserId UserId, SecurityUserId SecurityUserId)     : DomainEvent;

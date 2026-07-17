@@ -13,7 +13,7 @@ public class TerminateSessionCommandHandler(
     IOpenIddictTokenManager tokenManager)
 : ICommandHandler<TerminateSessionCommand>
 {
-    public async Task HandleAsync(TerminateSessionCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(TerminateSessionCommand command, CancellationToken cancellationToken)
     {
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling TerminateSessionCommand for SessionId: {SessionId}", command.SessionId);
@@ -54,7 +54,7 @@ public class TerminateSessionCommandHandler(
                                 var prm = method.GetParameters();
                                 if (prm.Length >= 2 && prm[0].ParameterType.IsAssignableFrom(tokenManager.GetType()) && prm[1].ParameterType.IsAssignableFrom(token.GetType()))
                                 {
-                                    var t = (Task)method.Invoke(null, [tokenManager, token, cancellationToken]);
+                                    var t = (Task)method.Invoke(null, [tokenManager, token, cancellationToken])!;
                                     await t.ConfigureAwait(false);
                                     return;
                                 }
@@ -160,12 +160,12 @@ public class TerminateSessionCommandHandler(
                                             bool moved;
                                             try
                                             {
-                                                moved = await (dynamic)moveNextTaskObj;
+                                                moved = await (dynamic)moveNextTaskObj!;
                                             }
                                             catch
                                             {
                                                 var asTaskMethod = moveNextTaskObj.GetType().GetMethod("AsTask");
-                                                var asTask = (Task<bool>)asTaskMethod.Invoke(moveNextTaskObj, null);
+                                                var asTask = (Task<bool>)asTaskMethod.Invoke(moveNextTaskObj, null)!;
                                                 moved = await asTask.ConfigureAwait(false);
                                             }
                                             if (!moved) break;
@@ -341,5 +341,6 @@ public class TerminateSessionCommandHandler(
         await sessionRepository.EndSessionAsync(new(command.SessionId), DateTime.UtcNow, cancellationToken);
 
         logger.LogInformation("Successfully terminated session with Id: {SessionId}", command.SessionId);
+        return Result.Success();
     }
 }

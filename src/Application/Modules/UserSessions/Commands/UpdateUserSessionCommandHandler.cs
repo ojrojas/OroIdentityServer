@@ -9,7 +9,7 @@ public class UpdateUserSessionCommandHandler(
     IUserSessionRepository userSessionRepository
 ) : ICommandHandler<UpdateUserSessionCommand>
 {
-    public async Task HandleAsync(UpdateUserSessionCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(UpdateUserSessionCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling UpdateUserSessionCommand for SessionId: {SessionId}", command.SessionId);
         try
@@ -18,12 +18,13 @@ public class UpdateUserSessionCommandHandler(
             if (session == null)
             {
                 logger.LogWarning("Session not found: {SessionId}", command.SessionId);
-                return;
+                return Result.Success();
             }
 
             session.UpdateLastActivity();
             await userSessionRepository.UpdateUserSessionAsync(session, cancellationToken);
             logger.LogInformation("Updated LastActivity for SessionId: {SessionId}", command.SessionId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

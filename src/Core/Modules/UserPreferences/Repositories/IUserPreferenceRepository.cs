@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.UserPreferences.Repositories;
 
-public interface IUserPreferenceRepository : IRepository<UserPreference>
+public interface IUserPreferenceRepository
 {
     Task<UserPreference?> GetByUserAsync(string userId, Guid tenantId, CancellationToken ct = default);
 }

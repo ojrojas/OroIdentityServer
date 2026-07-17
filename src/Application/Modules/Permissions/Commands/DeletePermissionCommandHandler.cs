@@ -9,7 +9,7 @@ public class DeletePermissionCommandHandler(
     IPermissionRepository permissionRepository)
 : ICommandHandler<DeletePermissionCommand>
 {
-    public async Task HandleAsync(DeletePermissionCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(DeletePermissionCommand command, CancellationToken cancellationToken)
     {
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling DeletePermissionCommand for PermissionId: {Id}", command.PermissionId);
@@ -23,6 +23,7 @@ public class DeletePermissionCommandHandler(
             await permissionRepository.DeletePermissionAsync(new (command.PermissionId), cancellationToken);
 
             logger.LogInformation("Successfully deleted permission with Id: {Id}", command.PermissionId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

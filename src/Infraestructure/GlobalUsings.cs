@@ -37,7 +37,6 @@ global using OroIdentityServer.Core.Shared;
 global using OroIdentityServer.Infraestructure.Data.Configurations;
 global using OroIdentityServer.Infraestructure.Interfaces;
 global using OroIdentityServer.Infraestructure.Specifications;
-global using OroKernel.Domain.Interfaces;
-global using OroKernel.Infrastructure.Audit;
-global using OroKernel.Infrastructure.Options;
+global using BuildingBlocks.Kernel.Domain;
+global using BuildingBlocks.Kernel.Persistence;
 

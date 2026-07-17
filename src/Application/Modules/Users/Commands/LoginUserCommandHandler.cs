@@ -10,7 +10,7 @@ public class LoginUserCommandHandler(
     IPasswordHasher passwordHasher
 ) : ICommandHandler<LoginUserCommand>
 {
-    public async Task HandleAsync(LoginUserCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(LoginUserCommand command, CancellationToken cancellationToken)
     {
         try
         {
@@ -58,6 +58,7 @@ public class LoginUserCommandHandler(
             await userRepository.UpdateUserAsync(user, cancellationToken);
 
             logger.LogInformation("User {Username} logged in successfully.", command.Username);
+            return Result.Success();
         }
         catch (Exception ex)
         {

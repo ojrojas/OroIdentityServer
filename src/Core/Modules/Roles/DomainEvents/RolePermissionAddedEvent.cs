@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Roles.DomainEvents;
 
-public sealed record RolePermissionAddedEvent(RoleId RoleId, PermissionId PermissionId) : DomainEventBase;
+public sealed record RolePermissionAddedEvent(RoleId RoleId, PermissionId PermissionId)     : DomainEvent;

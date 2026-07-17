@@ -67,6 +67,7 @@ public interface IUserRepository
     /// <returns>True if password has changed</returns>
     Task<bool> ChangePasswordAsync(string email, string currentPassword, string newPassword, string confirmedPassword, CancellationToken cancellationToken);
 
+    /// <summary>
     /// Validates whether a user with the specified login identifier is allowed to log in.
     /// </summary>
     /// <param name="loginIdentifier">The username or email of the user to validate.</param>

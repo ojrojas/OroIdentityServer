@@ -5,7 +5,7 @@
 namespace OroIdentityServer.Infraestructure;
 
 public class OroIdentityAppContext(
-    DbContextOptions<OroIdentityAppContext> options, IOptions<UserInfo> optionsUser) : AuditableDbContext(options, optionsUser)
+    DbContextOptions<OroIdentityAppContext> options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }

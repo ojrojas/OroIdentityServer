@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.UserPreferences.Aggregates;
 
-public sealed class UserPreference : BaseEntity<UserPreference, UserPreferenceId>, IAggregateRoot
+public sealed class UserPreference : AggregateRoot<UserPreferenceId>
 {
     public Guid TenantId { get; private set; }
     public string UserId { get; private set; } = string.Empty;

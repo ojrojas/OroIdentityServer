@@ -10,7 +10,7 @@ public class DeleteScopeCommandHandler(
     IOpenIddictScopeManager scopeManager
 ) : ICommandHandler<DeleteScopeCommand>
 {
-    public async Task HandleAsync(DeleteScopeCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(DeleteScopeCommand command, CancellationToken cancellationToken)
     {
         try
         {
@@ -25,12 +25,13 @@ public class DeleteScopeCommandHandler(
             if (existingScope == null)
             {
                 logger.LogWarning("Scope with name {Name} not found.", command.Name);
-                return;
+                return Result.Success();
             }
 
             await scopeManager.DeleteAsync(existingScope, cancellationToken);
 
             logger.LogInformation("Scope with name {Name} deleted successfully.", command.Name);
+            return Result.Success();
         }
         catch (Exception ex)
         {

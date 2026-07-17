@@ -10,7 +10,7 @@ public sealed class ActivateTenantCommandHandler(
     IEventBus eventBus)
     : ICommandHandler<ActivateTenantCommand>
 {
-    public async Task HandleAsync(ActivateTenantCommand command, CancellationToken ct)
+    public async Task<Result> HandleAsync(ActivateTenantCommand command, CancellationToken ct)
     {
         logger.LogInformation("Handling ActivateTenantCommand for TenantId: {TenantId}", command.TenantId);
 
@@ -27,6 +27,7 @@ public sealed class ActivateTenantCommandHandler(
                 new TenantActivatedIntegrationEvent(tenant.Id.Value), ct);
 
             logger.LogInformation("Successfully activated tenant {TenantId}", command.TenantId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

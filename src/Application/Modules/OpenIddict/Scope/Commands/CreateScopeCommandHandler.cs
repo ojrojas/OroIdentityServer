@@ -10,7 +10,7 @@ public class CreateScopeCommandHandler(
     IOpenIddictScopeManager scopeManager
 ) : ICommandHandler<CreateScopeCommand>
 {
-    public async Task HandleAsync(CreateScopeCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(CreateScopeCommand command, CancellationToken cancellationToken)
     {
         try
         {
@@ -25,7 +25,7 @@ public class CreateScopeCommandHandler(
             if (existingScope != null)
             {
                 logger.LogWarning("Scope with name {Name} already exists.", command.Name);
-                return;
+                return Result.Success();
             }
 
             var descriptor = new OpenIddictScopeDescriptor
@@ -42,6 +42,7 @@ public class CreateScopeCommandHandler(
             await scopeManager.CreateAsync(descriptor, cancellationToken);
 
             logger.LogInformation("Scope with name {Name} created successfully.", command.Name);
+            return Result.Success();
         }
         catch (Exception ex)
         {

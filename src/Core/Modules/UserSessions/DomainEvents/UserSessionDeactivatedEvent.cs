@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.UserSessions.DomainEvents;
 
-public record UserSessionDeactivatedEvent(UserSessionId UserSessionId) : DomainEventBase;
+public record UserSessionDeactivatedEvent(UserSessionId UserSessionId)     : DomainEvent;

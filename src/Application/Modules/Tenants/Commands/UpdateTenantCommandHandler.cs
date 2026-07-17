@@ -9,7 +9,7 @@ public sealed class UpdateTenantCommandHandler(
     ITenantRepository tenantRepository)
     : ICommandHandler<UpdateTenantCommand>
 {
-    public async Task HandleAsync(UpdateTenantCommand command, CancellationToken ct)
+    public async Task<Result> HandleAsync(UpdateTenantCommand command, CancellationToken ct)
     {
         logger.LogInformation("Handling UpdateTenantCommand for TenantId: {TenantId}", command.TenantId);
 
@@ -23,6 +23,7 @@ public sealed class UpdateTenantCommandHandler(
             await tenantRepository.UpdateAsync(tenant, ct);
 
             logger.LogInformation("Successfully updated tenant {TenantId}", command.TenantId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

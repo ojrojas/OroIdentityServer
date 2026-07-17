@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Roles.Aggregates;
 
-public sealed class Role : BaseEntity<Role, RoleId>, IAggregateRoot
+public sealed class Role : AggregateRoot<RoleId>
 {
     private readonly IList<RolePermission> _rolePermissions = [];
 

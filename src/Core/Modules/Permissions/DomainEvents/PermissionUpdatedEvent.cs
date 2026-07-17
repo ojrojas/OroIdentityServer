@@ -4,5 +4,5 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Permissions.DoaminEvents;
 
-public sealed record PermissionUpdatedEvent(PermissionId PermissionId) : DomainEventBase;
+public sealed record PermissionUpdatedEvent(PermissionId PermissionId)     : DomainEvent;
 

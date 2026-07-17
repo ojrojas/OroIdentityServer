@@ -9,7 +9,7 @@ public class DeleteApplicationCommandHandler(
     IOpenIddictApplicationManager applicationManager
 ) : ICommandHandler<DeleteApplicationCommand>
 {
-    public async Task HandleAsync(DeleteApplicationCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(DeleteApplicationCommand command, CancellationToken cancellationToken)
     {
         try
         {
@@ -26,13 +26,14 @@ public class DeleteApplicationCommandHandler(
             if (existingApplication == null)
             {
                 logger.LogWarning("Application with ClientId {ClientId} not found.", command.ClientId);
-                return;
+                return Result.Success();
             }
 
             // Delete the application
             await applicationManager.DeleteAsync(existingApplication, cancellationToken);
 
             logger.LogInformation("Application with ClientId {ClientId} deleted successfully.", command.ClientId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

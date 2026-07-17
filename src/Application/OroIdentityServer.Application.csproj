@@ -9,6 +9,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Core\OroIdentityServer.Core.csproj" />
     <ProjectReference Include="..\Infraestructure\OroIdentityServer.Infraestructure.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\BuildingBlocks.CQRS\BuildingBlocks.CQRS.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\BuildingBlocks.EventBus\BuildingBlocks.EventBus.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\BuildingBlocks.EventBus.RabbitMQ\BuildingBlocks.EventBus.RabbitMQ.csproj" />
   </ItemGroup>
 
   <ItemGroup>

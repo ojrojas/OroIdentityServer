@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.IdentificationTypes.DomainEvents;
 
-public sealed record IdentificationTypeUpdatedEvent(IdentificationTypeId IdentificationTypeId, IdentificationTypeName NewName) : DomainEventBase;
+public sealed record IdentificationTypeUpdatedEvent(IdentificationTypeId IdentificationTypeId, IdentificationTypeName NewName)     : DomainEvent;

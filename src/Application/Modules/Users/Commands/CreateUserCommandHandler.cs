@@ -10,7 +10,7 @@ public class CreateUserCommandHandler(
     IPasswordHasher passwordHasher)
 : ICommandHandler<CreateUserCommand>
 {
-    public async Task HandleAsync(CreateUserCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(CreateUserCommand command, CancellationToken cancellationToken)
     {
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling CreateUserCommand for UserName: {UserName}", command.UserName);
@@ -43,6 +43,7 @@ public class CreateUserCommandHandler(
             await userRepository.AddUserAsync(user, cancellationToken);
 
             logger.LogInformation("Successfully handled CreateUserCommand for UserName: {UserName}", command.UserName);
+            return Result.Success();
         }
         catch (Exception ex)
         {

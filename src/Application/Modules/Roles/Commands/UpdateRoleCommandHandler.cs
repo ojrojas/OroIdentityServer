@@ -9,7 +9,7 @@ public class UpdateRoleCommandHandler(
     IRoleRepository roleRepository
     ) : ICommandHandler<UpdateRoleCommand>
 {
-    public async Task HandleAsync(UpdateRoleCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(UpdateRoleCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling UpdateRoleCommand for RoleId: {RoleId}", command.Id);
 
@@ -27,6 +27,7 @@ public class UpdateRoleCommandHandler(
             await roleRepository.UpdateAsync(role, cancellationToken);
 
             logger.LogInformation("Successfully updated role with Id: {RoleId}", command.Id);
+            return Result.Success();
         }
         catch (Exception ex)
         {

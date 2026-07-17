@@ -12,4 +12,4 @@ public record UserSessionCreatedEvent(
     DateTime ExpiresAt, 
     string? IpAddress = null, 
     string? UserAgent = null, 
-    string? Location = null) : DomainEventBase;
+    string? Location = null)     : DomainEvent;

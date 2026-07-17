@@ -9,7 +9,7 @@ public class UpdatePermissionCommandHandler(
     IPermissionRepository permissionRepository)
 : ICommandHandler<UpdatePermissionCommand>
 {
-    public async Task HandleAsync(UpdatePermissionCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(UpdatePermissionCommand command, CancellationToken cancellationToken)
     {
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling UpdatePermissionCommand for PermissionId: {Id}", command.PermissionId);
@@ -24,6 +24,7 @@ public class UpdatePermissionCommandHandler(
             await permissionRepository.UpdatePermissionAsync(permission, cancellationToken);
 
             logger.LogInformation("Successfully updated permission with Id: {Id}", command.PermissionId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

@@ -12,7 +12,7 @@ public sealed class TenantProvisionedIntegrationEventHandler(
     ITenantSchemaProvisioner schemaProvisioner)
     : IIntegrationEventHandler<TenantProvisionedIntegrationEvent>
 {
-    public async Task Handle(TenantProvisionedIntegrationEvent integrationEvent, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(TenantProvisionedIntegrationEvent integrationEvent, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
             "Provisioning tenant schema for Slug: '{Slug}', TenantId: {TenantId}",

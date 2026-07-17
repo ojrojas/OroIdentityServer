@@ -9,7 +9,7 @@ public class UpdateIdentificationTypeCommandHandler(
     IIdentificationTypeRepository repository
 ) : ICommandHandler<UpdateIdentificationTypeCommand>
 {
-    public async Task HandleAsync(UpdateIdentificationTypeCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(UpdateIdentificationTypeCommand command, CancellationToken cancellationToken)
     {
         try
         {
@@ -27,6 +27,7 @@ public class UpdateIdentificationTypeCommandHandler(
             await repository.UpdateIdentificationTypeAsync(identificationTypeExist, cancellationToken);
 
             logger.LogInformation("Successfully updated IdentificationType with ID {Id}", command.Id);
+            return Result.Success();
         }
         catch (Exception ex)
         {

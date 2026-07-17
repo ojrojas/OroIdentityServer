@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Tenants.DomainEvents;
 
-public sealed record TenantProvisionedEvent(TenantId TenantId, TenantSlug Slug) : DomainEventBase;
+public sealed record TenantProvisionedEvent(TenantId TenantId, TenantSlug Slug)     : DomainEvent;

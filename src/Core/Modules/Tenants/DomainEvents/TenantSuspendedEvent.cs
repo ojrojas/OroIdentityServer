@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Tenants.DomainEvents;
 
-public sealed record TenantSuspendedEvent(TenantId TenantId) : DomainEventBase;
+public sealed record TenantSuspendedEvent(TenantId TenantId)     : DomainEvent;

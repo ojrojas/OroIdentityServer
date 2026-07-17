@@ -9,7 +9,7 @@ public class CreateSessionCommandHandler(
     ISessionRepository sessionRepository)
 : ICommandHandler<CreateSessionCommand>
 {
-    public async Task HandleAsync(CreateSessionCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(CreateSessionCommand command, CancellationToken cancellationToken)
     {
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling CreateSessionCommand for UserId: {UserId}", command.UserId);
@@ -19,6 +19,7 @@ public class CreateSessionCommandHandler(
             var session = Session.Create(new(command.UserId), command.IpAddress, command.Country, new(command.TenantId), command.AuthorizationId);
             await sessionRepository.AddSessionAsync(session, cancellationToken);
             logger.LogInformation("Successfully created session with Id: {SessionId}", session.Id);
+            return Result.Success();
         }
         catch (Exception ex)
         {

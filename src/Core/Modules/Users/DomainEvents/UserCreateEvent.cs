@@ -13,4 +13,4 @@ public sealed record UserCreateEvent(
         string Email,
         string Identification,
         IdentificationTypeId IdentificationTypeId,
-        TenantId TenantId) : DomainEventBase;
+        TenantId TenantId)     : DomainEvent;

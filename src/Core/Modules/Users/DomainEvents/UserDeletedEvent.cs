@@ -5,4 +5,4 @@
 namespace OroIdentityServer.Core.Modules.Users.DomainEvents;
 
 // Add UserDeletedEvent
-public sealed record UserDeletedEvent(UserId UserId) : DomainEventBase;
+public sealed record UserDeletedEvent(UserId UserId)     : DomainEvent;

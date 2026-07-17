@@ -10,7 +10,7 @@ public class UpdateScopeCommandHandler(
     IOpenIddictScopeManager scopeManager
 ) : ICommandHandler<UpdateScopeCommand>
 {
-    public async Task HandleAsync(UpdateScopeCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(UpdateScopeCommand command, CancellationToken cancellationToken)
     {
         try
         {
@@ -25,7 +25,7 @@ public class UpdateScopeCommandHandler(
             if (existingScope == null)
             {
                 logger.LogWarning("Scope with name {Name} not found.", command.Name);
-                return;
+                return Result.Success();
             }
 
             var descriptor = new OpenIddictScopeDescriptor();
@@ -38,6 +38,7 @@ public class UpdateScopeCommandHandler(
             await scopeManager.UpdateAsync(existingScope, descriptor, cancellationToken);
 
             logger.LogInformation("Scope with name {Name} updated successfully.", command.Name);
+            return Result.Success();
         }
         catch (Exception ex)
         {

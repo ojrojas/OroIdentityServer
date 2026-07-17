@@ -7,7 +7,7 @@ namespace OroIdentityServer.Core.Modules.Permissions.Aggregates;
 /// <summary>
 /// Represents a permission within the system, defining access rights to resources and actions
 /// </summary>
-public sealed class Permission : BaseEntity<Permission, PermissionId>, IAuditableEntity, IAggregateRoot
+public sealed class Permission : AggregateRoot<PermissionId>, IAuditableEntity
 {
     public string Name { get; private set; } = string.Empty;
     public string Provider { get; private set; } = string.Empty;

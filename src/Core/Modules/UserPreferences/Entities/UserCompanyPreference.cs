@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.UserPreferences.Entities;
 
-public sealed class UserCompanyPreference : BaseEntity<UserCompanyPreference, UserCompanyPreferenceId>
+public sealed class UserCompanyPreference : Entity<UserCompanyPreferenceId>
 {
     public Guid TenantId { get; private set; }
     public string UserId { get; private set; } = string.Empty;

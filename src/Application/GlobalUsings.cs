@@ -11,10 +11,10 @@ global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.IdentityModel.Tokens;
 global using OpenIddict.Abstractions;
-global using OroBuildingBlocks.EventBus.Abstractions;
-global using OroBuildingBlocks.EventBus.Events;
-global using OroCQRS.Core.Extensions;
-global using OroCQRS.Core.Interfaces;
+
+global using BuildingBlocks.CQRS.Abstractions;
+global using BuildingBlocks.EventBus;
+global using BuildingBlocks.Kernel.Results;
 global using OroIdentityServer.Application.Abstractions.Mappers;
 global using OroIdentityServer.Application.Modules.Permissions.DTOs;
 global using OroIdentityServer.Application.Modules.Tenants.DTOs;
@@ -36,7 +36,6 @@ global using OroIdentityServer.Core.Modules.UserSessions.Entities;
 global using OroIdentityServer.Core.Modules.UserSessions.Repositories;
 global using OroIdentityServer.Core.Shared;
 global using OroIdentityServer.Infraestructure.Interfaces;
-global using OroKernel.Domain.Enums;
 global using OroIdentityServer.Application.Modules.Tenants.Commands;
 
 global using OroIdentityServer.Core.Modules.Roles.DomainEvents;

@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Users.Aggregates;
 
-public class User : BaseEntity<User, UserId>, IAuditableEntity, IAggregateRoot
+public class User : AggregateRoot<UserId>, IAuditableEntity
 {
     public string? Name { get; private set; } = string.Empty;
     public string? LastName { get; private set; } = string.Empty;

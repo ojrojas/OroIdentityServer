@@ -11,7 +11,7 @@ public class DeleteRoleCommandHandler(
     private readonly IRoleRepository _roleRepository = roleRepository;
     private readonly ILogger<DeleteRoleCommandHandler> _logger = logger;
 
-    public async Task HandleAsync(DeleteRoleCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(DeleteRoleCommand command, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Handling DeleteRoleCommand for RoleId: {RoleId}", command.Id);
 
@@ -28,6 +28,7 @@ public class DeleteRoleCommandHandler(
             role.RaiseDomainEvent(new RoleDeletedEvent(new(command.Id)));
 
             _logger.LogInformation("Successfully deleted role with Id: {RoleId}", command.Id);
+            return Result.Success();
         }
         catch (Exception ex)
         {

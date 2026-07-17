@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Users.DomainEvents;
 
-public sealed record AccessFailedIncrementedEvent(SecurityUserId SecurityUserId, int FailedCount) : DomainEventBase;
+public sealed record AccessFailedIncrementedEvent(SecurityUserId SecurityUserId, int FailedCount)     : DomainEvent;

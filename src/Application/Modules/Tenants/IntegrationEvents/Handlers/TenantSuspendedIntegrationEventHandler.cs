@@ -11,7 +11,7 @@ public sealed class TenantSuspendedIntegrationEventHandler(
     ILogger<TenantSuspendedIntegrationEventHandler> logger)
     : IIntegrationEventHandler<TenantSuspendedIntegrationEvent>
 {
-    public Task Handle(TenantSuspendedIntegrationEvent integrationEvent, CancellationToken cancellationToken = default)
+    public Task HandleAsync(TenantSuspendedIntegrationEvent integrationEvent, CancellationToken cancellationToken = default)
     {
         logger.LogWarning(
             "Tenant suspended. TenantId: {TenantId}. Downstream modules should restrict access.",

@@ -19,7 +19,7 @@ public class CreateIdentificationTypeCommandHandler(
     ILogger<CreateIdentificationTypeCommandHandler> logger,
     IIdentificationTypeRepository repository) : ICommandHandler<CreateIdentificationTypeCommand>
 {
-    public async Task HandleAsync(CreateIdentificationTypeCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(CreateIdentificationTypeCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling CreateIdentificationTypeCommand for IdentificationTypeName: {IdentificationTypeName}", command.Name);
 
@@ -34,6 +34,7 @@ public class CreateIdentificationTypeCommandHandler(
             await repository.AddIdentificationTypeAsync(identificationType, cancellationToken);
 
             logger.LogInformation("Successfully handled CreateIdentificationTypeCommand for IdentificationTypeName: {IdentificationTypeName}", command.Name);
+            return Result.Success();
         }
         catch (Exception ex)
         {

@@ -6,7 +6,7 @@ namespace OroIdentityServer.Core.Modules.Tenants.Aggregates;
 
 public class TenantUser
 {
-    public TenantUserId TenantUserId { get; set; }
+    public TenantUserId TenantUserId { get; set; } = null!;
     public TenantId? TenantId { get; private set; }
     public UserId? UserId { get; private set; }
     public bool IsOwner { get; private set; }
@@ -20,7 +20,7 @@ public class TenantUser
     public DateTime JoinedAtUtc { get; private set; }
 }
 
-public class Tenant : BaseEntity<Tenant, TenantId>, IAuditableEntity, IAggregateRoot
+public class Tenant : AggregateRoot<TenantId>, IAuditableEntity
 {
     public TenantName Name { get; private set; }
     public bool IsActive { get; private set; }

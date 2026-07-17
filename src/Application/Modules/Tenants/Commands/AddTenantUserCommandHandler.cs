@@ -9,7 +9,7 @@ public sealed class AddTenantUserCommandHandler(
     ITenantRepository tenantRepository)
     : ICommandHandler<AddTenantUserCommand>
 {
-    public async Task HandleAsync(AddTenantUserCommand command, CancellationToken ct)
+    public async Task<Result> HandleAsync(AddTenantUserCommand command, CancellationToken ct)
     {
         logger.LogInformation("Handling AddTenantUserCommand for TenantId: {TenantId}, UserId: {UserId}",
             command.TenantId, command.UserId);
@@ -24,6 +24,7 @@ public sealed class AddTenantUserCommandHandler(
 
             logger.LogInformation("Successfully added user {UserId} to tenant {TenantId}",
                 command.UserId, command.TenantId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

@@ -9,7 +9,7 @@ public class DeleteIdentificationTypeCommandHandler(
     IIdentificationTypeRepository repository
 ) : ICommandHandler<DeleteIdentificationTypeCommand>
 {
-    public async Task HandleAsync(DeleteIdentificationTypeCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(DeleteIdentificationTypeCommand command, CancellationToken cancellationToken)
     {
          try
         {
@@ -25,6 +25,7 @@ public class DeleteIdentificationTypeCommandHandler(
             await repository.DeleteIdentificationTypeAsync(identificationTypeExist.Id, cancellationToken);
 
             logger.LogInformation("Successfully deleted IdentificationType with ID {Id}", command.Id);
+            return Result.Success();
         }
         catch (Exception ex)
         {

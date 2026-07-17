@@ -4,4 +4,4 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Users.DomainEvents;
 
-public sealed record LockoutEnabledChangedEvent(SecurityUserId SecurityUserId, bool Enabled) : DomainEventBase;
+public sealed record LockoutEnabledChangedEvent(SecurityUserId SecurityUserId, bool Enabled)     : DomainEvent;

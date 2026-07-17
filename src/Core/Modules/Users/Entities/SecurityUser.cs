@@ -5,7 +5,7 @@
 namespace OroIdentityServer.Core.Modules.Users.Entities;
 
 public partial class SecurityUser : 
-    BaseEntity<SecurityUser, SecurityUserId>, IAuditableEntity, IAggregateRoot
+    AggregateRoot<SecurityUserId>, IAuditableEntity
 {
     public SecurityUser(string passwordHash, string securityStamp, string ConcurrencyStamp)
     {

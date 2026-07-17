@@ -9,7 +9,7 @@ public class CreatePermissionCommandHandler(
     IPermissionRepository permissionRepository)
 : ICommandHandler<CreatePermissionCommand>
 {
-    public async Task HandleAsync(CreatePermissionCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(CreatePermissionCommand command, CancellationToken cancellationToken)
     {
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation(
@@ -31,6 +31,7 @@ public class CreatePermissionCommandHandler(
                 command.Provider, 
                 command.Resource, 
                 command.Action);
+            return Result.Success();
         }
         catch (Exception ex)
         {

@@ -9,7 +9,7 @@ public class DeactivateUserSessionCommandHandler(
     IUserSessionRepository userSessionRepository
 ) : ICommandHandler<DeactivateUserSessionCommand>
 {
-    public async Task HandleAsync(DeactivateUserSessionCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(DeactivateUserSessionCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling DeactivateUserSessionCommand for SessionId: {SessionId}", command.SessionId);
         try
@@ -18,12 +18,13 @@ public class DeactivateUserSessionCommandHandler(
             if (session == null)
             {
                 logger.LogWarning("Session not found: {SessionId}", command.SessionId);
-                return;
+                return Result.Success();
             }
 
             session.DeactivateSession();
             await userSessionRepository.UpdateUserSessionAsync(session, cancellationToken);
             logger.LogInformation("Deactivated session {SessionId}", command.SessionId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

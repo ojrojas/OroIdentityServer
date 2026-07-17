@@ -15,7 +15,7 @@ public class CreateRoleCommandHandler(
     ILogger<CreateRoleCommandHandler> logger, IRoleRepository roleRepository
     ) : ICommandHandler<CreateRoleCommand>
 {
-    public async Task HandleAsync(CreateRoleCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(CreateRoleCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling CreateRoleCommand for RoleName: {RoleName}", command.RoleName);
 
@@ -34,6 +34,7 @@ public class CreateRoleCommandHandler(
             await roleRepository.AddAsync(role, cancellationToken);
 
             logger.LogInformation("Successfully created role with RoleName: {RoleName}", command.RoleName);
+            return Result.Success();
         }
         catch (Exception ex)
         {

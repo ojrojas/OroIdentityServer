@@ -9,18 +9,18 @@ public sealed record UserPreferenceCreatedDomainEvent(
     string UserId,
     Guid TenantId,
     Language Language,
-    AppTheme Theme) : DomainEventBase;
+    AppTheme Theme)     : DomainEvent;
 
 public sealed record UserPreferenceUpdatedDomainEvent(
     UserPreferenceId PreferenceId,
     string UserId,
-    Guid TenantId) : DomainEventBase;
+    Guid TenantId)     : DomainEvent;
 
 public sealed record DefaultCompanySetDomainEvent(
     UserPreferenceId PreferenceId,
     string UserId,
-    Guid? CompanyId) : DomainEventBase;
+    Guid? CompanyId)     : DomainEvent;
 
 public sealed record DashboardLayoutUpdatedDomainEvent(
     UserPreferenceId PreferenceId,
-    string UserId) : DomainEventBase;
+    string UserId)     : DomainEvent;

@@ -24,9 +24,6 @@ global using OroIdentityServer.Core.Modules.UserSessions.Entities;
 global using OroIdentityServer.Core.Modules.UserSessions.ValueObjects;
 global using OroIdentityServer.Core.Services;
 global using OroIdentityServer.Core.Shared;
-global using OroKernel.Domain.Entities;
-global using OroKernel.Domain.Events;
-global using OroKernel.Domain.Interfaces;
 
 global using OroIdentityServer.Core.Modules.UserPreferences.ValueObjects;
 global using OroIdentityServer.Core.Modules.UserPreferences.Entities;
@@ -34,3 +31,6 @@ global using OroIdentityServer.Core.Modules.UserPreferences.Aggregates;
 global using OroIdentityServer.Core.Modules.UserPreferences.Events;
 global using System.Text.RegularExpressions;
 global using OroIdentityServer.Core.Modules.Roles.Entities;
+
+global using BuildingBlocks.Kernel.Events;
+global using BuildingBlocks.Kernel.Domain;

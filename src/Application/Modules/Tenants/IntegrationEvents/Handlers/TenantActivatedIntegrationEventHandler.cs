@@ -11,7 +11,7 @@ public sealed class TenantActivatedIntegrationEventHandler(
     ILogger<TenantActivatedIntegrationEventHandler> logger)
     : IIntegrationEventHandler<TenantActivatedIntegrationEvent>
 {
-    public Task Handle(TenantActivatedIntegrationEvent integrationEvent, CancellationToken cancellationToken = default)
+    public Task HandleAsync(TenantActivatedIntegrationEvent integrationEvent, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
             "Tenant activated. TenantId: {TenantId}. Downstream modules should restore access.",

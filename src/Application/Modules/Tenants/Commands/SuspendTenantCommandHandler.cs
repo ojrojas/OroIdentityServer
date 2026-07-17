@@ -10,7 +10,7 @@ public sealed class SuspendTenantCommandHandler(
     IEventBus eventBus)
     : ICommandHandler<SuspendTenantCommand>
 {
-    public async Task HandleAsync(SuspendTenantCommand command, CancellationToken ct)
+    public async Task<Result> HandleAsync(SuspendTenantCommand command, CancellationToken ct)
     {
         logger.LogInformation("Handling SuspendTenantCommand for TenantId: {TenantId}", command.TenantId);
 
@@ -26,6 +26,7 @@ public sealed class SuspendTenantCommandHandler(
                 new TenantSuspendedIntegrationEvent(tenant.Id.Value), ct);
 
             logger.LogInformation("Successfully suspended tenant {TenantId}", command.TenantId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

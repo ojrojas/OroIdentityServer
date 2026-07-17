@@ -9,7 +9,7 @@ public class CreateApplicationCommandHandler(
     IOpenIddictApplicationManager applicationManager
 ) : ICommandHandler<CreateApplicationCommand>
 {
-    public async Task HandleAsync(CreateApplicationCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(CreateApplicationCommand command, CancellationToken cancellationToken)
     {
         try
         {
@@ -26,7 +26,7 @@ public class CreateApplicationCommandHandler(
             if (existingApplication != null)
             {
                 logger.LogWarning("Application with ClientId {ClientId} already exists.", command.Descriptor.ClientId);
-                return;
+                return Result.Success();
             }
 
             var descriptor = command.Descriptor.ToOpenIddict();
@@ -35,6 +35,7 @@ public class CreateApplicationCommandHandler(
             await applicationManager.CreateAsync(descriptor, cancellationToken);
 
             logger.LogInformation("Application with ClientId {ClientId} created successfully.", command.Descriptor.ClientId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.UserSessions.Aggregates;
 
-public class UserSession : BaseEntity<UserSession, UserSessionId>, IAggregateRoot
+public class UserSession : AggregateRoot<UserSessionId>
 {
     // Constructor vacío requerido por EF Core
     private UserSession()

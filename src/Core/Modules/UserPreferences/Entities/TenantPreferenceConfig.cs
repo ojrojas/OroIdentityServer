@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.UserPreferences.Entities;
 
-public sealed class TenantPreferenceConfig : BaseEntity<TenantPreferenceConfig, TenantPreferenceConfigId>
+public sealed class TenantPreferenceConfig : Entity<TenantPreferenceConfigId>
 {
     public Guid TenantId { get; private set; }
     public Language DefaultLanguage { get; private set; }

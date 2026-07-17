@@ -10,4 +10,4 @@ public record UserSessionUpdatedEvent(
     DateTime? ExpiresAt = null, 
     string? IpAddress = null, 
     string? UserAgent = null, 
-    string? Location = null) : DomainEventBase;
+    string? Location = null)     : DomainEvent;

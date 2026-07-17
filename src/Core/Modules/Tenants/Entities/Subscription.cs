@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Tenants.Entities;
 
-public sealed class Subscription : BaseEntity<Subscription, SubscriptionId>, IAuditableEntity
+public sealed class Subscription : Entity<SubscriptionId>
 {
     public TenantId TenantId { get; private set; } = null!;
     public PlanType Plan { get; private set; }

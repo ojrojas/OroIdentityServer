@@ -10,7 +10,7 @@ public sealed class CreateTenantCommandHandler(
     IEventBus eventBus)
     : ICommandHandler<CreateTenantCommand>
 {
-    public async Task HandleAsync(CreateTenantCommand command, CancellationToken ct)
+    public async Task<Result> HandleAsync(CreateTenantCommand command, CancellationToken ct)
     {
         logger.LogInformation("Handling CreateTenantCommand for Slug: {Slug}", command.Slug);
 
@@ -29,6 +29,7 @@ public sealed class CreateTenantCommandHandler(
                 new TenantProvisionedIntegrationEvent(tenant.Id.Value, command.Slug), ct);
 
             logger.LogInformation("Successfully created tenant with Slug: {Slug}", command.Slug);
+            return Result.Success();
         }
         catch (Exception ex)
         {

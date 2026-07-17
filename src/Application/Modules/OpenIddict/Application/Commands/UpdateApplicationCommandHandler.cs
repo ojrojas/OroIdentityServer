@@ -9,7 +9,7 @@ public class UpdateApplicationCommandHandler(
     IOpenIddictApplicationManager applicationManager
 ) : ICommandHandler<UpdateApplicationCommand>
 {
-    public async Task HandleAsync(UpdateApplicationCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(UpdateApplicationCommand command, CancellationToken cancellationToken)
     {
         try
         {
@@ -26,7 +26,7 @@ public class UpdateApplicationCommandHandler(
             if (existingApplication == null)
             {
                 logger.LogWarning("Application with ClientId {ClientId} not found.", command.Descriptor.ClientId);
-                return;
+                return Result.Success();
             }
 
             var descriptor = command.Descriptor.ToOpenIddict();
@@ -34,6 +34,7 @@ public class UpdateApplicationCommandHandler(
             await applicationManager.UpdateAsync(existingApplication, descriptor, cancellationToken);
 
             logger.LogInformation("Application with ClientId {ClientId} updated successfully.", command.Descriptor.ClientId);
+            return Result.Success();
         }
         catch (Exception ex)
         {

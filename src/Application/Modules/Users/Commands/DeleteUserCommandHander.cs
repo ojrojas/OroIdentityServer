@@ -9,7 +9,7 @@ public class DeleteUserCommandHander(
     IUserRepository userRepository
 ) : ICommandHandler<DeleteUserCommand>
 {
-    public async Task HandleAsync(DeleteUserCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(DeleteUserCommand command, CancellationToken cancellationToken)
     {
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Handling DeleteUserCommand for Id: {Id}", command.Id);
@@ -25,6 +25,7 @@ public class DeleteUserCommandHander(
             await userRepository.DeleteUserAsync(new(command.Id), cancellationToken);
 
             logger.LogInformation("Successfully handled DeleteUserCommand for Id: {Id}", command.Id);
+            return Result.Success();
         }
         catch (Exception ex)
         {

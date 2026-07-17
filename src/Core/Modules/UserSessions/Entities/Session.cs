@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.UserSessions.Entities;
 
-public sealed class Session : BaseEntity<Session, SessionId>, IAuditableEntity, IAggregateRoot
+public sealed class Session : AggregateRoot<SessionId>, IAuditableEntity
 {
     public UserId UserId { get; private set; }
     public User? User { get; set; }
