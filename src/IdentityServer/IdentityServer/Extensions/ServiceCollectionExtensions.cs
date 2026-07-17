@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationHandlers(this IServiceCollection services)
     {
         services.AddBuildingBlocksCqrs(typeof(OroIdentityServer.Application.Extensions.ApplicationExtensions).Assembly);
+       
         return services;
     }
 }

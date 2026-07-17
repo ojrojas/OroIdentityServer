@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OpenIddict.Abstractions;
+using OroIdentityServer.Application.Extensions;
 using OroIdentityServer.Infraestructure;
 using OroIdentityServer.Infraestructure.Data;
 using OroIdentityServer.Infraestructure.Repositories.Extensions;
@@ -41,6 +42,8 @@ builder.Services.AddControllers();
 
 builder.AddInfraestructureExtensions(builder.Configuration);
 builder.Services.AddApplicationHandlers();
+builder.AddApplicationExtensions(builder.Configuration);
+
 
 builder.AddIdentityServerOpenIddict();
 builder.Services.AddAdminAuthentication();
