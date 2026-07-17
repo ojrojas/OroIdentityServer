@@ -28,7 +28,6 @@
     <Project Path="tests/BuildingBlocks.CQRS.UnitTests/BuildingBlocks.CQRS.UnitTests.csproj" />
     <Project Path="tests/BuildingBlocks.EventBus.RabbitMQ.IntegrationTests/BuildingBlocks.EventBus.RabbitMQ.IntegrationTests.csproj" />
     <Project Path="tests/BuildingBlocks.EventBus.UnitTests/BuildingBlocks.EventBus.UnitTests.csproj" />
-    <Project Path="tests/BuildingBlocks.Examples.OrdersApi.IntegrationTests/BuildingBlocks.Examples.OrdersApi.IntegrationTests.csproj" />
     <Project Path="tests/BuildingBlocks.Kernel.UnitTests/BuildingBlocks.Kernel.UnitTests.csproj" />
     <Project Path="tests/BuildingBlocks.Logger.UnitTests/BuildingBlocks.Logger.UnitTests.csproj" />
     <Project Path="tests/BuildingBlocks.ServicesDefaults.UnitTests/BuildingBlocks.ServicesDefaults.UnitTests.csproj" />

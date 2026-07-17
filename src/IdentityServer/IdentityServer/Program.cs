@@ -49,6 +49,7 @@ builder.Services.AddAdminAuthorization();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<OroIdentityServer.Core.Interfaces.IPasswordHasher, OroIdentityServer.Core.Services.PasswordHasher>();
+builder.Services.AddScoped<AdminPasswordSignInService>();
 
 var app = builder.Build();
 
@@ -63,10 +64,13 @@ await using (var scope = app.Services.CreateAsyncScope())
     var passwordHasher = scope.ServiceProvider.GetRequiredService<OroIdentityServer.Core.Interfaces.IPasswordHasher>();
     var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-    var seedPath = Path.Combine(AppContext.BaseDirectory, "Data", "seedData.json");
-    if (File.Exists(seedPath))
+    if (!configuration.GetValue<bool>("DatabaseSeeder:Skip"))
     {
-        await DatabaseSeeder.SeedAsync(ctx, applicationManager, seedPath, passwordHasher, configuration, scopeManager);
+        var seedPath = Path.Combine(AppContext.BaseDirectory, "Data", "seedData.json");
+        if (File.Exists(seedPath))
+        {
+            await DatabaseSeeder.SeedAsync(ctx, applicationManager, seedPath, passwordHasher, configuration, scopeManager);
+        }
     }
 }
 
@@ -102,3 +106,5 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(IdentityServer.Client._Imports).Assembly);
 
 app.Run();
+
+public partial class Program { }

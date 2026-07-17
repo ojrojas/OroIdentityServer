@@ -12,6 +12,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\BuildingBlocks.ServicesDefaults\BuildingBlocks.ServicesDefaults.csproj" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BuildingBlocks\BuildingBlocks.ServicesDefaults\BuildingBlocks.ServicesDefaults.csproj" />
   </ItemGroup>
 </Project>

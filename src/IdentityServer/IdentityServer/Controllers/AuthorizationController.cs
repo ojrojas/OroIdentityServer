@@ -10,9 +10,8 @@ using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using OroIdentityServer.Server.Helpers;
 using static OpenIddict.Abstractions.OpenIddictConstants;
-using OroBuildingBlocks.ServicesDefaults;
 using OroIdentityServer.Core.Modules.Users.Aggregates;
-using OroCQRS.Core.Interfaces;
+using BuildingBlocks.CQRS.Abstractions;
 using OroIdentityServer.Application.Modules.Users.Queries;
 using OroIdentityServer.Application.Modules.Roles.Queries;
 
@@ -24,14 +23,14 @@ public class AuthorizationController : Controller
     private readonly IOpenIddictAuthorizationManager _authorizationManager;
     private readonly IOpenIddictScopeManager _scopeManager;
     private readonly SignInManager<User> _signInManager;
-    private readonly ISender _sender;
+    private readonly IQueryDispatcher _queryDispatcher;
 
     public AuthorizationController(
         IOpenIddictApplicationManager applicationManager,
         IOpenIddictAuthorizationManager authorizationManager,
         IOpenIddictScopeManager scopeManager,
         SignInManager<User> signInManager,
-        ISender sender
+        IQueryDispatcher queryDispatcher
         // ,UserManager<ApplicationUser> userManager
         )
     {
@@ -39,7 +38,7 @@ public class AuthorizationController : Controller
         _authorizationManager = authorizationManager;
         _scopeManager = scopeManager;
         _signInManager = signInManager;
-        _sender = sender;
+        _queryDispatcher = queryDispatcher;
         // _userManager = userManager;
     }
 
@@ -100,7 +99,7 @@ public class AuthorizationController : Controller
         }
 
         // Retrieve the profile of the logged in user.
-        var user = await _sender.Send(new GetUserByIdQuery(Guid.Parse(result.Principal.GetClaim(Claims.Subject))), cancellationToken) ??
+        var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(Guid.Parse(result.Principal.GetClaim(Claims.Subject))), cancellationToken) ??
            throw new InvalidOperationException("The user details cannot be retrieved.");
 
         // Retrieve the application details from the database.
@@ -140,7 +139,7 @@ public class AuthorizationController : Controller
                     nameType: Claims.Name,
                     roleType: Claims.Role);
 
-                var roles = await _sender.Send(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
+                var roles = await _queryDispatcher.SendAsync(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
 
                 // Add the claims that will be persisted in the tokens.
                 identity.SetClaim(Claims.Subject, user.Data.Id.Value.ToString())
@@ -166,7 +165,9 @@ public class AuthorizationController : Controller
                     scopes: identity.GetScopes());
 
                 identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization));
-                identity.SetDestinations(GetDestination.GetDestinations);
+                var principal = new ClaimsPrincipal(identity);
+foreach (var claim in identity.Claims)
+    claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
                 return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 
@@ -203,7 +204,7 @@ public class AuthorizationController : Controller
         // Retrieve the profile of the logged in user.
         // var user = await _userManager.GetUserAsync(User) ??
         //     throw new InvalidOperationException("The user details cannot be retrieved.");
-        var user = await _sender.Send(new GetUserByIdQuery(new(User.GetClaim(Claims.Subject))), cancellationToken) ??
+        var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(new(User.GetClaim(Claims.Subject))), cancellationToken) ??
             throw new InvalidOperationException("The user details cannot be retrieved.");
 
         // Retrieve the application details from the database.
@@ -239,7 +240,7 @@ public class AuthorizationController : Controller
             nameType: Claims.Name,
             roleType: Claims.Role);
 
-        var roles = await _sender.Send(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
+        var roles = await _queryDispatcher.SendAsync(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
 
         // Add the claims that will be persisted in the tokens.
         identity.SetClaim(Claims.Subject, user.Data.Id.Value.ToString())
@@ -265,7 +266,9 @@ public class AuthorizationController : Controller
             scopes: identity.GetScopes());
 
         identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization));
-        identity.SetDestinations(GetDestination.GetDestinations);
+        var principal = new ClaimsPrincipal(identity);
+foreach (var claim in identity.Claims)
+    claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
         // Returning a SignInResult will ask OpenIddict to issue the appropriate access/identity tokens.
         return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
@@ -311,7 +314,7 @@ public class AuthorizationController : Controller
             var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 
             // Retrieve the user profile corresponding to the authorization code/refresh token.
-              var user = await _sender.Send(new GetUserByIdQuery(Guid.Parse(result.Principal.GetClaim(Claims.Subject))), cancellationToken) ??
+              var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(Guid.Parse(result.Principal.GetClaim(Claims.Subject))), cancellationToken) ??
            throw new InvalidOperationException("The user details cannot be retrieved.");
 
             if (user is null)
@@ -342,7 +345,7 @@ public class AuthorizationController : Controller
                 nameType: Claims.Name,
                 roleType: Claims.Role);
 
-            var roles = await _sender.Send(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
+            var roles = await _queryDispatcher.SendAsync(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
 
             // Override the user claims present in the principal in case they
             // changed since the authorization code/refresh token was issued.
@@ -352,7 +355,9 @@ public class AuthorizationController : Controller
                     .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
                     .SetClaims(Claims.Role, [.. roles.Data.Select(x=> x.Name)]);
 
-            identity.SetDestinations(GetDestination.GetDestinations);
+            var principal = new ClaimsPrincipal(identity);
+foreach (var claim in identity.Claims)
+    claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
             // Returning a SignInResult will ask OpenIddict to issue the appropriate access/identity tokens.
             return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);

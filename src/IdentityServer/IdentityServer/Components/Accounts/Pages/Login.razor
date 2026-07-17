@@ -1,6 +1,7 @@
 @page "/Account/Login"
 @layout LoginLayout
 @attribute [AllowAnonymous]
+@using Microsoft.FluentUI.AspNetCore.Components
 
 <div class="login-page">
     <FluentCard class="login-card">
@@ -30,7 +31,8 @@
                 Autofocus="true"
                 Class="login-field" />
 
-            <FluentPasswordField
+            <FluentTextField
+                Type="@TextFieldType.Password"
                 Name="Password"
                 Placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                 Required="true"

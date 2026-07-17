@@ -18,7 +18,7 @@ public static class AuthEndpoints
         var group = app.MapGroup("/auth").WithTags("Auth");
 
         group.MapPost("/login", async (
-            [FromServices]HttpContext http,
+            HttpContext http,
             [FromForm]LoginInputModel loginInput,
             [FromServices]AdminPasswordSignInService signInService,
             CancellationToken ct) =>

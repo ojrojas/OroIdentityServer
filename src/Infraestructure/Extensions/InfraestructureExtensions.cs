@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using Microsoft.EntityFrameworkCore.Diagnostics;
 namespace OroIdentityServer.Infraestructure.Repositories.Extensions;
 
 public static class InfraestructureExtensions
@@ -14,6 +15,7 @@ public static class InfraestructureExtensions
         {
             options.UseNpgsql(connectionDatabase);
             options.UseOpenIddict();
+            options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
             if (builder.Environment.IsDevelopment())
             {
                 options.EnableDetailedErrors(); // Consider disabling in production for performance reasons

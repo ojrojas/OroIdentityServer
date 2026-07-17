@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
-using OroCQRS.Core.Interfaces;
+using BuildingBlocks.CQRS.Abstractions;
 using OroIdentityServer.Application.Modules.Openddict.Commands;
 using OroIdentityServer.Application.Modules.Openddict.Queries;
 

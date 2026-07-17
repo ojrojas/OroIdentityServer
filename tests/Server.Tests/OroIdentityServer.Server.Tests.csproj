@@ -17,4 +17,8 @@
     <PackageReference Include="FluentAssertions" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer\IdentityServer.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using OroCQRS.Core.Interfaces;
+using BuildingBlocks.CQRS.Abstractions;
 using OroIdentityServer.Application.Modules.IdentificationTypes.Commands;
 using OroIdentityServer.Application.Modules.IdentificationTypes.Queries;
 

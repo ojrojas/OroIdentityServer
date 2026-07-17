@@ -3,7 +3,7 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using Microsoft.AspNetCore.Mvc;
-using OroCQRS.Core.Interfaces;
+using BuildingBlocks.CQRS.Abstractions;
 using OroIdentityServer.Application.Modules.Roles.Commands;
 using OroIdentityServer.Application.Modules.Roles.Queries;
 
