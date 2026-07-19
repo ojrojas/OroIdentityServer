@@ -12,4 +12,5 @@ public interface IUserSessionRepository
     Task<UserSession?> GetUserSessionByIdAsync(UserSessionId id, CancellationToken cancellationToken);
     Task<IEnumerable<UserSession>> GetSessionsByUserIdAsync(UserId userId, CancellationToken cancellationToken);
     Task<UserSession?> GetByTokenAsync(string sessionToken, CancellationToken cancellationToken);
+    Task<IEnumerable<UserSession>> GetActiveSessionsAsync(CancellationToken cancellationToken);
 }

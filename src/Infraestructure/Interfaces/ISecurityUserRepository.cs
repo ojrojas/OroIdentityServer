@@ -7,4 +7,5 @@ namespace OroIdentityServer.Infraestructure.Interfaces;
 public interface ISecurityUserRepository
 {
     Task<SecurityUser> GetSecurityUserAsync(Guid securityId, CancellationToken cancellationToken);
+    Task UpdateSecurityUserAsync(SecurityUser securityUser, CancellationToken cancellationToken);
 }

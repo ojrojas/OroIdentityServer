@@ -30,7 +30,10 @@ public class ServerAdminUserSessionService(IQueryDispatcher queryDispatcher, ICo
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }
 
+    public Task<int> GetActiveSessionsCountAsync(CancellationToken ct = default)
+        => queryDispatcher.SendAsync(new GetActiveUserSessionsCountQuery(), ct);
+
     private static UserSessionModel MapUserSession(UserSession session) => new(
-        session.UserId?.Value, session.Device, session.SessionToken, session.CreatedAt, session.ExpiresAt,
+        session.Id.Value, session.UserId?.Value, session.Device, session.SessionToken, session.CreatedAt, session.ExpiresAt,
         session.LastActivityAt, session.IpAddress, session.UserAgent, session.Location);
 }

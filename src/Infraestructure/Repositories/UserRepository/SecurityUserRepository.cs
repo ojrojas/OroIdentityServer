@@ -13,7 +13,13 @@ public class SecurityUserRepository(
     public async Task<SecurityUser> GetSecurityUserAsync(Guid securityId, CancellationToken cancellationToken)
     {
         logger.LogInformation("Get security user request by id");
-        return await repository.GetByIdAsync(new SecurityUserId(securityId), cancellationToken) 
+        return await repository.GetByIdAsync(new SecurityUserId(securityId), cancellationToken)
                ?? throw new Exception("Security user not found");
+    }
+
+    public async Task UpdateSecurityUserAsync(SecurityUser securityUser, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Updating security user {SecurityUserId}", securityUser.Id.Value);
+        await repository.UpdateAsync(securityUser, cancellationToken);
     }
 }

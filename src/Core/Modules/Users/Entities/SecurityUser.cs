@@ -23,6 +23,16 @@ public partial class SecurityUser :
     public DateTime? LockoutEnd { get; private set; } = DateTime.UtcNow;
     public bool LockoutEnabled { get; private set; } = false;
     public int AccessFailedCount { get; private set; } = 0;
+    public bool MustChangePassword { get; private set; } = true;
+
+    public void ChangePassword(string newPasswordHash)
+    {
+        PasswordHash = newPasswordHash;
+        SecurityStamp = Guid.NewGuid().ToString();
+        MustChangePassword = false;
+    }
+
+    public void ExemptFromPasswordChange() => MustChangePassword = false;
 
     public bool IsLockedOut()
     {

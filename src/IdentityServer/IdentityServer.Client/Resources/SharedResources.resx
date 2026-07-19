@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <!-- Common -->
+  <data name="Save"><value>Save</value></data>
+  <data name="Cancel"><value>Cancel</value></data>
+  <data name="Delete"><value>Delete</value></data>
+  <data name="Create"><value>Create</value></data>
+  <data name="New"><value>New</value></data>
+  <data name="Back"><value>Back</value></data>
+  <data name="ConfirmDeletionTitle"><value>Confirm deletion</value></data>
+  <data name="Name"><value>Name</value></data>
+  <data name="MiddleName"><value>Middle name</value></data>
+  <data name="LastName"><value>Last name</value></data>
+  <data name="Email"><value>Email</value></data>
+  <data name="Username"><value>Username</value></data>
+  <data name="Password"><value>Password</value></data>
+  <data name="Identification"><value>Identification</value></data>
+  <data name="IdentificationType"><value>Identification type</value></data>
+  <data name="Tenant"><value>Tenant</value></data>
+  <data name="Active"><value>Active</value></data>
+  <data name="Created"><value>Created</value></data>
+  <data name="SavedToast"><value>Saved.</value></data>
+  <data name="SaveFailedToast"><value>Could not save ({0}).</value></data>
+  <data name="Language"><value>Language</value></data>
+  <data name="ToggleTheme"><value>Toggle theme</value></data>
+  <data name="NotFoundTitle"><value>Not Found</value></data>
+  <data name="NotFoundMessage"><value>Sorry, the content you are looking for does not exist.</value></data>
+
+  <!-- Login -->
+  <data name="SignInTitle"><value>Sign In</value></data>
+  <data name="SignInSubtitle"><value>Enter your credentials to access the admin panel</value></data>
+  <data name="InvalidCredentials"><value>Invalid credentials. Please try again.</value></data>
+  <data name="LoginIdentifierPlaceholder"><value>you@example.com</value></data>
+  <data name="SignInButton"><value>Sign In</value></data>
+  <data name="AdminPanel"><value>Identity Admin Panel</value></data>
+
+  <!-- Change password -->
+  <data name="ChangePasswordTitle"><value>Change your password</value></data>
+  <data name="ChangePasswordSubtitle"><value>You must set a new password before continuing.</value></data>
+  <data name="PasswordMismatch"><value>Passwords do not match.</value></data>
+  <data name="NewPasswordPlaceholder"><value>New password</value></data>
+  <data name="ConfirmNewPasswordPlaceholder"><value>Confirm new password</value></data>
+  <data name="ChangePasswordButton"><value>Change password</value></data>
+
+  <!-- Logout -->
+  <data name="SignOutTitle"><value>Sign out</value></data>
+  <data name="SignOutSubtitle"><value>An application is asking to end your IdentityServer session. Do you want to sign out?</value></data>
+  <data name="YesSignOut"><value>Yes, sign me out</value></data>
+  <data name="NoStaySignedIn"><value>No, stay signed in</value></data>
+
+  <!-- Nav menu -->
+  <data name="NavDashboard"><value>Dashboard</value></data>
+  <data name="NavUsers"><value>Users</value></data>
+  <data name="NavRoles"><value>Roles</value></data>
+  <data name="NavIdentificationTypes"><value>Identification Types</value></data>
+  <data name="NavApplications"><value>Applications</value></data>
+  <data name="NavScopes"><value>Scopes</value></data>
+  <data name="NavSessions"><value>Sessions</value></data>
+
+  <!-- Dashboard -->
+  <data name="DashboardTitle"><value>Dashboard</value></data>
+  <data name="StatUsers"><value>Users</value></data>
+  <data name="StatConnectedUsers"><value>Connected users</value></data>
+  <data name="StatRoles"><value>Roles</value></data>
+  <data name="StatApplications"><value>Applications</value></data>
+  <data name="StatScopes"><value>Scopes</value></data>
+
+  <!-- Users -->
+  <data name="UsersTitle"><value>Users</value></data>
+  <data name="NewUserTitle"><value>New user</value></data>
+  <data name="ColUsername"><value>Username</value></data>
+  <data name="ColName"><value>Name</value></data>
+  <data name="ColEmail"><value>Email</value></data>
+  <data name="ColRoles"><value>Roles</value></data>
+  <data name="DeleteUserConfirm"><value>Delete user "{0}"?</value></data>
+  <data name="UserCreatedToast"><value>User created.</value></data>
+  <data name="UserCreateFailedToast"><value>Could not create user ({0}).</value></data>
+  <data name="UserDeletedToast"><value>User deleted.</value></data>
+  <data name="UserDeleteFailedToast"><value>Could not delete user ({0}).</value></data>
+  <data name="UserDetailTitle"><value>User</value></data>
+  <data name="NewPasswordRequiredPlaceholder"><value>Required to save changes</value></data>
+  <data name="RolesAssignedLabel"><value>Roles: {0}</value></data>
+  <data name="None"><value>none</value></data>
+
+  <!-- Roles -->
+  <data name="RolesTitle"><value>Roles</value></data>
+  <data name="NewRoleTitle"><value>New role</value></data>
+  <data name="RoleName"><value>Role name</value></data>
+  <data name="ColPermissions"><value>Permissions</value></data>
+  <data name="DeleteRoleConfirm"><value>Delete role "{0}"?</value></data>
+  <data name="RoleCreatedToast"><value>Role created.</value></data>
+  <data name="RoleCreateFailedToast"><value>Could not create role ({0}).</value></data>
+  <data name="RoleDeletedToast"><value>Role deleted.</value></data>
+  <data name="RoleDeleteFailedToast"><value>Could not delete role ({0}).</value></data>
+  <data name="RoleDetailTitle"><value>Role</value></data>
+  <data name="PermissionsAssignedLabel"><value>Permissions assigned: {0}</value></data>
+  <data name="ActiveLabel"><value>Active: {0}</value></data>
+
+  <!-- Identification types -->
+  <data name="IdentificationTypesTitle"><value>Identification Types</value></data>
+  <data name="NewIdentificationTypeTitle"><value>New identification type</value></data>
+  <data name="DeleteIdentificationTypeConfirm"><value>Delete identification type "{0}"?</value></data>
+  <data name="IdentificationTypeCreatedToast"><value>Identification type created.</value></data>
+  <data name="IdentificationTypeCreateFailedToast"><value>Could not create identification type ({0}).</value></data>
+  <data name="IdentificationTypeDeletedToast"><value>Identification type deleted.</value></data>
+  <data name="IdentificationTypeDeleteFailedToast"><value>Could not delete identification type ({0}).</value></data>
+  <data name="IdentificationTypeDetailTitle"><value>Identification Type</value></data>
+
+  <!-- Applications -->
+  <data name="ApplicationsTitle"><value>Applications</value></data>
+  <data name="NewApplicationTitle"><value>New application</value></data>
+  <data name="ClientId"><value>Client ID</value></data>
+  <data name="DisplayName"><value>Display name</value></data>
+  <data name="ClientSecret"><value>Client secret</value></data>
+  <data name="ClientSecretNewPlaceholder"><value>Leave blank for a public client</value></data>
+  <data name="ClientSecretEditPlaceholder"><value>Leave blank to keep current secret</value></data>
+  <data name="ClientType"><value>Client type</value></data>
+  <data name="ColType"><value>Type</value></data>
+  <data name="DeleteApplicationConfirm"><value>Delete application "{0}"?</value></data>
+  <data name="ApplicationCreatedToast"><value>Application created.</value></data>
+  <data name="ApplicationCreateFailedToast"><value>Could not create application ({0}).</value></data>
+  <data name="ApplicationDeletedToast"><value>Application deleted.</value></data>
+  <data name="ApplicationDeleteFailedToast"><value>Could not delete application ({0}).</value></data>
+  <data name="ApplicationDetailTitle"><value>Application</value></data>
+  <data name="RedirectUris"><value>Redirect URIs (comma separated)</value></data>
+  <data name="PostLogoutRedirectUris"><value>Post-logout redirect URIs (comma separated)</value></data>
+
+  <!-- Scopes -->
+  <data name="ScopesTitle"><value>Scopes</value></data>
+  <data name="NewScopeTitle"><value>New scope</value></data>
+  <data name="ScopeName"><value>Name</value></data>
+  <data name="Resources"><value>Resources (comma separated)</value></data>
+  <data name="ColResources"><value>Resources</value></data>
+  <data name="ColDisplayName"><value>Display name</value></data>
+  <data name="DeleteScopeConfirm"><value>Delete scope "{0}"?</value></data>
+  <data name="ScopeCreatedToast"><value>Scope created.</value></data>
+  <data name="ScopeCreateFailedToast"><value>Could not create scope ({0}).</value></data>
+  <data name="ScopeDeletedToast"><value>Scope deleted.</value></data>
+  <data name="ScopeDeleteFailedToast"><value>Could not delete scope ({0}).</value></data>
+  <data name="ScopeDetailTitle"><value>Scope</value></data>
+
+  <!-- Sessions -->
+  <data name="SessionsTitle"><value>Sessions</value></data>
+  <data name="SelectUserPrompt"><value>Select a user to see their sessions</value></data>
+  <data name="SessionsForUser"><value>Sessions for {0}</value></data>
+  <data name="NoActiveSessions"><value>No active sessions.</value></data>
+  <data name="ColDevice"><value>Device</value></data>
+  <data name="ColIp"><value>IP</value></data>
+  <data name="ColLastActivity"><value>Last activity</value></data>
+  <data name="ColExpires"><value>Expires</value></data>
+  <data name="Disconnect"><value>Disconnect</value></data>
+  <data name="DisconnectConfirm"><value>Disconnect this session?</value></data>
+  <data name="SessionDisconnectedToast"><value>Session disconnected.</value></data>
+  <data name="SessionDisconnectFailedToast"><value>Could not disconnect session ({0}).</value></data>
+</root>

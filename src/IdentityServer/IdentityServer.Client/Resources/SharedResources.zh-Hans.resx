@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="Save"><value>保存</value></data>
+  <data name="Cancel"><value>取消</value></data>
+  <data name="Delete"><value>删除</value></data>
+  <data name="Create"><value>创建</value></data>
+  <data name="New"><value>新建</value></data>
+  <data name="Back"><value>返回</value></data>
+  <data name="ConfirmDeletionTitle"><value>确认删除</value></data>
+  <data name="Name"><value>名字</value></data>
+  <data name="MiddleName"><value>中间名</value></data>
+  <data name="LastName"><value>姓氏</value></data>
+  <data name="Email"><value>电子邮件</value></data>
+  <data name="Username"><value>用户名</value></data>
+  <data name="Password"><value>密码</value></data>
+  <data name="Identification"><value>身份证件号</value></data>
+  <data name="IdentificationType"><value>证件类型</value></data>
+  <data name="Tenant"><value>租户</value></data>
+  <data name="Active"><value>启用</value></data>
+  <data name="Created"><value>创建时间</value></data>
+  <data name="SavedToast"><value>已保存。</value></data>
+  <data name="SaveFailedToast"><value>保存失败（{0}）。</value></data>
+  <data name="Language"><value>语言</value></data>
+  <data name="ToggleTheme"><value>切换主题</value></data>
+  <data name="NotFoundTitle"><value>未找到</value></data>
+  <data name="NotFoundMessage"><value>抱歉，您要查找的内容不存在。</value></data>
+
+  <data name="SignInTitle"><value>登录</value></data>
+  <data name="SignInSubtitle"><value>请输入您的凭据以访问管理面板</value></data>
+  <data name="InvalidCredentials"><value>凭据无效，请重试。</value></data>
+  <data name="LoginIdentifierPlaceholder"><value>you@example.com</value></data>
+  <data name="SignInButton"><value>登录</value></data>
+  <data name="AdminPanel"><value>身份管理面板</value></data>
+
+  <data name="ChangePasswordTitle"><value>修改密码</value></data>
+  <data name="ChangePasswordSubtitle"><value>继续之前，您必须设置新密码。</value></data>
+  <data name="PasswordMismatch"><value>两次输入的密码不一致。</value></data>
+  <data name="NewPasswordPlaceholder"><value>新密码</value></data>
+  <data name="ConfirmNewPasswordPlaceholder"><value>确认新密码</value></data>
+  <data name="ChangePasswordButton"><value>修改密码</value></data>
+
+  <data name="SignOutTitle"><value>退出登录</value></data>
+  <data name="SignOutSubtitle"><value>某个应用正请求结束您在 IdentityServer 的会话。是否要退出登录？</value></data>
+  <data name="YesSignOut"><value>是，退出登录</value></data>
+  <data name="NoStaySignedIn"><value>否，保持登录</value></data>
+
+  <data name="NavDashboard"><value>仪表盘</value></data>
+  <data name="NavUsers"><value>用户</value></data>
+  <data name="NavRoles"><value>角色</value></data>
+  <data name="NavIdentificationTypes"><value>证件类型</value></data>
+  <data name="NavApplications"><value>应用</value></data>
+  <data name="NavScopes"><value>作用域</value></data>
+  <data name="NavSessions"><value>会话</value></data>
+
+  <data name="DashboardTitle"><value>仪表盘</value></data>
+  <data name="StatUsers"><value>用户</value></data>
+  <data name="StatConnectedUsers"><value>在线用户</value></data>
+  <data name="StatRoles"><value>角色</value></data>
+  <data name="StatApplications"><value>应用</value></data>
+  <data name="StatScopes"><value>作用域</value></data>
+
+  <data name="UsersTitle"><value>用户</value></data>
+  <data name="NewUserTitle"><value>新建用户</value></data>
+  <data name="ColUsername"><value>用户名</value></data>
+  <data name="ColName"><value>姓名</value></data>
+  <data name="ColEmail"><value>电子邮件</value></data>
+  <data name="ColRoles"><value>角色</value></data>
+  <data name="DeleteUserConfirm"><value>确定要删除用户“{0}”吗？</value></data>
+  <data name="UserCreatedToast"><value>用户已创建。</value></data>
+  <data name="UserCreateFailedToast"><value>无法创建用户（{0}）。</value></data>
+  <data name="UserDeletedToast"><value>用户已删除。</value></data>
+  <data name="UserDeleteFailedToast"><value>无法删除用户（{0}）。</value></data>
+  <data name="UserDetailTitle"><value>用户</value></data>
+  <data name="NewPasswordRequiredPlaceholder"><value>保存更改需要填写</value></data>
+  <data name="RolesAssignedLabel"><value>角色：{0}</value></data>
+  <data name="None"><value>无</value></data>
+
+  <data name="RolesTitle"><value>角色</value></data>
+  <data name="NewRoleTitle"><value>新建角色</value></data>
+  <data name="RoleName"><value>角色名称</value></data>
+  <data name="ColPermissions"><value>权限</value></data>
+  <data name="DeleteRoleConfirm"><value>确定要删除角色“{0}”吗？</value></data>
+  <data name="RoleCreatedToast"><value>角色已创建。</value></data>
+  <data name="RoleCreateFailedToast"><value>无法创建角色（{0}）。</value></data>
+  <data name="RoleDeletedToast"><value>角色已删除。</value></data>
+  <data name="RoleDeleteFailedToast"><value>无法删除角色（{0}）。</value></data>
+  <data name="RoleDetailTitle"><value>角色</value></data>
+  <data name="PermissionsAssignedLabel"><value>已分配权限：{0}</value></data>
+  <data name="ActiveLabel"><value>启用：{0}</value></data>
+
+  <data name="IdentificationTypesTitle"><value>证件类型</value></data>
+  <data name="NewIdentificationTypeTitle"><value>新建证件类型</value></data>
+  <data name="DeleteIdentificationTypeConfirm"><value>确定要删除证件类型“{0}”吗？</value></data>
+  <data name="IdentificationTypeCreatedToast"><value>证件类型已创建。</value></data>
+  <data name="IdentificationTypeCreateFailedToast"><value>无法创建证件类型（{0}）。</value></data>
+  <data name="IdentificationTypeDeletedToast"><value>证件类型已删除。</value></data>
+  <data name="IdentificationTypeDeleteFailedToast"><value>无法删除证件类型（{0}）。</value></data>
+  <data name="IdentificationTypeDetailTitle"><value>证件类型</value></data>
+
+  <data name="ApplicationsTitle"><value>应用</value></data>
+  <data name="NewApplicationTitle"><value>新建应用</value></data>
+  <data name="ClientId"><value>客户端 ID</value></data>
+  <data name="DisplayName"><value>显示名称</value></data>
+  <data name="ClientSecret"><value>客户端密钥</value></data>
+  <data name="ClientSecretNewPlaceholder"><value>公共客户端请留空</value></data>
+  <data name="ClientSecretEditPlaceholder"><value>留空以保留当前密钥</value></data>
+  <data name="ClientType"><value>客户端类型</value></data>
+  <data name="ColType"><value>类型</value></data>
+  <data name="DeleteApplicationConfirm"><value>确定要删除应用“{0}”吗？</value></data>
+  <data name="ApplicationCreatedToast"><value>应用已创建。</value></data>
+  <data name="ApplicationCreateFailedToast"><value>无法创建应用（{0}）。</value></data>
+  <data name="ApplicationDeletedToast"><value>应用已删除。</value></data>
+  <data name="ApplicationDeleteFailedToast"><value>无法删除应用（{0}）。</value></data>
+  <data name="ApplicationDetailTitle"><value>应用</value></data>
+  <data name="RedirectUris"><value>重定向 URI（逗号分隔）</value></data>
+  <data name="PostLogoutRedirectUris"><value>注销后重定向 URI（逗号分隔）</value></data>
+
+  <data name="ScopesTitle"><value>作用域</value></data>
+  <data name="NewScopeTitle"><value>新建作用域</value></data>
+  <data name="ScopeName"><value>名称</value></data>
+  <data name="Resources"><value>资源（逗号分隔）</value></data>
+  <data name="ColResources"><value>资源</value></data>
+  <data name="ColDisplayName"><value>显示名称</value></data>
+  <data name="DeleteScopeConfirm"><value>确定要删除作用域“{0}”吗？</value></data>
+  <data name="ScopeCreatedToast"><value>作用域已创建。</value></data>
+  <data name="ScopeCreateFailedToast"><value>无法创建作用域（{0}）。</value></data>
+  <data name="ScopeDeletedToast"><value>作用域已删除。</value></data>
+  <data name="ScopeDeleteFailedToast"><value>无法删除作用域（{0}）。</value></data>
+  <data name="ScopeDetailTitle"><value>作用域</value></data>
+
+  <data name="SessionsTitle"><value>会话</value></data>
+  <data name="SelectUserPrompt"><value>选择一个用户以查看其会话</value></data>
+  <data name="SessionsForUser"><value>{0} 的会话</value></data>
+  <data name="NoActiveSessions"><value>没有活动会话。</value></data>
+  <data name="ColDevice"><value>设备</value></data>
+  <data name="ColIp"><value>IP</value></data>
+  <data name="ColLastActivity"><value>最后活动</value></data>
+  <data name="ColExpires"><value>到期时间</value></data>
+  <data name="Disconnect"><value>断开连接</value></data>
+  <data name="DisconnectConfirm"><value>要断开此会话吗？</value></data>
+  <data name="SessionDisconnectedToast"><value>会话已断开。</value></data>
+  <data name="SessionDisconnectFailedToast"><value>无法断开会话（{0}）。</value></data>
+</root>

@@ -1,0 +1,27 @@
+<FluentCard Style="padding: 16px; height: 100%;">
+    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalGap="12">
+        <FluentIcon Value="@Icon" Color="Color.Accent" />
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="0">
+            <FluentLabel Typo="Typography.Body">@Title</FluentLabel>
+            @if (Value is null)
+            {
+                <FluentProgressRing Style="width: 20px; height: 20px;" />
+            }
+            else
+            {
+                <FluentLabel Typo="Typography.H3">@Value</FluentLabel>
+            }
+        </FluentStack>
+    </FluentStack>
+</FluentCard>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public int? Value { get; set; }
+
+    [Parameter, EditorRequired]
+    public Icon Icon { get; set; } = default!;
+}

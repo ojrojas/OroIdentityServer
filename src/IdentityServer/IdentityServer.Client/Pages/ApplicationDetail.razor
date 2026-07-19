@@ -1,0 +1,95 @@
+@page "/applications/{ClientId}"
+@attribute [Authorize]
+@inject IAdminApplicationService ApplicationService
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["ApplicationDetailTitle"]</PageTitle>
+
+@if (item is null)
+{
+    <FluentProgressRing />
+}
+else
+{
+    <FluentLabel Typo="Typography.PageTitle">@L["ApplicationDetailTitle"]</FluentLabel>
+
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Style="max-width: 560px; margin-top: 1rem;">
+        <FluentTextField Value="@ClientId" ReadOnly="true" Label="@L["ClientId"]" Style="width:100%" />
+        <FluentTextField @bind-Value="displayName" Label="@L["DisplayName"]" Style="width:100%" />
+        <FluentTextField @bind-Value="clientSecret" Label="@L["ClientSecret"]" Placeholder="@L["ClientSecretEditPlaceholder"]" TextFieldType="TextFieldType.Password" Style="width:100%" />
+        <FluentSelect Style="width:100%" TOption="string" Items="@(["confidential", "public"])" @bind-Value="clientType" Label="@L["ClientType"]" />
+        <FluentTextField @bind-Value="redirectUris" Label="@L["RedirectUris"]" Style="width:100%" />
+        <FluentTextField @bind-Value="postLogoutRedirectUris" Label="@L["PostLogoutRedirectUris"]" Style="width:100%" />
+
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
+            <FluentButton Appearance="Appearance.Accent" Disabled="@saving" OnClick="SaveAsync">@L["Save"]</FluentButton>
+            <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/applications"))">@L["Back"]</FluentButton>
+            <FluentSpacer />
+            <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Regular.Size20.Delete())" OnClick="DeleteAsync">@L["Delete"]</FluentButton>
+        </FluentStack>
+    </FluentStack>
+}
+
+@code {
+    [Parameter]
+    public string ClientId { get; set; } = string.Empty;
+
+    private OpenIddictApplicationModel? item;
+    private string displayName = string.Empty;
+    private string clientSecret = string.Empty;
+    private string clientType = "confidential";
+    private string redirectUris = string.Empty;
+    private string postLogoutRedirectUris = string.Empty;
+    private bool saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        item = await ApplicationService.GetApplicationByClientIdAsync(ClientId);
+        if (item is null) return;
+
+        displayName = item.DisplayName ?? string.Empty;
+        clientType = item.ClientType ?? "confidential";
+        redirectUris = string.Join(", ", item.RedirectUris ?? []);
+        postLogoutRedirectUris = string.Join(", ", item.PostLogoutRedirectUris ?? []);
+    }
+
+    private static List<string> SplitUris(string value)
+        => [.. value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        var model = new OpenIddictApplicationModel(
+            ClientId, string.IsNullOrWhiteSpace(clientSecret) ? item!.ClientSecret : clientSecret, displayName, clientType,
+            item!.ApplicationType, item.ConsentType, item.Permissions, item.Requirements, SplitUris(redirectUris), SplitUris(postLogoutRedirectUris));
+
+        var response = await ApplicationService.UpdateApplicationAsync(ClientId, model);
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+            ToastService.ShowSuccess(L["SavedToast"]);
+        else
+            ToastService.ShowError(L["SaveFailedToast", (int)response.StatusCode]);
+    }
+
+    private async Task DeleteAsync()
+    {
+        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteApplicationConfirm", ClientId], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        var response = await ApplicationService.DeleteApplicationAsync(ClientId);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["ApplicationDeletedToast"]);
+            Nav.NavigateTo("/applications");
+        }
+        else
+        {
+            ToastService.ShowError(L["ApplicationDeleteFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

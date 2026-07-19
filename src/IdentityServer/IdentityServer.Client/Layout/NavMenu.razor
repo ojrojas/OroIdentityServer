@@ -1,26 +1,31 @@
-﻿<div class="navmenu">
+@inject IStringLocalizer<SharedResources> L
+
+<div class="navmenu">
     <input type="checkbox" title="Menu expand/collapse toggle" id="navmenu-toggle" class="navmenu-icon" />
     <label for="navmenu-toggle" class="navmenu-icon">
         <FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" Color="Color.Fill" />
     </label>
     <nav class="sitenav" aria-labelledby="main-menu">
-        <FluentNavMenu Id="main-menu" Width="250" Collapsible="true" Title="Navigation menu" @bind-Expanded="expanded"
-                       CustomToggle="true">
+        <FluentNavMenu Id="main-menu" Width="250" Collapsible="true" @bind-Expanded="expanded"
+                       CustomToggle="true" Title="Navigation menu">
             <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())"
-                           IconColor="Color.Accent">Dashboard</FluentNavLink>
-            <FluentNavLink Href="applications" Icon="@(new Icons.Regular.Size20.Apps())"
-                           IconColor="Color.Accent">Counter</FluentNavLink>
+                           IconColor="Color.Accent">@L["NavDashboard"]</FluentNavLink>
             <FluentNavLink Href="users" Icon="@(new Icons.Regular.Size20.PeopleCommunity())"
-                           IconColor="Color.Accent">Weather</FluentNavLink>
-            <FluentNavLink Href="roles" Icon="@(new Icons.Regular.Size20.ExtendedDock())"
-                           IconColor="Color.Accent">Counter</FluentNavLink>
-            <FluentNavLink Href="scopes" Icon="@(new Icons.Regular.Size20.Stethoscope())"
-                           IconColor="Color.Accent">Weather</FluentNavLink>
+                           IconColor="Color.Accent">@L["NavUsers"]</FluentNavLink>
+            <FluentNavLink Href="roles" Icon="@(new Icons.Regular.Size20.ShieldPerson())"
+                           IconColor="Color.Accent">@L["NavRoles"]</FluentNavLink>
+            <FluentNavLink Href="identification-types" Icon="@(new Icons.Regular.Size20.DocumentText())"
+                           IconColor="Color.Accent">@L["NavIdentificationTypes"]</FluentNavLink>
+            <FluentNavLink Href="applications" Icon="@(new Icons.Regular.Size20.Apps())"
+                           IconColor="Color.Accent">@L["NavApplications"]</FluentNavLink>
+            <FluentNavLink Href="scopes" Icon="@(new Icons.Regular.Size20.Key())"
+                           IconColor="Color.Accent">@L["NavScopes"]</FluentNavLink>
+            <FluentNavLink Href="sessions" Icon="@(new Icons.Regular.Size20.PlugConnected())"
+                           IconColor="Color.Accent">@L["NavSessions"]</FluentNavLink>
         </FluentNavMenu>
     </nav>
 </div>
 
 @code {
     private bool expanded = true;
-
 }

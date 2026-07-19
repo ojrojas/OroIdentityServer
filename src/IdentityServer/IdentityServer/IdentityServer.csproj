@@ -8,6 +8,7 @@
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <SatelliteResourceLanguages>en;es-419;fr;it;de;pt-BR;ja;zh-Hans</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>

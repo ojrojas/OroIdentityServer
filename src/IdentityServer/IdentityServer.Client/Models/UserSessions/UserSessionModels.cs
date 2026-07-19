@@ -1,6 +1,7 @@
 namespace IdentityServer.Client.Models.UserSessions;
 
 public sealed record UserSessionModel(
+    Guid Id,
     Guid? UserId,
     string? Device,
     string? SessionToken,

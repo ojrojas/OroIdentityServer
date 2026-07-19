@@ -1,0 +1,95 @@
+@page "/sessions"
+@attribute [Authorize]
+@inject IAdminUserService UserService
+@inject IAdminUserSessionService UserSessionService
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["SessionsTitle"]</PageTitle>
+
+<FluentLabel Typo="Typography.PageTitle">@L["SessionsTitle"]</FluentLabel>
+
+<FluentGrid Style="margin-top: 1rem;">
+    <FluentGridItem xs="12" sm="5">
+        <FluentLabel Typo="Typography.Subject">@L["NavUsers"]</FluentLabel>
+        @if (users is null)
+        {
+            <FluentProgressRing />
+        }
+        else
+        {
+            <FluentDataGrid Items="@users.AsQueryable()" TGridItem="UserModel" RowClick="@((FluentDataGridRow<UserModel> row) => SelectUserAsync(row.Item!))">
+                <PropertyColumn Title="@L["ColUsername"]" Property="@(x => x.UserName)" Sortable="true" />
+                <PropertyColumn Title="@L["ColEmail"]" Property="@(x => x.Email)" Sortable="true" />
+            </FluentDataGrid>
+        }
+    </FluentGridItem>
+    <FluentGridItem xs="12" sm="7">
+        <FluentLabel Typo="Typography.Subject">
+            @(selectedUser is null ? L["SelectUserPrompt"] : L["SessionsForUser", selectedUser.UserName ?? string.Empty])
+        </FluentLabel>
+        @if (selectedUser is not null)
+        {
+            @if (sessions is null)
+            {
+                <FluentProgressRing />
+            }
+            else if (sessions.Count == 0)
+            {
+                <FluentLabel>@L["NoActiveSessions"]</FluentLabel>
+            }
+            else
+            {
+                <FluentDataGrid Items="@sessions.AsQueryable()" GridTemplateColumns="1.5fr 1fr 1fr 1fr 0.5fr">
+                    <PropertyColumn Title="@L["ColDevice"]" Property="@(x => x.Device)" />
+                    <PropertyColumn Title="@L["ColIp"]" Property="@(x => x.IpAddress)" />
+                    <PropertyColumn Title="@L["ColLastActivity"]" Property="@(x => x.LastActivityAt)" />
+                    <PropertyColumn Title="@L["ColExpires"]" Property="@(x => x.ExpiresAt)" />
+                    <TemplateColumn Title="">
+                        <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.PlugDisconnected())" Title="@L["Disconnect"]" OnClick="@(() => DisconnectAsync(context))" />
+                    </TemplateColumn>
+                </FluentDataGrid>
+            }
+        }
+    </FluentGridItem>
+</FluentGrid>
+
+@code {
+    private List<UserModel>? users;
+    private UserModel? selectedUser;
+    private List<UserSessionModel>? sessions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await UserService.GetUsersAsync();
+        users = response?.Data?.ToList() ?? [];
+    }
+
+    private async Task SelectUserAsync(UserModel user)
+    {
+        selectedUser = user;
+        sessions = null;
+        var result = await UserSessionService.GetByUserAsync(user.Id);
+        sessions = result?.ToList() ?? [];
+    }
+
+    private async Task DisconnectAsync(UserSessionModel session)
+    {
+        var dialog = await DialogService.ShowConfirmationAsync(L["DisconnectConfirm"], L["Disconnect"], L["Cancel"], L["ConfirmDeletionTitle"]);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        var response = await UserSessionService.DeactivateUserSessionAsync(session.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["SessionDisconnectedToast"]);
+            if (selectedUser is not null)
+                await SelectUserAsync(selectedUser);
+        }
+        else
+        {
+            ToastService.ShowError(L["SessionDisconnectFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

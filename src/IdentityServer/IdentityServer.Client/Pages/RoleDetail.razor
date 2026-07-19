@@ -1,0 +1,78 @@
+@page "/roles/{Id:guid}"
+@attribute [Authorize]
+@inject IAdminRoleService RoleService
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["RoleDetailTitle"]</PageTitle>
+
+@if (item is null)
+{
+    <FluentProgressRing />
+}
+else
+{
+    <FluentLabel Typo="Typography.PageTitle">@L["RoleDetailTitle"]</FluentLabel>
+
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="16" Style="max-width: 480px; margin-top: 1rem;">
+        <FluentTextField @bind-Value="roleName" Label="@L["RoleName"]" Required="true" Style="width:100%" />
+        <FluentLabel>@L["ActiveLabel", item.IsActive]</FluentLabel>
+        <FluentLabel>@L["PermissionsAssignedLabel", item.Claims?.Count() ?? 0]</FluentLabel>
+
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
+            <FluentButton Appearance="Appearance.Accent" Disabled="@saving" OnClick="SaveAsync">@L["Save"]</FluentButton>
+            <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/roles"))">@L["Back"]</FluentButton>
+            <FluentSpacer />
+            <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Regular.Size20.Delete())" OnClick="DeleteAsync">@L["Delete"]</FluentButton>
+        </FluentStack>
+    </FluentStack>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private RoleModel? item;
+    private string roleName = string.Empty;
+    private bool saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await RoleService.GetRoleByIdAsync(Id);
+        item = response?.Data;
+        if (item is not null)
+            roleName = item.Name ?? string.Empty;
+    }
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        var response = await RoleService.UpdateRoleAsync(Id, new UpdateRoleRequest(roleName));
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+            ToastService.ShowSuccess(L["SavedToast"]);
+        else
+            ToastService.ShowError(L["SaveFailedToast", (int)response.StatusCode]);
+    }
+
+    private async Task DeleteAsync()
+    {
+        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteRoleConfirm", roleName], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        var response = await RoleService.DeleteRoleAsync(Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["RoleDeletedToast"]);
+            Nav.NavigateTo("/roles");
+        }
+        else
+        {
+            ToastService.ShowError(L["RoleDeleteFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

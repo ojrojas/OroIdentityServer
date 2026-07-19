@@ -12,7 +12,7 @@ using OroIdentityServer.Infraestructure;
 namespace OroIdentityServer.Infraestructure.Data.Migrations
 {
     [DbContext(typeof(OroIdentityAppContext))]
-    [Migration("20260719001151_initial")]
+    [Migration("20260719225703_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -492,6 +492,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
 
                     b.Property<DateTime?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");

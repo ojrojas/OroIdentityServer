@@ -1,0 +1,54 @@
+@implements IDialogContentComponent
+@inject IAdminApplicationService ApplicationService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<FluentDialogHeader ShowDismiss="true">
+    <FluentLabel Typo="Typography.PaneHeader">@L["NewApplicationTitle"]</FluentLabel>
+</FluentDialogHeader>
+<FluentDialogBody>
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="12">
+        <FluentTextField @bind-Value="clientId" Label="@L["ClientId"]" Required="true" Style="width:100%" />
+        <FluentTextField @bind-Value="displayName" Label="@L["DisplayName"]" Style="width:100%" />
+        <FluentTextField @bind-Value="clientSecret" Label="@L["ClientSecret"]" Placeholder="@L["ClientSecretNewPlaceholder"]" TextFieldType="TextFieldType.Password" Style="width:100%" />
+        <FluentSelect Style="width:100%" TOption="string" Items="@(["confidential", "public"])" @bind-Value="clientType" Label="@L["ClientType"]" />
+    </FluentStack>
+</FluentDialogBody>
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent" Disabled="@(string.IsNullOrWhiteSpace(clientId) || saving)" OnClick="SubmitAsync">@L["Create"]</FluentButton>
+    <FluentButton Appearance="Appearance.Neutral" OnClick="CancelAsync">@L["Cancel"]</FluentButton>
+</FluentDialogFooter>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    private string clientId = string.Empty;
+    private string displayName = string.Empty;
+    private string clientSecret = string.Empty;
+    private string clientType = "confidential";
+    private bool saving;
+
+    private async Task SubmitAsync()
+    {
+        saving = true;
+        var model = new OpenIddictApplicationModel(
+            clientId, string.IsNullOrWhiteSpace(clientSecret) ? null : clientSecret, displayName, clientType,
+            "web", "implicit", [], [], [], []);
+
+        var response = await ApplicationService.CreateApplicationAsync(model);
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["ApplicationCreatedToast"]);
+            await Dialog.CloseAsync(DialogResult.Ok(true));
+        }
+        else
+        {
+            ToastService.ShowError(L["ApplicationCreateFailedToast", (int)response.StatusCode]);
+        }
+    }
+
+    private async Task CancelAsync() => await Dialog.CancelAsync();
+}

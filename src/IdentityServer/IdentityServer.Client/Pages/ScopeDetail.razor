@@ -1,0 +1,78 @@
+@page "/scopes/{Name}"
+@attribute [Authorize]
+@inject IAdminScopeService ScopeService
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["ScopeDetailTitle"]</PageTitle>
+
+@if (item is null)
+{
+    <FluentProgressRing />
+}
+else
+{
+    <FluentLabel Typo="Typography.PageTitle">@L["ScopeDetailTitle"]</FluentLabel>
+
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Style="max-width: 480px; margin-top: 1rem;">
+        <FluentTextField Value="@Name" ReadOnly="true" Label="@L["ScopeName"]" Style="width:100%" />
+        <FluentTextField @bind-Value="resources" Label="@L["Resources"]" Style="width:100%" />
+
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
+            <FluentButton Appearance="Appearance.Accent" Disabled="@saving" OnClick="SaveAsync">@L["Save"]</FluentButton>
+            <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/scopes"))">@L["Back"]</FluentButton>
+            <FluentSpacer />
+            <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Regular.Size20.Delete())" OnClick="DeleteAsync">@L["Delete"]</FluentButton>
+        </FluentStack>
+    </FluentStack>
+}
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = string.Empty;
+
+    private OpenIddictScopeModel? item;
+    private string resources = string.Empty;
+    private bool saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var scopes = await ScopeService.GetScopesAsync();
+        item = scopes?.FirstOrDefault(s => s.Name == Name);
+        if (item is not null)
+            resources = string.Join(", ", item.Resources ?? []);
+    }
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        var resourceList = resources.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var response = await ScopeService.UpdateScopeAsync(Name, new UpdateOpenIddictScopeRequest(Name, resourceList));
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+            ToastService.ShowSuccess(L["SavedToast"]);
+        else
+            ToastService.ShowError(L["SaveFailedToast", (int)response.StatusCode]);
+    }
+
+    private async Task DeleteAsync()
+    {
+        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteScopeConfirm", Name], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        var response = await ScopeService.DeleteScopeAsync(Name);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["ScopeDeletedToast"]);
+            Nav.NavigateTo("/scopes");
+        }
+        else
+        {
+            ToastService.ShowError(L["ScopeDeleteFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

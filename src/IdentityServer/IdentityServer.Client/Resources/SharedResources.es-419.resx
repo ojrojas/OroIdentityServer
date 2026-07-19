@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="Save"><value>Guardar</value></data>
+  <data name="Cancel"><value>Cancelar</value></data>
+  <data name="Delete"><value>Eliminar</value></data>
+  <data name="Create"><value>Crear</value></data>
+  <data name="New"><value>Nuevo</value></data>
+  <data name="Back"><value>Volver</value></data>
+  <data name="ConfirmDeletionTitle"><value>Confirmar eliminación</value></data>
+  <data name="Name"><value>Nombre</value></data>
+  <data name="MiddleName"><value>Segundo nombre</value></data>
+  <data name="LastName"><value>Apellido</value></data>
+  <data name="Email"><value>Correo electrónico</value></data>
+  <data name="Username"><value>Usuario</value></data>
+  <data name="Password"><value>Contraseña</value></data>
+  <data name="Identification"><value>Identificación</value></data>
+  <data name="IdentificationType"><value>Tipo de identificación</value></data>
+  <data name="Tenant"><value>Inquilino</value></data>
+  <data name="Active"><value>Activo</value></data>
+  <data name="Created"><value>Creado</value></data>
+  <data name="SavedToast"><value>Guardado.</value></data>
+  <data name="SaveFailedToast"><value>No se pudo guardar ({0}).</value></data>
+  <data name="Language"><value>Idioma</value></data>
+  <data name="ToggleTheme"><value>Cambiar tema</value></data>
+  <data name="NotFoundTitle"><value>No encontrado</value></data>
+  <data name="NotFoundMessage"><value>Lo sentimos, el contenido que buscas no existe.</value></data>
+
+  <data name="SignInTitle"><value>Iniciar sesión</value></data>
+  <data name="SignInSubtitle"><value>Ingresa tus credenciales para acceder al panel de administración</value></data>
+  <data name="InvalidCredentials"><value>Credenciales incorrectas. Inténtalo de nuevo.</value></data>
+  <data name="LoginIdentifierPlaceholder"><value>tu@ejemplo.com</value></data>
+  <data name="SignInButton"><value>Iniciar sesión</value></data>
+  <data name="AdminPanel"><value>Panel de administración de identidad</value></data>
+
+  <data name="ChangePasswordTitle"><value>Cambia tu contraseña</value></data>
+  <data name="ChangePasswordSubtitle"><value>Debes establecer una nueva contraseña antes de continuar.</value></data>
+  <data name="PasswordMismatch"><value>Las contraseñas no coinciden.</value></data>
+  <data name="NewPasswordPlaceholder"><value>Nueva contraseña</value></data>
+  <data name="ConfirmNewPasswordPlaceholder"><value>Confirmar nueva contraseña</value></data>
+  <data name="ChangePasswordButton"><value>Cambiar contraseña</value></data>
+
+  <data name="SignOutTitle"><value>Cerrar sesión</value></data>
+  <data name="SignOutSubtitle"><value>Una aplicación está solicitando finalizar tu sesión en IdentityServer. ¿Deseas cerrar sesión?</value></data>
+  <data name="YesSignOut"><value>Sí, cerrar sesión</value></data>
+  <data name="NoStaySignedIn"><value>No, mantener la sesión</value></data>
+
+  <data name="NavDashboard"><value>Panel</value></data>
+  <data name="NavUsers"><value>Usuarios</value></data>
+  <data name="NavRoles"><value>Roles</value></data>
+  <data name="NavIdentificationTypes"><value>Tipos de identificación</value></data>
+  <data name="NavApplications"><value>Aplicaciones</value></data>
+  <data name="NavScopes"><value>Alcances</value></data>
+  <data name="NavSessions"><value>Sesiones</value></data>
+
+  <data name="DashboardTitle"><value>Panel</value></data>
+  <data name="StatUsers"><value>Usuarios</value></data>
+  <data name="StatConnectedUsers"><value>Usuarios conectados</value></data>
+  <data name="StatRoles"><value>Roles</value></data>
+  <data name="StatApplications"><value>Aplicaciones</value></data>
+  <data name="StatScopes"><value>Alcances</value></data>
+
+  <data name="UsersTitle"><value>Usuarios</value></data>
+  <data name="NewUserTitle"><value>Nuevo usuario</value></data>
+  <data name="ColUsername"><value>Usuario</value></data>
+  <data name="ColName"><value>Nombre</value></data>
+  <data name="ColEmail"><value>Correo electrónico</value></data>
+  <data name="ColRoles"><value>Roles</value></data>
+  <data name="DeleteUserConfirm"><value>¿Eliminar al usuario "{0}"?</value></data>
+  <data name="UserCreatedToast"><value>Usuario creado.</value></data>
+  <data name="UserCreateFailedToast"><value>No se pudo crear el usuario ({0}).</value></data>
+  <data name="UserDeletedToast"><value>Usuario eliminado.</value></data>
+  <data name="UserDeleteFailedToast"><value>No se pudo eliminar el usuario ({0}).</value></data>
+  <data name="UserDetailTitle"><value>Usuario</value></data>
+  <data name="NewPasswordRequiredPlaceholder"><value>Requerido para guardar cambios</value></data>
+  <data name="RolesAssignedLabel"><value>Roles: {0}</value></data>
+  <data name="None"><value>ninguno</value></data>
+
+  <data name="RolesTitle"><value>Roles</value></data>
+  <data name="NewRoleTitle"><value>Nuevo rol</value></data>
+  <data name="RoleName"><value>Nombre del rol</value></data>
+  <data name="ColPermissions"><value>Permisos</value></data>
+  <data name="DeleteRoleConfirm"><value>¿Eliminar el rol "{0}"?</value></data>
+  <data name="RoleCreatedToast"><value>Rol creado.</value></data>
+  <data name="RoleCreateFailedToast"><value>No se pudo crear el rol ({0}).</value></data>
+  <data name="RoleDeletedToast"><value>Rol eliminado.</value></data>
+  <data name="RoleDeleteFailedToast"><value>No se pudo eliminar el rol ({0}).</value></data>
+  <data name="RoleDetailTitle"><value>Rol</value></data>
+  <data name="PermissionsAssignedLabel"><value>Permisos asignados: {0}</value></data>
+  <data name="ActiveLabel"><value>Activo: {0}</value></data>
+
+  <data name="IdentificationTypesTitle"><value>Tipos de identificación</value></data>
+  <data name="NewIdentificationTypeTitle"><value>Nuevo tipo de identificación</value></data>
+  <data name="DeleteIdentificationTypeConfirm"><value>¿Eliminar el tipo de identificación "{0}"?</value></data>
+  <data name="IdentificationTypeCreatedToast"><value>Tipo de identificación creado.</value></data>
+  <data name="IdentificationTypeCreateFailedToast"><value>No se pudo crear el tipo de identificación ({0}).</value></data>
+  <data name="IdentificationTypeDeletedToast"><value>Tipo de identificación eliminado.</value></data>
+  <data name="IdentificationTypeDeleteFailedToast"><value>No se pudo eliminar el tipo de identificación ({0}).</value></data>
+  <data name="IdentificationTypeDetailTitle"><value>Tipo de identificación</value></data>
+
+  <data name="ApplicationsTitle"><value>Aplicaciones</value></data>
+  <data name="NewApplicationTitle"><value>Nueva aplicación</value></data>
+  <data name="ClientId"><value>ID de cliente</value></data>
+  <data name="DisplayName"><value>Nombre visible</value></data>
+  <data name="ClientSecret"><value>Secreto del cliente</value></data>
+  <data name="ClientSecretNewPlaceholder"><value>Déjalo en blanco para un cliente público</value></data>
+  <data name="ClientSecretEditPlaceholder"><value>Déjalo en blanco para mantener el secreto actual</value></data>
+  <data name="ClientType"><value>Tipo de cliente</value></data>
+  <data name="ColType"><value>Tipo</value></data>
+  <data name="DeleteApplicationConfirm"><value>¿Eliminar la aplicación "{0}"?</value></data>
+  <data name="ApplicationCreatedToast"><value>Aplicación creada.</value></data>
+  <data name="ApplicationCreateFailedToast"><value>No se pudo crear la aplicación ({0}).</value></data>
+  <data name="ApplicationDeletedToast"><value>Aplicación eliminada.</value></data>
+  <data name="ApplicationDeleteFailedToast"><value>No se pudo eliminar la aplicación ({0}).</value></data>
+  <data name="ApplicationDetailTitle"><value>Aplicación</value></data>
+  <data name="RedirectUris"><value>URIs de redirección (separadas por comas)</value></data>
+  <data name="PostLogoutRedirectUris"><value>URIs de redirección post-cierre de sesión (separadas por comas)</value></data>
+
+  <data name="ScopesTitle"><value>Alcances</value></data>
+  <data name="NewScopeTitle"><value>Nuevo alcance</value></data>
+  <data name="ScopeName"><value>Nombre</value></data>
+  <data name="Resources"><value>Recursos (separados por comas)</value></data>
+  <data name="ColResources"><value>Recursos</value></data>
+  <data name="ColDisplayName"><value>Nombre visible</value></data>
+  <data name="DeleteScopeConfirm"><value>¿Eliminar el alcance "{0}"?</value></data>
+  <data name="ScopeCreatedToast"><value>Alcance creado.</value></data>
+  <data name="ScopeCreateFailedToast"><value>No se pudo crear el alcance ({0}).</value></data>
+  <data name="ScopeDeletedToast"><value>Alcance eliminado.</value></data>
+  <data name="ScopeDeleteFailedToast"><value>No se pudo eliminar el alcance ({0}).</value></data>
+  <data name="ScopeDetailTitle"><value>Alcance</value></data>
+
+  <data name="SessionsTitle"><value>Sesiones</value></data>
+  <data name="SelectUserPrompt"><value>Selecciona un usuario para ver sus sesiones</value></data>
+  <data name="SessionsForUser"><value>Sesiones de {0}</value></data>
+  <data name="NoActiveSessions"><value>No hay sesiones activas.</value></data>
+  <data name="ColDevice"><value>Dispositivo</value></data>
+  <data name="ColIp"><value>IP</value></data>
+  <data name="ColLastActivity"><value>Última actividad</value></data>
+  <data name="ColExpires"><value>Expira</value></data>
+  <data name="Disconnect"><value>Desconectar</value></data>
+  <data name="DisconnectConfirm"><value>¿Desconectar esta sesión?</value></data>
+  <data name="SessionDisconnectedToast"><value>Sesión desconectada.</value></data>
+  <data name="SessionDisconnectFailedToast"><value>No se pudo desconectar la sesión ({0}).</value></data>
+</root>

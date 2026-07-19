@@ -1,0 +1,25 @@
+@using System.Globalization
+@using Microsoft.FluentUI.AspNetCore.Components
+
+<div class="login-language-picker">
+    <select class="language-picker-select" onchange="window.location.href='/culture/set?redirectUri=' + encodeURIComponent(window.location.pathname + window.location.search) + '&culture=' + this.value">
+        @foreach (var (lang, label) in Languages)
+        {
+            <option value="@lang" selected="@(lang == CultureInfo.CurrentUICulture.Name)">@label</option>
+        }
+    </select>
+</div>
+
+@code {
+    private static readonly (string Code, string Label)[] Languages =
+    [
+        ("en", "English"),
+        ("es-419", "Español"),
+        ("fr", "Français"),
+        ("it", "Italiano"),
+        ("de", "Deutsch"),
+        ("pt-BR", "Português (Brasil)"),
+        ("ja", "日本語"),
+        ("zh-Hans", "中文（简体）")
+    ];
+}

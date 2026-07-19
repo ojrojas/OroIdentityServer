@@ -1,65 +1,55 @@
-﻿@page "/"
+@page "/"
 @attribute [Authorize]
+@inject IAdminUserService UserService
+@inject IAdminRoleService RoleService
+@inject IAdminScopeService ScopeService
+@inject IAdminApplicationService ApplicationService
+@inject IAdminUserSessionService UserSessionService
+@inject IStringLocalizer<SharedResources> L
 
-@using IdentityServer.Client.Interfaces
+<PageTitle>@L["DashboardTitle"]</PageTitle>
 
-@inject IAdminUserService userService
-@inject IAdminRoleService roleService
-@inject IAdminScopeService scopeService
-@inject IAdminApplicationService applicationService
+<FluentLabel Typo="Typography.PageTitle">@L["DashboardTitle"]</FluentLabel>
 
-<PageTitle>Dashboard</PageTitle>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new Fluent Blazor app.
-
-<div>
-     <div>
-          <label>Users</label>
-          <span>@userCount</span>
-     </div>
-     <div>
-          <label>Roles</label>
-          <span>@roleCount</span>
-     </div>
-     <div>
-          <label>Applications</label>
-          <span>@applicationCount</span>
-     </div>
-     <div>
-          <label>Scopes</label>
-          <span>@scopeCount</span>
-     </div>
-</div>
-
-
+<FluentGrid Style="margin-top: 1rem;">
+    <FluentGridItem xs="12" sm="6" md="3">
+        <StatCard Title="@L["StatUsers"]" Value="@userCount" Icon="@(new Icons.Regular.Size24.PeopleCommunity())" />
+    </FluentGridItem>
+    <FluentGridItem xs="12" sm="6" md="3">
+        <StatCard Title="@L["StatConnectedUsers"]" Value="@connectedUserCount" Icon="@(new Icons.Regular.Size24.PlugConnected())" />
+    </FluentGridItem>
+    <FluentGridItem xs="12" sm="6" md="3">
+        <StatCard Title="@L["StatRoles"]" Value="@roleCount" Icon="@(new Icons.Regular.Size24.Shield())" />
+    </FluentGridItem>
+    <FluentGridItem xs="12" sm="6" md="3">
+        <StatCard Title="@L["StatApplications"]" Value="@applicationCount" Icon="@(new Icons.Regular.Size24.Apps())" />
+    </FluentGridItem>
+    <FluentGridItem xs="12" sm="6" md="3">
+        <StatCard Title="@L["StatScopes"]" Value="@scopeCount" Icon="@(new Icons.Regular.Size24.Key())" />
+    </FluentGridItem>
+</FluentGrid>
 
 @code {
-     private int userCount = default;
-     private int roleCount = default;
-     private int scopeCount = default;
-     private int applicationCount = default;
+    private int? userCount;
+    private int? connectedUserCount;
+    private int? roleCount;
+    private int? scopeCount;
+    private int? applicationCount;
 
-     protected override async Task OnAfterRenderAsync(bool firstRender)
-     {
+    protected override async Task OnInitializedAsync()
+    {
+        var users = await UserService.GetUsersAsync();
+        userCount = users?.Data?.Count() ?? 0;
 
-          if (firstRender)
-          {
-               CancellationTokenSource tokenSource = new CancellationTokenSource();
-               var countUser = await userService.GetUsersAsync(tokenSource.Token);
-               userCount = countUser?.Data?.Count() ?? default;
+        connectedUserCount = await UserSessionService.GetActiveSessionsCountAsync();
 
-               var countScope = await scopeService.GetScopesAsync(tokenSource.Token);
-               scopeCount = countUser?.Data?.Count() ?? default;
+        var roles = await RoleService.GetRolesAsync();
+        roleCount = roles?.Data?.Count() ?? 0;
 
-               var countRole = await roleService.GetRolesAsync(tokenSource.Token);
-               roleCount = countUser?.Data?.Count() ?? default;
+        var applications = await ApplicationService.GetApplicationsAsync();
+        applicationCount = applications?.Count() ?? 0;
 
-               var countapps = await userService.GetUsersAsync(tokenSource.Token);
-               applicationCount = countapps?.Data?.Count() ?? default;
-
-               StateHasChanged();
-          }
-     }
+        var scopes = await ScopeService.GetScopesAsync();
+        scopeCount = scopes?.Count() ?? 0;
+    }
 }

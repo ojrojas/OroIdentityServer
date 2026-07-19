@@ -1,0 +1,81 @@
+@page "/identification-types/{Id:guid}"
+@attribute [Authorize]
+@inject IAdminIdentificationTypeService IdentificationTypeService
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["IdentificationTypeDetailTitle"]</PageTitle>
+
+@if (item is null)
+{
+    <FluentProgressRing />
+}
+else
+{
+    <FluentLabel Typo="Typography.PageTitle">@L["IdentificationTypeDetailTitle"]</FluentLabel>
+
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="16" Style="max-width: 480px; margin-top: 1rem;">
+        <FluentTextField @bind-Value="name" Label="@L["Name"]" Required="true" Style="width:100%" />
+        <FluentSwitch @bind-Value="isActive" Label="@L["Active"]" />
+
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
+            <FluentButton Appearance="Appearance.Accent" Disabled="@saving" OnClick="SaveAsync">@L["Save"]</FluentButton>
+            <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/identification-types"))">@L["Back"]</FluentButton>
+            <FluentSpacer />
+            <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Regular.Size20.Delete())" OnClick="DeleteAsync">@L["Delete"]</FluentButton>
+        </FluentStack>
+    </FluentStack>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private IdentificationTypeModel? item;
+    private string name = string.Empty;
+    private bool isActive;
+    private bool saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await IdentificationTypeService.GetIdentificationTypeByIdAsync(Id);
+        item = response?.Data;
+        if (item is not null)
+        {
+            name = item.Name;
+            isActive = item.IsActive;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        var response = await IdentificationTypeService.UpdateIdentificationTypeAsync(Id, new UpdateIdentificationTypeRequest(name));
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+            ToastService.ShowSuccess(L["SavedToast"]);
+        else
+            ToastService.ShowError(L["SaveFailedToast", (int)response.StatusCode]);
+    }
+
+    private async Task DeleteAsync()
+    {
+        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteIdentificationTypeConfirm", name], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        var response = await IdentificationTypeService.DeleteIdentificationTypeAsync(Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["IdentificationTypeDeletedToast"]);
+            Nav.NavigateTo("/identification-types");
+        }
+        else
+        {
+            ToastService.ShowError(L["IdentificationTypeDeleteFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

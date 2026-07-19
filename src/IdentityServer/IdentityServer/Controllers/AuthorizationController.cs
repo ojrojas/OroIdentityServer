@@ -3,6 +3,7 @@ using IdentityServer.Server.ViewModels;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
@@ -277,8 +278,30 @@ foreach (var claim in identity.Claims)
     public IActionResult Deny() => Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 
     [HttpGet("~/connect/logout"), HttpPost("~/connect/logout"), IgnoreAntiforgeryToken]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> Logout([FromQuery] bool confirmed = false)
     {
+        // External (relying party) apps hit this endpoint directly to end the session. If there's
+        // an active admin cookie and the user hasn't confirmed yet, send them to a confirmation page
+        // instead of signing them out immediately - they decide here whether IdentityServer itself
+        // should also end its session, not the calling app.
+        if (!confirmed && User.Identity?.IsAuthenticated == true)
+        {
+            var request = HttpContext.GetOpenIddictServerRequest();
+            var parameters = new Dictionary<string, string?>
+            {
+                ["post_logout_redirect_uri"] = request?.PostLogoutRedirectUri,
+                ["state"] = request?.State,
+                ["client_id"] = request?.ClientId,
+                ["id_token_hint"] = request?.IdTokenHint
+            };
+
+            var queryString = string.Join('&', parameters
+                .Where(p => !string.IsNullOrEmpty(p.Value))
+                .Select(p => $"{p.Key}={Uri.EscapeDataString(p.Value!)}"));
+
+            return Redirect(queryString.Length == 0 ? "/Account/Logout" : $"/Account/Logout?{queryString}");
+        }
+
         // Delete the local admin cookie created when the user signed in.
         await HttpContext.SignOutAsync(CookieAuthHandlerSetup.AdminScheme);
 

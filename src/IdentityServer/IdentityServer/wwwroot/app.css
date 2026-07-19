@@ -202,6 +202,132 @@ code {
     }
 }
 
+/* Auth pages (Login / Logout / ChangePassword) */
+
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: 1.5rem;
+    position: relative;
+    background:
+        radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--accent-fill-rest) 18%, transparent), transparent 45%),
+        radial-gradient(circle at 85% 80%, color-mix(in srgb, var(--accent-fill-rest) 12%, transparent), transparent 45%),
+        var(--neutral-layer-1);
+}
+
+.login-language-picker {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 2;
+}
+
+.language-picker-select {
+    font-family: inherit;
+    font-size: .8rem;
+    padding: .4rem .6rem;
+    border-radius: 8px;
+    border: 1px solid var(--neutral-stroke-divider-rest);
+    background: var(--neutral-layer-2);
+    color: var(--neutral-foreground-rest);
+    cursor: pointer;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 2.75rem 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .18), 0 4px 16px rgba(0, 0, 0, .08);
+    border: 1px solid color-mix(in srgb, var(--neutral-stroke-divider-rest) 60%, transparent);
+    backdrop-filter: blur(6px);
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    color: var(--neutral-foreground-hint);
+    font-size: .8rem;
+    text-transform: uppercase;
+}
+
+.login-card-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-fill-rest), color-mix(in srgb, var(--accent-fill-rest) 60%, black));
+    color: var(--foreground-on-accent-rest);
+    margin-bottom: 1.25rem;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--accent-fill-rest) 45%, transparent);
+}
+
+.login-card-header h1 {
+    font-size: 1.85rem;
+    font-weight: 700;
+    margin: 0 0 .5rem;
+    letter-spacing: -.02em;
+}
+
+.login-subtitle {
+    color: var(--neutral-foreground-hint);
+    font-size: .925rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.login-error {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--error) 10%, transparent);
+    color: var(--error);
+    font-size: .875rem;
+    font-weight: 500;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.login-field {
+    width: 100%;
+}
+
+.login-btn {
+    margin-top: .5rem;
+    height: 46px;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.login-footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: .75rem;
+    color: var(--neutral-foreground-hint);
+}
+
 /* Table */
 
 table {

@@ -2,6 +2,7 @@ using IdentityServer.Components;
 using IdentityServer.Server.Extensions;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OpenIddict.Abstractions;
@@ -12,6 +13,8 @@ using OroIdentityServer.Infraestructure.Repositories.Extensions;
 using OroIdentityServer.Server.Authentication;
 using OroIdentityServer.Server.Endpoints;
 using Serilog;
+
+var supportedCultures = new[] { "en", "es-419", "fr", "it", "de", "pt-BR", "ja", "zh-Hans" };
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +40,23 @@ builder.Services.AddRazorComponents(options =>
 
 builder.Services.AddFluentUIComponents();
 builder.Services.AddCascadingAuthenticationState();
+
+builder.Services.AddLocalization();
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.SetDefaultCulture(supportedCultures[0])
+        .AddSupportedCultures(supportedCultures)
+        .AddSupportedUICultures(supportedCultures);
+
+    // Cookie (explicit user choice via /culture/set) wins; otherwise fall back to whatever
+    // language the browser reports as preferred, which reflects the OS locale on Windows,
+    // Linux and macOS alike.
+    options.RequestCultureProviders =
+    [
+        new CookieRequestCultureProvider(),
+        new AcceptLanguageHeaderRequestCultureProvider()
+    ];
+});
 
 builder.Services.AddControllersWithViews();
 
@@ -112,10 +132,47 @@ app.UseCors("OroIdentityServer");
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
+app.UseRequestLocalization();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path;
+    var isExempt = path.StartsWithSegments("/Account")
+        || path.StartsWithSegments("/auth")
+        || path.StartsWithSegments("/connect")
+        || path.StartsWithSegments("/api")
+        || path.StartsWithSegments("/_blazor")
+        || path.StartsWithSegments("/_framework")
+        || path.StartsWithSegments("/css")
+        || path.StartsWithSegments("/js")
+        || path.StartsWithSegments("/culture");
+
+    if (!isExempt
+        && HttpMethods.IsGet(context.Request.Method)
+        && context.User.Identity?.IsAuthenticated == true
+        && context.User.HasClaim(c => c.Type == AdminPasswordSignInService.MustChangePasswordClaimType))
+    {
+        context.Response.Redirect("/Account/ChangePassword");
+        return;
+    }
+
+    await next();
+});
+
 app.UseAntiforgery();
+
+app.MapGet("/culture/set", (HttpContext http, string culture, string? redirectUri) =>
+{
+    http.Response.Cookies.Append(
+        CookieRequestCultureProvider.DefaultCookieName,
+        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+        new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true });
+
+    return Results.Redirect(string.IsNullOrEmpty(redirectUri) ? "/" : redirectUri);
+});
 
 app.MapAuthEndpoints();
 app.MapAdminApiEndpoints();

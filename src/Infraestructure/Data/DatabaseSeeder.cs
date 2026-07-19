@@ -40,6 +40,9 @@ public static class DatabaseSeeder
             foreach (var user in seedData.Users)
             {
                 var securityUser = SecurityUser.Create(await passwordHasher.HashPassword(user.PasswordHash));
+                if (user.UserName == "pepe.perez")
+                    securityUser.ExemptFromPasswordChange();
+
                 context.SecurityUsers.Add(securityUser);
                 await context.SaveChangesAsync(cancellationToken);
 

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="Save"><value>Speichern</value></data>
+  <data name="Cancel"><value>Abbrechen</value></data>
+  <data name="Delete"><value>Löschen</value></data>
+  <data name="Create"><value>Erstellen</value></data>
+  <data name="New"><value>Neu</value></data>
+  <data name="Back"><value>Zurück</value></data>
+  <data name="ConfirmDeletionTitle"><value>Löschen bestätigen</value></data>
+  <data name="Name"><value>Vorname</value></data>
+  <data name="MiddleName"><value>Zweiter Vorname</value></data>
+  <data name="LastName"><value>Nachname</value></data>
+  <data name="Email"><value>E-Mail</value></data>
+  <data name="Username"><value>Benutzername</value></data>
+  <data name="Password"><value>Passwort</value></data>
+  <data name="Identification"><value>Ausweisnummer</value></data>
+  <data name="IdentificationType"><value>Ausweistyp</value></data>
+  <data name="Tenant"><value>Mandant</value></data>
+  <data name="Active"><value>Aktiv</value></data>
+  <data name="Created"><value>Erstellt</value></data>
+  <data name="SavedToast"><value>Gespeichert.</value></data>
+  <data name="SaveFailedToast"><value>Speichern fehlgeschlagen ({0}).</value></data>
+  <data name="Language"><value>Sprache</value></data>
+  <data name="ToggleTheme"><value>Design umschalten</value></data>
+  <data name="NotFoundTitle"><value>Nicht gefunden</value></data>
+  <data name="NotFoundMessage"><value>Der gesuchte Inhalt existiert leider nicht.</value></data>
+
+  <data name="SignInTitle"><value>Anmelden</value></data>
+  <data name="SignInSubtitle"><value>Geben Sie Ihre Anmeldedaten ein, um auf das Admin-Panel zuzugreifen</value></data>
+  <data name="InvalidCredentials"><value>Ungültige Anmeldedaten. Bitte versuchen Sie es erneut.</value></data>
+  <data name="LoginIdentifierPlaceholder"><value>du@beispiel.com</value></data>
+  <data name="SignInButton"><value>Anmelden</value></data>
+  <data name="AdminPanel"><value>Identity-Admin-Panel</value></data>
+
+  <data name="ChangePasswordTitle"><value>Passwort ändern</value></data>
+  <data name="ChangePasswordSubtitle"><value>Sie müssen ein neues Passwort festlegen, bevor Sie fortfahren.</value></data>
+  <data name="PasswordMismatch"><value>Die Passwörter stimmen nicht überein.</value></data>
+  <data name="NewPasswordPlaceholder"><value>Neues Passwort</value></data>
+  <data name="ConfirmNewPasswordPlaceholder"><value>Neues Passwort bestätigen</value></data>
+  <data name="ChangePasswordButton"><value>Passwort ändern</value></data>
+
+  <data name="SignOutTitle"><value>Abmelden</value></data>
+  <data name="SignOutSubtitle"><value>Eine Anwendung möchte Ihre IdentityServer-Sitzung beenden. Möchten Sie sich abmelden?</value></data>
+  <data name="YesSignOut"><value>Ja, abmelden</value></data>
+  <data name="NoStaySignedIn"><value>Nein, angemeldet bleiben</value></data>
+
+  <data name="NavDashboard"><value>Übersicht</value></data>
+  <data name="NavUsers"><value>Benutzer</value></data>
+  <data name="NavRoles"><value>Rollen</value></data>
+  <data name="NavIdentificationTypes"><value>Ausweistypen</value></data>
+  <data name="NavApplications"><value>Anwendungen</value></data>
+  <data name="NavScopes"><value>Berechtigungsbereiche</value></data>
+  <data name="NavSessions"><value>Sitzungen</value></data>
+
+  <data name="DashboardTitle"><value>Übersicht</value></data>
+  <data name="StatUsers"><value>Benutzer</value></data>
+  <data name="StatConnectedUsers"><value>Verbundene Benutzer</value></data>
+  <data name="StatRoles"><value>Rollen</value></data>
+  <data name="StatApplications"><value>Anwendungen</value></data>
+  <data name="StatScopes"><value>Berechtigungsbereiche</value></data>
+
+  <data name="UsersTitle"><value>Benutzer</value></data>
+  <data name="NewUserTitle"><value>Neuer Benutzer</value></data>
+  <data name="ColUsername"><value>Benutzername</value></data>
+  <data name="ColName"><value>Name</value></data>
+  <data name="ColEmail"><value>E-Mail</value></data>
+  <data name="ColRoles"><value>Rollen</value></data>
+  <data name="DeleteUserConfirm"><value>Benutzer "{0}" löschen?</value></data>
+  <data name="UserCreatedToast"><value>Benutzer erstellt.</value></data>
+  <data name="UserCreateFailedToast"><value>Benutzer konnte nicht erstellt werden ({0}).</value></data>
+  <data name="UserDeletedToast"><value>Benutzer gelöscht.</value></data>
+  <data name="UserDeleteFailedToast"><value>Benutzer konnte nicht gelöscht werden ({0}).</value></data>
+  <data name="UserDetailTitle"><value>Benutzer</value></data>
+  <data name="NewPasswordRequiredPlaceholder"><value>Zum Speichern erforderlich</value></data>
+  <data name="RolesAssignedLabel"><value>Rollen: {0}</value></data>
+  <data name="None"><value>keine</value></data>
+
+  <data name="RolesTitle"><value>Rollen</value></data>
+  <data name="NewRoleTitle"><value>Neue Rolle</value></data>
+  <data name="RoleName"><value>Rollenname</value></data>
+  <data name="ColPermissions"><value>Berechtigungen</value></data>
+  <data name="DeleteRoleConfirm"><value>Rolle "{0}" löschen?</value></data>
+  <data name="RoleCreatedToast"><value>Rolle erstellt.</value></data>
+  <data name="RoleCreateFailedToast"><value>Rolle konnte nicht erstellt werden ({0}).</value></data>
+  <data name="RoleDeletedToast"><value>Rolle gelöscht.</value></data>
+  <data name="RoleDeleteFailedToast"><value>Rolle konnte nicht gelöscht werden ({0}).</value></data>
+  <data name="RoleDetailTitle"><value>Rolle</value></data>
+  <data name="PermissionsAssignedLabel"><value>Zugewiesene Berechtigungen: {0}</value></data>
+  <data name="ActiveLabel"><value>Aktiv: {0}</value></data>
+
+  <data name="IdentificationTypesTitle"><value>Ausweistypen</value></data>
+  <data name="NewIdentificationTypeTitle"><value>Neuer Ausweistyp</value></data>
+  <data name="DeleteIdentificationTypeConfirm"><value>Ausweistyp "{0}" löschen?</value></data>
+  <data name="IdentificationTypeCreatedToast"><value>Ausweistyp erstellt.</value></data>
+  <data name="IdentificationTypeCreateFailedToast"><value>Ausweistyp konnte nicht erstellt werden ({0}).</value></data>
+  <data name="IdentificationTypeDeletedToast"><value>Ausweistyp gelöscht.</value></data>
+  <data name="IdentificationTypeDeleteFailedToast"><value>Ausweistyp konnte nicht gelöscht werden ({0}).</value></data>
+  <data name="IdentificationTypeDetailTitle"><value>Ausweistyp</value></data>
+
+  <data name="ApplicationsTitle"><value>Anwendungen</value></data>
+  <data name="NewApplicationTitle"><value>Neue Anwendung</value></data>
+  <data name="ClientId"><value>Client-ID</value></data>
+  <data name="DisplayName"><value>Anzeigename</value></data>
+  <data name="ClientSecret"><value>Client-Secret</value></data>
+  <data name="ClientSecretNewPlaceholder"><value>Für einen öffentlichen Client leer lassen</value></data>
+  <data name="ClientSecretEditPlaceholder"><value>Leer lassen, um das aktuelle Secret beizubehalten</value></data>
+  <data name="ClientType"><value>Client-Typ</value></data>
+  <data name="ColType"><value>Typ</value></data>
+  <data name="DeleteApplicationConfirm"><value>Anwendung "{0}" löschen?</value></data>
+  <data name="ApplicationCreatedToast"><value>Anwendung erstellt.</value></data>
+  <data name="ApplicationCreateFailedToast"><value>Anwendung konnte nicht erstellt werden ({0}).</value></data>
+  <data name="ApplicationDeletedToast"><value>Anwendung gelöscht.</value></data>
+  <data name="ApplicationDeleteFailedToast"><value>Anwendung konnte nicht gelöscht werden ({0}).</value></data>
+  <data name="ApplicationDetailTitle"><value>Anwendung</value></data>
+  <data name="RedirectUris"><value>Weiterleitungs-URIs (kommagetrennt)</value></data>
+  <data name="PostLogoutRedirectUris"><value>Weiterleitungs-URIs nach Abmeldung (kommagetrennt)</value></data>
+
+  <data name="ScopesTitle"><value>Berechtigungsbereiche</value></data>
+  <data name="NewScopeTitle"><value>Neuer Berechtigungsbereich</value></data>
+  <data name="ScopeName"><value>Name</value></data>
+  <data name="Resources"><value>Ressourcen (kommagetrennt)</value></data>
+  <data name="ColResources"><value>Ressourcen</value></data>
+  <data name="ColDisplayName"><value>Anzeigename</value></data>
+  <data name="DeleteScopeConfirm"><value>Berechtigungsbereich "{0}" löschen?</value></data>
+  <data name="ScopeCreatedToast"><value>Berechtigungsbereich erstellt.</value></data>
+  <data name="ScopeCreateFailedToast"><value>Berechtigungsbereich konnte nicht erstellt werden ({0}).</value></data>
+  <data name="ScopeDeletedToast"><value>Berechtigungsbereich gelöscht.</value></data>
+  <data name="ScopeDeleteFailedToast"><value>Berechtigungsbereich konnte nicht gelöscht werden ({0}).</value></data>
+  <data name="ScopeDetailTitle"><value>Berechtigungsbereich</value></data>
+
+  <data name="SessionsTitle"><value>Sitzungen</value></data>
+  <data name="SelectUserPrompt"><value>Wählen Sie einen Benutzer aus, um dessen Sitzungen anzuzeigen</value></data>
+  <data name="SessionsForUser"><value>Sitzungen von {0}</value></data>
+  <data name="NoActiveSessions"><value>Keine aktiven Sitzungen.</value></data>
+  <data name="ColDevice"><value>Gerät</value></data>
+  <data name="ColIp"><value>IP</value></data>
+  <data name="ColLastActivity"><value>Letzte Aktivität</value></data>
+  <data name="ColExpires"><value>Läuft ab</value></data>
+  <data name="Disconnect"><value>Trennen</value></data>
+  <data name="DisconnectConfirm"><value>Diese Sitzung trennen?</value></data>
+  <data name="SessionDisconnectedToast"><value>Sitzung getrennt.</value></data>
+  <data name="SessionDisconnectFailedToast"><value>Sitzung konnte nicht getrennt werden ({0}).</value></data>
+</root>

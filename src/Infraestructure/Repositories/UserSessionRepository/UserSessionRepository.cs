@@ -52,4 +52,12 @@ public class UserSessionRepository(
         logger.LogInformation("Exiting GetByTokenAsync");
         return session;
     }
+
+    public async Task<IEnumerable<UserSession>> GetActiveSessionsAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering GetActiveSessionsAsync");
+        var sessions = await repository.FindAsync(s => s.ExpiresAt > DateTime.UtcNow, cancellationToken);
+        logger.LogInformation("Exiting GetActiveSessionsAsync");
+        return sessions;
+    }
 }

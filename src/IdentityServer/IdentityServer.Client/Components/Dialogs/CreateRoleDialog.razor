@@ -1,0 +1,42 @@
+@implements IDialogContentComponent
+@inject IAdminRoleService RoleService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<FluentDialogHeader ShowDismiss="true">
+    <FluentLabel Typo="Typography.PaneHeader">@L["NewRoleTitle"]</FluentLabel>
+</FluentDialogHeader>
+<FluentDialogBody>
+    <FluentTextField @bind-Value="roleName" Label="@L["RoleName"]" Required="true" Style="width:100%" />
+</FluentDialogBody>
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent" Disabled="@(string.IsNullOrWhiteSpace(roleName) || saving)" OnClick="SubmitAsync">@L["Create"]</FluentButton>
+    <FluentButton Appearance="Appearance.Neutral" OnClick="CancelAsync">@L["Cancel"]</FluentButton>
+</FluentDialogFooter>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    private string roleName = string.Empty;
+    private bool saving;
+
+    private async Task SubmitAsync()
+    {
+        saving = true;
+        var response = await RoleService.CreateRoleAsync(new CreateRoleRequest(roleName));
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["RoleCreatedToast"]);
+            await Dialog.CloseAsync(DialogResult.Ok(true));
+        }
+        else
+        {
+            ToastService.ShowError(L["RoleCreateFailedToast", (int)response.StatusCode]);
+        }
+    }
+
+    private async Task CancelAsync() => await Dialog.CancelAsync();
+}

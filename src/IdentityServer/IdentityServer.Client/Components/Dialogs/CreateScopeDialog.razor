@@ -1,0 +1,47 @@
+@implements IDialogContentComponent
+@inject IAdminScopeService ScopeService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<FluentDialogHeader ShowDismiss="true">
+    <FluentLabel Typo="Typography.PaneHeader">@L["NewScopeTitle"]</FluentLabel>
+</FluentDialogHeader>
+<FluentDialogBody>
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="12">
+        <FluentTextField @bind-Value="name" Label="@L["ScopeName"]" Required="true" Style="width:100%" />
+        <FluentTextField @bind-Value="resources" Label="@L["Resources"]" Style="width:100%" />
+    </FluentStack>
+</FluentDialogBody>
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent" Disabled="@(string.IsNullOrWhiteSpace(name) || saving)" OnClick="SubmitAsync">@L["Create"]</FluentButton>
+    <FluentButton Appearance="Appearance.Neutral" OnClick="CancelAsync">@L["Cancel"]</FluentButton>
+</FluentDialogFooter>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    private string name = string.Empty;
+    private string resources = string.Empty;
+    private bool saving;
+
+    private async Task SubmitAsync()
+    {
+        saving = true;
+        var resourceList = resources.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var response = await ScopeService.CreateScopeAsync(new CreateOpenIddictScopeRequest(name, resourceList));
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["ScopeCreatedToast"]);
+            await Dialog.CloseAsync(DialogResult.Ok(true));
+        }
+        else
+        {
+            ToastService.ShowError(L["ScopeCreateFailedToast", (int)response.StatusCode]);
+        }
+    }
+
+    private async Task CancelAsync() => await Dialog.CancelAsync();
+}

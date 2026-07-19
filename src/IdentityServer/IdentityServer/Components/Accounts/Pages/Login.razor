@@ -2,22 +2,30 @@
 @layout LoginLayout
 @attribute [AllowAnonymous]
 @using Microsoft.FluentUI.AspNetCore.Components
+@inject IStringLocalizer<SharedResources> L
 
 <div class="login-page">
+    <LanguagePicker />
+
     <FluentCard class="login-card">
+        <div class="login-brand">
+            <FluentIcon Value="@(new Icons.Regular.Size16.Shield())" />
+            <span>@L["AdminPanel"]</span>
+        </div>
+
         <div class="login-card-header">
             <span class="login-icon">
                 <FluentIcon Value="@(new Icons.Regular.Size24.LockClosed())" />
             </span>
-            <h1>Sign In</h1>
-            <p class="login-subtitle">Enter your credentials to access the admin panel</p>
+            <h1>@L["SignInTitle"]</h1>
+            <p class="login-subtitle">@L["SignInSubtitle"]</p>
         </div>
 
         @if (!string.IsNullOrEmpty(Error))
         {
             <div class="login-error">
                 <FluentIcon Value="@(new Icons.Regular.Size20.DismissCircle())" Color="@Color.Error" />
-                <span>Invalid credentials. Please try again.</span>
+                <span>@L["InvalidCredentials"]</span>
             </div>
         }
 
@@ -26,7 +34,7 @@
 
             <FluentTextField
                 Name="LoginIdentifier"
-                Placeholder="you@example.com"
+                Placeholder="@L["LoginIdentifierPlaceholder"]"
                 Required="true"
                 Autofocus="true"
                 Class="login-field" />
@@ -39,9 +47,11 @@
                 Class="login-field" />
 
             <FluentButton Type="@ButtonType.Submit" Appearance="@Appearance.Accent" FullWidth="true" Class="login-btn">
-                Sign In
+                @L["SignInButton"]
             </FluentButton>
         </form>
+
+        <div class="login-footer">OroIdentityServer</div>
     </FluentCard>
 </div>
 

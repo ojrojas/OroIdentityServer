@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <data name="Save"><value>保存</value></data>
+  <data name="Cancel"><value>キャンセル</value></data>
+  <data name="Delete"><value>削除</value></data>
+  <data name="Create"><value>作成</value></data>
+  <data name="New"><value>新規</value></data>
+  <data name="Back"><value>戻る</value></data>
+  <data name="ConfirmDeletionTitle"><value>削除の確認</value></data>
+  <data name="Name"><value>名</value></data>
+  <data name="MiddleName"><value>ミドルネーム</value></data>
+  <data name="LastName"><value>姓</value></data>
+  <data name="Email"><value>メールアドレス</value></data>
+  <data name="Username"><value>ユーザー名</value></data>
+  <data name="Password"><value>パスワード</value></data>
+  <data name="Identification"><value>身分証明書番号</value></data>
+  <data name="IdentificationType"><value>身分証明書の種類</value></data>
+  <data name="Tenant"><value>テナント</value></data>
+  <data name="Active"><value>有効</value></data>
+  <data name="Created"><value>作成日</value></data>
+  <data name="SavedToast"><value>保存しました。</value></data>
+  <data name="SaveFailedToast"><value>保存できませんでした ({0})。</value></data>
+  <data name="Language"><value>言語</value></data>
+  <data name="ToggleTheme"><value>テーマを切り替え</value></data>
+  <data name="NotFoundTitle"><value>見つかりません</value></data>
+  <data name="NotFoundMessage"><value>お探しのコンテンツは存在しません。</value></data>
+
+  <data name="SignInTitle"><value>サインイン</value></data>
+  <data name="SignInSubtitle"><value>管理パネルにアクセスするには認証情報を入力してください</value></data>
+  <data name="InvalidCredentials"><value>認証情報が正しくありません。もう一度お試しください。</value></data>
+  <data name="LoginIdentifierPlaceholder"><value>you@example.com</value></data>
+  <data name="SignInButton"><value>サインイン</value></data>
+  <data name="AdminPanel"><value>ID管理パネル</value></data>
+
+  <data name="ChangePasswordTitle"><value>パスワードの変更</value></data>
+  <data name="ChangePasswordSubtitle"><value>続行する前に新しいパスワードを設定してください。</value></data>
+  <data name="PasswordMismatch"><value>パスワードが一致しません。</value></data>
+  <data name="NewPasswordPlaceholder"><value>新しいパスワード</value></data>
+  <data name="ConfirmNewPasswordPlaceholder"><value>新しいパスワードの確認</value></data>
+  <data name="ChangePasswordButton"><value>パスワードを変更</value></data>
+
+  <data name="SignOutTitle"><value>サインアウト</value></data>
+  <data name="SignOutSubtitle"><value>アプリケーションがIdentityServerのセッション終了を要求しています。サインアウトしますか？</value></data>
+  <data name="YesSignOut"><value>はい、サインアウトします</value></data>
+  <data name="NoStaySignedIn"><value>いいえ、サインインを続けます</value></data>
+
+  <data name="NavDashboard"><value>ダッシュボード</value></data>
+  <data name="NavUsers"><value>ユーザー</value></data>
+  <data name="NavRoles"><value>ロール</value></data>
+  <data name="NavIdentificationTypes"><value>身分証明書の種類</value></data>
+  <data name="NavApplications"><value>アプリケーション</value></data>
+  <data name="NavScopes"><value>スコープ</value></data>
+  <data name="NavSessions"><value>セッション</value></data>
+
+  <data name="DashboardTitle"><value>ダッシュボード</value></data>
+  <data name="StatUsers"><value>ユーザー</value></data>
+  <data name="StatConnectedUsers"><value>接続中のユーザー</value></data>
+  <data name="StatRoles"><value>ロール</value></data>
+  <data name="StatApplications"><value>アプリケーション</value></data>
+  <data name="StatScopes"><value>スコープ</value></data>
+
+  <data name="UsersTitle"><value>ユーザー</value></data>
+  <data name="NewUserTitle"><value>新規ユーザー</value></data>
+  <data name="ColUsername"><value>ユーザー名</value></data>
+  <data name="ColName"><value>名前</value></data>
+  <data name="ColEmail"><value>メールアドレス</value></data>
+  <data name="ColRoles"><value>ロール</value></data>
+  <data name="DeleteUserConfirm"><value>ユーザー「{0}」を削除しますか？</value></data>
+  <data name="UserCreatedToast"><value>ユーザーを作成しました。</value></data>
+  <data name="UserCreateFailedToast"><value>ユーザーを作成できませんでした ({0})。</value></data>
+  <data name="UserDeletedToast"><value>ユーザーを削除しました。</value></data>
+  <data name="UserDeleteFailedToast"><value>ユーザーを削除できませんでした ({0})。</value></data>
+  <data name="UserDetailTitle"><value>ユーザー</value></data>
+  <data name="NewPasswordRequiredPlaceholder"><value>変更を保存するには必須です</value></data>
+  <data name="RolesAssignedLabel"><value>ロール: {0}</value></data>
+  <data name="None"><value>なし</value></data>
+
+  <data name="RolesTitle"><value>ロール</value></data>
+  <data name="NewRoleTitle"><value>新規ロール</value></data>
+  <data name="RoleName"><value>ロール名</value></data>
+  <data name="ColPermissions"><value>権限</value></data>
+  <data name="DeleteRoleConfirm"><value>ロール「{0}」を削除しますか？</value></data>
+  <data name="RoleCreatedToast"><value>ロールを作成しました。</value></data>
+  <data name="RoleCreateFailedToast"><value>ロールを作成できませんでした ({0})。</value></data>
+  <data name="RoleDeletedToast"><value>ロールを削除しました。</value></data>
+  <data name="RoleDeleteFailedToast"><value>ロールを削除できませんでした ({0})。</value></data>
+  <data name="RoleDetailTitle"><value>ロール</value></data>
+  <data name="PermissionsAssignedLabel"><value>割り当てられた権限: {0}</value></data>
+  <data name="ActiveLabel"><value>有効: {0}</value></data>
+
+  <data name="IdentificationTypesTitle"><value>身分証明書の種類</value></data>
+  <data name="NewIdentificationTypeTitle"><value>新規身分証明書の種類</value></data>
+  <data name="DeleteIdentificationTypeConfirm"><value>身分証明書の種類「{0}」を削除しますか？</value></data>
+  <data name="IdentificationTypeCreatedToast"><value>身分証明書の種類を作成しました。</value></data>
+  <data name="IdentificationTypeCreateFailedToast"><value>身分証明書の種類を作成できませんでした ({0})。</value></data>
+  <data name="IdentificationTypeDeletedToast"><value>身分証明書の種類を削除しました。</value></data>
+  <data name="IdentificationTypeDeleteFailedToast"><value>身分証明書の種類を削除できませんでした ({0})。</value></data>
+  <data name="IdentificationTypeDetailTitle"><value>身分証明書の種類</value></data>
+
+  <data name="ApplicationsTitle"><value>アプリケーション</value></data>
+  <data name="NewApplicationTitle"><value>新規アプリケーション</value></data>
+  <data name="ClientId"><value>クライアントID</value></data>
+  <data name="DisplayName"><value>表示名</value></data>
+  <data name="ClientSecret"><value>クライアントシークレット</value></data>
+  <data name="ClientSecretNewPlaceholder"><value>パブリッククライアントの場合は空欄のままにしてください</value></data>
+  <data name="ClientSecretEditPlaceholder"><value>現在のシークレットを維持する場合は空欄のままにしてください</value></data>
+  <data name="ClientType"><value>クライアントタイプ</value></data>
+  <data name="ColType"><value>タイプ</value></data>
+  <data name="DeleteApplicationConfirm"><value>アプリケーション「{0}」を削除しますか？</value></data>
+  <data name="ApplicationCreatedToast"><value>アプリケーションを作成しました。</value></data>
+  <data name="ApplicationCreateFailedToast"><value>アプリケーションを作成できませんでした ({0})。</value></data>
+  <data name="ApplicationDeletedToast"><value>アプリケーションを削除しました。</value></data>
+  <data name="ApplicationDeleteFailedToast"><value>アプリケーションを削除できませんでした ({0})。</value></data>
+  <data name="ApplicationDetailTitle"><value>アプリケーション</value></data>
+  <data name="RedirectUris"><value>リダイレクトURI（カンマ区切り）</value></data>
+  <data name="PostLogoutRedirectUris"><value>ログアウト後のリダイレクトURI（カンマ区切り）</value></data>
+
+  <data name="ScopesTitle"><value>スコープ</value></data>
+  <data name="NewScopeTitle"><value>新規スコープ</value></data>
+  <data name="ScopeName"><value>名前</value></data>
+  <data name="Resources"><value>リソース（カンマ区切り）</value></data>
+  <data name="ColResources"><value>リソース</value></data>
+  <data name="ColDisplayName"><value>表示名</value></data>
+  <data name="DeleteScopeConfirm"><value>スコープ「{0}」を削除しますか？</value></data>
+  <data name="ScopeCreatedToast"><value>スコープを作成しました。</value></data>
+  <data name="ScopeCreateFailedToast"><value>スコープを作成できませんでした ({0})。</value></data>
+  <data name="ScopeDeletedToast"><value>スコープを削除しました。</value></data>
+  <data name="ScopeDeleteFailedToast"><value>スコープを削除できませんでした ({0})。</value></data>
+  <data name="ScopeDetailTitle"><value>スコープ</value></data>
+
+  <data name="SessionsTitle"><value>セッション</value></data>
+  <data name="SelectUserPrompt"><value>ユーザーを選択するとセッションが表示されます</value></data>
+  <data name="SessionsForUser"><value>{0} のセッション</value></data>
+  <data name="NoActiveSessions"><value>アクティブなセッションはありません。</value></data>
+  <data name="ColDevice"><value>デバイス</value></data>
+  <data name="ColIp"><value>IP</value></data>
+  <data name="ColLastActivity"><value>最終アクティビティ</value></data>
+  <data name="ColExpires"><value>有効期限</value></data>
+  <data name="Disconnect"><value>切断</value></data>
+  <data name="DisconnectConfirm"><value>このセッションを切断しますか？</value></data>
+  <data name="SessionDisconnectedToast"><value>セッションを切断しました。</value></data>
+  <data name="SessionDisconnectFailedToast"><value>セッションを切断できませんでした ({0})。</value></data>
+</root>

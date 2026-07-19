@@ -1,20 +1,69 @@
-﻿@page "/roles"
+@page "/roles"
+@attribute [Authorize]
+@inject IAdminRoleService RoleService
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>@L["RolesTitle"]</PageTitle>
 
-<h1>Counter</h1>
+<FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween" VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 1rem;">
+    <FluentLabel Typo="Typography.PageTitle">@L["RolesTitle"]</FluentLabel>
+    <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size20.Add())" OnClick="CreateAsync">@L["New"]</FluentButton>
+</FluentStack>
 
-<div role="status" style="padding-bottom: 1em;">
-    Current count: <FluentBadge Appearance="Appearance.Neutral">@currentCount</FluentBadge>
-</div>
-
-<FluentButton Appearance="Appearance.Accent" @onclick="IncrementCount">Click me</FluentButton>
+@if (items is null)
+{
+    <FluentProgressRing />
+}
+else
+{
+    <FluentDataGrid Items="@items.AsQueryable()" GridTemplateColumns="2fr 1fr 1fr 1fr">
+        <PropertyColumn Title="@L["Name"]" Property="@(x => x.Name)" Sortable="true" />
+        <PropertyColumn Title="@L["Active"]" Property="@(x => x.IsActive)" Sortable="true" />
+        <PropertyColumn Title="@L["ColPermissions"]" Property="@(x => x.Claims == null ? 0 : x.Claims.Count())" />
+        <TemplateColumn Title="">
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Edit())" OnClick="@(() => Nav.NavigateTo($"/roles/{context.Id}"))" />
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Delete())" OnClick="@(() => DeleteAsync(context))" />
+        </TemplateColumn>
+    </FluentDataGrid>
+}
 
 @code {
-    private int currentCount = 0;
+    private List<RoleModel>? items;
 
-    private void IncrementCount()
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
     {
-        currentCount++;
+        var response = await RoleService.GetRolesAsync();
+        items = response?.Data?.ToList() ?? [];
+    }
+
+    private async Task CreateAsync()
+    {
+        var dialog = await DialogService.ShowDialogAsync<CreateRoleDialog>(new DialogParameters { Title = L["NewRoleTitle"] });
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+            await LoadAsync();
+    }
+
+    private async Task DeleteAsync(RoleModel item)
+    {
+        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteRoleConfirm", item.Name ?? string.Empty], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        var response = await RoleService.DeleteRoleAsync(item.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["RoleDeletedToast"]);
+            await LoadAsync();
+        }
+        else
+        {
+            ToastService.ShowError(L["RoleDeleteFailedToast", (int)response.StatusCode]);
+        }
     }
 }

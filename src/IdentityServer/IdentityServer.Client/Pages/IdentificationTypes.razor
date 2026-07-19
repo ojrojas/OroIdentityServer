@@ -1,0 +1,69 @@
+@page "/identification-types"
+@attribute [Authorize]
+@inject IAdminIdentificationTypeService IdentificationTypeService
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["IdentificationTypesTitle"]</PageTitle>
+
+<FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween" VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 1rem;">
+    <FluentLabel Typo="Typography.PageTitle">@L["IdentificationTypesTitle"]</FluentLabel>
+    <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size20.Add())" OnClick="CreateAsync">@L["New"]</FluentButton>
+</FluentStack>
+
+@if (items is null)
+{
+    <FluentProgressRing />
+}
+else
+{
+    <FluentDataGrid Items="@items.AsQueryable()" GridTemplateColumns="2fr 1fr 1fr 1fr">
+        <PropertyColumn Title="@L["Name"]" Property="@(x => x.Name)" Sortable="true" />
+        <PropertyColumn Title="@L["Active"]" Property="@(x => x.IsActive)" Sortable="true" />
+        <PropertyColumn Title="@L["Created"]" Property="@(x => x.CreatedAtUtc)" Sortable="true" Format="yyyy-MM-dd" />
+        <TemplateColumn Title="">
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Edit())" OnClick="@(() => Nav.NavigateTo($"/identification-types/{context.Id}"))" />
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Delete())" OnClick="@(() => DeleteAsync(context))" />
+        </TemplateColumn>
+    </FluentDataGrid>
+}
+
+@code {
+    private List<IdentificationTypeModel>? items;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var response = await IdentificationTypeService.GetIdentificationTypesAsync();
+        items = response?.Data?.ToList() ?? [];
+    }
+
+    private async Task CreateAsync()
+    {
+        var dialog = await DialogService.ShowDialogAsync<CreateIdentificationTypeDialog>(new DialogParameters { Title = L["NewIdentificationTypeTitle"] });
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+            await LoadAsync();
+    }
+
+    private async Task DeleteAsync(IdentificationTypeModel item)
+    {
+        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteIdentificationTypeConfirm", item.Name], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        var response = await IdentificationTypeService.DeleteIdentificationTypeAsync(item.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["IdentificationTypeDeletedToast"]);
+            await LoadAsync();
+        }
+        else
+        {
+            ToastService.ShowError(L["IdentificationTypeDeleteFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

@@ -10,6 +10,9 @@ public class AdminUserSessionService(HttpClient client) : IAdminUserSessionServi
     public Task<IEnumerable<UserSessionModel>?> GetByUserAsync(Guid userId, CancellationToken ct = default)
         => client.GetFromJsonAsync<IEnumerable<UserSessionModel>>($"api/user-sessions/by-user/{userId}", ClientJsonOptions.Default, ct);
 
+    public Task<int> GetActiveSessionsCountAsync(CancellationToken ct = default)
+        => client.GetFromJsonAsync<int>("api/user-sessions/active-count", ClientJsonOptions.Default, ct);
+
     public Task<HttpResponseMessage> CreateUserSessionAsync(CreateUserSessionRequest request, CancellationToken ct = default)
         => client.PostAsJsonAsync("api/user-sessions", request, ClientJsonOptions.Default, ct);
 

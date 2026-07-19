@@ -1,8 +1,30 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@inject IStringLocalizer<SharedResources> L
+
+<FluentDesignTheme @bind-Mode="@themeMode" StorageName="theme" />
+
+<FluentToastProvider MaxToastCount="5" />
+<FluentDialogProvider />
+<FluentTooltipProvider />
 
 <FluentLayout>
     <FluentHeader>
-        IdentityServer
+        OroIdentityServer
+        <FluentSpacer />
+        <AuthorizeView>
+            <Authorized>
+                <FluentLabel Style="margin-right: .5rem;">@context.User.Identity?.Name</FluentLabel>
+            </Authorized>
+        </AuthorizeView>
+        <LanguagePicker />
+        <FluentButton Appearance="Appearance.Stealth"
+                      IconStart="@(themeMode == DesignThemeModes.Dark ? new Icons.Regular.Size20.WeatherSunny() : new Icons.Regular.Size20.WeatherMoon())"
+                      Title="@L["ToggleTheme"]" OnClick="ToggleTheme" />
+        <FluentButton Appearance="Appearance.Stealth"
+                      IconStart="@(new Icons.Regular.Size20.ArrowExit())"
+                      Title="@L["SignOutTitle"]"
+                      Href="/Account/Logout" />
+
     </FluentHeader>
     <FluentStack Class="main" Orientation="Orientation.Horizontal" Width="100%">
         <NavMenu />
@@ -24,3 +46,10 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private DesignThemeModes themeMode = DesignThemeModes.Dark;
+
+    private void ToggleTheme()
+        => themeMode = themeMode == DesignThemeModes.Dark ? DesignThemeModes.Light : DesignThemeModes.Dark;
+}
