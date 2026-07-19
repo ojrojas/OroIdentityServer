@@ -20,7 +20,7 @@ public sealed class TenantProvisionedIntegrationEventHandler(
 
         try
         {
-            await schemaProvisioner.ProvisionSchemaAsync(integrationEvent.Slug);
+            await schemaProvisioner.ProvisionSchemaAsync(integrationEvent.Slug, cancellationToken);
 
             logger.LogInformation(
                 "Tenant schema provisioned successfully for Slug: '{Slug}', TenantId: {TenantId}",

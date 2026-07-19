@@ -40,3 +40,5 @@ global using OroIdentityServer.Infraestructure.Specifications;
 global using BuildingBlocks.Kernel.Domain;
 global using BuildingBlocks.Kernel.Persistence;
 
+global using Microsoft.EntityFrameworkCore.Diagnostics;
+global using OroIdentityServer.Core.Modules.IdentificationTypes.ValueObjects;

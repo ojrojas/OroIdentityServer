@@ -18,9 +18,9 @@ public static class RabbitMQServiceCollectionExtensions
             .Bind(configuration.GetSection(RabbitMQOptions.SectionName))
             .Configure(o => configure?.Invoke(o));
 
-        services.AddSingleton<IRabbitMQConnection, RabbitMQConnection>();
-        services.AddSingleton<ISubscriptionRegistry, InMemorySubscriptionRegistry>();
-        services.AddSingleton<IEventBus, RabbitMQEventBus>();
+        services.AddScoped<IRabbitMQConnection, RabbitMQConnection>();
+        services.AddScoped<ISubscriptionRegistry, InMemorySubscriptionRegistry>();
+        services.AddScoped<IEventBus, RabbitMQEventBus>();
 
         var assemblies = handlerAssemblies.Length == 0 ? new[] { Assembly.GetCallingAssembly() } : handlerAssemblies;
         var openHandler = typeof(IIntegrationEventHandler<>);

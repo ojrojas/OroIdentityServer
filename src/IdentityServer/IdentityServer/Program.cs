@@ -1,6 +1,7 @@
 using IdentityServer.Components;
 using IdentityServer.Server.Extensions;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
 using OpenIddict.Abstractions;
@@ -10,6 +11,7 @@ using OroIdentityServer.Infraestructure.Data;
 using OroIdentityServer.Infraestructure.Repositories.Extensions;
 using OroIdentityServer.Server.Authentication;
 using OroIdentityServer.Server.Endpoints;
+using Polly;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,7 +39,7 @@ builder.Services.AddRazorComponents(options =>
 builder.Services.AddFluentUIComponents();
 builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
 
 
 builder.AddInfraestructureExtensions(builder.Configuration);
@@ -53,6 +55,22 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<OroIdentityServer.Core.Interfaces.IPasswordHasher, OroIdentityServer.Core.Services.PasswordHasher>();
 builder.Services.AddScoped<AdminPasswordSignInService>();
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+builder.Services.AddCors(setupAction =>
+{
+    setupAction.AddPolicy("OroIdentityServer", policy => {
+        policy.AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowAnyOrigin(); 
+    });
+});
 
 var app = builder.Build();
 
@@ -89,6 +107,8 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseCors("OroIdentityServer");
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();

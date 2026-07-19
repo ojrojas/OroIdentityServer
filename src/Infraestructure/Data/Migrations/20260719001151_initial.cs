@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -24,32 +24,14 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuditEntries",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EntityName = table.Column<string>(type: "text", nullable: false),
-                    EntityId = table.Column<string>(type: "text", nullable: false),
-                    Action = table.Column<string>(type: "text", nullable: false),
-                    Timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserName = table.Column<string>(type: "text", nullable: false),
-                    ChangesJson = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuditEntries", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "IdentificationTypes",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -112,7 +94,8 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     Action = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Resource = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Scope = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    IsSystem = table.Column<bool>(type: "boolean", nullable: false)
+                    IsSystem = table.Column<bool>(type: "boolean", nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -125,7 +108,8 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -142,7 +126,8 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     ConcurrencyStamp = table.Column<string>(type: "text", nullable: true),
                     LockoutEnd = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false)
+                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -157,33 +142,12 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     Slug = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tenants", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AuditEntryProperties",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    AuditEntryId = table.Column<int>(type: "integer", nullable: false),
-                    PropertyName = table.Column<string>(type: "text", nullable: false),
-                    OldValue = table.Column<string>(type: "text", nullable: true),
-                    NewValue = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuditEntryProperties", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AuditEntryProperties_AuditEntries_AuditEntryId",
-                        column: x => x.AuditEntryId,
-                        principalTable: "AuditEntries",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -243,7 +207,8 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     NormalizedEmail = table.Column<string>(type: "text", nullable: true),
                     NormalizedUserName = table.Column<string>(type: "text", nullable: true),
                     TenantId = table.Column<Guid>(type: "uuid", nullable: true),
-                    SecurityUserId = table.Column<Guid>(type: "uuid", nullable: true)
+                    SecurityUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Version = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -312,7 +277,8 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     IpAddress = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     StartedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EndedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    EndedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Version = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -353,11 +319,6 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 name: "IX_ApplicationTenants_TenantId",
                 table: "ApplicationTenants",
                 column: "TenantId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AuditEntryProperties_AuditEntryId",
-                table: "AuditEntryProperties",
-                column: "AuditEntryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_IdentificationTypes_IsActive",
@@ -471,9 +432,6 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 name: "ApplicationTenants");
 
             migrationBuilder.DropTable(
-                name: "AuditEntryProperties");
-
-            migrationBuilder.DropTable(
                 name: "OpenIddictScopes");
 
             migrationBuilder.DropTable(
@@ -490,9 +448,6 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserRoles");
-
-            migrationBuilder.DropTable(
-                name: "AuditEntries");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictAuthorizations");

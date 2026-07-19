@@ -1,12 +1,10 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { UserProfile } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly oidc = inject(OidcSecurityService);
-  private readonly router = inject(Router);
 
   private readonly _isAuthenticated = signal(false);
   private readonly _userProfile = signal<UserProfile | null>(null);
@@ -54,7 +52,6 @@ export class AuthService {
       this._userProfile.set(null);
       this._accessToken.set(null);
       localStorage.removeItem('access_token');
-      this.router.navigate(['/login']);
     });
     this.oidc.logoffLocalMultiple();
   }

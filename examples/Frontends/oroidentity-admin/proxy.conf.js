@@ -1,8 +1,8 @@
 module.exports = {
   "/identity": {
     target:
-      process.env["services__identity-api__https__0"] ||
-      process.env["services__identity-api__http__0"],
+      process.env.IDENTITY_API_HTTP ||
+      process.env.IDENTITY_API_HTTPS,
     secure: process.env["NODE_ENV"] !== "development",
     pathRewrite: {
       "^/identity": ""

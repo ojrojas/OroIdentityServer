@@ -17,7 +17,7 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.9")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -247,6 +247,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("IsActive");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IsActive")
@@ -293,6 +296,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.ToTable("Permissions", (string)null);
@@ -307,6 +313,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("IsActive");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -341,6 +350,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("IsActive");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -384,6 +396,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("UserId");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -433,6 +448,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Property<string>("UserName")
                         .HasColumnType("text");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
@@ -479,6 +497,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.ToTable("SecurityUsers", (string)null);
@@ -516,72 +537,6 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasDatabaseName("IX_ApplicationTenants_TenantId");
 
                     b.ToTable("ApplicationTenants", (string)null);
-                });
-
-            modelBuilder.Entity("OroKernel.Infrastructure.Audit.AuditEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ChangesJson")
-                        .HasColumnType("text");
-
-                    b.Property<string>("EntityId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EntityName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AuditEntries");
-                });
-
-            modelBuilder.Entity("OroKernel.Infrastructure.Audit.AuditEntryProperty", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AuditEntryId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("NewValue")
-                        .HasColumnType("text");
-
-                    b.Property<string>("OldValue")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PropertyName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuditEntryId");
-
-                    b.ToTable("AuditEntryProperties");
                 });
 
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreAuthorization", b =>
@@ -772,17 +727,6 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("OroKernel.Infrastructure.Audit.AuditEntryProperty", b =>
-                {
-                    b.HasOne("OroKernel.Infrastructure.Audit.AuditEntry", "AuditEntry")
-                        .WithMany("Properties")
-                        .HasForeignKey("AuditEntryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AuditEntry");
-                });
-
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication", b =>
                 {
                     b.Navigation("Authorizations");
@@ -803,11 +747,6 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
             modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Aggregates.User", b =>
                 {
                     b.Navigation("Roles");
-                });
-
-            modelBuilder.Entity("OroKernel.Infrastructure.Audit.AuditEntry", b =>
-                {
-                    b.Navigation("Properties");
                 });
 #pragma warning restore 612, 618
         }

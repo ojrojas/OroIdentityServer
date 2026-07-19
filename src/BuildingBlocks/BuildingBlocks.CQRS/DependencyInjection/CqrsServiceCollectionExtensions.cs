@@ -10,8 +10,8 @@ public static class CqrsServiceCollectionExtensions
 {
     public static IServiceCollection AddBuildingBlocksCqrs(this IServiceCollection services, params Assembly[] assemblies)
     {
-        services.AddSingleton<ICommandDispatcher, CommandDispatcher>();
-        services.AddSingleton<IQueryDispatcher, QueryDispatcher>();
+        services.AddScoped<ICommandDispatcher, CommandDispatcher>();
+        services.AddScoped<IQueryDispatcher, QueryDispatcher>();
 
         var targets = assemblies.Length == 0 ? new[] { Assembly.GetCallingAssembly() } : assemblies;
         RegisterImplementations(services, targets, typeof(ICommandHandler<>));

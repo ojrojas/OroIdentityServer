@@ -1,12 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { NotificationStore } from './notification.store';
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
+import { NotificationStore } from './notification.store';
 
 @Component({
   selector: 'app-notification-bell',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   template: `
     <div class="bell-wrapper" (click)="toggle()" (keydown.enter)="toggle()" tabindex="0" role="button" [attr.aria-label]="'NOTIFICATIONS.TITLE' | translate">
       <button class="oro-btn oro-btn-ghost bell-btn">

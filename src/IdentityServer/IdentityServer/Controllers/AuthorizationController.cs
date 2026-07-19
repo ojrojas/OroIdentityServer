@@ -3,14 +3,13 @@ using IdentityServer.Server.ViewModels;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
+using OroIdentityServer.Server.Authentication;
 using OroIdentityServer.Server.Helpers;
 using static OpenIddict.Abstractions.OpenIddictConstants;
-using OroIdentityServer.Core.Modules.Users.Aggregates;
 using BuildingBlocks.CQRS.Abstractions;
 using OroIdentityServer.Application.Modules.Users.Queries;
 using OroIdentityServer.Application.Modules.Roles.Queries;
@@ -22,24 +21,18 @@ public class AuthorizationController : Controller
     private readonly IOpenIddictApplicationManager _applicationManager;
     private readonly IOpenIddictAuthorizationManager _authorizationManager;
     private readonly IOpenIddictScopeManager _scopeManager;
-    private readonly SignInManager<User> _signInManager;
     private readonly IQueryDispatcher _queryDispatcher;
 
     public AuthorizationController(
         IOpenIddictApplicationManager applicationManager,
         IOpenIddictAuthorizationManager authorizationManager,
         IOpenIddictScopeManager scopeManager,
-        SignInManager<User> signInManager,
-        IQueryDispatcher queryDispatcher
-        // ,UserManager<ApplicationUser> userManager
-        )
+        IQueryDispatcher queryDispatcher)
     {
         _applicationManager = applicationManager;
         _authorizationManager = authorizationManager;
         _scopeManager = scopeManager;
-        _signInManager = signInManager;
         _queryDispatcher = queryDispatcher;
-        // _userManager = userManager;
     }
 
     [HttpGet("~/connect/authorize")]
@@ -98,8 +91,11 @@ public class AuthorizationController : Controller
             });
         }
 
+        var subject = result.Principal.FindFirstValue(ClaimTypes.NameIdentifier) ??
+            throw new InvalidOperationException("The subject claim cannot be retrieved.");
+
         // Retrieve the profile of the logged in user.
-        var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(Guid.Parse(result.Principal.GetClaim(Claims.Subject))), cancellationToken) ??
+        var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(Guid.Parse(subject)), cancellationToken) ??
            throw new InvalidOperationException("The user details cannot be retrieved.");
 
         // Retrieve the application details from the database.
@@ -202,9 +198,9 @@ foreach (var claim in identity.Claims)
             throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
 
         // Retrieve the profile of the logged in user.
-        // var user = await _userManager.GetUserAsync(User) ??
-        //     throw new InvalidOperationException("The user details cannot be retrieved.");
-        var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(new(User.GetClaim(Claims.Subject))), cancellationToken) ??
+        var acceptSubject = User.FindFirstValue(ClaimTypes.NameIdentifier) ??
+            throw new InvalidOperationException("The subject claim cannot be retrieved.");
+        var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(Guid.Parse(acceptSubject)), cancellationToken) ??
             throw new InvalidOperationException("The user details cannot be retrieved.");
 
         // Retrieve the application details from the database.
@@ -280,16 +276,11 @@ foreach (var claim in identity.Claims)
     // to redirect the user agent to the client application using the appropriate response_mode.
     public IActionResult Deny() => Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 
-    [HttpGet("~/connect/logout")]
-    public IActionResult Logout() => View();
-
-    [ActionName(nameof(Logout)), HttpPost("~/connect/logout"), ValidateAntiForgeryToken]
-    public async Task<IActionResult> LogoutPost()
+    [HttpGet("~/connect/logout"), HttpPost("~/connect/logout"), IgnoreAntiforgeryToken]
+    public async Task<IActionResult> Logout()
     {
-        // Ask ASP.NET Core Identity to delete the local and external cookies created
-        // when the user agent is redirected from the external identity provider
-        // after a successful authentication flow (e.g Google or Facebook).
-        await _signInManager.SignOutAsync();
+        // Delete the local admin cookie created when the user signed in.
+        await HttpContext.SignOutAsync(CookieAuthHandlerSetup.AdminScheme);
 
         // Returning a SignOutResult will ask OpenIddict to redirect the user agent
         // to the post_logout_redirect_uri specified by the client application or to
@@ -300,6 +291,43 @@ foreach (var claim in identity.Claims)
             {
                 RedirectUri = "/"
             });
+    }
+
+    [Authorize(AuthenticationSchemes = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)]
+    [HttpGet("~/connect/userinfo"), HttpPost("~/connect/userinfo"), IgnoreAntiforgeryToken, Produces("application/json")]
+    public async Task<IActionResult> Userinfo(CancellationToken cancellationToken)
+    {
+        var subject = User.GetClaim(Claims.Subject) ??
+            throw new InvalidOperationException("The subject claim cannot be retrieved.");
+
+        var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(Guid.Parse(subject)), cancellationToken) ??
+            throw new InvalidOperationException("The user details cannot be retrieved.");
+
+        var claims = new Dictionary<string, object>(StringComparer.Ordinal)
+        {
+            [Claims.Subject] = user.Data.Id.Value.ToString()
+        };
+
+        if (User.HasScope(Scopes.Email))
+        {
+            claims[Claims.Email] = user.Data.Email!;
+        }
+
+        if (User.HasScope(Scopes.Profile))
+        {
+            claims[Claims.Name] = $"{user.Data.Name} {user.Data.LastName}";
+            claims[Claims.GivenName] = user.Data.Name!;
+            claims[Claims.FamilyName] = user.Data.LastName!;
+            claims[Claims.PreferredUsername] = user.Data.UserName!;
+        }
+
+        if (User.HasScope(Scopes.Roles))
+        {
+            var roles = await _queryDispatcher.SendAsync(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
+            claims[Claims.Role] = roles.Data.Select(x => x.Name).ToArray();
+        }
+
+        return Ok(claims);
     }
 
     [HttpPost("~/connect/token"), IgnoreAntiforgeryToken, Produces("application/json")]
@@ -329,7 +357,7 @@ foreach (var claim in identity.Claims)
             }
 
             // Ensure the user is still allowed to sign in.
-            if (!await _signInManager.CanSignInAsync(user.Data))
+            if (!await _queryDispatcher.SendAsync(new ValidateUserToLoginQuery(user.Data.Email!), cancellationToken))
             {
                 return Forbid(
                     authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,

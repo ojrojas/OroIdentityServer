@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const identityServerHttp = process.env.IDENTITY_SERVER_HTTP ||process.env.IDENTITY_SERVER_HTTPS || 'https://localhost:7219' ;
+const identityServerHttp = process.env.IDENTITY_API_HTTPS || process.env.IDENTITY_API_HTTP;
 const clientId = process.env.CLIENT_ID || ''
 const seqUri = process.env.SEQ_URI;
 
