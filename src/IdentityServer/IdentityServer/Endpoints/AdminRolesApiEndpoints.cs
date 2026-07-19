@@ -3,9 +3,8 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using Microsoft.AspNetCore.Mvc;
-using BuildingBlocks.CQRS.Abstractions;
-using OroIdentityServer.Application.Modules.Roles.Commands;
-using OroIdentityServer.Application.Modules.Roles.Queries;
+using IdentityServer.Client.Models.Roles;
+using IdentityServer.Client.Interfaces;
 
 namespace OroIdentityServer.Server.Endpoints;
 
@@ -15,28 +14,19 @@ public static partial class AdminApiEndpoints
     {
         var g = api.MapGroup("/roles");
 
-        g.MapGet("/", async ([FromServices] IQueryHandler<GetRolesQuery, GetRolesResponse> h, CancellationToken ct)
-            => Results.Ok(await h.HandleAsync(new GetRolesQuery(), ct)));
+        g.MapGet("/", async ([FromServices] IAdminRoleService service, CancellationToken ct)
+            => Results.Ok(await service.GetRolesAsync(ct)));
 
-        g.MapGet("/{id:guid}", async (Guid id, [FromServices] IQueryHandler<GetRoleByIdQuery, GetRoleByIdResponse> h, CancellationToken ct)
-            => Results.Ok(await h.HandleAsync(new GetRoleByIdQuery(id), ct)));
+        g.MapGet("/{id:guid}", async (Guid id, [FromServices] IAdminRoleService service, CancellationToken ct)
+            => Results.Ok(await service.GetRoleByIdAsync(id, ct)));
 
-        g.MapPost("/", async ([FromBody] CreateRoleCommand cmd, [FromServices] ICommandHandler<CreateRoleCommand> h, CancellationToken ct) =>
-        {
-            await h.HandleAsync(cmd, ct);
-            return Results.Created("/api/roles", null);
-        });
+        g.MapPost("/", async ([FromBody] CreateRoleRequest request, [FromServices] IAdminRoleService service, CancellationToken ct)
+            => await ToResultAsync(await service.CreateRoleAsync(request, ct), ct));
 
-        g.MapPut("/{id:guid}", async (Guid id, [FromBody] UpdateRoleCommand cmd, [FromServices] ICommandHandler<UpdateRoleCommand> h, CancellationToken ct) =>
-        {
-            await h.HandleAsync(cmd with { Id = id }, ct);
-            return Results.NoContent();
-        });
+        g.MapPut("/{id:guid}", async (Guid id, [FromBody] UpdateRoleRequest request, [FromServices] IAdminRoleService service, CancellationToken ct)
+            => await ToResultAsync(await service.UpdateRoleAsync(id, request, ct), ct));
 
-        g.MapDelete("/{id:guid}", async (Guid id, [FromServices] ICommandHandler<DeleteRoleCommand> h, CancellationToken ct) =>
-        {
-            await h.HandleAsync(new DeleteRoleCommand(id), ct);
-            return Results.NoContent();
-        });
+        g.MapDelete("/{id:guid}", async (Guid id, [FromServices] IAdminRoleService service, CancellationToken ct)
+            => await ToResultAsync(await service.DeleteRoleAsync(id, ct), ct));
     }
 }

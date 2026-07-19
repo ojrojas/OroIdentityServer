@@ -1,4 +1,3 @@
-using BuildingBlocks.Logger;
 using BuildingBlocks.Logger.Options;
 using FluentAssertions;
 using Serilog;

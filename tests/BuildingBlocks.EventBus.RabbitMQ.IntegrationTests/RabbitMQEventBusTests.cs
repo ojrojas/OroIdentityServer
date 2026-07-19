@@ -1,5 +1,3 @@
-using BuildingBlocks.EventBus;
-using BuildingBlocks.EventBus.RabbitMQ;
 using BuildingBlocks.EventBus.RabbitMQ.DependencyInjection;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;

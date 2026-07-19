@@ -1,4 +1,3 @@
-using BuildingBlocks.EventBus;
 using FluentAssertions;
 
 namespace BuildingBlocks.EventBus.UnitTests;

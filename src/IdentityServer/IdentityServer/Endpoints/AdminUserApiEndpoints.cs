@@ -3,9 +3,8 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using Microsoft.AspNetCore.Mvc;
-using BuildingBlocks.CQRS.Abstractions;
-using OroIdentityServer.Application.Modules.Users.Commands;
-using OroIdentityServer.Application.Modules.Users.Queries;
+using IdentityServer.Client.Models.Users;
+using IdentityServer.Client.Interfaces;
 
 namespace OroIdentityServer.Server.Endpoints;
 
@@ -15,38 +14,23 @@ public static partial class AdminApiEndpoints
     {
         var g = api.MapGroup("/users");
 
-        g.MapGet("/", async ([FromServices] IQueryHandler<GetUsersQuery, GetUsersQueryResponse> h, CancellationToken ct)
-            => Results.Ok(await h.HandleAsync(new GetUsersQuery(), ct)));
+        g.MapGet("/", async ([FromServices] IAdminUserService service, CancellationToken ct)
+            => Results.Ok(await service.GetUsersAsync(ct)));
 
         g.MapPost("/", async (
-            [FromBody] CreateUserCommand cmd,
-            [FromServices] ICommandHandler<CreateUserCommand> h,
-            CancellationToken ct) =>
-        {
-            await h.HandleAsync(cmd, ct);
-            return Results.Created($"/api/users", null);
-        });
+            [FromBody] CreateUserRequest request,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) => await ToResultAsync(await service.CreateUserAsync(request, ct), ct));
 
         g.MapPut("/{id:guid}", async (
             Guid id,
-            [FromBody] UpdateUserCommand cmd,
-            [FromServices] ICommandHandler<UpdateUserCommand, UpdateUserResponse> h,
-            CancellationToken ct) =>
-        {
-            var result = await h.HandleAsync(cmd with { UserId = id }, ct);
-            return Results.Ok(result);
-        });
+            [FromBody] UpdateUserRequest request,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) => await ToResultAsync(await service.UpdateUserAsync(id, request, ct), ct));
 
         g.MapDelete("/{id:guid}", async (
             Guid id,
-            [FromServices] ICommandHandler<DeleteUserCommand> h,
-            CancellationToken ct) =>
-        {
-            await h.HandleAsync(new DeleteUserCommand(id), ct);
-            return Results.NoContent();
-        });
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) => await ToResultAsync(await service.DeleteUserAsync(id, ct), ct));
     }
 }
-
-
-

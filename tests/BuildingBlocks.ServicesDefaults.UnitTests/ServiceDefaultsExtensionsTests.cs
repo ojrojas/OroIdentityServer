@@ -1,8 +1,6 @@
-using BuildingBlocks.ServicesDefaults;
 using FluentAssertions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.Hosting;
 
 namespace BuildingBlocks.ServicesDefaults.UnitTests;
 

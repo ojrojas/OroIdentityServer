@@ -24,4 +24,20 @@ public static partial class AdminApiEndpoints
 
         return app;
     }
+
+    /// <summary>
+    /// ServerAdminXxxService write methods return HttpResponseMessage (so the same IAdminXxxService
+    /// interface works for both the HTTP-based client and this CQRS-based server implementation).
+    /// This translates that back into a minimal API IResult.
+    /// </summary>
+    private static async Task<IResult> ToResultAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        if (response.Content is { Headers.ContentLength: > 0 })
+        {
+            var body = await response.Content.ReadAsStringAsync(ct);
+            return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
+        }
+
+        return Results.StatusCode((int)response.StatusCode);
+    }
 }

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using BuildingBlocks.CQRS.Abstractions;
-using OroIdentityServer.Application.Modules.UserSessions.Commands;
-using OroIdentityServer.Application.Modules.UserSessions.Queries;
+using IdentityServer.Client.Models.UserSessions;
+using IdentityServer.Client.Interfaces;
 
 namespace OroIdentityServer.Server.Endpoints;
 
@@ -11,19 +10,13 @@ public static partial class AdminApiEndpoints
     {
         var g = api.MapGroup("/user-sessions");
 
-        g.MapGet("/by-user/{userId:guid}", async (Guid userId, [FromServices] IQueryHandler<GetUserSessionsByUserQuery, IEnumerable<OroIdentityServer.Core.Modules.UserSessions.Aggregates.UserSession>> h, CancellationToken ct)
-            => Results.Ok(await h.HandleAsync(new GetUserSessionsByUserQuery(userId), ct)));
+        g.MapGet("/by-user/{userId:guid}", async (Guid userId, [FromServices] IAdminUserSessionService service, CancellationToken ct)
+            => Results.Ok(await service.GetByUserAsync(userId, ct)));
 
-        g.MapPost("/", async ([FromBody] CreateUserSessionCommand cmd, [FromServices] ICommandHandler<CreateUserSessionCommand> h, CancellationToken ct) =>
-        {
-            await h.HandleAsync(cmd, ct);
-            return Results.Created("/api/user-sessions", null);
-        });
+        g.MapPost("/", async ([FromBody] CreateUserSessionRequest request, [FromServices] IAdminUserSessionService service, CancellationToken ct)
+            => await ToResultAsync(await service.CreateUserSessionAsync(request, ct), ct));
 
-        g.MapPost("/{id:guid}/deactivate", async (Guid id, [FromServices] ICommandHandler<DeactivateUserSessionCommand> h, CancellationToken ct) =>
-        {
-            await h.HandleAsync(new DeactivateUserSessionCommand(id), ct);
-            return Results.NoContent();
-        });
+        g.MapPost("/{id:guid}/deactivate", async (Guid id, [FromServices] IAdminUserSessionService service, CancellationToken ct)
+            => await ToResultAsync(await service.DeactivateUserSessionAsync(id, ct), ct));
     }
 }

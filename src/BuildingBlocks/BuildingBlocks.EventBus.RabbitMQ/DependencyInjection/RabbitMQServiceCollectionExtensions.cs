@@ -1,5 +1,4 @@
 using System.Reflection;
-using BuildingBlocks.EventBus;
 using BuildingBlocks.EventBus.Subscriptions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

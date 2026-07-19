@@ -1,4 +1,3 @@
-using BuildingBlocks.EventBus;
 using BuildingBlocks.EventBus.Subscriptions;
 using FluentAssertions;
 

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using BuildingBlocks.CQRS.Abstractions;
-using OroIdentityServer.Application.Modules.Sessions.Queries;
+using IdentityServer.Client.Interfaces;
 
 namespace OroIdentityServer.Server.Endpoints;
 
@@ -10,7 +9,7 @@ public static partial class AdminApiEndpoints
     {
         var g = api.MapGroup("/sessions");
 
-        g.MapGet("/by-user/{userId:guid}", async (Guid userId, [FromServices] IQueryHandler<GetUserSessionsQuery, GetUserSessionsQueryResponse> h, CancellationToken ct)
-            => Results.Ok(await h.HandleAsync(new GetUserSessionsQuery(userId), ct)));
+        g.MapGet("/by-user/{userId:guid}", async (Guid userId, [FromServices] IAdminSessionService service, CancellationToken ct)
+            => Results.Ok(await service.GetByUserAsync(userId, ct)));
     }
 }

@@ -1,0 +1,65 @@
+﻿@page "/"
+@attribute [Authorize]
+
+@using IdentityServer.Client.Interfaces
+
+@inject IAdminUserService userService
+@inject IAdminRoleService roleService
+@inject IAdminScopeService scopeService
+@inject IAdminApplicationService applicationService
+
+<PageTitle>Dashboard</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new Fluent Blazor app.
+
+<div>
+     <div>
+          <label>Users</label>
+          <span>@userCount</span>
+     </div>
+     <div>
+          <label>Roles</label>
+          <span>@roleCount</span>
+     </div>
+     <div>
+          <label>Applications</label>
+          <span>@applicationCount</span>
+     </div>
+     <div>
+          <label>Scopes</label>
+          <span>@scopeCount</span>
+     </div>
+</div>
+
+
+
+@code {
+     private int userCount = default;
+     private int roleCount = default;
+     private int scopeCount = default;
+     private int applicationCount = default;
+
+     protected override async Task OnAfterRenderAsync(bool firstRender)
+     {
+
+          if (firstRender)
+          {
+               CancellationTokenSource tokenSource = new CancellationTokenSource();
+               var countUser = await userService.GetUsersAsync(tokenSource.Token);
+               userCount = countUser?.Data?.Count() ?? default;
+
+               var countScope = await scopeService.GetScopesAsync(tokenSource.Token);
+               scopeCount = countUser?.Data?.Count() ?? default;
+
+               var countRole = await roleService.GetRolesAsync(tokenSource.Token);
+               roleCount = countUser?.Data?.Count() ?? default;
+
+               var countapps = await userService.GetUsersAsync(tokenSource.Token);
+               applicationCount = countapps?.Data?.Count() ?? default;
+
+               StateHasChanged();
+          }
+     }
+}

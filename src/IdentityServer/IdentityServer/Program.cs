@@ -11,7 +11,6 @@ using OroIdentityServer.Infraestructure.Data;
 using OroIdentityServer.Infraestructure.Repositories.Extensions;
 using OroIdentityServer.Server.Authentication;
 using OroIdentityServer.Server.Endpoints;
-using Polly;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,10 +40,10 @@ builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddControllersWithViews();
 
-
 builder.AddInfraestructureExtensions(builder.Configuration);
 builder.Services.AddApplicationHandlers();
 builder.AddApplicationExtensions(builder.Configuration);
+builder.Services.AddServerAdminServices();
 
 
 builder.AddIdentityServerOpenIddict();

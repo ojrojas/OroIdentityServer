@@ -13,7 +13,7 @@ public static class CqrsServiceCollectionExtensions
         services.AddScoped<ICommandDispatcher, CommandDispatcher>();
         services.AddScoped<IQueryDispatcher, QueryDispatcher>();
 
-        var targets = assemblies.Length == 0 ? new[] { Assembly.GetCallingAssembly() } : assemblies;
+        var targets = assemblies.Length == 0 ? [Assembly.GetCallingAssembly()] : assemblies;
         RegisterImplementations(services, targets, typeof(ICommandHandler<>));
         RegisterImplementations(services, targets, typeof(ICommandHandler<,>));
         RegisterImplementations(services, targets, typeof(IQueryHandler<,>));
