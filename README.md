@@ -8,36 +8,51 @@ OroIdentityServer is an identity and authentication management system built on *
 - OAuth2 / OpenID Connect via OpenIddict 8 (authorization code, client credentials, password and refresh token flows)
 - JWT issuance and validation, token revocation and authorization termination
 - Cookie-based admin sign-in with shared DataProtection keyring
-- Custom login/logout endpoints (`/auth/login`, `/auth/logout`)
+- Custom login/logout endpoints (`/auth/login`, `/auth/logout`, `/auth/change-password`)
+- Login form rejects invalid credentials in place and shows an error, instead of silently redirecting
+- Forced password change on first login for every user except the seeded admin account, enforced via a `must_change_password` claim and a redirect middleware that locks the UI to `/Account/ChangePassword` until cleared
+- Relying-party-initiated logout (`~/connect/logout`) shows an IdentityServer-owned confirmation page (`/Account/Logout`) before ending the session, so signing out of a client app doesn't silently sign the admin out of IdentityServer itself
 
-### 2. User, Role, Permission and Tenant Management
+### 2. Blazor Admin UI
+- FluentUI Blazor admin panel (list, detail/edit, create dialog, delete-with-confirmation) for Users, Roles, Applications, Scopes and Identification Types
+- Sessions page to inspect and forcibly disconnect a user's active sessions
+- Dashboard with live counts (users, connected users, roles, applications, scopes)
+- Dark/light theme toggle (`FluentDesignTheme`) plus toast (`IToastService`) and dialog (`IDialogService`) providers for feedback and confirmations
+- Runs under Blazor **Auto** render mode: components always call the `/api/*` endpoints over `HttpClient` (`IAdminXxxService`/`AdminXxxService` in `IdentityServer.Client`), whether rendered server-side on first paint or later from WebAssembly; the endpoints themselves delegate to CQRS-backed `ServerAdminXxxService` implementations (`IdentityServer/Services`) that talk to the dispatcher directly — no HTTP hop, no duplicated business logic between the two
+
+### 3. Localization
+- 8 supported languages: English, Spanish (LatAm), French, Italian, German, Portuguese (Brazil), Japanese, Chinese (Simplified) — `SharedResources.*.resx` under `IdentityServer.Client/Resources`
+- Default culture resolves from the browser's `Accept-Language` header (which reflects the OS locale on Windows, Linux and macOS); an explicit choice from the language picker overrides it via a persisted `.AspNetCore.Culture` cookie
+- Culture stays in sync between the server-rendered first paint and the WebAssembly runtime that takes over afterward (`/culture/set` endpoint + a small JS interop bootstrap in the client's `Program.cs`)
+
+### 4. User, Role, Permission and Tenant Management
 - Full CRUD for users, roles, permissions, tenants, identification types, applications and scopes
 - Role/permission-based authorization for the admin API
 - Multi-tenant support: tenant activation/suspension and user-to-tenant assignment
 - User session and login-session tracking, with session termination revoking OpenIddict tokens/authorizations
 
-### 3. Domain-Driven Design
+### 5. Domain-Driven Design
 - Aggregate roots, entities and value objects in `BuildingBlocks.Kernel`
 - `Result`/`Error` pattern instead of exceptions for expected failures
 - Business rules and domain events, dispatched via `DomainEventDispatcher`
 - Repository + specification pattern for querying aggregates
 
-### 4. CQRS — no MediatR
+### 6. CQRS — no MediatR
 - Hand-rolled `ICommand`/`IQuery` abstractions and dispatchers in `BuildingBlocks.CQRS`
 - Pipeline behaviors for logging and FluentValidation-based request validation
 
-### 5. Event-Driven Integration
+### 7. Event-Driven Integration
 - `BuildingBlocks.EventBus` defines integration events and an in-memory subscription registry
 - `BuildingBlocks.EventBus.RabbitMQ` provides a RabbitMQ-backed `IEventBus` implementation with Polly-based retry
 
-### 6. Modern .NET Stack
+### 8. Modern .NET Stack
 - .NET 10 / ASP.NET Core minimal APIs
 - Entity Framework Core with PostgreSQL (Npgsql)
 - Serilog structured logging (console, Seq)
 - OpenTelemetry instrumentation and Quartz-backed OpenIddict cleanup jobs
 - FluentUI Blazor components for the built-in admin UI (Interactive Server + WebAssembly render modes)
 
-### 7. Local Orchestration with .NET Aspire
+### 9. Local Orchestration with .NET Aspire
 - `examples/AppHost` wires up Postgres (+ pgAdmin), Redis, RabbitMQ and the identity server for local development
 - `examples/Frontends/oroidentity-admin` is a sample Angular admin frontend, run through Aspire's Node/pnpm integration
 
@@ -51,7 +66,14 @@ OroIdentityServer/
 │   ├── Infraestructure/                          # EF Core DbContext, migrations, repositories, specifications
 │   ├── IdentityServer/
 │   │   ├── IdentityServer/                       # Host: minimal API endpoints, OpenIddict, Blazor Server admin UI
-│   │   └── IdentityServer.Client/                # Blazor WebAssembly client (pages, layout, services)
+│   │   │   ├── Endpoints/                        # /api/* minimal API groups, delegate to Services/ServerAdminXxxService
+│   │   │   ├── Services/                         # ServerAdminXxxService: CQRS-backed IAdminXxxService implementations
+│   │   │   └── Components/Accounts/Pages/        # Login, Logout (confirmation), ChangePassword (static SSR pages)
+│   │   └── IdentityServer.Client/                # Blazor WebAssembly client (Auto render mode)
+│   │       ├── Interfaces/, Services/            # IAdminXxxService + HTTP-based AdminXxxService (used by components)
+│   │       ├── Models/                           # Client-facing request/response DTOs, per admin domain
+│   │       ├── Pages/, Components/               # Admin CRUD pages, create dialogs, Dashboard, Sessions
+│   │       └── Resources/                        # SharedResources.*.resx — localization (8 languages)
 │   ├── Shared/
 │   │   └── OroIdentityServer.Shared/             # Shared contracts across host/client
 │   └── BuildingBlocks/
@@ -85,7 +107,8 @@ OroIdentityServer/
 - **.NET Aspire** — distributed application orchestration (`examples/AppHost`)
 - **Serilog** — structured logging (console, Seq sink)
 - **OpenTelemetry** — tracing/metrics instrumentation
-- **Microsoft.FluentUI.AspNetCore.Components** — admin UI components
+- **Microsoft.FluentUI.AspNetCore.Components** — admin UI components (dark theme, toasts, dialogs, data grids)
+- **Microsoft.Extensions.Localization** — RESX-based localization, 8 languages, satellite assemblies for WASM
 - **Scalar.AspNetCore / Microsoft.OpenApi** — OpenAPI documentation
 - **xUnit, FluentAssertions, NSubstitute, Testcontainers** — test stack
 
@@ -170,15 +193,19 @@ Key configuration files:
 - `src/IdentityServer/IdentityServer/appsettings.json` / `appsettings.Development.json` — logging, OpenIddict, DB connection
 - `Directory.Build.props` — shared build properties
 - `Directory.Packages.props` — centralized (central package management) NuGet versions
-- `Data/seedData.json` (under the host project) — seed data for users, roles, applications and scopes on first run; controlled by the `DatabaseSeeder:Skip` setting
+- `Data/seedData.json` (under the host project) — seed data for users, roles, applications and scopes on first run; controlled by the `DatabaseSeeder:Skip` setting. The seeded `pepe.perez` admin account is exempt from the forced first-login password change; every other user (seeded or created later) must change their password on first sign-in.
 
 ## API Endpoints
 
 All admin endpoints are grouped under `/api` and generally require authentication/authorization; the `/auth` group is for sign-in/sign-out.
 
 ### Auth
-- `POST /auth/login` — admin sign-in
-- `POST /auth/logout` — admin sign-out
+- `POST /auth/login` — admin sign-in (invalid credentials redirect back to `/Account/Login` with an inline error)
+- `POST /auth/logout` — admin sign-out (used by the panel's own header button, no confirmation step)
+- `POST /auth/change-password` — sets a new password and clears the `must_change_password` claim
+- `GET /Account/Login`, `/Account/ChangePassword`, `/Account/Logout` — the corresponding Blazor pages (static SSR)
+- `GET/POST ~/connect/logout` — OpenIddict end-session endpoint; redirects to `/Account/Logout` for confirmation before signing out unless called with `confirmed=true`
+- `GET /culture/set?culture={code}&redirectUri={uri}` — sets the `.AspNetCore.Culture` cookie and redirects back
 
 ### Users — `/api/users`
 - `GET /` · `POST /` · `PUT /{id}` · `DELETE /{id}`
@@ -206,7 +233,7 @@ All admin endpoints are grouped under `/api` and generally require authenticatio
 - `GET /by-user/{userId}` — login sessions for a user
 
 ### User Sessions — `/api/user-sessions`
-- `GET /by-user/{userId}` · `POST /` · `POST /{id}/deactivate`
+- `GET /by-user/{userId}` · `GET /active-count` · `POST /` · `POST /{id}/deactivate`
 
 ## Testing
 
@@ -221,14 +248,6 @@ Run all tests:
 ```bash
 dotnet test
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
 
 ## License
 
