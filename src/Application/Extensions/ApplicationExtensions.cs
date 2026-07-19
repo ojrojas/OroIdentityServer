@@ -16,7 +16,5 @@ public static class ApplicationExtensions
             configuration,
             options => options.ExchangeName = "oroeventdrivenexchange",
             typeof(ApplicationExtensions).Assembly);
-
-        
     }
 }
