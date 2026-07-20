@@ -1,7 +1,3 @@
-// OroIdentityServer
-// Copyright (C) 2026 Oscar Rojas
-// Licensed under the GNU AGPL v3.0 or later.
-// See the LICENSE file in the project root for details.
 using Microsoft.AspNetCore.Mvc;
 using IdentityServer.Client.Models.Users;
 using IdentityServer.Client.Interfaces;
@@ -32,5 +28,21 @@ public static partial class AdminApiEndpoints
             Guid id,
             [FromServices] IAdminUserService service,
             CancellationToken ct) => await ToResultAsync(await service.DeleteUserAsync(id, ct), ct));
+
+        g.MapPut("/{id:guid}/roles", async (
+            Guid id,
+            [FromBody] AssignRolesRequest request,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) => await ToResultAsync(await service.AssignRolesToUserAsync(id, request, ct), ct));
+
+        g.MapPost("/{id:guid}/lock", async (
+            Guid id,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) => await ToResultAsync(await service.LockUserAsync(id, ct), ct));
+
+        g.MapPost("/{id:guid}/unlock", async (
+            Guid id,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) => await ToResultAsync(await service.UnlockUserAsync(id, ct), ct));
     }
 }

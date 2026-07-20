@@ -13,6 +13,8 @@ public sealed record UserModel(
     string? NormalizedUserName,
     Guid? TenantId,
     Guid? SecurityUserId,
+    bool IsLocked,
+    DateTime? LockoutEnd,
     IReadOnlyCollection<UserRoleModel> Roles);
 
 public sealed record UserRoleModel(Guid? UserId, Guid? RoleId);
@@ -38,3 +40,5 @@ public sealed record UpdateUserRequest(
     string Identification,
     Guid IdentificationTypeId,
     Guid TenantId);
+
+public sealed record AssignRolesRequest(List<Guid> RoleIds);

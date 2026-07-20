@@ -56,6 +56,24 @@ public class ServerAdminUserService(IQueryDispatcher queryDispatcher, ICommandDi
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }
 
+    public async Task<HttpResponseMessage> AssignRolesToUserAsync(Guid userId, AssignRolesRequest request, CancellationToken ct = default)
+    {
+        var result = await commandDispatcher.SendAsync(new AssignRolesToUserCommand(userId, request.RoleIds), ct);
+        return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.OK);
+    }
+
+    public async Task<HttpResponseMessage> LockUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var result = await commandDispatcher.SendAsync(new LockUserCommand(userId), ct);
+        return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.OK);
+    }
+
+    public async Task<HttpResponseMessage> UnlockUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var result = await commandDispatcher.SendAsync(new UnlockUserCommand(userId), ct);
+        return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.OK);
+    }
+
     private static UserModel MapUser(User user) => new(
         user.Id!.Value,
         user.Name,
@@ -69,6 +87,8 @@ public class ServerAdminUserService(IQueryDispatcher queryDispatcher, ICommandDi
         user.NormalizedUserName,
         user.TenantId?.Value,
         user.SecurityUserId?.Value,
+        user.SecurityUser?.IsLockedOut() ?? false,
+        user.SecurityUser?.LockoutEnd,
         user.Roles.Select(MapUserRole).ToList());
 
     private static UserRoleModel MapUserRole(UserRole role) => new(role.UserId?.Value, role.RoleId?.Value);

@@ -176,4 +176,29 @@
   <data name="DisconnectConfirm"><value>Disconnect this session?</value></data>
   <data name="SessionDisconnectedToast"><value>Session disconnected.</value></data>
   <data name="SessionDisconnectFailedToast"><value>Could not disconnect session ({0}).</value></data>
+
+  <!-- User Detail Sections -->
+  <data name="BasicInfoSection"><value>Basic Information</value></data>
+  <data name="RoleAssignmentSection"><value>Role Assignment</value></data>
+  <data name="SecuritySection"><value>Security</value></data>
+  <data name="ActiveSessionsSection"><value>Active Sessions</value></data>
+  <data name="SelectRolesForUser"><value>Select the roles to assign to this user:</value></data>
+  <data name="SaveRoles"><value>Save Roles</value></data>
+  <data name="RolesSavedToast"><value>Roles saved.</value></data>
+  <data name="RolesSaveFailedToast"><value>Could not save roles ({0}).</value></data>
+  <data name="AccountStatusLabel"><value>Account status:</value></data>
+  <data name="Locked"><value>Locked</value></data>
+  <data name="UnlockUser"><value>Unlock User</value></data>
+  <data name="LockUser"><value>Lock User</value></data>
+  <data name="UserLockedToast"><value>User locked.</value></data>
+  <data name="UserLockFailedToast"><value>Could not lock user ({0}).</value></data>
+  <data name="UserUnlockedToast"><value>User unlocked.</value></data>
+  <data name="UserUnlockFailedToast"><value>Could not unlock user ({0}).</value></data>
+  <data name="LockedUntilLabel"><value>Locked until {0}</value></data>
+  <data name="LoadSessions"><value>Load Sessions</value></data>
+  <data name="TerminateAllSessions"><value>Terminate All Sessions</value></data>
+  <data name="TerminateAllConfirm"><value>Are you sure you want to terminate all sessions for this user?</value></data>
+  <data name="AllSessionsTerminatedToast"><value>All sessions terminated.</value></data>
+  <data name="SessionsTerminateFailedToast"><value>Could not terminate sessions ({0}).</value></data>
+  <data name="Refresh"><value>Refresh</value></data>
 </root>

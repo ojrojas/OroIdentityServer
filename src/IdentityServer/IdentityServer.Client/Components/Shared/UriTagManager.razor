@@ -1,0 +1,55 @@
+@using Microsoft.FluentUI.AspNetCore.Components
+
+<div class="uri-tag-container">
+    @foreach (var uri in Uris)
+    {
+        <span class="uri-tag">
+            <span>@uri</span>
+            <button type="button" class="uri-tag-remove" @onclick="() => RemoveUri(uri)" title="Remove">&times;</button>
+        </span>
+    }
+    <input type="url" class="uri-tag-input" placeholder="@Placeholder"
+           @bind-value="newUri" @bind-value:event="oninput"
+           @onkeydown="HandleKeyDown" @onblur="AddCurrentUri" />
+</div>
+
+@code {
+    [Parameter]
+    public List<string> Uris { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<List<string>> UrisChanged { get; set; }
+
+    [Parameter]
+    public string Placeholder { get; set; } = "https://example.com/callback";
+
+    private string newUri = string.Empty;
+
+    private async Task AddCurrentUri()
+    {
+        var trimmed = newUri.Trim();
+        if (string.IsNullOrEmpty(trimmed) || Uris.Contains(trimmed))
+        {
+            newUri = string.Empty;
+            return;
+        }
+
+        Uris = [.. Uris, trimmed];
+        newUri = string.Empty;
+        await UrisChanged.InvokeAsync(Uris);
+    }
+
+    private async Task RemoveUri(string uri)
+    {
+        Uris = [.. Uris.Where(u => u != uri)];
+        await UrisChanged.InvokeAsync(Uris);
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await AddCurrentUri();
+        }
+    }
+}

@@ -18,4 +18,7 @@ public class AdminUserSessionService(HttpClient client) : IAdminUserSessionServi
 
     public Task<HttpResponseMessage> DeactivateUserSessionAsync(Guid id, CancellationToken ct = default)
         => client.PostAsync($"api/user-sessions/{id}/deactivate", null, ct);
+
+    public Task<HttpResponseMessage> TerminateAllUserSessionsAsync(Guid userId, CancellationToken ct = default)
+        => client.PostAsync($"api/user-sessions/terminate-all/{userId}", null, ct);
 }

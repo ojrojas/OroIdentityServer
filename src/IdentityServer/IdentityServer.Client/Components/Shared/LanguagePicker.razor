@@ -1,16 +1,19 @@
 @using System.Globalization
-@using Microsoft.FluentUI.AspNetCore.Components
+@inject NavigationManager Nav
 
-<div class="login-language-picker">
-    <select class="language-picker-select" onchange="window.location.href='/culture/set?redirectUri=' + encodeURIComponent(window.location.pathname + window.location.search) + '&culture=' + this.value">
-        @foreach (var (lang, label) in Languages)
-        {
-            <option value="@lang" selected="@(lang == CultureInfo.CurrentUICulture.Name)">@label</option>
-        }
-    </select>
+<div class="@Class">
+    <FluentSelect TOption="string" Items="@Languages.Select(l => l.Code)" OptionText="@(code => GetLabel(code))"
+                  OptionValue="@(code => code)" SelectedOption="@selectedCulture"
+                  SelectedOptionChanged="@(val => ChangeCulture(val))"
+                  Style="min-width: 140px;" />
 </div>
 
 @code {
+    [Parameter]
+    public string Class { get; set; } = "header-language-picker";
+
+    private string? selectedCulture;
+
     private static readonly (string Code, string Label)[] Languages =
     [
         ("en", "English"),
@@ -22,4 +25,21 @@
         ("ja", "日本語"),
         ("zh-Hans", "中文（简体）")
     ];
+
+    protected override void OnInitialized()
+    {
+        selectedCulture = CultureInfo.CurrentUICulture.Name;
+    }
+
+    private string GetLabel(string code)
+        => Languages.FirstOrDefault(l => l.Code == code).Label ?? code;
+
+    private void ChangeCulture(string? culture)
+    {
+        if (string.IsNullOrEmpty(culture) || culture == CultureInfo.CurrentUICulture.Name)
+            return;
+
+        var uri = Nav.ToAbsoluteUri(Nav.Uri).PathAndQuery;
+        Nav.NavigateTo($"/culture/set?culture={culture}&redirectUri={Uri.EscapeDataString(uri)}", forceLoad: true);
+    }
 }

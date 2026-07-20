@@ -8,4 +8,5 @@ public interface IAdminUserSessionService
     Task<int> GetActiveSessionsCountAsync(CancellationToken ct = default);
     Task<HttpResponseMessage> CreateUserSessionAsync(CreateUserSessionRequest request, CancellationToken ct = default);
     Task<HttpResponseMessage> DeactivateUserSessionAsync(Guid id, CancellationToken ct = default);
+    Task<HttpResponseMessage> TerminateAllUserSessionsAsync(Guid userId, CancellationToken ct = default);
 }

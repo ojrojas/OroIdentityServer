@@ -30,6 +30,12 @@ public class ServerAdminUserSessionService(IQueryDispatcher queryDispatcher, ICo
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }
 
+    public async Task<HttpResponseMessage> TerminateAllUserSessionsAsync(Guid userId, CancellationToken ct = default)
+    {
+        var result = await commandDispatcher.SendAsync(new TerminateAllUserSessionsCommand(userId), ct);
+        return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
+    }
+
     public Task<int> GetActiveSessionsCountAsync(CancellationToken ct = default)
         => queryDispatcher.SendAsync(new GetActiveUserSessionsCountQuery(), ct);
 

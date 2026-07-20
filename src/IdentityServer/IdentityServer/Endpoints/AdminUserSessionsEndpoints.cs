@@ -21,5 +21,8 @@ public static partial class AdminApiEndpoints
 
         g.MapPost("/{id:guid}/deactivate", async (Guid id, [FromServices] IAdminUserSessionService service, CancellationToken ct)
             => await ToResultAsync(await service.DeactivateUserSessionAsync(id, ct), ct));
+
+        g.MapPost("/terminate-all/{userId:guid}", async (Guid userId, [FromServices] IAdminUserSessionService service, CancellationToken ct)
+            => await ToResultAsync(await service.TerminateAllUserSessionsAsync(userId, ct), ct));
     }
 }
