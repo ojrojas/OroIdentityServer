@@ -10,6 +10,12 @@ namespace IdentityServer.Services;
 
 public class ServerAdminUserSessionService(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher) : IAdminUserSessionService
 {
+    public async Task<IEnumerable<UserSessionModel>?> GetActiveSessionsAsync(CancellationToken ct = default)
+    {
+        var sessions = await queryDispatcher.SendAsync(new GetAllActiveUserSessionsQuery(), ct);
+        return sessions.Select(MapUserSession).ToList();
+    }
+
     public async Task<IEnumerable<UserSessionModel>?> GetByUserAsync(Guid userId, CancellationToken ct = default)
     {
         var sessions = await queryDispatcher.SendAsync(new GetUserSessionsByUserQuery(userId), ct);

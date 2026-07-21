@@ -1,5 +1,34 @@
 @inherits LayoutComponentBase
+@using System.Globalization
+@inject NavigationManager Nav
 
 <div class="login-layout">
+    <div class="login-language-picker">
+        <form method="get" action="/culture/set" class="language-form">
+            <input type="hidden" name="redirectUri" value="@Nav.ToAbsoluteUri(Nav.Uri).PathAndQuery" />
+            <select name="culture" class="language-select" onchange="this.form.submit()">
+                @foreach (var lang in Languages)
+                {
+                    <option value="@lang.Code" selected="@(lang.Code == currentCulture ? true : false)">@lang.Label</option>
+                }
+            </select>
+        </form>
+    </div>
     @Body
 </div>
+
+@code {
+    private string currentCulture = CultureInfo.CurrentUICulture.Name;
+
+    private static readonly (string Code, string Label)[] Languages =
+    [
+        ("en", "English"),
+        ("es-419", "Español"),
+        ("fr", "Français"),
+        ("it", "Italiano"),
+        ("de", "Deutsch"),
+        ("pt-BR", "Português (Brasil)"),
+        ("ja", "日本語"),
+        ("zh-Hans", "中文（简体）")
+    ];
+}

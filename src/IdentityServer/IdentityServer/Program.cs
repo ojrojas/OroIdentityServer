@@ -1,3 +1,4 @@
+using System.Globalization;
 using IdentityServer.Components;
 using IdentityServer.Server.Extensions;
 using Microsoft.AspNetCore.DataProtection;
@@ -13,8 +14,6 @@ using OroIdentityServer.Infraestructure.Repositories.Extensions;
 using OroIdentityServer.Server.Authentication;
 using OroIdentityServer.Server.Endpoints;
 using Serilog;
-
-var supportedCultures = new[] { "en", "es-419", "fr", "it", "de", "pt-BR", "ja", "zh-Hans" };
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,21 +41,6 @@ builder.Services.AddFluentUIComponents();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddLocalization();
-builder.Services.Configure<RequestLocalizationOptions>(options =>
-{
-    options.SetDefaultCulture(supportedCultures[0])
-        .AddSupportedCultures(supportedCultures)
-        .AddSupportedUICultures(supportedCultures);
-
-    // Cookie (explicit user choice via /culture/set) wins; otherwise fall back to whatever
-    // language the browser reports as preferred, which reflects the OS locale on Windows,
-    // Linux and macOS alike.
-    options.RequestCultureProviders =
-    [
-        new CookieRequestCultureProvider(),
-        new AcceptLanguageHeaderRequestCultureProvider()
-    ];
-});
 
 builder.Services.AddControllersWithViews();
 
@@ -163,6 +147,31 @@ app.Use(async (context, next) =>
 });
 
 app.UseAntiforgery();
+
+var supportedCultures = new[]
+{
+    new CultureInfo("en"),
+    new CultureInfo("de"),
+    new CultureInfo("fr"),
+    new CultureInfo("it"),
+    new CultureInfo("es"),
+    new CultureInfo("ja"),
+    new CultureInfo("br"),
+    new CultureInfo("zh")
+};
+
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures,
+    RequestCultureProviders =
+    [
+        new CookieRequestCultureProvider(),
+        new AcceptLanguageHeaderRequestCultureProvider()
+    ]
+});
+
 
 app.MapGet("/culture/set", (HttpContext http, string culture, string? redirectUri) =>
 {

@@ -3,5 +3,35 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: var(--neutral-layer-1);
+    background: var(--saas-bg-page);
+    position: relative;
+}
+
+.login-language-picker {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 100;
+}
+
+.language-form {
+    margin: 0;
+}
+
+.language-select {
+    min-width: 140px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--saas-border);
+    background: color-mix(in srgb, var(--saas-bg-elevated) 70%, transparent);
+    backdrop-filter: blur(8px);
+    color: var(--saas-text-primary);
+    font-size: .8rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color var(--saas-transition);
+}
+
+.language-select:hover {
+    border-color: var(--saas-accent);
 }

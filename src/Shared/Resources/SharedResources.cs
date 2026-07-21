@@ -1,4 +1,4 @@
-namespace IdentityServer.Client.Resources;
+namespace IdentityServer.Shared.Resources;
 
 /// <summary>
 /// Marker type used only to anchor the SharedResources.*.resx satellite resource files via

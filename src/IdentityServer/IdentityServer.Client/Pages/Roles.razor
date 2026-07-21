@@ -24,8 +24,8 @@ else
         <PropertyColumn Title="@L["Active"]" Property="@(x => x.IsActive)" Sortable="true" />
         <PropertyColumn Title="@L["ColPermissions"]" Property="@(x => x.Claims == null ? 0 : x.Claims.Count())" />
         <TemplateColumn Title="">
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Edit())" OnClick="@(() => Nav.NavigateTo($"/roles/{context.Id}"))" />
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Delete())" OnClick="@(() => DeleteAsync(context))" />
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Edit())" Title="@L["Edit"]" OnClick="@(() => Nav.NavigateTo($"/roles/{context.Id}"))" />
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Delete())" Title="@L["Delete"]" OnClick="@(() => DeleteAsync(context))" />
         </TemplateColumn>
     </FluentDataGrid>
 }

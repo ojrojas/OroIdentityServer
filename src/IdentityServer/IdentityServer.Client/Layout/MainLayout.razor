@@ -1,45 +1,100 @@
 @inherits LayoutComponentBase
 @inject IStringLocalizer<SharedResources> L
+@inject NavigationManager Nav
 
-<FluentDesignTheme @bind-Mode="@themeMode" StorageName="theme" />
+<FluentDesignTheme @bind-Mode="themeMode" StorageName="theme" />
 
 <FluentToastProvider MaxToastCount="5" />
 <FluentDialogProvider />
 <FluentTooltipProvider />
 
-<FluentLayout>
-    <FluentHeader>
-        OroIdentityServer
-        <FluentSpacer />
-        <AuthorizeView>
-            <Authorized>
-                <FluentLabel Style="margin-right: .5rem;">@context.User.Identity?.Name</FluentLabel>
-            </Authorized>
-        </AuthorizeView>
-        <LanguagePicker />
-        <FluentButton Appearance="Appearance.Stealth"
-                      IconStart="@(themeMode == DesignThemeModes.Dark ? new Icons.Regular.Size20.WeatherSunny() : new Icons.Regular.Size20.WeatherMoon())"
-                      Title="@L["ToggleTheme"]" OnClick="ToggleTheme" />
-        <FluentButton Appearance="Appearance.Stealth"
-                      IconStart="@(new Icons.Regular.Size20.ArrowExit())"
-                      Title="@L["SignOutTitle"]"
-                      Href="/Account/Logout" />
+<div class="saas-layout">
+    <aside class="saas-sidebar @(sidebarOpen ? "open" : "")">
+        <div class="saas-sidebar-brand">
+            <div class="saas-sidebar-brand-icon">
+                <FluentIcon Value="@(new Icons.Regular.Size20.Shield())" />
+            </div>
+            OroIdentityServer
+        </div>
+        <nav class="saas-sidebar-nav">
+            <div class="saas-sidebar-section">@L["NavDashboard"]</div>
+            <a class="saas-sidebar-link @GetActiveClass("/")" href="/" @onclick="(() => { CloseSidebar(); })">
+                <FluentIcon Value="@(new Icons.Regular.Size20.Home())" />
+                @L["NavDashboard"]
+            </a>
+            <div class="saas-sidebar-section">@L["NavUsers"]</div>
+            <a class="saas-sidebar-link @GetActiveClass("/users")" href="/users" @onclick="(() => { CloseSidebar(); })">
+                <FluentIcon Value="@(new Icons.Regular.Size20.PeopleCommunity())" />
+                @L["NavUsers"]
+            </a>
+            <a class="saas-sidebar-link @GetActiveClass("/roles")" href="/roles" @onclick="(() => { CloseSidebar(); })">
+                <FluentIcon Value="@(new Icons.Regular.Size20.ShieldPerson())" />
+                @L["NavRoles"]
+            </a>
+            <a class="saas-sidebar-link @GetActiveClass("/identification-types")" href="/identification-types" @onclick="(() => { CloseSidebar(); })">
+                <FluentIcon Value="@(new Icons.Regular.Size20.DocumentText())" />
+                @L["NavIdentificationTypes"]
+            </a>
+            <div class="saas-sidebar-section">@L["NavApplications"]</div>
+            <a class="saas-sidebar-link @GetActiveClass("/applications")" href="/applications" @onclick="(() => { CloseSidebar(); })">
+                <FluentIcon Value="@(new Icons.Regular.Size20.Apps())" />
+                @L["NavApplications"]
+            </a>
+            <a class="saas-sidebar-link @GetActiveClass("/scopes")" href="/scopes" @onclick="(() => { CloseSidebar(); })">
+                <FluentIcon Value="@(new Icons.Regular.Size20.Key())" />
+                @L["NavScopes"]
+            </a>
+            <a class="saas-sidebar-link @GetActiveClass("/sessions")" href="/sessions" @onclick="(() => { CloseSidebar(); })">
+                <FluentIcon Value="@(new Icons.Regular.Size20.PlugConnected())" />
+                @L["NavSessions"]
+            </a>
+        </nav>
+    </aside>
 
-    </FluentHeader>
-    <FluentStack Class="main" Orientation="Orientation.Horizontal" Width="100%">
-        <NavMenu />
-        <FluentBodyContent Class="body-content">
-            <div class="content">
+    @if (sidebarOpen)
+    {
+        <div class="saas-sidebar-overlay open" @onclick="ToggleSidebar"></div>
+    }
+
+    <div class="saas-main">
+        <header class="saas-header">
+            <button class="saas-sidebar-toggle" @onclick="ToggleSidebar" title="@L["ToggleMenu"]">
+                <FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" />
+            </button>
+            <div class="saas-header-left">
+            </div>
+            <div class="saas-header-right">
+                <AuthorizeView>
+                    <Authorized>
+                        <span style="font-size: .875rem; color: var(--saas-text-secondary); margin-right: .5rem;">@context.User.Identity?.Name</span>
+                    </Authorized>
+                </AuthorizeView>
+                <LanguagePicker />
+                <FluentButton Appearance="Appearance.Stealth"
+                              IconStart="@(themeMode == DesignThemeModes.Dark ? new Icons.Regular.Size20.WeatherSunny() : new Icons.Regular.Size20.WeatherMoon())"
+                              Title="@L["ToggleTheme"]" OnClick="ToggleTheme" />
+                <a href="/Account/Logout" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; text-decoration: none; color: var(--saas-text-secondary);" title="@L["SignOutTitle"]">
+                    <FluentIcon Value="@(new Icons.Regular.Size20.ArrowExit())" />
+                </a>
+            </div>
+        </header>
+
+        <main class="saas-content">
+            <div class="saas-content-wide">
                 @Body
             </div>
-        </FluentBodyContent>
-    </FluentStack>
-    <FluentFooter>
-        <a href="https://www.fluentui-blazor.net" target="_blank">Documentation and demos</a>
-        <FluentSpacer />
-        <a href="https://learn.microsoft.com/en-us/aspnet/core/blazor" target="_blank">About Blazor</a>
-    </FluentFooter>
-</FluentLayout>
+        </main>
+
+        <footer class="saas-footer">
+            <span>&copy; @DateTime.Now.Year OroIdentityServer</span>
+            <span>
+                <a href="https://www.fluentui-blazor.net" target="_blank">FluentUI Blazor</a>
+                &middot;
+                <a href="https://learn.microsoft.com/en-us/aspnet/core/blazor" target="_blank">Blazor</a>
+            </span>
+        </footer>
+    </div>
+</div>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
@@ -49,7 +104,17 @@
 
 @code {
     private DesignThemeModes themeMode = DesignThemeModes.Dark;
+    private bool sidebarOpen;
 
     private void ToggleTheme()
         => themeMode = themeMode == DesignThemeModes.Dark ? DesignThemeModes.Light : DesignThemeModes.Dark;
+
+    private void ToggleSidebar()
+        => sidebarOpen = !sidebarOpen;
+
+    private void CloseSidebar()
+        => sidebarOpen = false;
+
+    private string GetActiveClass(string href)
+        => Nav.Uri.EndsWith(href, StringComparison.OrdinalIgnoreCase) ? "active" : "";
 }

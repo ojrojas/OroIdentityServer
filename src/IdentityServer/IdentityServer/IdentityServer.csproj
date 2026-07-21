@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Shared\OroIdentityServer.Shared.csproj" />
     <ProjectReference Include="..\IdentityServer.Client\IdentityServer.Client.csproj" />
   </ItemGroup>
 

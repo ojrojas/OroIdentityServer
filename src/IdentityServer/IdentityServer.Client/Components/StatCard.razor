@@ -1,17 +1,17 @@
-<FluentCard Class="stat-card" Style="padding: 20px; height: 100%;">
+<FluentCard Class="saas-stat-card">
     <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalGap="16">
-        <div style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, color-mix(in srgb, var(--diamond, #8EC5D8) 90%, black), color-mix(in srgb, var(--diamond, #8EC5D8) 70%, black));">
-            <FluentIcon Value="@Icon" Color="Color.Fill" Style="color: #1a1a1a;" />
+        <div class="saas-stat-icon" style="background: linear-gradient(135deg, var(--saas-accent), color-mix(in srgb, var(--saas-accent) 60%, #000));">
+            <FluentIcon Value="@Icon" Color="Color.Fill" />
         </div>
-        <FluentStack Orientation="Orientation.Vertical" VerticalGap="2">
-            <FluentLabel Typo="Typography.Body" Style="opacity: 0.7; font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">@Title</FluentLabel>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+            <p class="saas-stat-label">@Title</p>
             @if (Value is null)
             {
-                <FluentProgressRing Style="width: 20px; height: 20px;" />
+                <FluentProgressRing Style="width: 22px; height: 22px;" />
             }
             else
             {
-                <FluentLabel Typo="Typography.H3" Style="font-family: 'Playfair Display', Georgia, serif; font-weight: 700; margin: 0;">@Value</FluentLabel>
+                <p class="saas-stat-value">@Value</p>
             }
         </FluentStack>
     </FluentStack>

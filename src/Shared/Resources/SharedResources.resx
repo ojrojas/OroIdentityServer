@@ -31,6 +31,7 @@
   <data name="Create"><value>Create</value></data>
   <data name="New"><value>New</value></data>
   <data name="Back"><value>Back</value></data>
+  <data name="Edit"><value>Edit</value></data>
   <data name="ConfirmDeletionTitle"><value>Confirm deletion</value></data>
   <data name="Name"><value>Name</value></data>
   <data name="MiddleName"><value>Middle name</value></data>
@@ -47,6 +48,7 @@
   <data name="SaveFailedToast"><value>Could not save ({0}).</value></data>
   <data name="Language"><value>Language</value></data>
   <data name="ToggleTheme"><value>Toggle theme</value></data>
+  <data name="ToggleMenu"><value>Toggle menu</value></data>
   <data name="NotFoundTitle"><value>Not Found</value></data>
   <data name="NotFoundMessage"><value>Sorry, the content you are looking for does not exist.</value></data>
 
@@ -201,4 +203,11 @@
   <data name="AllSessionsTerminatedToast"><value>All sessions terminated.</value></data>
   <data name="SessionsTerminateFailedToast"><value>Could not terminate sessions ({0}).</value></data>
   <data name="Refresh"><value>Refresh</value></data>
+  <data name="ColStatus"><value>Status</value></data>
+  <data name="ActiveStatus"><value>Active</value></data>
+  <data name="LockUserConfirm"><value>Lock user "{0}"?</value></data>
+  <data name="UnlockUserConfirm"><value>Unlock user "{0}"?</value></data>
+  <data name="ConfirmActionTitle"><value>Confirm action</value></data>
+  <data name="TerminateSessionsConfirm"><value>Disconnect all sessions for "{0}"?</value></data>
+  <data name="ConnectedUsersDetail"><value>Connected Users</value></data>
 </root>

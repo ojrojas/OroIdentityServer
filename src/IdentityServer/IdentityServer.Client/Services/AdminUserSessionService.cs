@@ -7,6 +7,9 @@ namespace IdentityServer.Client.Services;
 
 public class AdminUserSessionService(HttpClient client) : IAdminUserSessionService
 {
+    public Task<IEnumerable<UserSessionModel>?> GetActiveSessionsAsync(CancellationToken ct = default)
+        => client.GetFromJsonAsync<IEnumerable<UserSessionModel>>("api/user-sessions/active", ClientJsonOptions.Default, ct);
+
     public Task<IEnumerable<UserSessionModel>?> GetByUserAsync(Guid userId, CancellationToken ct = default)
         => client.GetFromJsonAsync<IEnumerable<UserSessionModel>>($"api/user-sessions/by-user/{userId}", ClientJsonOptions.Default, ct);
 

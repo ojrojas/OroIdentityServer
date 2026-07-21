@@ -2,7 +2,9 @@
   <Folder Name="/examples/">
     <Project Path="examples/AppHost/AppHost.csproj" />
   </Folder>
-  <Folder Name="/src/" />
+  <Folder Name="/src/">
+    <Project Path="src/Shared/OroIdentityServer.Shared.csproj" />
+  </Folder>
   <Folder Name="/src/Application/">
     <Project Path="src/Application/OroIdentityServer.Application.csproj" />
   </Folder>

@@ -1,6 +1,7 @@
 @page "/users"
 @attribute [Authorize]
 @inject IAdminUserService UserService
+@inject IAdminUserSessionService UserSessionService
 @inject IDialogService DialogService
 @inject IToastService ToastService
 @inject NavigationManager Nav
@@ -19,14 +20,26 @@
 }
 else
 {
-    <FluentDataGrid Items="@items.AsQueryable()" GridTemplateColumns="1.5fr 1.5fr 2fr 1fr 1fr">
+    <FluentDataGrid Items="@items.AsQueryable()" GridTemplateColumns="1.5fr 1.5fr 2fr 1fr 1fr 2fr">
         <PropertyColumn Title="@L["ColUsername"]" Property="@(x => x.UserName)" Sortable="true" />
         <PropertyColumn Title="@L["ColName"]" Property="@(x => $"{x.Name} {x.LastName}")" Sortable="true" />
         <PropertyColumn Title="@L["ColEmail"]" Property="@(x => x.Email)" Sortable="true" />
         <PropertyColumn Title="@L["ColRoles"]" Property="@(x => x.Roles.Count)" />
+        <TemplateColumn Title="@L["ColStatus"]">
+            @if (context.IsLocked)
+            {
+                <FluentLabel>@L["Locked"]</FluentLabel>
+            }
+            else
+            {
+                <FluentLabel>@L["ActiveStatus"]</FluentLabel>
+            }
+        </TemplateColumn>
         <TemplateColumn Title="">
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Edit())" OnClick="@(() => Nav.NavigateTo($"/users/{context.Id}"))" />
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Delete())" OnClick="@(() => DeleteAsync(context))" />
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Edit())" Title="@L["Edit"]" OnClick="@(() => Nav.NavigateTo($"/users/{context.Id}"))" />
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(context.IsLocked ? new Icons.Regular.Size16.LockOpen() : new Icons.Regular.Size16.LockClosed())" Title="@(context.IsLocked ? L["UnlockUser"] : L["LockUser"])" OnClick="@(() => ToggleLockAsync(context))" />
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.PlugDisconnected())" Title="@L["Disconnect"]" OnClick="@(() => TerminateSessionsAsync(context))" />
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Delete())" Title="@L["Delete"]" OnClick="@(() => DeleteAsync(context))" />
         </TemplateColumn>
     </FluentDataGrid>
 }
@@ -65,6 +78,61 @@ else
         else
         {
             ToastService.ShowError(L["UserDeleteFailedToast", (int)response.StatusCode]);
+        }
+    }
+
+    private async Task ToggleLockAsync(UserModel item)
+    {
+        if (item.IsLocked)
+        {
+            var dialog = await DialogService.ShowConfirmationAsync(L["UnlockUserConfirm", item.UserName ?? string.Empty], L["UnlockUser"], L["Cancel"], L["ConfirmActionTitle"]);
+            var result = await dialog.Result;
+            if (result.Cancelled) return;
+
+            var response = await UserService.UnlockUserAsync(item.Id);
+            if (response.IsSuccessStatusCode)
+            {
+                ToastService.ShowSuccess(L["UserUnlockedToast"]);
+                await LoadAsync();
+            }
+            else
+            {
+                ToastService.ShowError(L["UserUnlockFailedToast", (int)response.StatusCode]);
+            }
+        }
+        else
+        {
+            var dialog = await DialogService.ShowConfirmationAsync(L["LockUserConfirm", item.UserName ?? string.Empty], L["LockUser"], L["Cancel"], L["ConfirmActionTitle"]);
+            var result = await dialog.Result;
+            if (result.Cancelled) return;
+
+            var response = await UserService.LockUserAsync(item.Id);
+            if (response.IsSuccessStatusCode)
+            {
+                ToastService.ShowSuccess(L["UserLockedToast"]);
+                await LoadAsync();
+            }
+            else
+            {
+                ToastService.ShowError(L["UserLockFailedToast", (int)response.StatusCode]);
+            }
+        }
+    }
+
+    private async Task TerminateSessionsAsync(UserModel item)
+    {
+        var dialog = await DialogService.ShowConfirmationAsync(L["TerminateSessionsConfirm", item.UserName ?? string.Empty], L["Disconnect"], L["Cancel"], L["ConfirmActionTitle"]);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        var response = await UserSessionService.TerminateAllUserSessionsAsync(item.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["AllSessionsTerminatedToast"]);
+        }
+        else
+        {
+            ToastService.ShowError(L["SessionsTerminateFailedToast", (int)response.StatusCode]);
         }
     }
 }

@@ -29,12 +29,40 @@
     </FluentGridItem>
 </FluentGrid>
 
+@if (activeSessions is not null && activeSessions.Count > 0)
+{
+    <FluentStack Orientation="Orientation.Vertical" Style="margin-top: 2rem;">
+        <FluentLabel Typo="Typography.Subject">@L["ConnectedUsersDetail"] (@connectedUserCount)</FluentLabel>
+        <FluentDataGrid Items="@activeSessions.AsQueryable()" GridTemplateColumns="1.5fr 1fr 1.5fr 1.5fr 0.5fr">
+            <TemplateColumn Title="@L["ColUsername"]">
+                @(context.UserId?.ToString() ?? "-")
+            </TemplateColumn>
+            <TemplateColumn Title="@L["ColDevice"]">
+                @(context.Device ?? "-")
+            </TemplateColumn>
+            <TemplateColumn Title="@L["ColIp"]">
+                @(context.IpAddress ?? "-")
+            </TemplateColumn>
+            <TemplateColumn Title="@L["ColLastActivity"]">
+                @FormatLastActivity(context.LastActivityAt)
+            </TemplateColumn>
+            <TemplateColumn Title="@L["ColExpires"]">
+                @context.ExpiresAt.ToString("g")
+            </TemplateColumn>
+        </FluentDataGrid>
+    </FluentStack>
+}
+
 @code {
     private int? userCount;
     private int? connectedUserCount;
     private int? roleCount;
     private int? scopeCount;
     private int? applicationCount;
+    private List<UserSessionModel>? activeSessions;
+
+    private static string FormatLastActivity(DateTime? dt)
+        => dt.HasValue ? dt.Value.ToString("g") : "-";
 
     protected override async Task OnInitializedAsync()
     {
@@ -42,6 +70,9 @@
         userCount = users?.Data?.Count() ?? 0;
 
         connectedUserCount = await UserSessionService.GetActiveSessionsCountAsync();
+
+        var allSessions = await UserSessionService.GetActiveSessionsAsync();
+        activeSessions = allSessions?.ToList() ?? [];
 
         var roles = await RoleService.GetRolesAsync();
         roleCount = roles?.Data?.Count() ?? 0;

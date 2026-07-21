@@ -13,6 +13,9 @@ public static partial class AdminApiEndpoints
         g.MapGet("/by-user/{userId:guid}", async (Guid userId, [FromServices] IAdminUserSessionService service, CancellationToken ct)
             => Results.Ok(await service.GetByUserAsync(userId, ct)));
 
+        g.MapGet("/active", async ([FromServices] IAdminUserSessionService service, CancellationToken ct)
+            => Results.Ok(await service.GetActiveSessionsAsync(ct)));
+
         g.MapGet("/active-count", async ([FromServices] IAdminUserSessionService service, CancellationToken ct)
             => Results.Ok(await service.GetActiveSessionsCountAsync(ct)));
 

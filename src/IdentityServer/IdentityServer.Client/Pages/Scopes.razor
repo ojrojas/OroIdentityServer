@@ -24,8 +24,8 @@ else
         <PropertyColumn Title="@L["ColDisplayName"]" Property="@(x => x.DisplayName)" Sortable="true" />
         <PropertyColumn Title="@L["ColResources"]" Property="@(x => x.Resources == null ? "" : string.Join(", ", x.Resources))" />
         <TemplateColumn Title="">
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Edit())" OnClick="@(() => Nav.NavigateTo($"/scopes/{context.Name}"))" />
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Delete())" OnClick="@(() => DeleteAsync(context))" />
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Edit())" Title="@L["Edit"]" OnClick="@(() => Nav.NavigateTo($"/scopes/{context.Name}"))" />
+            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Delete())" Title="@L["Delete"]" OnClick="@(() => DeleteAsync(context))" />
         </TemplateColumn>
     </FluentDataGrid>
 }

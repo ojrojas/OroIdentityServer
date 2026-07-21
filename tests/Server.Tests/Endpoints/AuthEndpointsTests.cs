@@ -26,6 +26,6 @@ public sealed class AuthEndpointsTests(IdentityServerWebApplicationFactory facto
         var response = await _client.PostAsync("/auth/login", form);
 
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location!.OriginalString.Should().Contain("/login?error=invalid");
+        response.Headers.Location!.OriginalString.Should().Contain("/Account/Login?error=invalid&ReturnUrl=");
     }
 }
