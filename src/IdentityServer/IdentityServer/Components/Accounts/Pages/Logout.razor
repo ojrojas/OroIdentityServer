@@ -1,6 +1,7 @@
 @page "/Account/Logout"
 @layout LoginLayout
 @using Microsoft.FluentUI.AspNetCore.Components
+@inject NavigationManager navigationManager
 @inject IStringLocalizer<SharedResources> L
 
 <div class="login-page">
@@ -30,6 +31,11 @@
     [SupplyParameterFromQuery] public string? State { get; set; }
     [SupplyParameterFromQuery(Name = "client_id")] public string? ClientId { get; set; }
     [SupplyParameterFromQuery(Name = "id_token_hint")] public string? IdTokenHint { get; set; }
+
+    private void LogoutApp()
+    {
+        navigationManager.NavigateTo("/auth/logout");
+    }
 
     private string ConfirmUrl
     {
