@@ -21,10 +21,7 @@ public class TerminateSessionCommandHandler(
         Session? session = null;
         try
         {
-            session = await sessionRepository.GetSessionByIdAsync(new(command.SessionId), cancellationToken);
-            if (session == null)
-                throw new InvalidOperationException("Session not found.");
-
+            session = await sessionRepository.GetSessionByIdAsync(new(command.SessionId), cancellationToken) ?? throw new InvalidOperationException("Session not found.");
             var subject = session.UserId.Value.ToString();
 
             async Task RevokeTokenAsync(object token)

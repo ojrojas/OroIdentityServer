@@ -16,10 +16,7 @@ public class UpdatePermissionCommandHandler(
 
         try
         {
-            var permission = await permissionRepository.GetPermissionByIdAsync(new(command.PermissionId), cancellationToken);
-            if (permission == null)
-                throw new InvalidOperationException("Permission not found.");
-
+            var permission = await permissionRepository.GetPermissionByIdAsync(new(command.PermissionId), cancellationToken) ?? throw new InvalidOperationException("Permission not found.");
             permission.Update(command.Provider, command.Description, command.Action, command.Resource, command.IsSystem);
             await permissionRepository.UpdatePermissionAsync(permission, cancellationToken);
 

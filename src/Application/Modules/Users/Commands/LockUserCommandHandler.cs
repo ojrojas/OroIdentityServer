@@ -2,7 +2,8 @@ namespace OroIdentityServer.Application.Modules.Users.Commands;
 
 public sealed class LockUserCommandHandler(
     ILogger<LockUserCommandHandler> logger,
-    IUserRepository userRepository
+    IUserRepository userRepository,
+    ISecurityUserRepository securityUserRepository
 ) : ICommandHandler<LockUserCommand>
 {
     public async Task<Result> HandleAsync(LockUserCommand command, CancellationToken cancellationToken)
@@ -12,9 +13,8 @@ public sealed class LockUserCommandHandler(
 
         try
         {
-            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken);
-            if (user is null)
-                throw new InvalidOperationException("User not found.");
+            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken) ?? throw new InvalidOperationException("User not found.");
+            user.SecurityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId.Value, cancellationToken);
 
             if (user.SecurityUser is null)
                 throw new InvalidOperationException("SecurityUser not found for this user.");

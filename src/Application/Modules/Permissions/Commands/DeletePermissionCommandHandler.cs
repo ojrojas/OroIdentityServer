@@ -16,10 +16,7 @@ public class DeletePermissionCommandHandler(
 
         try
         {
-            var permission = await permissionRepository.GetPermissionByIdAsync(new (command.PermissionId), cancellationToken);
-            if (permission == null)
-                throw new InvalidOperationException("Permission not found.");
-
+            var permission = await permissionRepository.GetPermissionByIdAsync(new(command.PermissionId), cancellationToken) ?? throw new InvalidOperationException("Permission not found.");
             await permissionRepository.DeletePermissionAsync(new (command.PermissionId), cancellationToken);
 
             logger.LogInformation("Successfully deleted permission with Id: {Id}", command.PermissionId);

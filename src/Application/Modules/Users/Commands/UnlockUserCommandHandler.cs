@@ -12,10 +12,7 @@ public sealed class UnlockUserCommandHandler(
 
         try
         {
-            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken);
-            if (user is null)
-                throw new InvalidOperationException("User not found.");
-
+            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken) ?? throw new InvalidOperationException("User not found.");
             if (user.SecurityUser is null)
                 throw new InvalidOperationException("SecurityUser not found for this user.");
 

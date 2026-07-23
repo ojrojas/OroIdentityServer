@@ -17,9 +17,7 @@ public class UpdateUserCommandHandler(
         try
         {
             // Retrieve the existing user
-            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken);
-            if (user == null)
-                throw new InvalidOperationException("User not found.");
+            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken) ?? throw new InvalidOperationException("User not found.");
 
             // Update user details
             user.UpdateDetails(

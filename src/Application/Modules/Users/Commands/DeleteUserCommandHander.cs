@@ -17,9 +17,7 @@ public class DeleteUserCommandHander(
         try
         {
             // Validate if user exists
-            var user = await userRepository.GetUserByIdAsync(new(command.Id), cancellationToken);
-            if (user == null)
-                throw new InvalidOperationException("User not found.");
+            var user = await userRepository.GetUserByIdAsync(new(command.Id), cancellationToken) ?? throw new InvalidOperationException("User not found.");
 
             // Delete the user
             await userRepository.DeleteUserAsync(new(command.Id), cancellationToken);

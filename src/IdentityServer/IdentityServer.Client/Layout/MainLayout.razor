@@ -69,7 +69,7 @@
                         <span style="font-size: .875rem; color: var(--saas-text-secondary); margin-right: .5rem;">@context.User.Identity?.Name</span>
                     </Authorized>
                 </AuthorizeView>
-                <LanguagePicker />
+                @* <LanguagePicker /> *@
                 <FluentButton Appearance="Appearance.Stealth"
                               IconStart="@(themeMode == DesignThemeModes.Dark ? new Icons.Regular.Size20.WeatherSunny() : new Icons.Regular.Size20.WeatherMoon())"
                               Title="@L["ToggleTheme"]" OnClick="ToggleTheme" />

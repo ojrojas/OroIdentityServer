@@ -24,8 +24,8 @@ public static class AuthEndpoints
 
         group.MapPost("/login", async (
             HttpContext http,
-            [FromForm]LoginInputModel loginInput,
-            [FromServices]AdminPasswordSignInService signInService,
+            [FromForm] LoginInputModel loginInput,
+            [FromServices] AdminPasswordSignInService signInService,
             CancellationToken ct) =>
         {
             var principal = await signInService.SignInAsync(loginInput.LoginIdentifier, loginInput.Password, ct);
@@ -44,7 +44,7 @@ public static class AuthEndpoints
             return Results.Redirect(target);
         }).DisableAntiforgery();
 
-        group.MapPost("/logout", async (HttpContext http) =>
+        group.MapMethods("/logout", [HttpMethod.Get.Method, HttpMethod.Post.Method], async (HttpContext http) =>
         {
             await http.SignOutAsync(CookieAuthHandlerSetup.AdminScheme);
             return Results.Redirect("/Account/Login");
