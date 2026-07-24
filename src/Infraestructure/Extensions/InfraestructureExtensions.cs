@@ -36,5 +36,6 @@ public static class InfraestructureExtensions
         builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
         builder.Services.AddScoped<ISessionRepository, SessionRepository>();
         builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
+        builder.Services.AddScoped<IAuthValidationLogRepository, AuthValidationLogRepository>();
     }
 }

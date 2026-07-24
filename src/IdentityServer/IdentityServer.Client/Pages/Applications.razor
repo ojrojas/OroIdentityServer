@@ -41,13 +41,7 @@ else
         items = response?.ToList() ?? [];
     }
 
-    private async Task CreateAsync()
-    {
-        var dialog = await DialogService.ShowDialogAsync<CreateApplicationDialog>(new DialogParameters { Title = L["NewApplicationTitle"] });
-        var result = await dialog.Result;
-        if (!result.Cancelled)
-            await LoadAsync();
-    }
+    private void CreateAsync() => Nav.NavigateTo("/applications/create");
 
     private async Task DeleteAsync(OpenIddictApplicationModel item)
     {

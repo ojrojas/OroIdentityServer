@@ -23,7 +23,8 @@ public sealed class GetRolesByUserIdQueryHandler(
                     r.Id.Value,
                     r.IsActive,
                     r.Name,
-                    [.. r.RolePermissions.Select(rp => new RolePermissionDto(rp.RoleId.Value, rp.PermissionId.Value))]
+                    [.. r.RolePermissions.Select(rp => new RolePermissionDto(rp.RoleId.Value, rp.PermissionId.Value))],
+                    r.CreatedAtUtc
                 )),
                 StatusCode = 200,
                 Message = "Roles retrieved successfully."

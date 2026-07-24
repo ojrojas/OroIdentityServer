@@ -1,6 +1,5 @@
 using IdentityServer.Client.Interfaces;
 using IdentityServer.Services;
-
 namespace IdentityServer.Server.Extensions;
 
 /// <summary>
@@ -22,6 +21,7 @@ public static class ServerAdminServiceCollectionExtensions
         services.AddScoped<IAdminSessionService, ServerAdminSessionService>();
         services.AddScoped<IAdminApplicationService, ServerAdminApplicationService>();
         services.AddScoped<IAdminScopeService, ServerAdminScopeService>();
+        services.AddScoped<IAdminValidationLogService,ServerAdminValidationLogService>();
 
         return services;
     }

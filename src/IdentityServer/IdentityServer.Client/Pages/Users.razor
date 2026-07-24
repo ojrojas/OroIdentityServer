@@ -55,13 +55,7 @@ else
         items = response?.Data?.ToList() ?? [];
     }
 
-    private async Task CreateAsync()
-    {
-        var dialog = await DialogService.ShowDialogAsync<CreateUserDialog>(new DialogParameters { Title = L["NewUserTitle"] });
-        var result = await dialog.Result;
-        if (!result.Cancelled)
-            await LoadAsync();
-    }
+    private void CreateAsync() => Nav.NavigateTo("/users/create");
 
     private async Task DeleteAsync(UserModel item)
     {

@@ -34,7 +34,7 @@ public class GetRoleByIdQueryHandler(
             return new GetRoleByIdResponse
             {
                 Data = new(role.Id.Value, role.IsActive, role.Name, role.RolePermissions
-                    .Select(r => new RolePermissionDto(r.RoleId.Value, r.PermissionId.Value)))
+                    .Select(r => new RolePermissionDto(r.RoleId.Value, r.PermissionId.Value)), role.CreatedAtUtc)
             };
         }
         catch (Exception ex)

@@ -1,0 +1,98 @@
+@page "/users/create"
+@attribute [Authorize]
+@inject IAdminUserService UserService
+@inject IAdminIdentificationTypeService IdentificationTypeService
+@inject IAdminTenantService TenantService
+@inject IToastService ToastService
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["NewUserTitle"]</PageTitle>
+
+<FluentLabel Typo="Typography.PageTitle">@L["NewUserTitle"]</FluentLabel>
+
+@if (identificationTypes is null || tenants is null)
+{
+    <FluentProgressRing />
+}
+else
+{
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Style="max-width: 560px; margin-top: 1rem;">
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12">
+            <FluentTextField @bind-Value="name" Label="@L["Name"]" Required="true" Style="flex:1" />
+            <FluentTextField @bind-Value="middleName" Label="@L["MiddleName"]" Style="flex:1" />
+            <FluentTextField @bind-Value="lastName" Label="@L["LastName"]" Required="true" Style="flex:1" />
+        </FluentStack>
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12">
+            <FluentTextField @bind-Value="userName" Label="@L["Username"]" Required="true" Style="flex:1" />
+            <FluentTextField @bind-Value="email" Label="@L["Email"]" Required="true" Style="flex:1" TextFieldType="TextFieldType.Email" />
+        </FluentStack>
+        <FluentTextField @bind-Value="password" Label="@L["Password"]" Required="true" TextFieldType="TextFieldType.Password" Style="width:100%" />
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12">
+            <FluentTextField @bind-Value="identification" Label="@L["Identification"]" Required="true" Style="flex:1" />
+            <FluentSelect Style="flex:1" TOption="IdentificationTypeModel" Items="identificationTypes" OptionText="@(x => x.Name)" OptionValue="@(x => x.Id.ToString())"
+                          @bind-SelectedOption="selectedIdentificationType" Label="@L["IdentificationType"]" />
+        </FluentStack>
+        <FluentSelect Style="width:100%" TOption="TenantModel" Items="tenants" OptionText="@(x => x.Name)" OptionValue="@(x => x.Id.ToString())"
+                      @bind-SelectedOption="selectedTenant" Label="@L["Tenant"]" />
+
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
+            <FluentButton Appearance="Appearance.Accent" Disabled="@(!CanSubmit || saving)" OnClick="SubmitAsync">@L["Create"]</FluentButton>
+            <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/users"))">@L["Cancel"]</FluentButton>
+        </FluentStack>
+    </FluentStack>
+}
+
+@code {
+    private List<IdentificationTypeModel>? identificationTypes;
+    private List<TenantModel>? tenants;
+    private IdentificationTypeModel? selectedIdentificationType;
+    private TenantModel? selectedTenant;
+
+    private string name = string.Empty;
+    private string middleName = string.Empty;
+    private string lastName = string.Empty;
+    private string userName = string.Empty;
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string identification = string.Empty;
+    private bool saving;
+
+    private bool CanSubmit =>
+        !string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(lastName) &&
+        !string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(email) &&
+        !string.IsNullOrWhiteSpace(password) && !string.IsNullOrWhiteSpace(identification) &&
+        selectedIdentificationType is not null && selectedTenant is not null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var identificationTypesResponse = await IdentificationTypeService.GetIdentificationTypesAsync();
+        identificationTypes = identificationTypesResponse?.Data?.ToList() ?? [];
+        selectedIdentificationType = identificationTypes.FirstOrDefault();
+
+        var tenantsResponse = await TenantService.GetTenantsAsync();
+        tenants = tenantsResponse?.Data?.ToList() ?? [];
+        selectedTenant = tenants.FirstOrDefault();
+    }
+
+    private async Task SubmitAsync()
+    {
+        saving = true;
+        var request = new CreateUserRequest(
+            name, middleName, lastName, userName, email, password, identification,
+            selectedIdentificationType!.Id, selectedTenant!.Id);
+
+        var response = await UserService.CreateUserAsync(request);
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["UserCreatedToast"]);
+            Nav.NavigateTo("/users");
+        }
+        else
+        {
+            ToastService.ShowError(L["UserCreateFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

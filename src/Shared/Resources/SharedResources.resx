@@ -178,6 +178,11 @@
   <data name="DisconnectConfirm"><value>Disconnect this session?</value></data>
   <data name="SessionDisconnectedToast"><value>Session disconnected.</value></data>
   <data name="SessionDisconnectFailedToast"><value>Could not disconnect session ({0}).</value></data>
+  <data name="SessionHistory"><value>Session History</value></data>
+  <data name="ColStartedAt"><value>Started</value></data>
+  <data name="ColEndedAt"><value>Ended</value></data>
+  <data name="ColCountry"><value>Country</value></data>
+  <data name="NoSessionHistory"><value>No session history</value></data>
 
   <!-- User Detail Sections -->
   <data name="BasicInfoSection"><value>Basic Information</value></data>
@@ -205,6 +210,16 @@
   <data name="Refresh"><value>Refresh</value></data>
   <data name="ColStatus"><value>Status</value></data>
   <data name="ActiveStatus"><value>Active</value></data>
+  <data name="ExpiredStatus"><value>Expired</value></data>
+  <data name="ValidationsTitle"><value>Identity server validations</value></data>
+  <data name="ValidationsSubtitle"><value>Authorization and token requests approved or denied</value></data>
+  <data name="ValidationsOk"><value>Approved</value></data>
+  <data name="ValidationsFailed"><value>Denied</value></data>
+  <data name="Last7Days"><value>Last 7 days</value></data>
+  <data name="RecentConnectionsTitle"><value>Recently connected users</value></data>
+  <data name="NoRecentConnections"><value>No recent connections</value></data>
+  <data name="RecentlyCreatedTitle"><value>Recently created</value></data>
+  <data name="NoRecentlyCreated"><value>Nothing created yet</value></data>
   <data name="LockUserConfirm"><value>Lock user "{0}"?</value></data>
   <data name="UnlockUserConfirm"><value>Unlock user "{0}"?</value></data>
   <data name="ConfirmActionTitle"><value>Confirm action</value></data>

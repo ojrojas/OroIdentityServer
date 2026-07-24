@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @inject IAdminUserService UserService
 @inject IAdminUserSessionService UserSessionService
+@inject IAdminSessionService SessionService
 @inject IDialogService DialogService
 @inject IToastService ToastService
 @inject IStringLocalizer<SharedResources> L
@@ -51,6 +52,36 @@
                     </TemplateColumn>
                 </FluentDataGrid>
             }
+
+            <FluentLabel Typo="Typography.Subject" Style="margin-top: 1.5rem;">@L["SessionHistory"]</FluentLabel>
+            @if (sessionHistory is null)
+            {
+                <FluentProgressRing />
+            }
+            else if (sessionHistory.Count == 0)
+            {
+                <FluentLabel>@L["NoSessionHistory"]</FluentLabel>
+            }
+            else
+            {
+                <FluentDataGrid Items="@sessionHistory.AsQueryable()" GridTemplateColumns="1fr 1fr 1fr 1fr">
+                    <PropertyColumn Title="@L["ColIp"]" Property="@(x => x.IpAddress)" />
+                    <PropertyColumn Title="@L["ColCountry"]" Property="@(x => x.Country)" />
+                    <TemplateColumn Title="@L["ColStartedAt"]">
+                        @context.StartedAtUtc.ToString("g")
+                    </TemplateColumn>
+                    <TemplateColumn Title="@L["ColEndedAt"]">
+                        @if (context.EndedAtUtc is null)
+                        {
+                            <span class="saas-badge saas-badge-success">@L["ActiveStatus"]</span>
+                        }
+                        else
+                        {
+                            @context.EndedAtUtc.Value.ToString("g")
+                        }
+                    </TemplateColumn>
+                </FluentDataGrid>
+            }
         }
     </FluentGridItem>
 </FluentGrid>
@@ -59,6 +90,7 @@
     private List<UserModel>? users;
     private UserModel? selectedUser;
     private List<UserSessionModel>? sessions;
+    private List<SessionModel>? sessionHistory;
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,8 +102,12 @@
     {
         selectedUser = user;
         sessions = null;
+        sessionHistory = null;
         var result = await UserSessionService.GetByUserAsync(user.Id);
         sessions = result?.ToList() ?? [];
+
+        var historyResponse = await SessionService.GetByUserAsync(user.Id);
+        sessionHistory = historyResponse?.Data?.ToList() ?? [];
     }
 
     private async Task DisconnectAsync(UserSessionModel session)

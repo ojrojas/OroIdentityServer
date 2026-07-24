@@ -89,7 +89,8 @@ public class ServerAdminUserService(IQueryDispatcher queryDispatcher, ICommandDi
         user.SecurityUserId?.Value,
         user.SecurityUser?.IsLockedOut() ?? false,
         user.SecurityUser?.LockoutEnd,
-        user.Roles.Select(MapUserRole).ToList());
+        user.Roles.Select(MapUserRole).ToList(),
+        user.CreatedAtUtc);
 
     private static UserRoleModel MapUserRole(UserRole role) => new(role.UserId?.Value, role.RoleId?.Value);
 }

@@ -57,5 +57,6 @@ public class ServerAdminRoleService(IQueryDispatcher queryDispatcher, ICommandDi
         role.Id,
         role.IsActive,
         role.Name?.Value,
-        role.Claims.Select(c => new RolePermissionModel(c.RoleId, c.PermissionId)));
+        role.Claims.Select(c => new RolePermissionModel(c.RoleId, c.PermissionId)),
+        role.CreatedAtUtc);
 }

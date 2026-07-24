@@ -19,6 +19,7 @@ public static class ClientServiceCollectionExtensions
         services.AddHttpClient<IAdminTenantService, AdminTenantService>(httpClient => httpClient.BaseAddress = baseAddress);
         services.AddHttpClient<IAdminUserSessionService, AdminUserSessionService>(httpClient => httpClient.BaseAddress = baseAddress);
         services.AddHttpClient<IAdminSessionService, AdminSessionService>(httpClient => httpClient.BaseAddress = baseAddress);
+        services.AddHttpClient<IAdminValidationLogService, AdminValidationLogService>(httpClient => httpClient.BaseAddress = baseAddress);
         services.AddHttpClient<IAdminApplicationService, AdminApplicationService>(httpClient => httpClient.BaseAddress = baseAddress);
         services.AddHttpClient<IAdminScopeService, AdminScopeService>(httpClient => httpClient.BaseAddress = baseAddress);
 

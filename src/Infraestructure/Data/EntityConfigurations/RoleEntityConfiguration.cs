@@ -19,6 +19,10 @@ public class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
             .HasColumnName("IsActive")
             .IsRequired();
 
+        builder.Property(r => r.CreatedAtUtc)
+            .HasColumnName("CreatedAtUtc")
+            .IsRequired();
+
         builder.OwnsOne(r => r.Name, name =>
         {
             name.Property(n => n.Value)

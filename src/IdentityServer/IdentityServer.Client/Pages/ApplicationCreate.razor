@@ -1,0 +1,63 @@
+@page "/applications/create"
+@attribute [Authorize]
+@inject IAdminApplicationService ApplicationService
+@inject IToastService ToastService
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["NewApplicationTitle"]</PageTitle>
+
+<FluentLabel Typo="Typography.PageTitle">@L["NewApplicationTitle"]</FluentLabel>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Style="max-width: 560px; margin-top: 1rem;">
+    <FluentTextField @bind-Value="clientId" Label="@L["ClientId"]" Required="true" Style="width:100%" />
+    <FluentTextField @bind-Value="displayName" Label="@L["DisplayName"]" Style="width:100%" />
+    <FluentTextField @bind-Value="clientSecret" Label="@L["ClientSecret"]" Placeholder="@L["ClientSecretNewPlaceholder"]" TextFieldType="TextFieldType.Password" Style="width:100%" />
+    <FluentSelect Style="width:100%" TOption="string" Items="@(["confidential", "public"])" @bind-Value="clientType" Label="@L["ClientType"]" />
+
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+        <FluentLabel Typo="Typography.Body">@L["RedirectUris"]</FluentLabel>
+        <UriTagManager @bind-Uris="redirectUris" />
+    </FluentStack>
+
+    <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+        <FluentLabel Typo="Typography.Body">@L["PostLogoutRedirectUris"]</FluentLabel>
+        <UriTagManager @bind-Uris="postLogoutRedirectUris" />
+    </FluentStack>
+
+    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
+        <FluentButton Appearance="Appearance.Accent" Disabled="@(string.IsNullOrWhiteSpace(clientId) || saving)" OnClick="SubmitAsync">@L["Create"]</FluentButton>
+        <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/applications"))">@L["Cancel"]</FluentButton>
+    </FluentStack>
+</FluentStack>
+
+@code {
+    private string clientId = string.Empty;
+    private string displayName = string.Empty;
+    private string clientSecret = string.Empty;
+    private string clientType = "confidential";
+    private List<string> redirectUris = [];
+    private List<string> postLogoutRedirectUris = [];
+    private bool saving;
+
+    private async Task SubmitAsync()
+    {
+        saving = true;
+        var model = new OpenIddictApplicationModel(
+            clientId, string.IsNullOrWhiteSpace(clientSecret) ? null : clientSecret, displayName, clientType,
+            "web", "implicit", [], [], redirectUris, postLogoutRedirectUris);
+
+        var response = await ApplicationService.CreateApplicationAsync(model);
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["ApplicationCreatedToast"]);
+            Nav.NavigateTo("/applications");
+        }
+        else
+        {
+            ToastService.ShowError(L["ApplicationCreateFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

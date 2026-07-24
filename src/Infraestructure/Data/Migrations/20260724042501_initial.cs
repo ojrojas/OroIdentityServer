@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -21,6 +20,26 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ApplicationTenants", x => x.ClientId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AuthValidationLogs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    EventType = table.Column<string>(type: "text", nullable: false),
+                    Succeeded = table.Column<bool>(type: "boolean", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ClientId = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Scopes = table.Column<string>(type: "text", nullable: true),
+                    IpAddress = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    FailureReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    OccurredAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuthValidationLogs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -109,6 +128,7 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Version = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -149,6 +169,27 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tenants", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserSessions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Device = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    SessionToken = table.Column<string>(type: "character varying(400)", maxLength: 400, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastActivityAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IpAddress = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    UserAgent = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    Location = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
+                    Version = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSessions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -198,6 +239,7 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     LastName = table.Column<string>(type: "text", nullable: true),
                     MiddleName = table.Column<string>(type: "text", nullable: true),
@@ -322,6 +364,11 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 column: "TenantId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AuthValidationLogs_OccurredAtUtc",
+                table: "AuthValidationLogs",
+                column: "OccurredAtUtc");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_IdentificationTypes_IsActive",
                 table: "IdentificationTypes",
                 column: "IsActive");
@@ -424,6 +471,12 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 table: "Users",
                 column: "UserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSessions_SessionToken",
+                table: "UserSessions",
+                column: "SessionToken",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -431,6 +484,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ApplicationTenants");
+
+            migrationBuilder.DropTable(
+                name: "AuthValidationLogs");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictScopes");
@@ -449,6 +505,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserRoles");
+
+            migrationBuilder.DropTable(
+                name: "UserSessions");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictAuthorizations");

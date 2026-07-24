@@ -1,6 +1,6 @@
 namespace IdentityServer.Client.Models.Roles;
 
-public sealed record RoleModel(Guid Id, bool IsActive, string? Name, IEnumerable<RolePermissionModel>? Claims);
+public sealed record RoleModel(Guid Id, bool IsActive, string? Name, IEnumerable<RolePermissionModel>? Claims, DateTime CreatedAtUtc);
 
 public sealed record RolePermissionModel(Guid RoleId, Guid PermissionId);
 

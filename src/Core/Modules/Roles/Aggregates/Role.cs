@@ -4,12 +4,13 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Roles.Aggregates;
 
-public sealed class Role : AggregateRoot<RoleId>
+public sealed class Role : AggregateRoot<RoleId>, IAuditableEntity
 {
     private readonly IList<RolePermission> _rolePermissions = [];
 
     public bool IsActive { get; private set; }
     public RoleName Name { get; private set; }
+    public DateTime CreatedAtUtc { get; private set; } = DateTime.UtcNow;
 
     public IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.AsReadOnly();
 

@@ -16,10 +16,10 @@
         </div>
 
         <div class="login-form">
-            <FluentButton Appearance="@Appearance.Accent" FullWidth="true" Class="login-btn" Href="@ConfirmUrl">
+            <FluentButton Appearance="@Appearance.Accent" FullWidth="true" Class="login-btn" OnClick="@(() => navigationManager.NavigateTo(ConfirmUrl, forceLoad: true))">
                 @L["YesSignOut"]
             </FluentButton>
-            <FluentButton Appearance="@Appearance.Neutral" FullWidth="true" Class="login-btn" Href="/">
+            <FluentButton Appearance="@Appearance.Neutral" FullWidth="true" Class="login-btn" OnClick="@(() => navigationManager.NavigateTo("/", forceLoad: true))">
                 @L["NoStaySignedIn"]
             </FluentButton>
         </div>
@@ -31,11 +31,6 @@
     [SupplyParameterFromQuery] public string? State { get; set; }
     [SupplyParameterFromQuery(Name = "client_id")] public string? ClientId { get; set; }
     [SupplyParameterFromQuery(Name = "id_token_hint")] public string? IdTokenHint { get; set; }
-
-    private void LogoutApp()
-    {
-        navigationManager.NavigateTo("/auth/logout");
-    }
 
     private string ConfirmUrl
     {

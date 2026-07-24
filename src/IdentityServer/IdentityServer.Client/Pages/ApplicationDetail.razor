@@ -21,8 +21,15 @@ else
         <FluentTextField @bind-Value="displayName" Label="@L["DisplayName"]" Style="width:100%" />
         <FluentTextField @bind-Value="clientSecret" Label="@L["ClientSecret"]" Placeholder="@L["ClientSecretEditPlaceholder"]" TextFieldType="TextFieldType.Password" Style="width:100%" />
         <FluentSelect Style="width:100%" TOption="string" Items="@(["confidential", "public"])" @bind-Value="clientType" Label="@L["ClientType"]" />
-        <FluentTextField @bind-Value="redirectUris" Label="@L["RedirectUris"]" Style="width:100%" />
-        <FluentTextField @bind-Value="postLogoutRedirectUris" Label="@L["PostLogoutRedirectUris"]" Style="width:100%" />
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+            <FluentLabel Typo="Typography.Body">@L["RedirectUris"]</FluentLabel>
+            <UriTagManager @bind-Uris="redirectUris" />
+        </FluentStack>
+
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+            <FluentLabel Typo="Typography.Body">@L["PostLogoutRedirectUris"]</FluentLabel>
+            <UriTagManager @bind-Uris="postLogoutRedirectUris" />
+        </FluentStack>
 
         <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
             <FluentButton Appearance="Appearance.Accent" Disabled="@saving" OnClick="SaveAsync">@L["Save"]</FluentButton>
@@ -41,8 +48,8 @@ else
     private string displayName = string.Empty;
     private string clientSecret = string.Empty;
     private string clientType = "confidential";
-    private string redirectUris = string.Empty;
-    private string postLogoutRedirectUris = string.Empty;
+    private List<string> redirectUris = [];
+    private List<string> postLogoutRedirectUris = [];
     private bool saving;
 
     protected override async Task OnInitializedAsync()
@@ -52,19 +59,16 @@ else
 
         displayName = item.DisplayName ?? string.Empty;
         clientType = item.ClientType ?? "confidential";
-        redirectUris = string.Join(", ", item.RedirectUris ?? []);
-        postLogoutRedirectUris = string.Join(", ", item.PostLogoutRedirectUris ?? []);
+        redirectUris = item.RedirectUris?.ToList() ?? [];
+        postLogoutRedirectUris = item.PostLogoutRedirectUris?.ToList() ?? [];
     }
-
-    private static List<string> SplitUris(string value)
-        => [.. value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
 
     private async Task SaveAsync()
     {
         saving = true;
         var model = new OpenIddictApplicationModel(
             ClientId, string.IsNullOrWhiteSpace(clientSecret) ? item!.ClientSecret : clientSecret, displayName, clientType,
-            item!.ApplicationType, item.ConsentType, item.Permissions, item.Requirements, SplitUris(redirectUris), SplitUris(postLogoutRedirectUris));
+            item!.ApplicationType, item.ConsentType, item.Permissions, item.Requirements, redirectUris, postLogoutRedirectUris);
 
         var response = await ApplicationService.UpdateApplicationAsync(ClientId, model);
         saving = false;

@@ -5,6 +5,8 @@
 @inject IAdminScopeService ScopeService
 @inject IAdminApplicationService ApplicationService
 @inject IAdminUserSessionService UserSessionService
+@inject IAdminIdentificationTypeService IdentificationTypeService
+@inject IAdminValidationLogService ValidationLogService
 @inject IStringLocalizer<SharedResources> L
 
 <PageTitle>@L["DashboardTitle"]</PageTitle>
@@ -29,29 +31,123 @@
     </FluentGridItem>
 </FluentGrid>
 
-@if (activeSessions is not null && activeSessions.Count > 0)
-{
-    <FluentStack Orientation="Orientation.Vertical" Style="margin-top: 2rem;">
-        <FluentLabel Typo="Typography.Subject">@L["ConnectedUsersDetail"] (@connectedUserCount)</FluentLabel>
-        <FluentDataGrid Items="@activeSessions.AsQueryable()" GridTemplateColumns="1.5fr 1fr 1.5fr 1.5fr 0.5fr">
-            <TemplateColumn Title="@L["ColUsername"]">
-                @(context.UserId?.ToString() ?? "-")
-            </TemplateColumn>
-            <TemplateColumn Title="@L["ColDevice"]">
-                @(context.Device ?? "-")
-            </TemplateColumn>
-            <TemplateColumn Title="@L["ColIp"]">
-                @(context.IpAddress ?? "-")
-            </TemplateColumn>
-            <TemplateColumn Title="@L["ColLastActivity"]">
-                @FormatLastActivity(context.LastActivityAt)
-            </TemplateColumn>
-            <TemplateColumn Title="@L["ColExpires"]">
-                @context.ExpiresAt.ToString("g")
-            </TemplateColumn>
-        </FluentDataGrid>
-    </FluentStack>
-}
+<div class="saas-dashboard-grid">
+    <div class="saas-dashboard-main">
+        <div class="saas-card">
+            <div class="saas-card-header">
+                <p class="saas-card-title">@L["ValidationsTitle"]</p>
+                @if (validationDays is not null)
+                {
+                    <span class="saas-badge saas-badge-info">@L["Last7Days"]</span>
+                }
+            </div>
+
+            @if (validationDays is null)
+            {
+                <FluentProgressRing />
+            }
+            else
+            {
+                <p class="validation-chart-total">@totalValidations</p>
+                <p class="validation-chart-subtitle">@L["ValidationsSubtitle"]</p>
+
+                <div class="validation-chart">
+                    @foreach (var day in validationDays)
+                    {
+                        var total = day.SucceededCount + day.FailedCount;
+                        var succeededPct = maxDailyTotal == 0 ? 0 : (double)day.SucceededCount / maxDailyTotal * 100;
+                        var failedPct = maxDailyTotal == 0 ? 0 : (double)day.FailedCount / maxDailyTotal * 100;
+                        var isPeak = total > 0 && total == maxDailyTotal;
+                        <div class="validation-chart-column" title="@($"{day.Date:d}: {day.SucceededCount} {L["ValidationsOk"]}, {day.FailedCount} {L["ValidationsFailed"]}")">
+                            <div class="validation-chart-bar-track">
+                                @if (isPeak)
+                                {
+                                    <span class="validation-chart-callout">@total</span>
+                                }
+                                @if (total > 0)
+                                {
+                                    <div class="validation-chart-bar validation-chart-bar-fail" style="height:@(failedPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                                    <div class="validation-chart-bar validation-chart-bar-success @(isPeak ? "validation-chart-bar-peak" : "")" style="height:@(succeededPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                                }
+                            </div>
+                            <span class="validation-chart-day-label">@day.Date.ToString("ddd", System.Globalization.CultureInfo.CurrentUICulture)</span>
+                        </div>
+                    }
+                </div>
+
+                <div class="validation-chart-legend">
+                    <span class="validation-chart-legend-item"><span class="validation-chart-swatch validation-chart-bar-success"></span>@L["ValidationsOk"]</span>
+                    <span class="validation-chart-legend-item"><span class="validation-chart-swatch validation-chart-bar-fail"></span>@L["ValidationsFailed"]</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="saas-dashboard-side">
+        <div class="saas-card">
+            <div class="saas-card-header">
+                <p class="saas-card-title">@L["RecentConnectionsTitle"]</p>
+            </div>
+
+            @if (recentConnections is null)
+            {
+                <FluentProgressRing />
+            }
+            else if (recentConnections.Count == 0)
+            {
+                <p class="saas-empty-text">@L["NoRecentConnections"]</p>
+            }
+            else
+            {
+                <div class="saas-list">
+                    @foreach (var connection in recentConnections)
+                    {
+                        <div class="saas-list-row">
+                            <div class="saas-avatar @AvatarClass(connection.DisplayName)">@Initials(connection.DisplayName)</div>
+                            <div class="saas-list-row-body">
+                                <p class="saas-list-row-title">@connection.DisplayName</p>
+                                <p class="saas-list-row-subtitle">@(connection.Device ?? connection.IpAddress ?? "-")</p>
+                            </div>
+                            <span class="saas-badge @(connection.IsActive ? "saas-badge-success" : "saas-badge-warning")">
+                                @(connection.IsActive ? L["ActiveStatus"] : L["ExpiredStatus"])
+                            </span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="saas-card" style="margin-top: 1.5rem;">
+            <div class="saas-card-header">
+                <p class="saas-card-title">@L["RecentlyCreatedTitle"]</p>
+            </div>
+
+            @if (recentlyCreated is null)
+            {
+                <FluentProgressRing />
+            }
+            else if (recentlyCreated.Count == 0)
+            {
+                <p class="saas-empty-text">@L["NoRecentlyCreated"]</p>
+            }
+            else
+            {
+                <div class="saas-chip-row">
+                    @foreach (var entity in recentlyCreated)
+                    {
+                        <div class="saas-chip" title="@($"{entity.Name} · {entity.TypeLabel}")">
+                            <span class="saas-avatar saas-avatar-sm @TypeAvatarClass(entity.TypeKind)">@Initials(entity.Name)</span>
+                            <span class="saas-chip-text">
+                                <span class="saas-chip-label">@entity.Name</span>
+                                <span class="saas-chip-caption">@entity.TypeLabel</span>
+                            </span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
 
 @code {
     private int? userCount;
@@ -59,28 +155,106 @@
     private int? roleCount;
     private int? scopeCount;
     private int? applicationCount;
-    private List<UserSessionModel>? activeSessions;
 
-    private static string FormatLastActivity(DateTime? dt)
-        => dt.HasValue ? dt.Value.ToString("g") : "-";
+    private List<DailyValidationCountModel>? validationDays;
+    private int totalValidations;
+    private int maxDailyTotal;
+
+    private List<RecentConnection>? recentConnections;
+    private List<RecentEntity>? recentlyCreated;
+
+    private sealed record RecentConnection(string DisplayName, string? Device, string? IpAddress, bool IsActive, DateTime SortKey);
+    private sealed record RecentEntity(string Name, string TypeLabel, string TypeKind, DateTime CreatedAtUtc);
+
+    private static readonly string[] AvatarPalette = ["saas-avatar-accent", "saas-avatar-info", "saas-avatar-success", "saas-avatar-warning", "saas-avatar-danger"];
+
+    private static string Initials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "-";
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length switch
+        {
+            0 => "-",
+            1 => parts[0][..1].ToUpperInvariant(),
+            _ => string.Concat(parts[0][..1], parts[^1][..1]).ToUpperInvariant()
+        };
+    }
+
+    private static string AvatarClass(string seed)
+    {
+        var index = Math.Abs(seed.GetHashCode()) % AvatarPalette.Length;
+        return AvatarPalette[index];
+    }
+
+    private static string TypeAvatarClass(string typeKind) => typeKind switch
+    {
+        "user" => "saas-avatar-accent",
+        "role" => "saas-avatar-success",
+        "identification-type" => "saas-avatar-warning",
+        _ => "saas-avatar-info"
+    };
 
     protected override async Task OnInitializedAsync()
     {
         var users = await UserService.GetUsersAsync();
-        userCount = users?.Data?.Count() ?? 0;
+        var userList = users?.Data?.ToList() ?? [];
+        userCount = userList.Count;
 
         connectedUserCount = await UserSessionService.GetActiveSessionsCountAsync();
 
         var allSessions = await UserSessionService.GetActiveSessionsAsync();
-        activeSessions = allSessions?.ToList() ?? [];
+        var sessionList = allSessions?.ToList() ?? [];
 
         var roles = await RoleService.GetRolesAsync();
-        roleCount = roles?.Data?.Count() ?? 0;
+        var roleList = roles?.Data?.ToList() ?? [];
+        roleCount = roleList.Count;
 
         var applications = await ApplicationService.GetApplicationsAsync();
         applicationCount = applications?.Count() ?? 0;
 
         var scopes = await ScopeService.GetScopesAsync();
         scopeCount = scopes?.Count() ?? 0;
+
+        var identificationTypesResponse = await IdentificationTypeService.GetIdentificationTypesAsync();
+        var identificationTypeList = identificationTypesResponse?.Data?.ToList() ?? [];
+
+        BuildRecentConnections(sessionList, userList);
+        BuildRecentlyCreated(userList, roleList, identificationTypeList);
+
+        var summary = await ValidationLogService.GetDailySummaryAsync(7);
+        validationDays = summary.ToList();
+        totalValidations = validationDays.Sum(d => d.SucceededCount + d.FailedCount);
+        maxDailyTotal = validationDays.Count == 0 ? 0 : validationDays.Max(d => d.SucceededCount + d.FailedCount);
+    }
+
+    private void BuildRecentConnections(List<UserSessionModel> sessions, List<UserModel> users)
+    {
+        recentConnections = [.. sessions
+            .Where(s => s.UserId is not null)
+            .GroupBy(s => s.UserId)
+            .Select(g => g.OrderByDescending(s => s.LastActivityAt ?? s.CreatedAt).First())
+            .OrderByDescending(s => s.LastActivityAt ?? s.CreatedAt)
+            .Take(6)
+            .Select(s =>
+            {
+                var user = users.FirstOrDefault(u => u.Id == s.UserId);
+                var displayName = user is null ? s.UserId!.Value.ToString() : $"{user.Name} {user.LastName}".Trim();
+                return new RecentConnection(displayName, s.Device, s.IpAddress, s.ExpiresAt > DateTime.UtcNow, s.LastActivityAt ?? s.CreatedAt);
+            })];
+    }
+
+    private void BuildRecentlyCreated(List<UserModel> users, List<RoleModel> roles, List<IdentificationTypeModel> identificationTypes)
+    {
+        var combined = new List<RecentEntity>();
+        combined.AddRange(users.Select(u => new RecentEntity($"{u.Name} {u.LastName}".Trim(), L["StatUsers"], "user", u.CreatedAtUtc)));
+        combined.AddRange(roles.Where(r => r.Name is not null).Select(r => new RecentEntity(r.Name!, L["StatRoles"], "role", r.CreatedAtUtc)));
+        combined.AddRange(identificationTypes.Select(i => new RecentEntity(i.Name, L["NavIdentificationTypes"], "identification-type", i.CreatedAtUtc)));
+
+        var today = DateTime.UtcNow.Date;
+        var todayEntities = combined.Where(e => e.CreatedAtUtc.Date == today).OrderByDescending(e => e.CreatedAtUtc).ToList();
+
+        recentlyCreated = todayEntities.Count > 0
+            ? todayEntities.Take(8).ToList()
+            : [.. combined.OrderByDescending(e => e.CreatedAtUtc).Take(8)];
     }
 }

@@ -17,6 +17,7 @@ public class OroIdentityAppContext(
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<Session> Sessions { get; set; }
     public DbSet<UserSession> UserSessions { get; set; }
+    public DbSet<AuthValidationLog> AuthValidationLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -31,5 +32,6 @@ public class OroIdentityAppContext(
         builder.ApplyConfiguration(new RolePermissionEntityConfiguration());
         builder.ApplyConfiguration(new SessionEntityConfiguration());
         builder.ApplyConfiguration(new UserSessionEntityConfiguration());
+        builder.ApplyConfiguration(new AuthValidationLogEntityConfiguration());
     }
 }

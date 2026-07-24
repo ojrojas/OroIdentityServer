@@ -12,6 +12,8 @@ global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using OpenIddict.Abstractions;
 global using OroIdentityServer.Core.Interfaces;
+global using OroIdentityServer.Core.Modules.Diagnostics.Aggregates;
+global using OroIdentityServer.Core.Modules.Diagnostics.Repositories;
 global using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 global using OroIdentityServer.Core.Modules.IdentificationTypes.Repositories;
 global using OroIdentityServer.Core.Modules.Permissions.Aggregates;

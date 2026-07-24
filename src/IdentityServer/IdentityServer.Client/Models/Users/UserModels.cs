@@ -15,7 +15,8 @@ public sealed record UserModel(
     Guid? SecurityUserId,
     bool IsLocked,
     DateTime? LockoutEnd,
-    IReadOnlyCollection<UserRoleModel> Roles);
+    IReadOnlyCollection<UserRoleModel> Roles,
+    DateTime CreatedAtUtc);
 
 public sealed record UserRoleModel(Guid? UserId, Guid? RoleId);
 

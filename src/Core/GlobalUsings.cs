@@ -9,6 +9,8 @@ global using OroIdentityServer.Core.Modules.IdentificationTypes.DomainEvents;
 global using OroIdentityServer.Core.Modules.IdentificationTypes.ValueObjects;
 global using OroIdentityServer.Core.Modules.Permissions.Aggregates;
 global using OroIdentityServer.Core.Modules.Permissions.DoaminEvents;
+global using OroIdentityServer.Core.Modules.Diagnostics.Aggregates;
+global using OroIdentityServer.Core.Modules.Diagnostics.Enums;
 global using OroIdentityServer.Core.Modules.Roles.Aggregates;
 global using OroIdentityServer.Core.Modules.Roles.DomainEvents;
 global using OroIdentityServer.Core.Modules.Tenants.Aggregates;

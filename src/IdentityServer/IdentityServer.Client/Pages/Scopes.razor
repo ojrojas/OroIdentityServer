@@ -41,13 +41,7 @@ else
         items = response?.ToList() ?? [];
     }
 
-    private async Task CreateAsync()
-    {
-        var dialog = await DialogService.ShowDialogAsync<CreateScopeDialog>(new DialogParameters { Title = L["NewScopeTitle"] });
-        var result = await dialog.Result;
-        if (!result.Cancelled)
-            await LoadAsync();
-    }
+    private void CreateAsync() => Nav.NavigateTo("/scopes/create");
 
     private async Task DeleteAsync(OpenIddictScopeModel item)
     {

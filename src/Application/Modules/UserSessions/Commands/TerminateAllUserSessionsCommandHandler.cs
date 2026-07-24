@@ -1,5 +1,3 @@
-using OroIdentityServer.Core.Modules.UserSessions.Repositories;
-
 namespace OroIdentityServer.Application.Modules.UserSessions.Commands;
 
 public sealed class TerminateAllUserSessionsCommandHandler(

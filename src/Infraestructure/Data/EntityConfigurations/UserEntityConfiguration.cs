@@ -17,6 +17,10 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
             .HasConversion(id => id.Value, value => new UserId(value))
             .HasColumnName("Id");
 
+        builder.Property(u => u.CreatedAtUtc)
+            .HasColumnName("CreatedAtUtc")
+            .IsRequired();
+
         builder.HasIndex(u => u.Email).IsUnique();
         builder.HasIndex(u => u.UserName).IsUnique();
         builder.HasIndex(u => u.Identification).IsUnique();

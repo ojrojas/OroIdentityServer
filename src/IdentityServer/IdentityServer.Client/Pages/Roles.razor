@@ -41,13 +41,7 @@ else
         items = response?.Data?.ToList() ?? [];
     }
 
-    private async Task CreateAsync()
-    {
-        var dialog = await DialogService.ShowDialogAsync<CreateRoleDialog>(new DialogParameters { Title = L["NewRoleTitle"] });
-        var result = await dialog.Result;
-        if (!result.Cancelled)
-            await LoadAsync();
-    }
+    private void CreateAsync() => Nav.NavigateTo("/roles/create");
 
     private async Task DeleteAsync(RoleModel item)
     {

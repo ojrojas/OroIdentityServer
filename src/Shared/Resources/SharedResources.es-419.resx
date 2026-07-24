@@ -164,4 +164,20 @@
   <data name="DisconnectConfirm"><value>¿Desconectar esta sesión?</value></data>
   <data name="SessionDisconnectedToast"><value>Sesión desconectada.</value></data>
   <data name="SessionDisconnectFailedToast"><value>No se pudo desconectar la sesión ({0}).</value></data>
+  <data name="SessionHistory"><value>Historial de sesiones</value></data>
+  <data name="ColStartedAt"><value>Inicio</value></data>
+  <data name="ColEndedAt"><value>Fin</value></data>
+  <data name="ColCountry"><value>País</value></data>
+  <data name="NoSessionHistory"><value>Sin historial de sesiones</value></data>
+  <data name="ActiveStatus"><value>Activa</value></data>
+  <data name="ExpiredStatus"><value>Expirada</value></data>
+  <data name="ValidationsTitle"><value>Validaciones del identity server</value></data>
+  <data name="ValidationsSubtitle"><value>Peticiones de autorización y token aprobadas o rechazadas</value></data>
+  <data name="ValidationsOk"><value>Aprobadas</value></data>
+  <data name="ValidationsFailed"><value>Rechazadas</value></data>
+  <data name="Last7Days"><value>Últimos 7 días</value></data>
+  <data name="RecentConnectionsTitle"><value>Últimos usuarios conectados</value></data>
+  <data name="NoRecentConnections"><value>Sin conexiones recientes</value></data>
+  <data name="RecentlyCreatedTitle"><value>Creados recientemente</value></data>
+  <data name="NoRecentlyCreated"><value>Todavía no hay nada creado</value></data>
 </root>

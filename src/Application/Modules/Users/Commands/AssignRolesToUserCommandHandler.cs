@@ -1,5 +1,3 @@
-using OroIdentityServer.Core.Modules.Users.Repositories;
-
 namespace OroIdentityServer.Application.Modules.Users.Commands;
 
 public sealed class AssignRolesToUserCommandHandler(

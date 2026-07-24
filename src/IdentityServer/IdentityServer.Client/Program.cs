@@ -1,8 +1,6 @@
-using System.Globalization;
 using IdentityServer.Client.Extensions;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.FluentUI.AspNetCore.Components;
-using Microsoft.JSInterop;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 

@@ -1,0 +1,41 @@
+@page "/roles/create"
+@attribute [Authorize]
+@inject IAdminRoleService RoleService
+@inject IToastService ToastService
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["NewRoleTitle"]</PageTitle>
+
+<FluentLabel Typo="Typography.PageTitle">@L["NewRoleTitle"]</FluentLabel>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="16" Style="max-width: 480px; margin-top: 1rem;">
+    <FluentTextField @bind-Value="roleName" Label="@L["RoleName"]" Required="true" Style="width:100%" />
+
+    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
+        <FluentButton Appearance="Appearance.Accent" Disabled="@(string.IsNullOrWhiteSpace(roleName) || saving)" OnClick="SubmitAsync">@L["Create"]</FluentButton>
+        <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/roles"))">@L["Cancel"]</FluentButton>
+    </FluentStack>
+</FluentStack>
+
+@code {
+    private string roleName = string.Empty;
+    private bool saving;
+
+    private async Task SubmitAsync()
+    {
+        saving = true;
+        var response = await RoleService.CreateRoleAsync(new CreateRoleRequest(roleName));
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["RoleCreatedToast"]);
+            Nav.NavigateTo("/roles");
+        }
+        else
+        {
+            ToastService.ShowError(L["RoleCreateFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

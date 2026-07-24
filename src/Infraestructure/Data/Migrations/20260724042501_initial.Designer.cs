@@ -12,7 +12,7 @@ using OroIdentityServer.Infraestructure;
 namespace OroIdentityServer.Infraestructure.Data.Migrations
 {
     [DbContext(typeof(OroIdentityAppContext))]
-    [Migration("20260719225703_initial")]
+    [Migration("20260724042501_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -237,6 +237,51 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.ToTable("OpenIddictTokens", (string)null);
                 });
 
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Diagnostics.Aggregates.AuthValidationLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("ClientId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Scopes")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Succeeded")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OccurredAtUtc")
+                        .HasDatabaseName("IX_AuthValidationLogs_OccurredAtUtc");
+
+                    b.ToTable("AuthValidationLogs", (string)null);
+                });
+
             modelBuilder.Entity("OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates.IdentificationType", b =>
                 {
                     b.Property<Guid>("Id")
@@ -313,6 +358,10 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
 
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAtUtc");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("IsActive");
@@ -365,6 +414,56 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.ToTable("Tenants", (string)null);
                 });
 
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.UserSessions.Aggregates.UserSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Device")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("LastActivityAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("SessionToken")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserId");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionToken")
+                        .IsUnique();
+
+                    b.ToTable("UserSessions", (string)null);
+                });
+
             modelBuilder.Entity("OroIdentityServer.Core.Modules.UserSessions.Entities.Session", b =>
                 {
                     b.Property<Guid>("Id")
@@ -415,6 +514,10 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAtUtc");
 
                     b.Property<string>("Email")
                         .HasColumnType("text");

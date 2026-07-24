@@ -6,6 +6,7 @@ namespace OroIdentityServer.Core.Modules.Users.Aggregates;
 
 public class User : AggregateRoot<UserId>, IAuditableEntity
 {
+    public DateTime CreatedAtUtc { get; private set; } = DateTime.UtcNow;
     public string? Name { get; private set; } = string.Empty;
     public string? LastName { get; private set; } = string.Empty;
     public string? MiddleName { get; set; } = string.Empty;

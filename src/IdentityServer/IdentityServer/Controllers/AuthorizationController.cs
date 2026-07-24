@@ -3,7 +3,6 @@ using IdentityServer.Server.ViewModels;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
@@ -14,6 +13,8 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 using BuildingBlocks.CQRS.Abstractions;
 using OroIdentityServer.Application.Modules.Users.Queries;
 using OroIdentityServer.Application.Modules.Roles.Queries;
+using OroIdentityServer.Application.Modules.Diagnostics.Commands;
+using OroIdentityServer.Core.Modules.Diagnostics.Enums;
 
 namespace OroIdentityServer.Server.Controllers;
 
@@ -23,17 +24,29 @@ public class AuthorizationController : Controller
     private readonly IOpenIddictAuthorizationManager _authorizationManager;
     private readonly IOpenIddictScopeManager _scopeManager;
     private readonly IQueryDispatcher _queryDispatcher;
+    private readonly ICommandDispatcher _commandDispatcher;
 
     public AuthorizationController(
         IOpenIddictApplicationManager applicationManager,
         IOpenIddictAuthorizationManager authorizationManager,
         IOpenIddictScopeManager scopeManager,
-        IQueryDispatcher queryDispatcher)
+        IQueryDispatcher queryDispatcher,
+        ICommandDispatcher commandDispatcher)
     {
         _applicationManager = applicationManager;
         _authorizationManager = authorizationManager;
         _scopeManager = scopeManager;
         _queryDispatcher = queryDispatcher;
+        _commandDispatcher = commandDispatcher;
+    }
+
+    private async Task LogValidationAsync(AuthValidationEventType eventType, bool succeeded, Guid? userId, string? clientId, string? scopes, string? failureReason, CancellationToken ct)
+    {
+        try
+        {
+            await _commandDispatcher.SendAsync(new LogAuthValidationCommand(eventType, succeeded, userId, clientId, scopes, HttpContext.Connection.RemoteIpAddress?.ToString(), failureReason), ct);
+        }
+        catch { /* auditing must never break the auth flow */ }
     }
 
     [HttpGet("~/connect/authorize")]
@@ -65,6 +78,7 @@ public class AuthorizationController : Controller
             // return an error indicating that the user is not logged in.
             if (request.HasPromptValue(PromptValues.None))
             {
+                await LogValidationAsync(AuthValidationEventType.AuthorizeDenied, false, null, request.ClientId, null, "login_required", cancellationToken);
                 return Forbid(
                     authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                     properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -116,6 +130,7 @@ public class AuthorizationController : Controller
             // If the consent is external (e.g when authorizations are granted by a sysadmin),
             // immediately return an error if no authorization can be found in the database.
             case ConsentTypes.External when authorizations.Count is 0:
+                await LogValidationAsync(AuthValidationEventType.AuthorizeDenied, false, user.Data.Id.Value, request.ClientId, null, "consent_required", cancellationToken);
                 return Forbid(
                     authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                     properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -166,12 +181,14 @@ public class AuthorizationController : Controller
 foreach (var claim in identity.Claims)
     claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
+                await LogValidationAsync(AuthValidationEventType.AuthorizeSucceeded, true, user.Data.Id.Value, request.ClientId, string.Join(" ", request.GetScopes()), null, cancellationToken);
                 return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 
             // At this point, no authorization was found in the database and an error must be returned
             // if the client application specified prompt=none in the authorization request.
             case ConsentTypes.Explicit when request.HasPromptValue(PromptValues.None):
             case ConsentTypes.Systematic when request.HasPromptValue(PromptValues.None):
+                await LogValidationAsync(AuthValidationEventType.AuthorizeDenied, false, user.Data.Id.Value, request.ClientId, null, "consent_required", cancellationToken);
                 return Forbid(
                     authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                     properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -267,6 +284,8 @@ foreach (var claim in identity.Claims)
 foreach (var claim in identity.Claims)
     claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
+        await LogValidationAsync(AuthValidationEventType.AuthorizeSucceeded, true, user.Data.Id.Value, request.ClientId, string.Join(" ", request.GetScopes()), null, cancellationToken);
+
         // Returning a SignInResult will ask OpenIddict to issue the appropriate access/identity tokens.
         return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
@@ -275,7 +294,16 @@ foreach (var claim in identity.Claims)
     [HttpPost("~/connect/authorize"), ValidateAntiForgeryToken]
     // Notify OpenIddict that the authorization grant has been denied by the resource owner
     // to redirect the user agent to the client application using the appropriate response_mode.
-    public IActionResult Deny() => Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    public async Task<IActionResult> Deny()
+    {
+        var request = HttpContext.GetOpenIddictServerRequest();
+        var subject = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = Guid.TryParse(subject, out var parsedUserId) ? parsedUserId : (Guid?)null;
+
+        await LogValidationAsync(AuthValidationEventType.AuthorizeDenied, false, userId, request?.ClientId, null, "user_denied", CancellationToken.None);
+
+        return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
 
     [HttpGet("~/connect/logout"), HttpPost("~/connect/logout"), IgnoreAntiforgeryToken]
     public async Task<IActionResult> Logout([FromQuery] bool confirmed = false)
@@ -300,6 +328,13 @@ foreach (var claim in identity.Claims)
                 .Select(p => $"{p.Key}={Uri.EscapeDataString(p.Value!)}"));
 
             return Redirect(queryString.Length == 0 ? "/Account/Logout" : $"/Account/Logout?{queryString}");
+        }
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var logoutSubject = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var logoutUserId = Guid.TryParse(logoutSubject, out var parsedLogoutUserId) ? parsedLogoutUserId : (Guid?)null;
+            await LogValidationAsync(AuthValidationEventType.LogoutSucceeded, true, logoutUserId, null, null, null, CancellationToken.None);
         }
 
         // Delete the local admin cookie created when the user signed in.
@@ -370,6 +405,7 @@ foreach (var claim in identity.Claims)
 
             if (user is null)
             {
+                await LogValidationAsync(AuthValidationEventType.TokenDenied, false, null, HttpContext.GetOpenIddictServerRequest()?.ClientId, null, "The token is no longer valid.", cancellationToken);
                 return Forbid(
                     authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                     properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -382,6 +418,7 @@ foreach (var claim in identity.Claims)
             // Ensure the user is still allowed to sign in.
             if (!await _queryDispatcher.SendAsync(new ValidateUserToLoginQuery(user.Data.Email!), cancellationToken))
             {
+                await LogValidationAsync(AuthValidationEventType.TokenDenied, false, user.Data.Id.Value, HttpContext.GetOpenIddictServerRequest()?.ClientId, null, "The user is no longer allowed to sign in.", cancellationToken);
                 return Forbid(
                     authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                     properties: new AuthenticationProperties(new Dictionary<string, string?>
@@ -409,6 +446,8 @@ foreach (var claim in identity.Claims)
             var principal = new ClaimsPrincipal(identity);
 foreach (var claim in identity.Claims)
     claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
+
+            await LogValidationAsync(AuthValidationEventType.TokenIssued, true, user.Data.Id.Value, HttpContext.GetOpenIddictServerRequest()?.ClientId, string.Join(" ", identity.GetScopes()), null, cancellationToken);
 
             // Returning a SignInResult will ask OpenIddict to issue the appropriate access/identity tokens.
             return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
