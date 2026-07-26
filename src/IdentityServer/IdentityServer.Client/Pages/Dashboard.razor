@@ -7,6 +7,7 @@
 @inject IAdminUserSessionService UserSessionService
 @inject IAdminIdentificationTypeService IdentificationTypeService
 @inject IAdminValidationLogService ValidationLogService
+@inject IAdminTenantService TenantService
 @inject NavigationManager Nav
 @inject IStringLocalizer<SharedResources> L
 @rendermode InteractiveAuto
@@ -26,24 +27,27 @@
 
             <div class="inset">
                 <div class="stat-row">
-                    <StatCard Title="@L["StatUsers"]" Value="@userCount" IconName="users" Featured="true"
-                              Note="@L["StatUsersNote"]" Delta="@createdTodayCount" DeltaText="@TodayDeltaText"
-                              OnClick="@((e) => NavigationStat("/users"))" />
+                    <StatCard Title="@L["Tenants"]" Value="@tenantCount" IconName="house" Featured="true"
+                              Note="@L["StatTenantsNote"]" Delta="@createdTodayCount" 
+                              OnClick="@((e) => NavigationStat("/tenants"))" />
                     <StatCard Title="@L["StatUsers"]" Value="@userCount" IconName="users" Featured="true"
                               Note="@L["StatUsersNote"]" Delta="@createdTodayCount" DeltaText="@TodayDeltaText"
                               OnClick="@((e) => NavigationStat("/users"))" />
 
-                    <StatCard Title="@L["StatConnectedUsers"]" Featured="true" Value="@connectedUserCount"
-                              IconName="plug" Note="@L["StatConnectedNote"]"
-                              OnClick="@((e) => NavigationStat("/sessions"))" />
                 </div>
 
                 <div class="stat-row" style="margin-top:4px">
+                    <StatCard Title="@L["StatConnectedUsers"]" Featured="true" Value="@connectedUserCount"
+                              IconName="plug" Note="@L["StatConnectedNote"]"
+                              OnClick="@((e) => NavigationStat("/sessions"))" />
                     <StatCard Featured="true" Title="@L["StatRoles"]" Value="@roleCount" IconName="shield"
+                              Note="@L["StatRolesNote"]"
                               OnClick="@(() => NavigationStat("/roles"))" />
                     <StatCard Featured="true" Title="@L["StatApplications"]" Value="@applicationCount" IconName="apps"
+                              Note="@L["StatApplicationsNote"]"
                               OnClick="@(() => NavigationStat("/applications"))" />
                     <StatCard Featured="true" Title="@L["StatScopes"]" Value="@scopeCount" IconName="key"
+                              Note="@L["StatScopesNote"]"
                               OnClick="@(() => NavigationStat("/scopes"))" />
                 </div>
             </div>
@@ -218,6 +222,7 @@
     </div>
 
 @code {
+    private int? tenantCount;
     private int? userCount;
     private int? connectedUserCount;
     private int? roleCount;
@@ -249,6 +254,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var tenants = await TenantService.GetTenantsAsync();
+        var tenantList = tenants.Data.ToList();
+        tenantCount = tenantList.Count();
+
         var users = await UserService.GetUsersAsync();
         var userList = users?.Data?.ToList() ?? [];
         userCount = userList.Count;

@@ -84,6 +84,12 @@
   <data name="StatRoles"><value>Funções</value></data>
   <data name="StatApplications"><value>Aplicativos</value></data>
   <data name="StatScopes"><value>Escopos</value></data>
+  <data name="StatUsersNote"><value>Contas registradas</value></data>
+
+  <data name="StatConnectedNote"><value>Sessões ativas</value></data>
+  <data name="StatRolesNote"><value>Grupos de controle de acesso</value></data>
+  <data name="StatApplicationsNote"><value>Clientes OAuth 2.0</value></data>
+  <data name="StatScopesNote"><value>Permissões de API</value></data>
 
   <data name="UsersTitle"><value>Usuários</value></data>
   <data name="NewUserTitle"><value>Novo usuário</value></data>

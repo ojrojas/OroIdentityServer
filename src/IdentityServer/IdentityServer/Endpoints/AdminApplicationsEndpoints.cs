@@ -8,7 +8,7 @@ public static partial class AdminApiEndpoints
 {
     private static void MapOpenIddictApplications(this RouteGroupBuilder api)
     {
-        var g = api.MapGroup("/applications");
+        var g = api.MapGroup("/applications").RequireAuthorization("AdminOnly");
 
         g.MapGet("/", async ([FromServices] IAdminApplicationService service, CancellationToken ct)
             => Results.Ok(await service.GetApplicationsAsync(ct)));

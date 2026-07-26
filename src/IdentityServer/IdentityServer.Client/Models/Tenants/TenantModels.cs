@@ -18,7 +18,7 @@ public sealed record TenantDetailModel(
     List<TenantUserModel> Users,
     SubscriptionModel? CurrentSubscription);
 
-public sealed record TenantUserModel(Guid UserId, Guid RoleId, bool IsActive, DateTime JoinedAtUtc);
+public sealed record TenantUserModel(Guid UserId, string Role, bool IsActive, DateTime JoinedAtUtc);
 
 public sealed record SubscriptionModel(
     Guid Id,

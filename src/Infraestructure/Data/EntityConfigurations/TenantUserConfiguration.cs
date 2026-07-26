@@ -9,8 +9,8 @@ public class TenantUserConfiguration : IEntityTypeConfiguration<TenantUser>
     public void Configure(EntityTypeBuilder<TenantUser> builder)
     {
         builder.ToTable("TenantUsers");
-        builder.HasKey(tu => tu.TenantUserId);
-        builder.Property(tu => tu.TenantUserId)
+        builder.HasKey(tu => tu.Id);
+        builder.Property(tu => tu.Id)
             .HasConversion(id => id.Value, value => new TenantUserId(value))
             .HasColumnName("Id");
 
@@ -24,7 +24,7 @@ public class TenantUserConfiguration : IEntityTypeConfiguration<TenantUser>
             .HasColumnName("UserId")
             .IsRequired();
 
-        builder.Property(tu => tu.UserRoles).HasColumnName("Role").HasMaxLength(50).IsRequired();
+        builder.Property(tu => tu.Role).HasColumnName("Role").HasMaxLength(50).IsRequired();
         builder.Property(tu => tu.IsActive).HasColumnName("IsActive").IsRequired();
         builder.Property(tu => tu.JoinedAtUtc).HasColumnName("JoinedAtUtc").IsRequired();
 

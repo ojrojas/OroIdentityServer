@@ -15,6 +15,7 @@ global using OroIdentityServer.Core.Modules.Roles.Aggregates;
 global using OroIdentityServer.Core.Modules.Roles.DomainEvents;
 global using OroIdentityServer.Core.Modules.Tenants.Aggregates;
 global using OroIdentityServer.Core.Modules.Tenants.DomainEvents;
+global using OroIdentityServer.Core.Modules.Tenants.Entities;
 global using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 global using OroIdentityServer.Core.Modules.Users.Aggregates;
 global using OroIdentityServer.Core.Modules.Users.DomainEvents;

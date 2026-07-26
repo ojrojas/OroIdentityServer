@@ -1,5 +1,5 @@
 @page "/sessions"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin,Manager")]
 @inject IAdminUserService UserService
 @inject IAdminUserSessionService UserSessionService
 @inject IAdminSessionService SessionService

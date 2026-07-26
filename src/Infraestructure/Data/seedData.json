@@ -31,6 +31,16 @@
       ]
     },
     {
+      "Name": "Manager",
+      "Description": "Manager role",
+      "RoleClaims": [
+        {
+          "ClaimType": "Permission",
+          "ClaimValue": "Manager"
+        }
+      ]
+    },
+    {
       "Name": "User",
       "Description": "User role",
       "RoleClaims": [

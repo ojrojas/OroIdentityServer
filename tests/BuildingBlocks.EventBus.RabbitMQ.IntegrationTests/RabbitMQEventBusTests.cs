@@ -1,5 +1,4 @@
 using BuildingBlocks.EventBus.RabbitMQ.DependencyInjection;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -51,7 +50,7 @@ public sealed class RabbitMQEventBusTests
         await bus.PublishAsync(sent);
 
         var delivered = await OrderShippedHandler.Tcs.Task.WaitAsync(TimeSpan.FromSeconds(15));
-        delivered.OrderId.Should().Be(sent.OrderId);
+        Assert.Equal(sent.OrderId, delivered.OrderId);
     }
 }
 

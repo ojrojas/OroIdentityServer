@@ -39,7 +39,7 @@ public class IdentificationTypeRepository(
     {
         logger.LogInformation("Entering GetIdentificationTypeByIdAsync with id: {Id}", id);
         var identificationTypeSpecification = new GetIdentificationTypeByIdSpecification(id);
-        var result = await repository.FindSingleAsync(identificationTypeSpecification.Criteria, cancellationToken);
+        var result = await repository.FirstOrDefaultAsync(identificationTypeSpecification, cancellationToken);
         logger.LogInformation("Exiting GetIdentificationTypeByIdAsync");
         return result;
     }
@@ -48,7 +48,7 @@ public class IdentificationTypeRepository(
     {
         logger.LogInformation("Entering GetIdentificationTypeByNameAsync with name: {Name}", name.Value);
         var identificationTypeSpecification = new GetIdentificationTypeByNameSpecification(name);
-        var result = await repository.FindSingleAsync(identificationTypeSpecification.Criteria, cancellationToken);
+        var result = await repository.FirstOrDefaultAsync(identificationTypeSpecification, cancellationToken);
         logger.LogInformation("Exiting GetIdentificationTypeByNameAsync");
         return result;
     }

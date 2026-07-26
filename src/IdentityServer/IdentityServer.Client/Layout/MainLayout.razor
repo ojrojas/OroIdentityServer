@@ -24,24 +24,32 @@
                     <Icon Name="users" Size="19" />
                     @L["NavUsers"]
                 </a>
-                <a class="nav-item @Active("/roles")" href="/roles" @onclick="CloseSidebar">
-                    <Icon Name="shield" Size="19" />
-                    @L["NavRoles"]
-                </a>
+                <AuthorizeView Roles="Admin">
+                    <Authorized>
+                        <a class="nav-item @Active("/roles")" href="/roles" @onclick="CloseSidebar">
+                            <Icon Name="shield" Size="19" />
+                            @L["NavRoles"]
+                        </a>
+                    </Authorized>
+                </AuthorizeView>
                 <a class="nav-item @Active("/identification-types")" href="/identification-types" @onclick="CloseSidebar">
                     <Icon Name="document" Size="19" />
                     @L["NavIdentificationTypes"]
                 </a>
 
-                <div class="nav-section">@L["NavApplications"]</div>
-                <a class="nav-item @Active("/applications")" href="/applications" @onclick="CloseSidebar">
-                    <Icon Name="apps" Size="19" />
-                    @L["NavApplications"]
-                </a>
-                <a class="nav-item @Active("/scopes")" href="/scopes" @onclick="CloseSidebar">
-                    <Icon Name="key" Size="19" />
-                    @L["NavScopes"]
-                </a>
+                <AuthorizeView Roles="Admin">
+                    <Authorized>
+                        <div class="nav-section">@L["NavApplications"]</div>
+                        <a class="nav-item @Active("/applications")" href="/applications" @onclick="CloseSidebar">
+                            <Icon Name="apps" Size="19" />
+                            @L["NavApplications"]
+                        </a>
+                        <a class="nav-item @Active("/scopes")" href="/scopes" @onclick="CloseSidebar">
+                            <Icon Name="key" Size="19" />
+                            @L["NavScopes"]
+                        </a>
+                    </Authorized>
+                </AuthorizeView>
                 <a class="nav-item @Active("/sessions")" href="/sessions" @onclick="CloseSidebar">
                     <Icon Name="plug" Size="19" />
                     @L["NavSessions"]

@@ -1,0 +1,10 @@
+global using BuildingBlocks.Kernel.Persistence;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Logging.Abstractions;
+global using OroIdentityServer.Core.Modules.Tenants.Aggregates;
+global using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
+global using OroIdentityServer.Core.Modules.Users.Aggregates;
+global using OroIdentityServer.Core.Shared;
+global using OroIdentityServer.Infraestructure;
+global using OroIdentityServer.Infraestructure.Repositories;
+global using OroIdentityServer.Infraestructure.Specifications;

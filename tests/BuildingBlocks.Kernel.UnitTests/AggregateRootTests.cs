@@ -1,6 +1,5 @@
 using BuildingBlocks.Kernel.Domain;
 using BuildingBlocks.Kernel.Events;
-using FluentAssertions;
 
 namespace BuildingBlocks.Kernel.UnitTests;
 
@@ -18,8 +17,8 @@ public sealed class AggregateRootTests
     public void Raising_domain_event_records_it()
     {
         var order = new Order(Guid.NewGuid());
-        order.DomainEvents.Should().HaveCount(1);
-        order.DomainEvents.Single().Should().BeOfType<OrderCreated>();
+        var domainEvent = Assert.Single(order.DomainEvents);
+        Assert.IsType<OrderCreated>(domainEvent);
     }
 
     [Fact]
@@ -28,6 +27,6 @@ public sealed class AggregateRootTests
         var order = new Order(Guid.NewGuid());
         order.Touch();
         order.ClearDomainEvents();
-        order.DomainEvents.Should().BeEmpty();
+        Assert.Empty(order.DomainEvents);
     }
 }

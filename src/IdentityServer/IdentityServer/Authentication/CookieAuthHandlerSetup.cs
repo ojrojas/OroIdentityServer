@@ -3,6 +3,7 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using Microsoft.AspNetCore.Authentication.Cookies;
+using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 
 namespace OroIdentityServer.Server.Authentication;
 
@@ -62,9 +63,14 @@ public static class CookieAuthHandlerSetup
             .AddPolicy("AdminOnly", policy =>
             {
                 policy.RequireAuthenticatedUser();
-                policy.RequireRole("Administrator");
+                policy.RequireRole(TenantRole.Admin);
+            })
+            .AddPolicy("ManagerOrAdmin", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireRole(TenantRole.Admin, TenantRole.Manager);
             });
-            
+
         return services;
     }
 }

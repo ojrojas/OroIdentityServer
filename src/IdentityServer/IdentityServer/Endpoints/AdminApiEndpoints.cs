@@ -9,7 +9,7 @@ public static partial class AdminApiEndpoints
     public static IEndpointRouteBuilder MapAdminApiEndpoints(this IEndpointRouteBuilder app)
     {
         var api = app.MapGroup("/api")
-            .RequireAuthorization("AdminOnly")
+            .RequireAuthorization("ManagerOrAdmin")
             .WithTags("Admin API");
 
         api.MapUsers();

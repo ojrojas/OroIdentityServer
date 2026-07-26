@@ -1,6 +1,5 @@
 using BuildingBlocks.CQRS.Abstractions;
 using BuildingBlocks.CQRS.DependencyInjection;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.CQRS.UnitTests;
@@ -22,6 +21,6 @@ public sealed class QueryDispatcherTests
             .BuildServiceProvider();
 
         var result = await sp.GetRequiredService<IQueryDispatcher>().SendAsync(new GetGreeting("World"));
-        result.Should().Be("Hello, World");
+        Assert.Equal("Hello, World", result);
     }
 }

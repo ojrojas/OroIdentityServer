@@ -1,0 +1,213 @@
+@page "/tenants/{Id:guid}"
+@attribute [Authorize(Roles = "Admin")]
+@inject IAdminTenantService TenantService
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["TenantDetailTitle"]</PageTitle>
+
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["TenantDetailTitle"]</h2>
+    </div>
+
+    @if (item is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="name">@L["Name"] <span class="req">*</span></label>
+                    <input id="name" class="input" @bind="name" @bind:event="oninput" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="slug">@L["Slug"]</label>
+                    <input id="slug" class="input" @bind="slug" @bind:event="oninput" disabled />
+                </div>
+            </div>
+
+            <label class="switch-row" for="isActive">
+                <span class="switch-row-text">
+                    <span class="switch-row-label">@L["Active"]</span>
+                    <span class="switch-row-sub">@L["IsTenantActiveHint"]</span>
+                </span>
+                <input id="isActive" type="checkbox" class="switch" @bind="isActive" />
+            </label>
+
+            @if (item.CurrentSubscription is not null)
+            {
+                <div class="field">
+                    <label class="field-label">@L["SubscriptionLabel"]</label>
+                    <div class="inset">
+                        <div class="stat-row">
+                            <div class="stat">
+                                <div class="stat-label">@L["PlanLabel"]</div>
+                                <div class="stat-figure">@item.CurrentSubscription.Plan</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">@L["MaxCompanies"]</div>
+                                <div class="stat-figure">@item.CurrentSubscription.MaxCompanies</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">@L["MaxUsersPerCompany"]</div>
+                                <div class="stat-figure">@item.CurrentSubscription.MaxUsersPerCompany</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-label">@L["Status"]</div>
+                                <div class="stat-figure">
+                                    @if (item.CurrentSubscription.IsActive)
+                                    {
+                                        <span class="badge badge-green">@L["ActiveStatus"]</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-gray">@L["ExpiredStatus"]</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (item.Users.Count > 0)
+            {
+                <div class="field">
+                    <label class="field-label">@L["TenantUsersLabel"]</label>
+                    <div class="list">
+                        @foreach (var user in item.Users)
+                        {
+                            <div class="list-row">
+                                <span class="list-body">
+                                    <span class="list-title">@user.UserId</span>
+                                    <span class="list-sub">@user.Role &middot; @L["JoinedAt"]: @user.JoinedAtUtc.ToString("yyyy-MM-dd")</span>
+                                </span>
+                                <span class="badge @(user.IsActive ? "badge-green" : "badge-gray")">
+                                    @(user.IsActive ? L["ActiveStatus"] : L["SuspendedStatus"])
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SaveAsync">@L["Save"]</button>
+                <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/tenants")'>@L["Back"]</button>
+                <div class="spacer"></div>
+                @if (item.IsActive)
+                {
+                    <button type="button" class="btn btn-warning" @onclick="SuspendAsync">
+                        <Icon Name="pause" Size="15" /> @L["Suspend"]
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-success" @onclick="ActivateAsync">
+                        <Icon Name="play" Size="15" /> @L["Activate"]
+                    </button>
+                }
+                <button type="button" class="btn btn-danger" @onclick="DeleteAsync">
+                    <Icon Name="trash" Size="15" /> @L["Delete"]
+                </button>
+            </div>
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private TenantDetailModel? item;
+    private string name = string.Empty;
+    private string slug = string.Empty;
+    private bool isActive;
+    private bool saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await TenantService.GetTenantByIdAsync(Id);
+        item = response?.Data;
+        if (item is not null)
+        {
+            name = item.Name;
+            slug = item.Slug;
+            isActive = item.IsActive;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        var response = await TenantService.UpdateTenantAsync(Id, new UpdateTenantRequest(name));
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+            ToastService.ShowSuccess(L["SavedToast"]);
+        else
+            ToastService.ShowError(L["SaveFailedToast", (int)response.StatusCode]);
+    }
+
+    private async Task ActivateAsync()
+    {
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmActionTitle"], L["ActivateTenantConfirm", name],
+            L["Activate"], L["Cancel"]);
+        if (!ok) return;
+
+        var response = await TenantService.ActivateTenantAsync(Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["TenantActivatedToast"]);
+            Nav.NavigateTo(Nav.Uri, forceLoad: true);
+        }
+        else
+        {
+            ToastService.ShowError(L["TenantActivateFailedToast", (int)response.StatusCode]);
+        }
+    }
+
+    private async Task SuspendAsync()
+    {
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmActionTitle"], L["SuspendTenantConfirm", name],
+            L["Suspend"], L["Cancel"], danger: true);
+        if (!ok) return;
+
+        var response = await TenantService.SuspendTenantAsync(Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["TenantSuspendedToast"]);
+            Nav.NavigateTo(Nav.Uri, forceLoad: true);
+        }
+        else
+        {
+            ToastService.ShowError(L["TenantSuspendFailedToast", (int)response.StatusCode]);
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmDeletionTitle"], L["DeleteTenantConfirm", name],
+            L["Delete"], L["Cancel"], danger: true);
+        if (!ok) return;
+
+        var response = await TenantService.SuspendTenantAsync(Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["TenantDeletedToast"]);
+            Nav.NavigateTo("/tenants");
+        }
+        else
+        {
+            ToastService.ShowError(L["TenantDeleteFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

@@ -1,0 +1,111 @@
+@page "/tenants"
+@attribute [Authorize(Roles = "Admin")]
+@inject IAdminTenantService TenantService
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["TenantsTitle"]</PageTitle>
+
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["TenantsTitle"]</h2>
+        <button type="button" class="btn btn-primary btn-sm" @onclick="CreateAsync">
+            <Icon Name="plus" Size="15" Stroke="2.2" /> @L["New"]
+        </button>
+    </div>
+
+    @if (items is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else if (items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">@L["NoData"]</p>
+            <p>@L["NoDataHint"]</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@L["Name"]</th>
+                        <th>@L["Slug"]</th>
+                        <th>@L["Active"]</th>
+                        <th>@L["ColUsers"]</th>
+                        <th>@L["Created"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in items)
+                    {
+                        <tr>
+                            <td class="cell-strong">@item.Name</td>
+                            <td class="cell-muted">@item.Slug</td>
+                            <td>
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge badge-green">@L["ActiveStatus"]</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-gray">@L["SuspendedStatus"]</span>
+                                }
+                            </td>
+                            <td class="num">@item.UserCount</td>
+                            <td class="cell-muted">@item.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
+                            <td>
+                                <div class="actions">
+                                    <button type="button" class="btn-row" title="@L["Edit"]" @onclick="@(() => Nav.NavigateTo($"/tenants/{item.Id}"))">
+                                        <Icon Name="edit" Size="15" />
+                                    </button>
+                                    <button type="button" class="btn-row is-danger" title="@L["Delete"]" @onclick="@(() => DeleteAsync(item))">
+                                        <Icon Name="trash" Size="15" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@code {
+    private List<TenantModel>? items;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var response = await TenantService.GetTenantsAsync();
+        items = response?.Data?.ToList() ?? [];
+    }
+
+    private void CreateAsync() => Nav.NavigateTo("/tenants/create");
+
+    private async Task DeleteAsync(TenantModel item)
+    {
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmDeletionTitle"], L["DeleteTenantConfirm", item.Name],
+            L["Delete"], L["Cancel"], danger: true);
+        if (!ok) return;
+
+        var response = await TenantService.SuspendTenantAsync(item.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["TenantDeletedToast"]);
+            await LoadAsync();
+        }
+        else
+        {
+            ToastService.ShowError(L["TenantDeleteFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

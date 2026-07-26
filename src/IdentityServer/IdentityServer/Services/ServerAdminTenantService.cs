@@ -83,7 +83,7 @@ public class ServerAdminTenantService(IQueryDispatcher queryDispatcher, ICommand
 
     private static TenantDetailModel MapTenantDetail(TenantDetailDto tenant) => new(
         tenant.Id, tenant.Name, tenant.Slug, tenant.IsActive, tenant.CreatedAtUtc, tenant.UserCount,
-        tenant.Users.Select(u => new TenantUserModel(u.UserId, u.RoleId, u.IsActive, u.JoinedAtUtc)).ToList(),
+        [.. tenant.Users.Select(u => new TenantUserModel(u.UserId, u.Role, u.IsActive, u.JoinedAtUtc))],
         tenant.CurrentSubscription is null ? null : new SubscriptionModel(
             tenant.CurrentSubscription.Id, tenant.CurrentSubscription.Plan, tenant.CurrentSubscription.StartDate,
             tenant.CurrentSubscription.EndDate, tenant.CurrentSubscription.IsActive,

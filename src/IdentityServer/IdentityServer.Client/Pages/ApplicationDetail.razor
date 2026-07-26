@@ -1,5 +1,5 @@
 @page "/applications/{ClientId}"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 @inject IAdminApplicationService ApplicationService
 @inject NavigationManager Nav
 @inject IDialogService DialogService

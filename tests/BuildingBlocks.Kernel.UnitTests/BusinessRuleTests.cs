@@ -1,6 +1,5 @@
 using BuildingBlocks.Kernel.Domain;
 using BuildingBlocks.Kernel.Exceptions;
-using FluentAssertions;
 
 namespace BuildingBlocks.Kernel.UnitTests;
 
@@ -16,14 +15,15 @@ public sealed class BusinessRuleTests
     public void Broken_rule_throws_validation_exception()
     {
         var act = () => BusinessRule.Check(new MustBePositive(-1));
-        act.Should().Throw<BusinessRuleValidationException>()
-           .Which.BrokenRule.Should().BeOfType<MustBePositive>();
+        var exception = Assert.Throws<BusinessRuleValidationException>(act);
+        Assert.IsType<MustBePositive>(exception.BrokenRule);
     }
 
     [Fact]
     public void Satisfied_rule_does_not_throw()
     {
         var act = () => BusinessRule.Check(new MustBePositive(1));
-        act.Should().NotThrow();
+        var exception = Record.Exception(act);
+        Assert.Null(exception);
     }
 }

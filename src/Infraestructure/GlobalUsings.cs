@@ -22,6 +22,7 @@ global using OroIdentityServer.Core.Modules.Roles.Aggregates;
 global using OroIdentityServer.Core.Modules.Roles.Entities;
 global using OroIdentityServer.Core.Modules.Roles.Repositories;
 global using OroIdentityServer.Core.Modules.Tenants.Aggregates;
+global using OroIdentityServer.Core.Modules.Tenants.Entities;
 global using OroIdentityServer.Core.Modules.Tenants.Repositories;
 global using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 global using OroIdentityServer.Core.Modules.UserPreferences.Aggregates;

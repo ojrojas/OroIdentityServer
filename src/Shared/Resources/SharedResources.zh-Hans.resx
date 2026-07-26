@@ -153,6 +153,12 @@
   <data name="ScopeDeleteFailedToast"><value>无法删除作用域（{0}）。</value></data>
   <data name="ScopeDetailTitle"><value>作用域</value></data>
 
+  <data name="StatUsersNote"><value>注册账户</value></data>
+  <data name="StatConnectedNote"><value>活动会话</value></data>
+  <data name="StatRolesNote"><value>访问控制组</value></data>
+  <data name="StatApplicationsNote"><value>OAuth 2.0客户端</value></data>
+  <data name="StatScopesNote"><value>API权限</value></data>
+
   <data name="SessionsTitle"><value>会话</value></data>
   <data name="SelectUserPrompt"><value>选择一个用户以查看其会话</value></data>
   <data name="SessionsForUser"><value>{0} 的会话</value></data>

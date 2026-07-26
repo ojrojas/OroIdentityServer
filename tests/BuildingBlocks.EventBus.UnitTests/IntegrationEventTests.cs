@@ -1,5 +1,3 @@
-using FluentAssertions;
-
 namespace BuildingBlocks.EventBus.UnitTests;
 
 public sealed class IntegrationEventTests
@@ -11,8 +9,8 @@ public sealed class IntegrationEventTests
     {
         var a = new CustomerRegistered("a@b.com");
         var b = new CustomerRegistered("a@b.com");
-        a.EventId.Should().NotBe(b.EventId);
-        a.OccurredOn.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
-        a.EventName.Should().Be(nameof(CustomerRegistered));
+        Assert.NotEqual(b.EventId, a.EventId);
+        Assert.True(Math.Abs((a.OccurredOn - DateTimeOffset.UtcNow).TotalSeconds) <= 5);
+        Assert.Equal(nameof(CustomerRegistered), a.EventName);
     }
 }

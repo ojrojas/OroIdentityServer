@@ -12,7 +12,7 @@ public static partial class AdminApiEndpoints
 {
     private static void MapPermissions(this RouteGroupBuilder api)
     {
-        var g = api.MapGroup("/permissions");
+        var g = api.MapGroup("/permissions").RequireAuthorization("AdminOnly");
 
         g.MapGet("/", async ([FromServices] IAdminPermissionService service, CancellationToken ct)
             => Results.Ok(await service.GetPermissionsAsync(ct)));

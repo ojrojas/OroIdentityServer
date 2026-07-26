@@ -134,6 +134,37 @@
   <data name="IdentificationTypeDeleteFailedToast"><value>Could not delete identification type ({0}).</value></data>
   <data name="IdentificationTypeDetailTitle"><value>Identification Type</value></data>
 
+  <!-- Tenants -->
+  <data name="TenantsTitle"><value>Tenants</value></data>
+  <data name="NewTenantTitle"><value>New tenant</value></data>
+  <data name="TenantDetailTitle"><value>Tenant</value></data>
+  <data name="TenantCreatedToast"><value>Tenant created.</value></data>
+  <data name="TenantCreateFailedToast"><value>Could not create tenant ({0}).</value></data>
+  <data name="TenantDeletedToast"><value>Tenant deleted.</value></data>
+  <data name="TenantDeleteFailedToast"><value>Could not delete tenant ({0}).</value></data>
+  <data name="DeleteTenantConfirm"><value>Delete tenant "{0}"?</value></data>
+  <data name="TenantActivatedToast"><value>Tenant activated.</value></data>
+  <data name="TenantActivateFailedToast"><value>Could not activate tenant ({0}).</value></data>
+  <data name="TenantSuspendedToast"><value>Tenant suspended.</value></data>
+  <data name="TenantSuspendFailedToast"><value>Could not suspend tenant ({0}).</value></data>
+  <data name="ActivateTenantConfirm"><value>Activate tenant "{0}"?</value></data>
+  <data name="SuspendTenantConfirm"><value>Suspend tenant "{0}"?</value></data>
+  <data name="Slug"><value>Slug</value></data>
+  <data name="SlugHint"><value>URL-friendly identifier. Cannot be changed after creation.</value></data>
+  <data name="TenantUsersLabel"><value>Tenant Users</value></data>
+  <data name="IsTenantActiveHint"><value>Suspended tenants cannot access the system.</value></data>
+  <data name="SubscriptionLabel"><value>Current Subscription</value></data>
+  <data name="PlanLabel"><value>Plan</value></data>
+  <data name="MaxCompanies"><value>Max Companies</value></data>
+  <data name="MaxUsersPerCompany"><value>Max Users/Company</value></data>
+  <data name="Suspend"><value>Suspend</value></data>
+  <data name="Activate"><value>Activate</value></data>
+  <data name="JoinedAt"><value>Joined</value></data>
+  <data name="ColUsers"><value>Users</value></data>
+  <data name="SuspendedStatus"><value>Suspended</value></data>
+  <data name="Status"><value>Status</value></data>
+  <data name="StatTenantsNote"><value>Active organizations</value></data>
+
   <!-- Applications -->
   <data name="ApplicationsTitle"><value>Applications</value></data>
   <data name="NewApplicationTitle"><value>New application</value></data>
@@ -229,7 +260,11 @@
   <data name="ConnectedUsersDetail"><value>Connected Users</value></data>
   <data name="OverviewTitle"><value>Overview</value></data>
   <data name="StatUsersNote"><value>Registered accounts</value></data>
+
   <data name="StatConnectedNote"><value>Live sessions</value></data>
+  <data name="StatRolesNote"><value>Access control groups</value></data>
+  <data name="StatApplicationsNote"><value>OAuth 2.0 clients</value></data>
+  <data name="StatScopesNote"><value>API permissions</value></data>
   <data name="RecentlyCreatedSubtitle"><value>The latest records added to the server.</value></data>
   <data name="ViewAll"><value>View all</value></data>
   <data name="ValidationsPeak"><value>Busiest day</value></data>

@@ -4,6 +4,8 @@
 // See the LICENSE file in the project root for details.
 using System.Security.Claims;
 using OroIdentityServer.Core.Interfaces;
+using OroIdentityServer.Core.Modules.Tenants.Repositories;
+using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 using OroIdentityServer.Core.Modules.Users.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Repositories;
 using OroIdentityServer.Infraestructure.Interfaces;
@@ -14,8 +16,8 @@ public sealed class AdminPasswordSignInService(
     ILogger<AdminPasswordSignInService> logger,
     IUserRepository userRepository,
     ISecurityUserRepository securityUserRepository,
-    IPasswordHasher passwordHasher,
-    IConfiguration configuration)
+    ITenantRepository tenantRepository,
+    IPasswordHasher passwordHasher)
 {
     public const string MustChangePasswordClaimType = "must_change_password";
 
@@ -51,7 +53,7 @@ public sealed class AdminPasswordSignInService(
             return null;
         }
 
-        return BuildPrincipal(user, securityUser.MustChangePassword, loginIdentifier);
+        return await BuildPrincipalAsync(user, securityUser.MustChangePassword, loginIdentifier, ct);
     }
 
     /// <summary>
@@ -64,19 +66,19 @@ public sealed class AdminPasswordSignInService(
         var user = await userRepository.GetUserByIdAsync(new(userId), ct);
         if (user is null) return null;
 
-        return BuildPrincipal(user, mustChangePassword: false, user.UserName ?? user.Email ?? string.Empty);
+        return await BuildPrincipalAsync(user, mustChangePassword: false, user.UserName ?? user.Email ?? string.Empty, ct);
     }
 
-    private ClaimsPrincipal BuildPrincipal(User user, bool mustChangePassword, string loginIdentifier)
+    private async Task<ClaimsPrincipal> BuildPrincipalAsync(User user, bool mustChangePassword, string loginIdentifier, CancellationToken ct)
     {
-        var defaultRole = configuration["Admin:DefaultRole"] ?? "Administrator";
+        var role = await ResolveTenantRoleAsync(user, ct);
 
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.Value.ToString()),
             new(ClaimTypes.Name, user.UserName ?? user.Email ?? loginIdentifier),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new(ClaimTypes.Role, defaultRole),
+            new(ClaimTypes.Role, role),
             new("tenant_id", user.TenantId!.Value.ToString())
         };
 
@@ -85,5 +87,18 @@ public sealed class AdminPasswordSignInService(
 
         var identity = new ClaimsIdentity(claims, CookieAuthHandlerSetup.AdminScheme);
         return new ClaimsPrincipal(identity);
+    }
+
+    /// <summary>
+    /// A user's admin-console role is scoped to their home tenant's TenantUser membership, not a
+    /// global claim - defaults to the least-privileged role if no membership row exists yet.
+    /// </summary>
+    private async Task<string> ResolveTenantRoleAsync(User user, CancellationToken ct)
+    {
+        var tenants = await tenantRepository.GetByUserIdAsync(user.Id, ct);
+        var homeTenant = tenants.FirstOrDefault(t => t.Id == user.TenantId);
+        var membership = homeTenant?.TenantUsers.FirstOrDefault(tu => tu.UserId == user.Id);
+
+        return membership?.Role ?? TenantRole.Member;
     }
 }

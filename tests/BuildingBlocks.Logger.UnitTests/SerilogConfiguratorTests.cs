@@ -1,5 +1,4 @@
 using BuildingBlocks.Logger.Options;
-using FluentAssertions;
 using Serilog;
 using Serilog.Events;
 
@@ -22,16 +21,16 @@ public sealed class SerilogConfiguratorTests
 
         ILogger logger = SerilogConfigurator.Configure(new LoggerConfiguration(), options).CreateLogger();
 
-        logger.IsEnabled(LogEventLevel.Debug).Should().BeTrue();
-        logger.IsEnabled(LogEventLevel.Verbose).Should().BeFalse();
+        Assert.True(logger.IsEnabled(LogEventLevel.Debug));
+        Assert.False(logger.IsEnabled(LogEventLevel.Verbose));
     }
 
     [Fact]
     public void Configure_throws_for_null_arguments()
     {
         var actNullCfg = () => SerilogConfigurator.Configure(null!, new LoggerOptions());
-        actNullCfg.Should().Throw<ArgumentNullException>();
+        Assert.Throws<ArgumentNullException>(actNullCfg);
         var actNullOpts = () => SerilogConfigurator.Configure(new LoggerConfiguration(), null!);
-        actNullOpts.Should().Throw<ArgumentNullException>();
+        Assert.Throws<ArgumentNullException>(actNullOpts);
     }
 }

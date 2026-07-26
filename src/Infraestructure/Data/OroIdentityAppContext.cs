@@ -13,6 +13,7 @@ public class OroIdentityAppContext(
     public DbSet<IdentificationType> IdentificationTypes { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Tenant> Tenants { get; set; }
+    public DbSet<TenantUser> TenantUsers { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<Session> Sessions { get; set; }
@@ -27,6 +28,7 @@ public class OroIdentityAppContext(
         builder.ApplyConfiguration(new UserRoleEntityConfiguration());
         builder.ApplyConfiguration(new SecurityUserEntityConfiguration());
         builder.ApplyConfiguration(new TenantEntityConfiguration());
+        builder.ApplyConfiguration(new TenantUserConfiguration());
         builder.ApplyConfiguration(new ApplicationTenantEntityConfiguration());
         builder.ApplyConfiguration(new PermissionEntityConfiguration());
         builder.ApplyConfiguration(new RolePermissionEntityConfiguration());

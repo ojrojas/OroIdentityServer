@@ -1,5 +1,4 @@
 using BuildingBlocks.Kernel.Domain;
-using FluentAssertions;
 
 namespace BuildingBlocks.Kernel.UnitTests;
 
@@ -18,15 +17,15 @@ public sealed class ValueObjectTests
     {
         var a = new Money(10, "USD");
         var b = new Money(10, "USD");
-        a.Should().Be(b);
-        (a == b).Should().BeTrue();
-        a.GetHashCode().Should().Be(b.GetHashCode());
+        Assert.Equal(b, a);
+        Assert.True(a == b);
+        Assert.Equal(b.GetHashCode(), a.GetHashCode());
     }
 
     [Fact]
     public void Different_components_break_equality()
     {
-        new Money(10, "USD").Should().NotBe(new Money(10, "EUR"));
-        new Money(10, "USD").Should().NotBe(new Money(11, "USD"));
+        Assert.NotEqual(new Money(10, "USD"), new Money(10, "EUR"));
+        Assert.NotEqual(new Money(10, "USD"), new Money(11, "USD"));
     }
 }

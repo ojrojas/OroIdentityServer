@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 
@@ -17,8 +16,8 @@ public sealed class ServiceDefaultsExtensionsTests
         await app.StartAsync();
 
         var client = app.GetTestClient();
-        (await client.GetAsync("/health/live")).IsSuccessStatusCode.Should().BeTrue();
-        (await client.GetAsync("/health/ready")).IsSuccessStatusCode.Should().BeTrue();
+        Assert.True((await client.GetAsync("/health/live")).IsSuccessStatusCode);
+        Assert.True((await client.GetAsync("/health/ready")).IsSuccessStatusCode);
 
         await app.StopAsync();
     }

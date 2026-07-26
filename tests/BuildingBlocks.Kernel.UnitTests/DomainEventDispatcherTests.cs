@@ -1,6 +1,5 @@
 using BuildingBlocks.Kernel.DependencyInjection;
 using BuildingBlocks.Kernel.Events;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.Kernel.UnitTests;
@@ -30,6 +29,6 @@ public sealed class DomainEventDispatcherTests
         var dispatcher = services.GetRequiredService<IDomainEventDispatcher>();
         await dispatcher.DispatchAsync(new[] { new Pinged("test") });
 
-        CountingHandler.Count.Should().Be(1);
+        Assert.Equal(1, CountingHandler.Count);
     }
 }

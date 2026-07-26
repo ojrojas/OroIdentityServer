@@ -84,6 +84,12 @@
   <data name="StatRoles"><value>ロール</value></data>
   <data name="StatApplications"><value>アプリケーション</value></data>
   <data name="StatScopes"><value>スコープ</value></data>
+  <data name="StatUsersNote"><value>登録済みアカウント</value></data>
+
+  <data name="StatConnectedNote"><value>アクティブセッション</value></data>
+  <data name="StatRolesNote"><value>アクセス制御グループ</value></data>
+  <data name="StatApplicationsNote"><value>OAuth 2.0クライアント</value></data>
+  <data name="StatScopesNote"><value>API権限</value></data>
 
   <data name="UsersTitle"><value>ユーザー</value></data>
   <data name="NewUserTitle"><value>新規ユーザー</value></data>

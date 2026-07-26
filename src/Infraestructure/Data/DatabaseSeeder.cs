@@ -101,6 +101,37 @@ public static class DatabaseSeeder
                     context.UserRoles.Add(new UserRole(maria.Id, userRole.Id));
                 }
             }
+
+            await context.SaveChangesAsync(cancellationToken);
+        }
+
+        if (!context.TenantUsers.Any())
+        {
+            var tenants = await context.Tenants
+                .Include(t => t.TenantUsers)
+                .IgnoreQueryFilters()
+                .ToListAsync(cancellationToken);
+
+            var allUsers = await context.Users.ToListAsync(cancellationToken);
+
+            foreach (var tenant in tenants)
+            {
+                var usersInTenant = allUsers.Where(u => u.TenantId == tenant.Id);
+
+                foreach (var user in usersInTenant)
+                {
+                    var role = user.UserName switch
+                    {
+                        "pepe.perez" => TenantRole.Admin,
+                        "maria.martinez" => TenantRole.Manager,
+                        _ => TenantRole.Member
+                    };
+
+                    tenant.AddUser(user.Id, role);
+                }
+            }
+
+            await context.SaveChangesAsync(cancellationToken);
         }
 
         var identityUrls = configuration.GetValue<string>("ASPNETCORE_URLS").Split(";");

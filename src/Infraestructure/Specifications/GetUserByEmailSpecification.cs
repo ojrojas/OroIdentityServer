@@ -4,17 +4,11 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Infraestructure.Specifications;
 
-public sealed class GetUserByEmailSpecification(string criteria) : ISpecification<User>
+public sealed class GetUserByEmailSpecification : Specification<User>
 {
-    public Expression<Func<User, bool>> Criteria { get; } = x => x.NormalizedEmail == criteria.ToUpperInvariant();
-
-    public bool IsSatisfiedBy(User entity)
+    public GetUserByEmailSpecification(string email) : base(x => x.NormalizedEmail == email.ToUpperInvariant())
     {
-        return Criteria.Compile()(entity);
-    }
-
-    public Expression<Func<User, bool>> ToExpression()
-    {
-        return Criteria;
+        AddInclude(x => x.Roles);
+        AddInclude(x => x.SecurityUser!);
     }
 }

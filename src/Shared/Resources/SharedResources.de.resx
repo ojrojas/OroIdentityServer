@@ -140,6 +140,12 @@
   <data name="ApplicationDetailTitle"><value>Anwendung</value></data>
   <data name="RedirectUris"><value>Weiterleitungs-URIs (kommagetrennt)</value></data>
   <data name="PostLogoutRedirectUris"><value>Weiterleitungs-URIs nach Abmeldung (kommagetrennt)</value></data>
+  <data name="StatUsersNote"><value>Registrierte Konten</value></data>
+
+  <data name="StatConnectedNote"><value>Aktive Sitzungen</value></data>
+  <data name="StatRolesNote"><value>Zugriffskontrollgruppen</value></data>
+  <data name="StatApplicationsNote"><value>OAuth 2.0-Clients</value></data>
+  <data name="StatScopesNote"><value>API-Berechtigungen</value></data>
 
   <data name="ScopesTitle"><value>Berechtigungsbereiche</value></data>
   <data name="NewScopeTitle"><value>Neuer Berechtigungsbereich</value></data>

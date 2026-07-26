@@ -3,7 +3,6 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using System.Net;
-using FluentAssertions;
 using OroIdentityServer.Server.Tests.Infrastructure;
 using Xunit;
 
@@ -25,7 +24,7 @@ public sealed class AuthEndpointsTests(IdentityServerWebApplicationFactory facto
 
         var response = await _client.PostAsync("/auth/login", form);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location!.OriginalString.Should().Contain("/Account/Login?error=invalid&ReturnUrl=");
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Contains("/Account/Login?error=invalid&ReturnUrl=", response.Headers.Location!.OriginalString);
     }
 }

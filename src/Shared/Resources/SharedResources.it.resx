@@ -84,6 +84,12 @@
   <data name="StatRoles"><value>Ruoli</value></data>
   <data name="StatApplications"><value>Applicazioni</value></data>
   <data name="StatScopes"><value>Ambiti</value></data>
+  <data name="StatUsersNote"><value>Account registrati</value></data>
+
+  <data name="StatConnectedNote"><value>Sessioni attive</value></data>
+  <data name="StatRolesNote"><value>Gruppi di controllo accessi</value></data>
+  <data name="StatApplicationsNote"><value>Client OAuth 2.0</value></data>
+  <data name="StatScopesNote"><value>Permessi API</value></data>
 
   <data name="UsersTitle"><value>Utenti</value></data>
   <data name="NewUserTitle"><value>Nuovo utente</value></data>

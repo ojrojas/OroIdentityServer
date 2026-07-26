@@ -1,20 +1,19 @@
+// OroIdentityServer
+// Copyright (C) 2026 Oscar Rojas
+// Licensed under the GNU AGPL v3.0 or later.
+// See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Infraestructure.Specifications;
 
-public sealed class GetUserByUserNameOrEmailSpecification(string loginIdentifier) : ISpecification<User>
+public sealed class GetUserByUserNameOrEmailSpecification : Specification<User>
 {
-    private readonly string _normalizedLoginIdentifier = loginIdentifier.ToUpperInvariant();
-
-    public Expression<Func<User, bool>> Criteria => x =>
-        x.NormalizedUserName == _normalizedLoginIdentifier ||
-        x.NormalizedEmail == _normalizedLoginIdentifier;
-
-    public bool IsSatisfiedBy(User entity)
+    public GetUserByUserNameOrEmailSpecification(string loginIdentifier)
     {
-        return Criteria.Compile()(entity);
-    }
+        var normalizedLoginIdentifier = loginIdentifier.ToUpperInvariant();
+        Criteria = x =>
+            x.NormalizedUserName == normalizedLoginIdentifier ||
+            x.NormalizedEmail == normalizedLoginIdentifier;
 
-    public Expression<Func<User, bool>> ToExpression()
-    {
-        return Criteria;
+        AddInclude(x => x.Roles);
+        AddInclude(x => x.SecurityUser!);
     }
 }

@@ -4,22 +4,6 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Tenants.Aggregates;
 
-public class TenantUser
-{
-    public TenantUserId TenantUserId { get; set; } = null!;
-    public TenantId? TenantId { get; private set; }
-    public UserId? UserId { get; private set; }
-    public bool IsOwner { get; private set; }
-    public bool IsActive { get; private set; }
-    private readonly List<UserRole> _userRoles = [];
-    public IReadOnlyCollection<UserRole> UserRoles => _userRoles;
-
-    // Navigation
-    public Tenant Tenant { get; set; } = null!;
-    public User User { get; set; } = null!;
-    public DateTime JoinedAtUtc { get; private set; }
-}
-
 public class Tenant : AggregateRoot<TenantId>, IAuditableEntity
 {
     public TenantName Name { get; private set; }
@@ -107,5 +91,21 @@ public class Tenant : AggregateRoot<TenantId>, IAuditableEntity
 
         IsActive = true;
         RaiseDomainEvent(new TenantActivatedEvent(Id));
+    }
+
+    public TenantUser AddUser(UserId userId, string role)
+    {
+        if (!TenantRole.IsValid(role))
+            throw new ArgumentException($"'{role}' is not a valid tenant role.", nameof(role));
+
+        if (_tenantUsers.Any(tu => tu.UserId == userId))
+            throw new InvalidOperationException("User is already a member of this tenant.");
+
+        var tenantUser = new TenantUser(Id, userId, role);
+        _tenantUsers.Add(tenantUser);
+
+        RaiseDomainEvent(new TenantUserAddedEvent(Id, userId, role));
+
+        return tenantUser;
     }
 }

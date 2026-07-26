@@ -7,8 +7,7 @@ namespace OroIdentityServer.Infraestructure.Repositories;
 public class UserRepository(
     ILogger<UserRepository> logger,
     IRepository<User> repository,
-    ISecurityUserRepository securityUserRepository,
-    OroIdentityAppContext context) : IUserRepository
+    ISecurityUserRepository securityUserRepository) : IUserRepository
 {
     public async Task AddUserAsync(User user, CancellationToken cancellationToken)
     {
@@ -61,10 +60,7 @@ public class UserRepository(
     public async Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetAllUsersAsync");
-        // The generic IRepository<T>.GetAllAsync never applies .Include(), so it queried
-        // through OroIdentityAppContext directly here - otherwise User.Roles always comes
-        // back empty (no lazy-loading proxies are configured).
-        var result = await context.Users.Include(u => u.Roles).ToListAsync(cancellationToken);
+        var result = await repository.ListAsync(new GetAllUsersSpecification(), cancellationToken);
         logger.LogInformation("Exiting GetAllUsersAsync");
         return result;
     }
@@ -73,7 +69,7 @@ public class UserRepository(
     {
         logger.LogInformation("handling request user by email {Email}", email);
         var emailSpecification = new GetUserByEmailSpecification(email);
-        var user = await repository.FindSingleAsync(emailSpecification.Criteria, cancellationToken);
+        var user = await repository.FirstOrDefaultAsync(emailSpecification, cancellationToken);
         logger.LogInformation("finish request get user by email");
         return user ?? throw new InvalidOperationException("User cannot be null.");
     }
@@ -82,7 +78,7 @@ public class UserRepository(
     {
         logger.LogInformation("handling request user by login identifier {LoginIdentifier}", loginIdentifier);
         var specification = new GetUserByUserNameOrEmailSpecification(loginIdentifier);
-        var user = await repository.FindSingleAsync(specification.Criteria, cancellationToken);
+        var user = await repository.FirstOrDefaultAsync(specification, cancellationToken);
         logger.LogInformation("finish request get user by login identifier");
         return user ?? throw new InvalidOperationException("User cannot be null.");
     }
@@ -91,15 +87,7 @@ public class UserRepository(
     {
         logger.LogInformation("Entering GetUserByIdAsync with id: {Id}", id);
         var specification = new GetUserByIdSpecification(id);
-
-        // specification.Includes existed but was never consumed by anything - the generic
-        // IRepository<T>.FindSingleAsync it used to go through has no .Include() support at
-        // all, so User.Roles always came back empty here. Query the DbContext directly and
-        // eager-load Roles explicitly instead.
-        var user = await context.Users
-            .Include(u => u.Roles)
-            .FirstOrDefaultAsync(specification.Criteria, cancellationToken);
-
+        var user = await repository.FirstOrDefaultAsync(specification, cancellationToken);
         logger.LogInformation("Exiting GetUserByIdAsync");
         return user;
     }

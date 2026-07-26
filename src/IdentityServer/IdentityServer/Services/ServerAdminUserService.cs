@@ -3,8 +3,10 @@ using BuildingBlocks.CQRS.Abstractions;
 using IdentityServer.Client.Interfaces;
 using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.Users;
+using OroIdentityServer.Application.Modules.Roles.Queries;
 using OroIdentityServer.Application.Modules.Users.Commands;
 using OroIdentityServer.Application.Modules.Users.Queries;
+using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 using OroIdentityServer.Core.Modules.Users.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Entities;
 
@@ -16,8 +18,12 @@ namespace IdentityServer.Services;
 /// instead of over HTTP, and maps the result into the same client-facing models the HTTP-based
 /// AdminUserService would deserialize from the wire.
 /// </summary>
-public class ServerAdminUserService(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher) : IAdminUserService
+public class ServerAdminUserService(
+    IQueryDispatcher queryDispatcher,
+    ICommandDispatcher commandDispatcher,
+    IHttpContextAccessor httpContextAccessor) : IAdminUserService
 {
+    private const string AdministratorRoleName = "Administrator";
     public async Task<ApiResponse<IEnumerable<UserModel>>?> GetUsersAsync(CancellationToken ct = default)
     {
         var result = await queryDispatcher.SendAsync(new GetUsersQuery(), ct);
@@ -58,6 +64,16 @@ public class ServerAdminUserService(IQueryDispatcher queryDispatcher, ICommandDi
 
     public async Task<HttpResponseMessage> AssignRolesToUserAsync(Guid userId, AssignRolesRequest request, CancellationToken ct = default)
     {
+        var caller = httpContextAccessor.HttpContext?.User;
+        if (caller?.IsInRole(TenantRole.Admin) != true)
+        {
+            var adminRole = await queryDispatcher.SendAsync(new GetRoleByNameQuery(AdministratorRoleName), ct);
+            if (adminRole.Data is not null && request.RoleIds.Contains(adminRole.Data.Id))
+            {
+                return new HttpResponseMessage(HttpStatusCode.Forbidden);
+            }
+        }
+
         var result = await commandDispatcher.SendAsync(new AssignRolesToUserCommand(userId, request.RoleIds), ct);
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.OK);
     }

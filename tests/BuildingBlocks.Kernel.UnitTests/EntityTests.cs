@@ -1,5 +1,4 @@
 using BuildingBlocks.Kernel.Domain;
-using FluentAssertions;
 
 namespace BuildingBlocks.Kernel.UnitTests;
 
@@ -22,21 +21,21 @@ public sealed class EntityTests
         var a = new Customer(id);
         var b = new Customer(id);
 
-        a.Should().Be(b);
-        (a == b).Should().BeTrue();
-        a.GetHashCode().Should().Be(b.GetHashCode());
+        Assert.Equal(b, a);
+        Assert.True(a == b);
+        Assert.Equal(b.GetHashCode(), a.GetHashCode());
     }
 
     [Fact]
     public void Entities_with_different_ids_are_not_equal()
     {
-        new Customer(Guid.NewGuid()).Should().NotBe(new Customer(Guid.NewGuid()));
+        Assert.NotEqual(new Customer(Guid.NewGuid()), new Customer(Guid.NewGuid()));
     }
 
     [Fact]
     public void Entities_of_different_types_with_same_id_are_not_equal()
     {
         var id = Guid.NewGuid();
-        ((object)new Customer(id)).Should().NotBe(new Product(id));
+        Assert.NotEqual((object)new Product(id), (object)new Customer(id));
     }
 }

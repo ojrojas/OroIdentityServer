@@ -1,5 +1,4 @@
 using BuildingBlocks.EventBus.Subscriptions;
-using FluentAssertions;
 
 namespace BuildingBlocks.EventBus.UnitTests;
 
@@ -23,11 +22,11 @@ public sealed class SubscriptionRegistryTests
         registry.OnEventRemoved += (_, name) => removed = name;
 
         registry.Add<OrderPaid, OrderPaidHandler>();
-        registry.HasSubscriptions(nameof(OrderPaid)).Should().BeTrue();
+        Assert.True(registry.HasSubscriptions(nameof(OrderPaid)));
 
         registry.Remove<OrderPaid, OrderPaidHandler>();
-        registry.HasSubscriptions(nameof(OrderPaid)).Should().BeFalse();
-        removed.Should().Be(nameof(OrderPaid));
+        Assert.False(registry.HasSubscriptions(nameof(OrderPaid)));
+        Assert.Equal(nameof(OrderPaid), removed);
     }
 
     [Fact]
@@ -36,7 +35,7 @@ public sealed class SubscriptionRegistryTests
         var registry = new InMemorySubscriptionRegistry();
         registry.Add<OrderPaid, OrderPaidHandler>();
         registry.Add<OrderPaid, AnotherHandler>();
-        registry.GetHandlersFor(nameof(OrderPaid)).Should().HaveCount(2);
+        Assert.Equal(2, registry.GetHandlersFor(nameof(OrderPaid)).Count());
     }
 
     [Fact]
@@ -45,6 +44,6 @@ public sealed class SubscriptionRegistryTests
         var registry = new InMemorySubscriptionRegistry();
         registry.Add<OrderPaid, OrderPaidHandler>();
         var act = () => registry.Add<OrderPaid, OrderPaidHandler>();
-        act.Should().Throw<InvalidOperationException>();
+        Assert.Throws<InvalidOperationException>(act);
     }
 }

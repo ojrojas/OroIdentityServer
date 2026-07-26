@@ -46,7 +46,12 @@ public class TenantEntityConfiguration : IEntityTypeConfiguration<Tenant>
 
         builder.HasQueryFilter(it => it.IsActive);
 
-        // Ignore TenantUsers navigation for now - mapped separately when needed
-        builder.Ignore(t => t.TenantUsers);
+        builder.Metadata.FindNavigation(nameof(Tenant.TenantUsers))!
+            .SetPropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasMany(t => t.TenantUsers)
+            .WithOne()
+            .HasForeignKey(tu => tu.TenantId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

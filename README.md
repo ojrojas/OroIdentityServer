@@ -110,7 +110,7 @@ OroIdentityServer/
 - **Microsoft.FluentUI.AspNetCore.Components** — admin UI components (dark theme, toasts, dialogs, data grids)
 - **Microsoft.Extensions.Localization** — RESX-based localization, 8 languages, satellite assemblies for WASM
 - **Scalar.AspNetCore / Microsoft.OpenApi** — OpenAPI documentation
-- **xUnit, FluentAssertions, NSubstitute, Testcontainers** — test stack
+- **xUnit, NSubstitute, Testcontainers, EF Core InMemory** — test stack
 
 ## Domain-Driven Design Implementation
 

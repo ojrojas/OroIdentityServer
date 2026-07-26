@@ -1,5 +1,5 @@
 @page "/applications/create"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 @inject IAdminApplicationService ApplicationService
 @inject IToastService ToastService
 @inject NavigationManager Nav

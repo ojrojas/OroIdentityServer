@@ -1,5 +1,5 @@
 @page "/scopes"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 @inject IAdminScopeService ScopeService
 @inject IDialogService DialogService
 @inject IToastService ToastService

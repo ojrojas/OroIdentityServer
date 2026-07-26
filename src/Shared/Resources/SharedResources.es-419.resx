@@ -184,7 +184,11 @@
   <data name="NoRecentlyCreated"><value>Todavía no hay nada creado</value></data>
   <data name="OverviewTitle"><value>Resumen</value></data>
   <data name="StatUsersNote"><value>Cuentas registradas</value></data>
+
   <data name="StatConnectedNote"><value>Sesiones vigentes</value></data>
+  <data name="StatRolesNote"><value>Grupos de control de acceso</value></data>
+  <data name="StatApplicationsNote"><value>Clientes OAuth 2.0</value></data>
+  <data name="StatScopesNote"><value>Permisos de API</value></data>
   <data name="RecentlyCreatedSubtitle"><value>Lo último que se dio de alta en el servidor.</value></data>
   <data name="ViewAll"><value>Ver todos</value></data>
   <data name="ValidationsPeak"><value>Día con más actividad</value></data>

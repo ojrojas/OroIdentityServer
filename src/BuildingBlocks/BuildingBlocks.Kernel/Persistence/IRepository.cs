@@ -10,6 +10,9 @@ public interface IRepository<TAggregate>
     Task<IEnumerable<TAggregate>> GetAllAsync(CancellationToken cancellationToken = default);
     Task<IEnumerable<TAggregate>> FindAsync(Expression<Func<TAggregate, bool>> predicate, CancellationToken cancellationToken = default);
     Task<TAggregate?> FindSingleAsync(Expression<Func<TAggregate, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TAggregate>> ListAsync(ISpecification<TAggregate> specification, CancellationToken cancellationToken = default);
+    Task<TAggregate?> FirstOrDefaultAsync(ISpecification<TAggregate> specification, CancellationToken cancellationToken = default);
+    Task<bool> AnyAsync(ISpecification<TAggregate> specification, CancellationToken cancellationToken = default);
     Task AddAsync(TAggregate aggregate, CancellationToken cancellationToken = default);
     Task UpdateAsync(TAggregate aggregate, CancellationToken cancellationToken = default);
     Task DeleteAsync(TAggregate aggregate, CancellationToken cancellationToken = default);

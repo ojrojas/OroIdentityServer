@@ -1,0 +1,76 @@
+@page "/tenants/create"
+@attribute [Authorize(Roles = "Admin")]
+@inject IAdminTenantService TenantService
+@inject IToastService ToastService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["NewTenantTitle"]</PageTitle>
+
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["NewTenantTitle"]</h2>
+    </div>
+
+    <div class="form">
+        <div class="form-grid">
+            <div class="field">
+                <label class="field-label" for="name">@L["Name"] <span class="req">*</span></label>
+                <input id="name" class="input" @bind="name" @bind:event="oninput" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="slug">@L["Slug"] <span class="req">*</span></label>
+                <input id="slug" class="input" @bind="slug" @bind:event="oninput" />
+            </div>
+        </div>
+
+        <p class="field-hint">@L["SlugHint"]</p>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@(!CanSubmit || saving)" @onclick="SubmitAsync">@L["Create"]</button>
+            <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/tenants")'>@L["Cancel"]</button>
+        </div>
+    </div>
+</section>
+
+@code {
+    private string name = string.Empty;
+    private string slug = string.Empty;
+    private Guid ownerId;
+    private bool saving;
+
+    private bool CanSubmit =>
+        !string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(slug) && !saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdClaim, out var parsedId))
+            {
+                ownerId = parsedId;
+            }
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        saving = true;
+        var response = await TenantService.CreateTenantAsync(new CreateTenantRequest(name, slug, ownerId));
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["TenantCreatedToast"]);
+            Nav.NavigateTo("/tenants");
+        }
+        else
+        {
+            ToastService.ShowError(L["TenantCreateFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

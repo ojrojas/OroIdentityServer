@@ -1,7 +1,6 @@
 using BuildingBlocks.CQRS.Abstractions;
 using BuildingBlocks.CQRS.DependencyInjection;
 using BuildingBlocks.CQRS.Exceptions;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.CQRS.UnitTests;
@@ -35,7 +34,7 @@ public sealed class PipelineBehaviorTests
 
         var dispatcher = sp.GetRequiredService<IQueryDispatcher>();
         var act = () => dispatcher.SendAsync(new Echo(""));
-        await act.Should().ThrowAsync<RequestValidationException>();
+        await Assert.ThrowsAsync<RequestValidationException>(act);
     }
 
     [Fact]
@@ -48,6 +47,6 @@ public sealed class PipelineBehaviorTests
             .BuildServiceProvider();
 
         var result = await sp.GetRequiredService<IQueryDispatcher>().SendAsync(new Echo("ping"));
-        result.Should().Be("ping");
+        Assert.Equal("ping", result);
     }
 }

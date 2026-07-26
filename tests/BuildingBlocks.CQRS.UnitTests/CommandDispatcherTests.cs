@@ -1,7 +1,6 @@
 using BuildingBlocks.CQRS.Abstractions;
 using BuildingBlocks.CQRS.DependencyInjection;
 using BuildingBlocks.Kernel.Results;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.CQRS.UnitTests;
@@ -30,7 +29,7 @@ public sealed class CommandDispatcherTests
 
         var dispatcher = sp.GetRequiredService<ICommandDispatcher>();
         var id = await dispatcher.SendAsync(new CreateThing("a"));
-        id.Should().NotBeEmpty();
+        Assert.NotEqual(Guid.Empty, id);
     }
 
     [Fact]
@@ -41,6 +40,6 @@ public sealed class CommandDispatcherTests
             .BuildServiceProvider();
 
         var result = await sp.GetRequiredService<ICommandDispatcher>().SendAsync(new DeleteThing(Guid.NewGuid()));
-        result.IsSuccess.Should().BeTrue();
+        Assert.True(result.IsSuccess);
     }
 }

@@ -35,7 +35,7 @@ public class UserRolesRepository(
     {
         logger.LogInformation("Entering GetRolesByUserIdAsync");
         var specification = new GetUserRolesByUserIdSpecification(userId);
-        var roles = await repository.FindAsync(specification.Criteria, cancellationToken);
+        var roles = await repository.ListAsync(specification, cancellationToken);
         logger.LogInformation("Exiting GetRolesByUserIdAsync");
         return roles;
     }

@@ -8,7 +8,7 @@ public static partial class AdminApiEndpoints
 {
     private static void MapTenants(this RouteGroupBuilder api)
     {
-        var g = api.MapGroup("/tenants");
+        var g = api.MapGroup("/tenants").RequireAuthorization("AdminOnly");
 
         g.MapGet("/", async ([FromServices] IAdminTenantService service, CancellationToken ct)
             => Results.Ok(await service.GetTenantsAsync(ct)));

@@ -48,6 +48,37 @@ public class Repository<T>(
         return result;
     }
 
+    public async Task<IEnumerable<T>> ListAsync(ISpecification<T> specification, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering ListAsync");
+        var result = await SpecificationEvaluator.GetQuery(context.Set<T>().AsQueryable(), specification)
+            .ToListAsync(cancellationToken);
+        logger.LogInformation("Exiting ListAsync");
+        return result;
+    }
+
+    public async Task<T?> FirstOrDefaultAsync(ISpecification<T> specification, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering FirstOrDefaultAsync");
+        var result = await SpecificationEvaluator.GetQuery(context.Set<T>().AsQueryable(), specification)
+            .FirstOrDefaultAsync(cancellationToken);
+        logger.LogInformation("Exiting FirstOrDefaultAsync");
+        return result;
+    }
+
+    public async Task<bool> AnyAsync(ISpecification<T> specification, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering AnyAsync");
+        var query = context.Set<T>().AsQueryable();
+        if (specification.IgnoreQueryFilters)
+        {
+            query = query.IgnoreQueryFilters();
+        }
+        var result = await query.AnyAsync(specification.ToExpression(), cancellationToken);
+        logger.LogInformation("Exiting AnyAsync");
+        return result;
+    }
+
     public async Task AddAsync(T entity, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering AddAsync");

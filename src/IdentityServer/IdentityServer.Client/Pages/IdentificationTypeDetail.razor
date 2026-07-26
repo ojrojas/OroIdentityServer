@@ -1,5 +1,5 @@
 @page "/identification-types/{Id:guid}"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin,Manager")]
 @inject IAdminIdentificationTypeService IdentificationTypeService
 @inject NavigationManager Nav
 @inject IDialogService DialogService

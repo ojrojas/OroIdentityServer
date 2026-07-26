@@ -411,6 +411,43 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.ToTable("Tenants", (string)null);
                 });
 
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Tenants.Entities.TenantUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsActive");
+
+                    b.Property<DateTime>("JoinedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("JoinedAtUtc");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("Role");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("TenantId");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_tenant_users_tenant_id_user_id");
+
+                    b.ToTable("TenantUsers", (string)null);
+                });
+
             modelBuilder.Entity("OroIdentityServer.Core.Modules.UserSessions.Aggregates.UserSession", b =>
                 {
                     b.Property<Guid>("Id")
@@ -783,6 +820,15 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Tenants.Entities.TenantUser", b =>
+                {
+                    b.HasOne("OroIdentityServer.Core.Modules.Tenants.Aggregates.Tenant", null)
+                        .WithMany("TenantUsers")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OroIdentityServer.Core.Modules.UserSessions.Entities.Session", b =>
                 {
                     b.HasOne("OroIdentityServer.Core.Modules.Users.Aggregates.User", "User")
@@ -848,6 +894,11 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
             modelBuilder.Entity("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", b =>
                 {
                     b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Tenants.Aggregates.Tenant", b =>
+                {
+                    b.Navigation("TenantUsers");
                 });
 
             modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Aggregates.User", b =>

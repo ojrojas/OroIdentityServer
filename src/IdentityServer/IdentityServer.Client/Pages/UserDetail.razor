@@ -1,5 +1,5 @@
 @page "/users/{Id:guid}"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin,Manager")]
 @inject IAdminUserService UserService
 @inject IAdminIdentificationTypeService IdentificationTypeService
 @inject IAdminTenantService TenantService

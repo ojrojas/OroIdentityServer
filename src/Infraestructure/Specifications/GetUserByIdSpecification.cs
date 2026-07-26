@@ -4,17 +4,11 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Infraestructure.Specifications;
 
-public sealed class GetUserByIdSpecification(UserId id) : ISpecification<User>
+public sealed class GetUserByIdSpecification : Specification<User>
 {
-    public Expression<Func<User, bool>> Criteria { get; } = x => x.Id == id;
-
-    public bool IsSatisfiedBy(User entity)
+    public GetUserByIdSpecification(UserId id) : base(x => x.Id == id)
     {
-        return Criteria.Compile()(entity);
-    }
-
-    public Expression<Func<User, bool>> ToExpression()
-    {
-        return Criteria;
+        AddInclude(x => x.Roles);
+        AddInclude(x => x.SecurityUser!);
     }
 }

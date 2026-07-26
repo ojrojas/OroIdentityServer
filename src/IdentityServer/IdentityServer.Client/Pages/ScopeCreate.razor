@@ -1,5 +1,5 @@
 @page "/scopes/create"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 @inject IAdminScopeService ScopeService
 @inject IToastService ToastService
 @inject NavigationManager Nav

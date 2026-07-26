@@ -100,6 +100,12 @@
   <data name="NewPasswordRequiredPlaceholder"><value>Requis pour enregistrer les modifications</value></data>
   <data name="RolesAssignedLabel"><value>Rôles : {0}</value></data>
   <data name="None"><value>aucun</value></data>
+  <data name="StatUsersNote"><value>Comptes enregistrés</value></data>
+
+  <data name="StatConnectedNote"><value>Sessions actives</value></data>
+  <data name="StatRolesNote"><value>Groupes de contrôle d'accès</value></data>
+  <data name="StatApplicationsNote"><value>Clients OAuth 2.0</value></data>
+  <data name="StatScopesNote"><value>Permissions API</value></data>
 
   <data name="RolesTitle"><value>Rôles</value></data>
   <data name="NewRoleTitle"><value>Nouveau rôle</value></data>

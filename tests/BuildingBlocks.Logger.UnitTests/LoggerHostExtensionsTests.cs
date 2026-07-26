@@ -1,6 +1,5 @@
 using BuildingBlocks.Logger.DependencyInjection;
 using BuildingBlocks.Logger.Options;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,7 +22,7 @@ public sealed class LoggerHostExtensionsTests
 
         var sp = services.BuildServiceProvider();
         var options = sp.GetRequiredService<LoggerOptions>();
-        options.ApplicationName.Should().Be("FromConfig");
-        options.MinimumLevel.Should().Be("Error");
+        Assert.Equal("FromConfig", options.ApplicationName);
+        Assert.Equal("Error", options.MinimumLevel);
     }
 }
