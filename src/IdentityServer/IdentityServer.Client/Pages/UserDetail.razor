@@ -187,8 +187,14 @@
         item = response?.Data?.FirstOrDefault(u => u.Id == Id);
         if (item is null) return;
 
-        var assignedIds = item.Roles.Select(r => r.RoleId).Where(id => id is not null).Select(id => id!.Value).ToHashSet();
-        assignedRoles = [.. roles.Where(r => assignedIds.Contains(r.Id))];
+        // Inner join: only the catalogue roles (`roles`) that also appear in this
+        // user's assignments (`item.Roles`) survive - RoleModel.Id (Guid) against
+        // UserRoleModel.RoleId (Guid?), so the outer key is cast to match.
+        assignedRoles = [.. roles.Join(
+            item.Roles,
+            role => (Guid?)role.Id,
+            userRole => userRole.RoleId,
+            (role, _) => role)];
 
         name = item.Name ?? string.Empty;
         middleName = item.MiddleName ?? string.Empty;

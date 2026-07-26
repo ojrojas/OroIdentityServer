@@ -13,6 +13,9 @@ public static partial class AdminApiEndpoints
         g.MapGet("/", async ([FromServices] IAdminUserService service, CancellationToken ct)
             => Results.Ok(await service.GetUsersAsync(ct)));
 
+        g.MapGet("/{id:guid}", async ( Guid id, [FromServices] IAdminUserService service, CancellationToken ct)
+            => Results.Ok(await service.GetUserByIdAsync(id, ct)));
+
         g.MapPost("/", async (
             [FromBody] CreateUserRequest request,
             [FromServices] IAdminUserService service,

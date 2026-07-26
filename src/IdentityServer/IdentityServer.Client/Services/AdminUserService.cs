@@ -27,4 +27,7 @@ public class AdminUserService(HttpClient client) : IAdminUserService
 
     public Task<HttpResponseMessage> UnlockUserAsync(Guid userId, CancellationToken ct = default)
         => client.PostAsync($"api/users/{userId}/unlock", null, ct);
+
+    public Task<ApiResponse<UserModel>?> GetUserByIdAsync(Guid Id, CancellationToken ct = default)
+        => client.GetFromJsonAsync<ApiResponse<UserModel>>($"api/users/{Id}", ClientJsonOptions.Default, ct);
 }

@@ -93,4 +93,16 @@ public class ServerAdminUserService(IQueryDispatcher queryDispatcher, ICommandDi
         user.CreatedAtUtc);
 
     private static UserRoleModel MapUserRole(UserRole role) => new(role.UserId?.Value, role.RoleId?.Value);
+
+    public async Task<ApiResponse<UserModel>?> GetUserByIdAsync(Guid Id, CancellationToken ct = default)
+    {
+        var result = await queryDispatcher.SendAsync(new GetUserByIdQuery(Id), ct);
+         return new ApiResponse<UserModel>
+         {
+            Data  = MapUser(result.Data),
+            StatusCode = result.StatusCode,
+            Message = result.Message,
+            Errors = result.Errors  
+         };
+    }
 }
