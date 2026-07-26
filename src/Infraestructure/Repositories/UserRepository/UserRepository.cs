@@ -5,9 +5,10 @@
 namespace OroIdentityServer.Infraestructure.Repositories;
 
 public class UserRepository(
-    ILogger<UserRepository> logger, 
+    ILogger<UserRepository> logger,
     IRepository<User> repository,
-    ISecurityUserRepository securityUserRepository) : IUserRepository
+    ISecurityUserRepository securityUserRepository,
+    OroIdentityAppContext context) : IUserRepository
 {
     public async Task AddUserAsync(User user, CancellationToken cancellationToken)
     {
@@ -60,7 +61,10 @@ public class UserRepository(
     public async Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetAllUsersAsync");
-        var result = await repository.GetAllAsync(cancellationToken);
+        // The generic IRepository<T>.GetAllAsync never applies .Include(), so it queried
+        // through OroIdentityAppContext directly here - otherwise User.Roles always comes
+        // back empty (no lazy-loading proxies are configured).
+        var result = await context.Users.Include(u => u.Roles).ToListAsync(cancellationToken);
         logger.LogInformation("Exiting GetAllUsersAsync");
         return result;
     }
@@ -87,7 +91,14 @@ public class UserRepository(
     {
         logger.LogInformation("Entering GetUserByIdAsync with id: {Id}", id);
         var specification = new GetUserByIdSpecification(id);
-        var user = await repository.FindSingleAsync(specification.Criteria, cancellationToken);
+
+        // specification.Includes existed but was never consumed by anything - the generic
+        // IRepository<T>.FindSingleAsync it used to go through has no .Include() support at
+        // all, so User.Roles always came back empty here. Query the DbContext directly and
+        // eager-load Roles explicitly instead.
+        var user = await context.Users
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(specification.Criteria, cancellationToken);
 
         logger.LogInformation("Exiting GetUserByIdAsync");
         return user;

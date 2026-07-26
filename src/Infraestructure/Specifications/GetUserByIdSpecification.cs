@@ -7,8 +7,6 @@ namespace OroIdentityServer.Infraestructure.Specifications;
 public sealed class GetUserByIdSpecification(UserId id) : ISpecification<User>
 {
     public Expression<Func<User, bool>> Criteria { get; } = x => x.Id == id;
-    public List<Expression<Func<User, object>>> Includes { get; } = [u => u.Roles];
-    public List<string> IncludeStrings { get; } = [];
 
     public bool IsSatisfiedBy(User entity)
     {
