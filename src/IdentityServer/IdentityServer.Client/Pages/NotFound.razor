@@ -2,5 +2,14 @@
 @layout MainLayout
 @inject IStringLocalizer<SharedResources> L
 
-<h3>@L["NotFoundTitle"]</h3>
-<p>@L["NotFoundMessage"]</p>
+<PageTitle>@L["NotFoundTitle"]</PageTitle>
+
+<section class="card">
+    <div class="empty">
+        <p class="empty-title">@L["NotFoundTitle"]</p>
+        <p>@L["NotFoundMessage"]</p>
+        <a class="btn btn-primary" href="/">
+            <Icon Name="dashboard" Size="15" /> @L["NavDashboard"]
+        </a>
+    </div>
+</section>

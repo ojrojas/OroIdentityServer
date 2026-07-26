@@ -8,27 +8,43 @@
 
 <PageTitle>@L["RoleDetailTitle"]</PageTitle>
 
-@if (item is null)
-{
-    <FluentProgressRing />
-}
-else
-{
-    <FluentLabel Typo="Typography.PageTitle">@L["RoleDetailTitle"]</FluentLabel>
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["RoleDetailTitle"]</h2>
+    </div>
 
-    <FluentStack Orientation="Orientation.Vertical" VerticalGap="16" Style="max-width: 480px; margin-top: 1rem;">
-        <FluentTextField @bind-Value="roleName" Label="@L["RoleName"]" Required="true" Style="width:100%" />
-        <FluentLabel>@L["ActiveLabel", item.IsActive]</FluentLabel>
-        <FluentLabel>@L["PermissionsAssignedLabel", item.Claims?.Count() ?? 0]</FluentLabel>
+    @if (item is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else
+    {
+        <div class="form">
+            <div class="field">
+                <label class="field-label" for="roleName">@L["RoleName"] <span class="req">*</span></label>
+                <input id="roleName" class="input" @bind="roleName" @bind:event="oninput" />
+            </div>
 
-        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
-            <FluentButton Appearance="Appearance.Accent" Disabled="@saving" OnClick="SaveAsync">@L["Save"]</FluentButton>
-            <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/roles"))">@L["Back"]</FluentButton>
-            <FluentSpacer />
-            <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Regular.Size20.Delete())" OnClick="DeleteAsync">@L["Delete"]</FluentButton>
-        </FluentStack>
-    </FluentStack>
-}
+            <label class="switch-row" for="isActive">
+                <span class="switch-row-text">
+                    <span class="switch-row-label">@L["Active"]</span>
+                    <span class="switch-row-sub">@L["IsActiveHint"]</span>
+                </span>
+                <input id="isActive" type="checkbox" class="switch" @bind="isActive" />
+            </label>
+            <span class="field-hint">@L["PermissionsAssignedLabel", item.Claims?.Count() ?? 0]</span>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SaveAsync">@L["Save"]</button>
+                <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/roles")'>@L["Back"]</button>
+                <div class="spacer"></div>
+                <button type="button" class="btn btn-danger" @onclick="DeleteAsync">
+                    <Icon Name="trash" Size="15" /> @L["Delete"]
+                </button>
+            </div>
+        </div>
+    }
+</section>
 
 @code {
     [Parameter]
@@ -36,6 +52,7 @@ else
 
     private RoleModel? item;
     private string roleName = string.Empty;
+    private bool isActive = false;
     private bool saving;
 
     protected override async Task OnInitializedAsync()
@@ -60,9 +77,10 @@ else
 
     private async Task DeleteAsync()
     {
-        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteRoleConfirm", roleName], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
-        var result = await dialog.Result;
-        if (result.Cancelled) return;
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmDeletionTitle"], L["DeleteRoleConfirm", roleName],
+            L["Delete"], L["Cancel"], danger: true);
+        if (!ok) return;
 
         var response = await RoleService.DeleteRoleAsync(Id);
         if (response.IsSuccessStatusCode)

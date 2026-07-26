@@ -1,29 +1,68 @@
-<FluentCard Class="saas-stat-card">
-    <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalGap="16">
-        <div class="saas-stat-icon" style="background: linear-gradient(135deg, var(--saas-accent), color-mix(in srgb, var(--saas-accent) 60%, #000));">
-            <FluentIcon Value="@Icon" Color="Color.Fill" />
-        </div>
-        <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
-            <p class="saas-stat-label">@Title</p>
-            @if (Value is null)
+@* One figure inside the Overview inset panel. Set Featured on the primary metric. *@
+
+<div class="stat @(Featured ? "stat-featured" : "")">
+    <div class="stat-label">
+        @if (!string.IsNullOrEmpty(IconName))
+        {
+            <Icon Name="@IconName" Size="15" Stroke="1.8" />
+        }
+        @Title
+    </div>
+
+    <div class="stat-figure">
+        @if (Value is null)
+        {
+            <span class="spinner" role="status" aria-label="@Title"></span>
+        }
+        else
+        {
+            <span class="stat-value">@Value.Value.ToString("N0")</span>
+
+            @if (!string.IsNullOrEmpty(DeltaText))
             {
-                <FluentProgressRing Style="width: 22px; height: 22px;" />
+                <span class="delta @DeltaClass">
+                    @if (Delta > 0)
+                    {
+                        <Icon Name="arrow-up" Size="11" Stroke="3" />
+                    }
+                    else if (Delta < 0)
+                    {
+                        <Icon Name="arrow-down" Size="11" Stroke="3" />
+                    }
+                    @DeltaText
+                </span>
             }
-            else
-            {
-                <p class="saas-stat-value">@Value</p>
-            }
-        </FluentStack>
-    </FluentStack>
-</FluentCard>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(Note))
+    {
+        <p class="stat-note">@Note</p>
+    }
+</div>
 
 @code {
-    [Parameter, EditorRequired]
-    public string Title { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
 
-    [Parameter]
-    public int? Value { get; set; }
+    [Parameter] public int? Value { get; set; }
 
-    [Parameter, EditorRequired]
-    public Icon Icon { get; set; } = default!;
+    /// <summary>Name from the <see cref="Icon"/> set.</summary>
+    [Parameter] public string? IconName { get; set; }
+
+    [Parameter] public string? Note { get; set; }
+
+    /// <summary>Renders as the elevated white card inside the inset panel.</summary>
+    [Parameter] public bool Featured { get; set; }
+
+    /// <summary>Drives the arrow and colour of the delta chip.</summary>
+    [Parameter] public int Delta { get; set; }
+
+    [Parameter] public string? DeltaText { get; set; }
+
+    private string DeltaClass => Delta switch
+    {
+        > 0 => "delta-up",
+        < 0 => "delta-down",
+        _ => "delta-flat"
+    };
 }

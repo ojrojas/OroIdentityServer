@@ -1,3 +1,4 @@
+using IdentityServer.Client.Extensions;
 using System.Globalization;
 using IdentityServer.Components;
 using IdentityServer.Server.Extensions;
@@ -5,7 +6,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.FluentUI.AspNetCore.Components;
 using OpenIddict.Abstractions;
 using OroIdentityServer.Application.Extensions;
 using OroIdentityServer.Infraestructure;
@@ -37,7 +37,7 @@ builder.Services.AddRazorComponents(options =>
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
 
-builder.Services.AddFluentUIComponents();
+builder.Services.AddIdentityServerUiServices();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddLocalization();

@@ -25,4 +25,17 @@ public static class ClientServiceCollectionExtensions
 
         return services;
     }
+
+    /// <summary>
+    /// UI services that replace the FluentUI providers (toasts and dialogs).
+    /// Registered on both the WASM client and the server host, since components
+    /// prerender on the server under InteractiveAuto.
+    /// </summary>
+    public static IServiceCollection AddIdentityServerUiServices(this IServiceCollection services)
+    {
+        services.AddScoped<IToastService, ToastService>();
+        services.AddScoped<IDialogService, DialogService>();
+
+        return services;
+    }
 }

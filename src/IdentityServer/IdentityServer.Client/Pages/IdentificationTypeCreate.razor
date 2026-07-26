@@ -7,16 +7,23 @@
 
 <PageTitle>@L["NewIdentificationTypeTitle"]</PageTitle>
 
-<FluentLabel Typo="Typography.PageTitle">@L["NewIdentificationTypeTitle"]</FluentLabel>
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["NewIdentificationTypeTitle"]</h2>
+    </div>
 
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="16" Style="max-width: 480px; margin-top: 1rem;">
-    <FluentTextField @bind-Value="name" Label="@L["Name"]" Required="true" Style="width:100%" />
+    <div class="form">
+        <div class="field">
+            <label class="field-label" for="name">@L["Name"] <span class="req">*</span></label>
+            <input id="name" class="input" @bind="name" @bind:event="oninput" />
+        </div>
 
-    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
-        <FluentButton Appearance="Appearance.Accent" Disabled="@(string.IsNullOrWhiteSpace(name) || saving)" OnClick="SubmitAsync">@L["Create"]</FluentButton>
-        <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/identification-types"))">@L["Cancel"]</FluentButton>
-    </FluentStack>
-</FluentStack>
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@(string.IsNullOrWhiteSpace(name) || saving)" @onclick="SubmitAsync">@L["Create"]</button>
+            <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/identification-types")'>@L["Cancel"]</button>
+        </div>
+    </div>
+</section>
 
 @code {
     private string name = string.Empty;

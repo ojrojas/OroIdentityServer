@@ -6,7 +6,8 @@ namespace OroIdentityServer.Infraestructure.Repositories;
 
 public class AuthValidationLogRepository(
     ILogger<AuthValidationLogRepository> logger,
-    IRepository<AuthValidationLog> repository) : IAuthValidationLogRepository
+    IRepository<AuthValidationLog> repository,
+    OroIdentityAppContext context) : IAuthValidationLogRepository
 {
     public async Task AddAsync(AuthValidationLog log, CancellationToken cancellationToken)
     {
@@ -21,5 +22,17 @@ public class AuthValidationLogRepository(
         var result = await repository.FindAsync(x => x.OccurredAtUtc >= sinceUtc, cancellationToken);
         logger.LogInformation("Exiting GetSinceAsync");
         return result.ToList();
+    }
+
+    public async Task<IReadOnlyList<AuthValidationLog>> GetRecentAsync(int take, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering GetRecentAsync with take: {Take}", take);
+        var result = await context.Set<AuthValidationLog>()
+            .AsNoTracking()
+            .OrderByDescending(x => x.OccurredAtUtc)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+        logger.LogInformation("Exiting GetRecentAsync");
+        return result;
     }
 }

@@ -21,4 +21,20 @@ internal class ServerAdminValidationLogService(
        
        return [];
     }
+
+    public async Task<IReadOnlyList<ValidationLogEntryModel>> GetRecentAsync(int take = 6, CancellationToken ct = default)
+    {
+        var result = await queryDispatcher.SendAsync(new GetRecentValidationLogsQuery(take), ct);
+        if (result is null || result.Entries.Count == 0)
+            return [];
+
+        return [.. result.Entries.Select(e => new ValidationLogEntryModel(
+            e.OccurredAtUtc,
+            e.EventType,
+            e.Succeeded,
+            e.UserId,
+            e.ClientId,
+            e.Scopes,
+            e.FailureReason))];
+    }
 }

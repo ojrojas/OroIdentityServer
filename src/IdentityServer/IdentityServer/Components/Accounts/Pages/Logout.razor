@@ -1,37 +1,49 @@
 @page "/Account/Logout"
 @layout LoginLayout
-@using Microsoft.FluentUI.AspNetCore.Components
 @inject NavigationManager navigationManager
 @inject IStringLocalizer<SharedResources> L
+@rendermode InteractiveServer
 
-<div class="login-page">
-
-    <FluentCard class="login-card">
-        <div class="login-card-header">
-            <span class="login-icon">
-                <FluentIcon Value="@(new Icons.Regular.Size24.ArrowExit())" />
+<div class="auth">
+    <div class="auth-card">
+        <div class="auth-head">
+            <span class="auth-mark">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <path d="M16 17l5-5-5-5" />
+                    <path d="M21 12H9" />
+                </svg>
             </span>
-            <h1>@L["SignOutTitle"]</h1>
-            <p class="login-subtitle">@L["SignOutSubtitle"]</p>
+            <h1 class="auth-title">@L["SignOutTitle"]</h1>
+            <p class="auth-sub">@L["SignOutSubtitle"]</p>
         </div>
 
-        <div class="login-form">
-            <FluentButton Appearance="@Appearance.Accent" FullWidth="true" Class="login-btn" OnClick="@(() => navigationManager.NavigateTo(ConfirmUrl, forceLoad: true))">
+        <div class="auth-form">
+            <button type="button" class="btn btn-primary btn-block"
+                    @onclick="@(() => navigationManager.NavigateTo(ConfirmUrl, forceLoad: true))">
                 @L["YesSignOut"]
-            </FluentButton>
-            <FluentButton Appearance="@Appearance.Neutral" FullWidth="true" Class="login-btn" OnClick="@(() => navigationManager.NavigateTo("/", forceLoad: true))">
+            </button>
+            <button type="button" class="btn btn-ghost btn-block"
+                    @onclick="@(() => navigationManager.NavigateTo("/", forceLoad: true))">
                 @L["NoStaySignedIn"]
-            </FluentButton>
+            </button>
         </div>
-    </FluentCard>
+    </div>
 </div>
 
 @code {
+    // Carried through from the RP-initiated end-session request so the calling
+    // application gets redirected back after IdentityServer ends the session.
     [SupplyParameterFromQuery(Name = "post_logout_redirect_uri")] public string? PostLogoutRedirectUri { get; set; }
     [SupplyParameterFromQuery] public string? State { get; set; }
     [SupplyParameterFromQuery(Name = "client_id")] public string? ClientId { get; set; }
     [SupplyParameterFromQuery(Name = "id_token_hint")] public string? IdTokenHint { get; set; }
 
+    /// <summary>
+    /// Goes to the OpenIddict end-session endpoint rather than /auth/logout: that handler
+    /// clears the admin cookie *and* honours post_logout_redirect_uri. See
+    /// AuthorizationController.Logout - "confirmed=true" skips the confirmation bounce.
+    /// </summary>
     private string ConfirmUrl
     {
         get
@@ -45,11 +57,11 @@
                 ["id_token_hint"] = IdTokenHint
             };
 
-            var queryString = string.Join('&', parameters
+            var query = string.Join('&', parameters
                 .Where(p => !string.IsNullOrEmpty(p.Value))
                 .Select(p => $"{p.Key}={Uri.EscapeDataString(p.Value!)}"));
 
-            return $"/connect/logout?{queryString}";
+            return $"/connect/logout?{query}";
         }
     }
 }

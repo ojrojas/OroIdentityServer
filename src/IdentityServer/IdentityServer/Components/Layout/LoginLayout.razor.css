@@ -1,10 +1,8 @@
+/* The .auth class in app.css centres the card full-screen; this layout is a
+   bare pass-through and only positions the language picker. */
 .login-layout {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: var(--saas-bg-page);
     position: relative;
+    min-height: 100vh;
 }
 
 .login-language-picker {
@@ -21,17 +19,16 @@
 .language-select {
     min-width: 140px;
     padding: 6px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--saas-border);
-    background: color-mix(in srgb, var(--saas-bg-elevated) 70%, transparent);
-    backdrop-filter: blur(8px);
-    color: var(--saas-text-primary);
+    border-radius: var(--r-sm, 9px);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-1);
     font-size: .8rem;
     font-family: inherit;
     cursor: pointer;
-    transition: border-color var(--saas-transition);
+    transition: border-color var(--ease);
 }
 
 .language-select:hover {
-    border-color: var(--saas-accent);
+    border-color: var(--text-3);
 }

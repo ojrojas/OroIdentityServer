@@ -1,0 +1,62 @@
+@* Chip-style list editor. Type a value, press Enter (or blur) to add it. *@
+
+<div class="tags">
+    @foreach (var value in Values)
+    {
+        <span class="tag">
+            <span title="@value">@value</span>
+            <button type="button" class="tag-x" title="@RemoveLabel" @onclick="() => RemoveAsync(value)">
+                <Icon Name="x" Size="11" Stroke="2.4" />
+            </button>
+        </span>
+    }
+    <input class="tag-field"
+           type="@InputType"
+           placeholder="@Placeholder"
+           @bind="draft"
+           @bind:event="oninput"
+           @onkeydown="HandleKeyDownAsync"
+           @onblur="AddAsync" />
+</div>
+
+@code {
+    [Parameter] public List<string> Values { get; set; } = [];
+
+    [Parameter] public EventCallback<List<string>> ValuesChanged { get; set; }
+
+    [Parameter] public string Placeholder { get; set; } = "https://example.com/callback";
+
+    [Parameter] public string InputType { get; set; } = "url";
+
+    [Parameter] public string RemoveLabel { get; set; } = "Quitar";
+
+    private string draft = string.Empty;
+
+    private async Task AddAsync()
+    {
+        var value = draft.Trim();
+
+        if (value.Length == 0 || Values.Contains(value, StringComparer.OrdinalIgnoreCase))
+        {
+            draft = string.Empty;
+            return;
+        }
+
+        Values = [.. Values, value];
+        draft = string.Empty;
+        await ValuesChanged.InvokeAsync(Values);
+    }
+
+    private async Task RemoveAsync(string value)
+    {
+        Values = [.. Values.Where(v => v != value)];
+        await ValuesChanged.InvokeAsync(Values);
+    }
+
+    private async Task HandleKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key is "Enter" or "," or " ") await AddAsync();
+        else if (e.Key == "Backspace" && draft.Length == 0 && Values.Count > 0)
+            await RemoveAsync(Values[^1]);
+    }
+}

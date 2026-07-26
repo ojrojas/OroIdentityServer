@@ -9,82 +9,164 @@
 
 <PageTitle>@L["SessionsTitle"]</PageTitle>
 
-<FluentLabel Typo="Typography.PageTitle">@L["SessionsTitle"]</FluentLabel>
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["NavUsers"]</h2>
+    </div>
 
-<FluentGrid Style="margin-top: 1rem;">
-    <FluentGridItem xs="12" sm="5">
-        <FluentLabel Typo="Typography.Subject">@L["NavUsers"]</FluentLabel>
-        @if (users is null)
+    @if (users is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else if (users.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">@L["NoData"]</p>
+            <p>@L["NoDataHint"]</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@L["ColUsername"]</th>
+                        <th>@L["ColEmail"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <td class="cell-strong">@user.UserName</td>
+                            <td class="cell-muted">@user.Email</td>
+                            <td>
+                                <div class="actions">
+                                    <button type="button" class="btn-row" title="@L["LoadSessions"]" @onclick="@(() => SelectUserAsync(user))">
+                                        <Icon Name="arrow-right" Size="15" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">
+            @(selectedUser is null ? L["SelectUserPrompt"] : L["SessionsForUser", selectedUser.UserName ?? string.Empty])
+        </h2>
+    </div>
+
+    @if (selectedUser is not null)
+    {
+        @if (sessions is null)
         {
-            <FluentProgressRing />
+            <div class="spinner spinner-lg spinner-center"></div>
+        }
+        else if (sessions.Count == 0)
+        {
+            <div class="empty">
+                <p class="empty-title">@L["NoActiveSessions"]</p>
+            </div>
         }
         else
         {
-            <FluentDataGrid Items="@users.AsQueryable()" TGridItem="UserModel" RowClick="@((FluentDataGridRow<UserModel> row) => SelectUserAsync(row.Item!))">
-                <PropertyColumn Title="@L["ColUsername"]" Property="@(x => x.UserName)" Sortable="true" />
-                <PropertyColumn Title="@L["ColEmail"]" Property="@(x => x.Email)" Sortable="true" />
-            </FluentDataGrid>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>@L["ColDevice"]</th>
+                            <th>@L["ColIp"]</th>
+                            <th>@L["ColLastActivity"]</th>
+                            <th>@L["ColExpires"]</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var session in sessions)
+                        {
+                            <tr>
+                                <td class="cell-strong">@session.Device</td>
+                                <td class="cell-muted">@session.IpAddress</td>
+                                <td>@session.LastActivityAt</td>
+                                <td>@session.ExpiresAt</td>
+                                <td>
+                                    <div class="actions">
+                                        <button type="button" class="btn-row is-danger" title="@L["Disconnect"]" @onclick="@(() => DisconnectAsync(session))">
+                                            <Icon Name="disconnect" Size="15" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
-    </FluentGridItem>
-    <FluentGridItem xs="12" sm="7">
-        <FluentLabel Typo="Typography.Subject">
-            @(selectedUser is null ? L["SelectUserPrompt"] : L["SessionsForUser", selectedUser.UserName ?? string.Empty])
-        </FluentLabel>
-        @if (selectedUser is not null)
-        {
-            @if (sessions is null)
-            {
-                <FluentProgressRing />
-            }
-            else if (sessions.Count == 0)
-            {
-                <FluentLabel>@L["NoActiveSessions"]</FluentLabel>
-            }
-            else
-            {
-                <FluentDataGrid Items="@sessions.AsQueryable()" GridTemplateColumns="1.5fr 1fr 1fr 1fr 0.5fr">
-                    <PropertyColumn Title="@L["ColDevice"]" Property="@(x => x.Device)" />
-                    <PropertyColumn Title="@L["ColIp"]" Property="@(x => x.IpAddress)" />
-                    <PropertyColumn Title="@L["ColLastActivity"]" Property="@(x => x.LastActivityAt)" />
-                    <PropertyColumn Title="@L["ColExpires"]" Property="@(x => x.ExpiresAt)" />
-                    <TemplateColumn Title="">
-                        <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.PlugDisconnected())" Title="@L["Disconnect"]" OnClick="@(() => DisconnectAsync(context))" />
-                    </TemplateColumn>
-                </FluentDataGrid>
-            }
+    }
+</section>
 
-            <FluentLabel Typo="Typography.Subject" Style="margin-top: 1.5rem;">@L["SessionHistory"]</FluentLabel>
-            @if (sessionHistory is null)
-            {
-                <FluentProgressRing />
-            }
-            else if (sessionHistory.Count == 0)
-            {
-                <FluentLabel>@L["NoSessionHistory"]</FluentLabel>
-            }
-            else
-            {
-                <FluentDataGrid Items="@sessionHistory.AsQueryable()" GridTemplateColumns="1fr 1fr 1fr 1fr">
-                    <PropertyColumn Title="@L["ColIp"]" Property="@(x => x.IpAddress)" />
-                    <PropertyColumn Title="@L["ColCountry"]" Property="@(x => x.Country)" />
-                    <TemplateColumn Title="@L["ColStartedAt"]">
-                        @context.StartedAtUtc.ToString("g")
-                    </TemplateColumn>
-                    <TemplateColumn Title="@L["ColEndedAt"]">
-                        @if (context.EndedAtUtc is null)
-                        {
-                            <span class="saas-badge saas-badge-success">@L["ActiveStatus"]</span>
-                        }
-                        else
-                        {
-                            @context.EndedAtUtc.Value.ToString("g")
-                        }
-                    </TemplateColumn>
-                </FluentDataGrid>
-            }
+@if (selectedUser is not null)
+{
+    <section class="card">
+        <div class="card-head">
+            <h2 class="card-title">@L["SessionHistory"]</h2>
+        </div>
+
+        @if (sessionHistory is null)
+        {
+            <div class="spinner spinner-lg spinner-center"></div>
         }
-    </FluentGridItem>
-</FluentGrid>
+        else if (sessionHistory.Count == 0)
+        {
+            <div class="empty">
+                <p class="empty-title">@L["NoSessionHistory"]</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>@L["ColIp"]</th>
+                            <th>@L["ColCountry"]</th>
+                            <th>@L["ColStartedAt"]</th>
+                            <th>@L["ColEndedAt"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in sessionHistory)
+                        {
+                            <tr>
+                                <td class="cell-strong">@entry.IpAddress</td>
+                                <td class="cell-muted">@entry.Country</td>
+                                <td>@entry.StartedAtUtc.ToString("g")</td>
+                                <td>
+                                    @if (entry.EndedAtUtc is null)
+                                    {
+                                        <span class="badge badge-green">@L["ActiveStatus"]</span>
+                                    }
+                                    else
+                                    {
+                                        @entry.EndedAtUtc.Value.ToString("g")
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+}
 
 @code {
     private List<UserModel>? users;
@@ -112,9 +194,10 @@
 
     private async Task DisconnectAsync(UserSessionModel session)
     {
-        var dialog = await DialogService.ShowConfirmationAsync(L["DisconnectConfirm"], L["Disconnect"], L["Cancel"], L["ConfirmDeletionTitle"]);
-        var result = await dialog.Result;
-        if (result.Cancelled) return;
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmDeletionTitle"], L["DisconnectConfirm"],
+            L["Disconnect"], L["Cancel"], danger: true);
+        if (!ok) return;
 
         var response = await UserSessionService.DeactivateUserSessionAsync(session.Id);
         if (response.IsSuccessStatusCode)

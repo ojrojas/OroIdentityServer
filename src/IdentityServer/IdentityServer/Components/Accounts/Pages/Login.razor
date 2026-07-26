@@ -1,57 +1,57 @@
 @page "/Account/Login"
 @layout LoginLayout
 @attribute [AllowAnonymous]
-@using Microsoft.FluentUI.AspNetCore.Components
 @inject IStringLocalizer<SharedResources> L
 
-<div class="login-page">
-
-    <FluentCard class="login-card">
-        <div class="login-brand">
-            <FluentIcon Value="@(new Icons.Regular.Size16.Shield())" />
-            <span>@L["AdminPanel"]</span>
-        </div>
-
-        <div class="login-card-header">
-            <span class="login-icon">
-                <FluentIcon Value="@(new Icons.Regular.Size24.LockClosed())" />
+<div class="auth">
+    <div class="auth-card">
+        <div class="auth-head">
+            <span class="auth-mark">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3l7 3v6c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z" />
+                    <path d="M9 12l2 2 4-4" />
+                </svg>
             </span>
-            <h1>@L["SignInTitle"]</h1>
-            <p class="login-subtitle">@L["SignInSubtitle"]</p>
+            <h1 class="auth-title">@L["SignInTitle"]</h1>
+            <p class="auth-sub">@L["SignInSubtitle"]</p>
         </div>
 
         @if (!string.IsNullOrEmpty(Error))
         {
-            <div class="login-error">
-                <FluentIcon Value="@(new Icons.Regular.Size20.DismissCircle())" Color="@Color.Error" />
-                <span>@L["InvalidCredentials"]</span>
-            </div>
+            <div class="alert alert-error">@L["InvalidCredentials"]</div>
         }
 
-        <form action="/auth/login" method="post" class="login-form">
+        <form action="/auth/login" method="post" class="auth-form">
             <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
 
-            <FluentTextField
-                Name="LoginIdentifier"
-                Placeholder="@L["LoginIdentifierPlaceholder"]"
-                Required="true"
-                Autofocus="true"
-                Class="login-field" />
+            <div class="field">
+                <label class="field-label" for="loginIdentifier">@L["Username"]</label>
+                <input id="loginIdentifier"
+                       name="LoginIdentifier"
+                       class="input"
+                       type="text"
+                       autocomplete="username"
+                       placeholder="@L["LoginIdentifierPlaceholder"]"
+                       required
+                       autofocus />
+            </div>
 
-            <FluentTextField
-                Type="@TextFieldType.Password"
-                Name="Password"
-                Placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
-                Required="true"
-                Class="login-field" />
+            <div class="field">
+                <label class="field-label" for="password">@L["Password"]</label>
+                <input id="password"
+                       name="Password"
+                       class="input"
+                       type="password"
+                       autocomplete="current-password"
+                       placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                       required />
+            </div>
 
-            <FluentButton Type="@ButtonType.Submit" Appearance="@Appearance.Accent" FullWidth="true" Class="login-btn">
-                @L["SignInButton"]
-            </FluentButton>
+            <button type="submit" class="btn btn-primary btn-block">@L["SignInButton"]</button>
         </form>
 
-        <div class="login-footer">OroIdentityServer</div>
-    </FluentCard>
+        <div class="auth-foot">@L["AdminPanel"]</div>
+    </div>
 </div>
 
 @code {

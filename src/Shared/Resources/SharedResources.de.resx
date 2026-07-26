@@ -40,6 +40,7 @@
   <data name="Identification"><value>Ausweisnummer</value></data>
   <data name="IdentificationType"><value>Ausweistyp</value></data>
   <data name="Tenant"><value>Mandant</value></data>
+  <data name="Role"><value>Rolle</value></data>
   <data name="Active"><value>Aktiv</value></data>
   <data name="Created"><value>Erstellt</value></data>
   <data name="SavedToast"><value>Gespeichert.</value></data>

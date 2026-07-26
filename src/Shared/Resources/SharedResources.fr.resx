@@ -40,6 +40,7 @@
   <data name="Identification"><value>Pièce d'identité</value></data>
   <data name="IdentificationType"><value>Type de pièce d'identité</value></data>
   <data name="Tenant"><value>Locataire</value></data>
+  <data name="Role"><value>Rôle</value></data>
   <data name="Active"><value>Actif</value></data>
   <data name="Created"><value>Créé le</value></data>
   <data name="SavedToast"><value>Enregistré.</value></data>

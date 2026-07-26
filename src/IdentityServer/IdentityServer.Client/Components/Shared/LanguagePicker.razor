@@ -1,16 +1,19 @@
-@using System.Globalization
 @inject NavigationManager Nav
 
-<div class="@Class">
-    <FluentSelect TOption="string" Items="@Languages.Select(l => l.Code)" OptionText="@(code => GetLabel(code))"
-                  OptionValue="@(code => code)" SelectedOption="@selectedCulture"
-                  SelectedOptionChanged="@(val => ChangeCulture(val))"
-                  Style="min-width: 140px;" />
-</div>
+<select class="select @Class" value="@selectedCulture"
+        @onchange="e => ChangeCulture(e.Value?.ToString())"
+        aria-label="@AriaLabel">
+    @* NB: don't name the loop variable "code" - Razor parses a leading @code as the directive. *@
+    @foreach (var lang in Languages)
+    {
+        <option value="@lang.Code" selected="@(lang.Code == selectedCulture)">@lang.Label</option>
+    }
+</select>
 
 @code {
-    [Parameter]
-    public string Class { get; set; } = "header-language-picker";
+    [Parameter] public string Class { get; set; } = string.Empty;
+
+    [Parameter] public string AriaLabel { get; set; } = "Language";
 
     private string? selectedCulture;
 
@@ -26,13 +29,7 @@
         ("zh", "中文（简体）")
     ];
 
-    protected override void OnInitialized()
-    {
-        selectedCulture = CultureInfo.CurrentUICulture.Name;
-    }
-
-    private string GetLabel(string code)
-        => Languages.FirstOrDefault(l => l.Code == code).Label ?? code;
+    protected override void OnInitialized() => selectedCulture = CultureInfo.CurrentUICulture.Name;
 
     private void ChangeCulture(string? culture)
     {

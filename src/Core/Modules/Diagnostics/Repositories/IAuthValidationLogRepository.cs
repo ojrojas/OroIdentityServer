@@ -8,4 +8,5 @@ public interface IAuthValidationLogRepository
 {
     Task AddAsync(AuthValidationLog log, CancellationToken cancellationToken);
     Task<IReadOnlyList<AuthValidationLog>> GetSinceAsync(DateTime sinceUtc, CancellationToken cancellationToken);
+    Task<IReadOnlyList<AuthValidationLog>> GetRecentAsync(int take, CancellationToken cancellationToken);
 }

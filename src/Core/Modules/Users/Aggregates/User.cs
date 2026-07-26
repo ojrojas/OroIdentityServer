@@ -74,7 +74,6 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
         return userName.ToUpperInvariant();
     }
 
-
     public void AddRole(UserRole role)
     {
         if (_roles.Any(r => r.RoleId == role.RoleId))

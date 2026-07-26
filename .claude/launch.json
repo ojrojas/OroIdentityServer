@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "identityserver",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "src/IdentityServer/IdentityServer/IdentityServer.csproj", "--launch-profile", "http"],
+      "port": 5080
+    },
+    {
+      "name": "preview",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5099", "--directory", "."],
+      "port": 5099
+    }
+  ]
+}

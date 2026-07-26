@@ -40,6 +40,7 @@
   <data name="Identification"><value>Identificação</value></data>
   <data name="IdentificationType"><value>Tipo de identificação</value></data>
   <data name="Tenant"><value>Inquilino</value></data>
+  <data name="Role"><value>Role</value></data>
   <data name="Active"><value>Ativo</value></data>
   <data name="Created"><value>Criado em</value></data>
   <data name="SavedToast"><value>Salvo.</value></data>

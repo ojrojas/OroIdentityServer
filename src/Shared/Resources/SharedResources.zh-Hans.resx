@@ -40,6 +40,7 @@
   <data name="Identification"><value>身份证件号</value></data>
   <data name="IdentificationType"><value>证件类型</value></data>
   <data name="Tenant"><value>租户</value></data>
+  <data name="Role">角色<value>Role</value></data>
   <data name="Active"><value>启用</value></data>
   <data name="Created"><value>创建时间</value></data>
   <data name="SavedToast"><value>已保存。</value></data>

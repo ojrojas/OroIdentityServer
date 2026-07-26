@@ -9,40 +9,80 @@
 
 <PageTitle>@L["UsersTitle"]</PageTitle>
 
-<FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween" VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 1rem;">
-    <FluentLabel Typo="Typography.PageTitle">@L["UsersTitle"]</FluentLabel>
-    <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size20.Add())" OnClick="CreateAsync">@L["New"]</FluentButton>
-</FluentStack>
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["UsersTitle"]</h2>
+        <button type="button" class="btn btn-primary btn-sm" @onclick="CreateAsync">
+            <Icon Name="plus" Size="15" Stroke="2.2" /> @L["New"]
+        </button>
+    </div>
 
-@if (items is null)
-{
-    <FluentProgressRing />
-}
-else
-{
-    <FluentDataGrid Items="@items.AsQueryable()" GridTemplateColumns="1.5fr 1.5fr 2fr 1fr 1fr 2fr">
-        <PropertyColumn Title="@L["ColUsername"]" Property="@(x => x.UserName)" Sortable="true" />
-        <PropertyColumn Title="@L["ColName"]" Property="@(x => $"{x.Name} {x.LastName}")" Sortable="true" />
-        <PropertyColumn Title="@L["ColEmail"]" Property="@(x => x.Email)" Sortable="true" />
-        <PropertyColumn Title="@L["ColRoles"]" Property="@(x => x.Roles.Count)" />
-        <TemplateColumn Title="@L["ColStatus"]">
-            @if (context.IsLocked)
-            {
-                <FluentLabel>@L["Locked"]</FluentLabel>
-            }
-            else
-            {
-                <FluentLabel>@L["ActiveStatus"]</FluentLabel>
-            }
-        </TemplateColumn>
-        <TemplateColumn Title="">
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Edit())" Title="@L["Edit"]" OnClick="@(() => Nav.NavigateTo($"/users/{context.Id}"))" />
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(context.IsLocked ? new Icons.Regular.Size16.LockOpen() : new Icons.Regular.Size16.LockClosed())" Title="@(context.IsLocked ? L["UnlockUser"] : L["LockUser"])" OnClick="@(() => ToggleLockAsync(context))" />
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.PlugDisconnected())" Title="@L["Disconnect"]" OnClick="@(() => TerminateSessionsAsync(context))" />
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Delete())" Title="@L["Delete"]" OnClick="@(() => DeleteAsync(context))" />
-        </TemplateColumn>
-    </FluentDataGrid>
-}
+    @if (items is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else if (items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">@L["NoData"]</p>
+            <p>@L["NoDataHint"]</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@L["ColUsername"]</th>
+                        <th>@L["ColName"]</th>
+                        <th>@L["ColEmail"]</th>
+                        <th class="num">@L["ColRoles"]</th>
+                        <th>@L["ColStatus"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in items)
+                    {
+                        <tr>
+                            <td class="cell-strong">@item.UserName</td>
+                            <td>@($"{item.Name} {item.LastName}")</td>
+                            <td class="cell-muted">@item.Email</td>
+                            <td class="num">@item.Roles.Count</td>
+                            <td>
+                                @if (item.IsLocked)
+                                {
+                                    <span class="badge badge-red">@L["Locked"]</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-green">@L["ActiveStatus"]</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    <button type="button" class="btn-row" title="@L["Edit"]" @onclick="@(() => Nav.NavigateTo($"/users/{item.Id}"))">
+                                        <Icon Name="edit" Size="15" />
+                                    </button>
+                                    <button type="button" class="btn-row" title="@(item.IsLocked ? L["UnlockUser"] : L["LockUser"])" @onclick="@(() => ToggleLockAsync(item))">
+                                        <Icon Name="@(item.IsLocked ? "unlock" : "lock")" Size="15" />
+                                    </button>
+                                    <button type="button" class="btn-row" title="@L["Disconnect"]" @onclick="@(() => TerminateSessionsAsync(item))">
+                                        <Icon Name="disconnect" Size="15" />
+                                    </button>
+                                    <button type="button" class="btn-row is-danger" title="@L["Delete"]" @onclick="@(() => DeleteAsync(item))">
+                                        <Icon Name="trash" Size="15" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
 
 @code {
     private List<UserModel>? items;
@@ -59,9 +99,10 @@ else
 
     private async Task DeleteAsync(UserModel item)
     {
-        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteUserConfirm", item.UserName ?? string.Empty], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
-        var result = await dialog.Result;
-        if (result.Cancelled) return;
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmDeletionTitle"], L["DeleteUserConfirm", item.UserName ?? string.Empty],
+            L["Delete"], L["Cancel"], danger: true);
+        if (!ok) return;
 
         var response = await UserService.DeleteUserAsync(item.Id);
         if (response.IsSuccessStatusCode)
@@ -79,9 +120,10 @@ else
     {
         if (item.IsLocked)
         {
-            var dialog = await DialogService.ShowConfirmationAsync(L["UnlockUserConfirm", item.UserName ?? string.Empty], L["UnlockUser"], L["Cancel"], L["ConfirmActionTitle"]);
-            var result = await dialog.Result;
-            if (result.Cancelled) return;
+            var ok = await DialogService.ConfirmAsync(
+                L["ConfirmActionTitle"], L["UnlockUserConfirm", item.UserName ?? string.Empty],
+                L["UnlockUser"], L["Cancel"]);
+            if (!ok) return;
 
             var response = await UserService.UnlockUserAsync(item.Id);
             if (response.IsSuccessStatusCode)
@@ -96,9 +138,10 @@ else
         }
         else
         {
-            var dialog = await DialogService.ShowConfirmationAsync(L["LockUserConfirm", item.UserName ?? string.Empty], L["LockUser"], L["Cancel"], L["ConfirmActionTitle"]);
-            var result = await dialog.Result;
-            if (result.Cancelled) return;
+            var ok = await DialogService.ConfirmAsync(
+                L["ConfirmActionTitle"], L["LockUserConfirm", item.UserName ?? string.Empty],
+                L["LockUser"], L["Cancel"]);
+            if (!ok) return;
 
             var response = await UserService.LockUserAsync(item.Id);
             if (response.IsSuccessStatusCode)
@@ -115,9 +158,10 @@ else
 
     private async Task TerminateSessionsAsync(UserModel item)
     {
-        var dialog = await DialogService.ShowConfirmationAsync(L["TerminateSessionsConfirm", item.UserName ?? string.Empty], L["Disconnect"], L["Cancel"], L["ConfirmActionTitle"]);
-        var result = await dialog.Result;
-        if (result.Cancelled) return;
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmActionTitle"], L["TerminateSessionsConfirm", item.UserName ?? string.Empty],
+            L["Disconnect"], L["Cancel"], danger: true);
+        if (!ok) return;
 
         var response = await UserSessionService.TerminateAllUserSessionsAsync(item.Id);
         if (response.IsSuccessStatusCode)

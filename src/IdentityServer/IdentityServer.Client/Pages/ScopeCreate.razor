@@ -7,17 +7,28 @@
 
 <PageTitle>@L["NewScopeTitle"]</PageTitle>
 
-<FluentLabel Typo="Typography.PageTitle">@L["NewScopeTitle"]</FluentLabel>
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["NewScopeTitle"]</h2>
+    </div>
 
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Style="max-width: 480px; margin-top: 1rem;">
-    <FluentTextField @bind-Value="name" Label="@L["ScopeName"]" Required="true" Style="width:100%" />
-    <FluentTextField @bind-Value="resources" Label="@L["Resources"]" Style="width:100%" />
+    <div class="form">
+        <div class="field">
+            <label class="field-label" for="scopeName">@L["ScopeName"] <span class="req">*</span></label>
+            <input id="scopeName" class="input" @bind="name" @bind:event="oninput" />
+        </div>
 
-    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
-        <FluentButton Appearance="Appearance.Accent" Disabled="@(string.IsNullOrWhiteSpace(name) || saving)" OnClick="SubmitAsync">@L["Create"]</FluentButton>
-        <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/scopes"))">@L["Cancel"]</FluentButton>
-    </FluentStack>
-</FluentStack>
+        <div class="field">
+            <label class="field-label" for="resources">@L["Resources"]</label>
+            <input id="resources" class="input" @bind="resources" @bind:event="oninput" />
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@(string.IsNullOrWhiteSpace(name) || saving)" @onclick="SubmitAsync">@L["Create"]</button>
+            <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/scopes")'>@L["Cancel"]</button>
+        </div>
+    </div>
+</section>
 
 @code {
     private string name = string.Empty;

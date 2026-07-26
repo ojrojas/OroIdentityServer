@@ -8,27 +8,70 @@
 
 <PageTitle>@L["RolesTitle"]</PageTitle>
 
-<FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween" VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 1rem;">
-    <FluentLabel Typo="Typography.PageTitle">@L["RolesTitle"]</FluentLabel>
-    <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size20.Add())" OnClick="CreateAsync">@L["New"]</FluentButton>
-</FluentStack>
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["RolesTitle"]</h2>
+        <button type="button" class="btn btn-primary btn-sm" @onclick="CreateAsync">
+            <Icon Name="plus" Size="15" Stroke="2.2" /> @L["New"]
+        </button>
+    </div>
 
-@if (items is null)
-{
-    <FluentProgressRing />
-}
-else
-{
-    <FluentDataGrid Items="@items.AsQueryable()" GridTemplateColumns="2fr 1fr 1fr 1fr">
-        <PropertyColumn Title="@L["Name"]" Property="@(x => x.Name)" Sortable="true" />
-        <PropertyColumn Title="@L["Active"]" Property="@(x => x.IsActive)" Sortable="true" />
-        <PropertyColumn Title="@L["ColPermissions"]" Property="@(x => x.Claims == null ? 0 : x.Claims.Count())" />
-        <TemplateColumn Title="">
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Edit())" Title="@L["Edit"]" OnClick="@(() => Nav.NavigateTo($"/roles/{context.Id}"))" />
-            <FluentButton Appearance="Appearance.Lightweight" IconStart="@(new Icons.Regular.Size16.Delete())" Title="@L["Delete"]" OnClick="@(() => DeleteAsync(context))" />
-        </TemplateColumn>
-    </FluentDataGrid>
-}
+    @if (items is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else if (items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">@L["NoData"]</p>
+            <p>@L["NoDataHint"]</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@L["Name"]</th>
+                        <th>@L["Active"]</th>
+                        <th class="num">@L["ColPermissions"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in items)
+                    {
+                        <tr>
+                            <td class="cell-strong">@item.Name</td>
+                            <td>
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge badge-green">@L["ActiveStatus"]</span>
+                                }
+                                else
+                                {
+                                    <span class="cell-muted">—</span>
+                                }
+                            </td>
+                            <td class="num">@(item.Claims == null ? 0 : item.Claims.Count())</td>
+                            <td>
+                                <div class="actions">
+                                    <button type="button" class="btn-row" title="@L["Edit"]" @onclick="@(() => Nav.NavigateTo($"/roles/{item.Id}"))">
+                                        <Icon Name="edit" Size="15" />
+                                    </button>
+                                    <button type="button" class="btn-row is-danger" title="@L["Delete"]" @onclick="@(() => DeleteAsync(item))">
+                                        <Icon Name="trash" Size="15" />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
 
 @code {
     private List<RoleModel>? items;
@@ -45,9 +88,10 @@ else
 
     private async Task DeleteAsync(RoleModel item)
     {
-        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteRoleConfirm", item.Name ?? string.Empty], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
-        var result = await dialog.Result;
-        if (result.Cancelled) return;
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmDeletionTitle"], L["DeleteRoleConfirm", item.Name ?? string.Empty],
+            L["Delete"], L["Cancel"], danger: true);
+        if (!ok) return;
 
         var response = await RoleService.DeleteRoleAsync(item.Id);
         if (response.IsSuccessStatusCode)

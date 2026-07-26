@@ -40,6 +40,7 @@
   <data name="Identification"><value>身分証明書番号</value></data>
   <data name="IdentificationType"><value>身分証明書の種類</value></data>
   <data name="Tenant"><value>テナント</value></data>
+  <data name="Role"><value>役割</value></data>
   <data name="Active"><value>有効</value></data>
   <data name="Created"><value>作成日</value></data>
   <data name="SavedToast"><value>保存しました。</value></data>

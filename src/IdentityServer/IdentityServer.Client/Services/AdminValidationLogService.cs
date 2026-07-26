@@ -14,4 +14,12 @@ public class AdminValidationLogService(HttpClient client) : IAdminValidationLogS
 
         return response?.Data ?? [];
     }
+
+    public async Task<IReadOnlyList<ValidationLogEntryModel>> GetRecentAsync(int take = 6, CancellationToken ct = default)
+    {
+        var response = await client.GetFromJsonAsync<ApiResponse<IReadOnlyList<ValidationLogEntryModel>>>(
+            $"api/validation-logs/recent?take={take}", ClientJsonOptions.Default, ct);
+
+        return response?.Data ?? [];
+    }
 }

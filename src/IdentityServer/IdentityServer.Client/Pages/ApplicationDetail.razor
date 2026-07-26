@@ -8,37 +8,64 @@
 
 <PageTitle>@L["ApplicationDetailTitle"]</PageTitle>
 
-@if (item is null)
-{
-    <FluentProgressRing />
-}
-else
-{
-    <FluentLabel Typo="Typography.PageTitle">@L["ApplicationDetailTitle"]</FluentLabel>
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["ApplicationDetailTitle"]</h2>
+    </div>
 
-    <FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Style="max-width: 560px; margin-top: 1rem;">
-        <FluentTextField Value="@ClientId" ReadOnly="true" Label="@L["ClientId"]" Style="width:100%" />
-        <FluentTextField @bind-Value="displayName" Label="@L["DisplayName"]" Style="width:100%" />
-        <FluentTextField @bind-Value="clientSecret" Label="@L["ClientSecret"]" Placeholder="@L["ClientSecretEditPlaceholder"]" TextFieldType="TextFieldType.Password" Style="width:100%" />
-        <FluentSelect Style="width:100%" TOption="string" Items="@(["confidential", "public"])" @bind-Value="clientType" Label="@L["ClientType"]" />
-        <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
-            <FluentLabel Typo="Typography.Body">@L["RedirectUris"]</FluentLabel>
-            <UriTagManager @bind-Uris="redirectUris" />
-        </FluentStack>
+    @if (item is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="clientId">@L["ClientId"]</label>
+                    <input id="clientId" class="input" value="@ClientId" readonly />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="displayName">@L["DisplayName"]</label>
+                    <input id="displayName" class="input" @bind="displayName" @bind:event="oninput" />
+                </div>
+            </div>
 
-        <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
-            <FluentLabel Typo="Typography.Body">@L["PostLogoutRedirectUris"]</FluentLabel>
-            <UriTagManager @bind-Uris="postLogoutRedirectUris" />
-        </FluentStack>
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="clientSecret">@L["ClientSecret"]</label>
+                    <input id="clientSecret" type="password" class="input" placeholder="@L["ClientSecretEditPlaceholder"]" @bind="clientSecret" @bind:event="oninput" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="clientType">@L["ClientType"]</label>
+                    <select id="clientType" class="select" @bind="clientType">
+                        <option value="confidential">confidential</option>
+                        <option value="public">public</option>
+                    </select>
+                </div>
+            </div>
 
-        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
-            <FluentButton Appearance="Appearance.Accent" Disabled="@saving" OnClick="SaveAsync">@L["Save"]</FluentButton>
-            <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/applications"))">@L["Back"]</FluentButton>
-            <FluentSpacer />
-            <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Regular.Size20.Delete())" OnClick="DeleteAsync">@L["Delete"]</FluentButton>
-        </FluentStack>
-    </FluentStack>
-}
+            <div class="field">
+                <label class="field-label">@L["RedirectUris"]</label>
+                <TagInput @bind-Values="redirectUris" />
+            </div>
+
+            <div class="field">
+                <label class="field-label">@L["PostLogoutRedirectUris"]</label>
+                <TagInput @bind-Values="postLogoutRedirectUris" />
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SaveAsync">@L["Save"]</button>
+                <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/applications")'>@L["Back"]</button>
+                <div class="spacer"></div>
+                <button type="button" class="btn btn-danger" @onclick="DeleteAsync">
+                    <Icon Name="trash" Size="15" /> @L["Delete"]
+                </button>
+            </div>
+        </div>
+    }
+</section>
 
 @code {
     [Parameter]
@@ -81,9 +108,10 @@ else
 
     private async Task DeleteAsync()
     {
-        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteApplicationConfirm", ClientId], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
-        var result = await dialog.Result;
-        if (result.Cancelled) return;
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmDeletionTitle"], L["DeleteApplicationConfirm", ClientId],
+            L["Delete"], L["Cancel"], danger: true);
+        if (!ok) return;
 
         var response = await ApplicationService.DeleteApplicationAsync(ClientId);
         if (response.IsSuccessStatusCode)

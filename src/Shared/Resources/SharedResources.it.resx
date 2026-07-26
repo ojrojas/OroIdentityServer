@@ -40,6 +40,7 @@
   <data name="Identification"><value>Documento d'identità</value></data>
   <data name="IdentificationType"><value>Tipo di documento</value></data>
   <data name="Tenant"><value>Tenant</value></data>
+  <data name="Role"><value>Ruolo</value></data>
   <data name="Active"><value>Attivo</value></data>
   <data name="Created"><value>Creato</value></data>
   <data name="SavedToast"><value>Salvato.</value></data>

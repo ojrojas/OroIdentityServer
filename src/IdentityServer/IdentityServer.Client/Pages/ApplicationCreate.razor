@@ -7,29 +7,53 @@
 
 <PageTitle>@L["NewApplicationTitle"]</PageTitle>
 
-<FluentLabel Typo="Typography.PageTitle">@L["NewApplicationTitle"]</FluentLabel>
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["NewApplicationTitle"]</h2>
+    </div>
 
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Style="max-width: 560px; margin-top: 1rem;">
-    <FluentTextField @bind-Value="clientId" Label="@L["ClientId"]" Required="true" Style="width:100%" />
-    <FluentTextField @bind-Value="displayName" Label="@L["DisplayName"]" Style="width:100%" />
-    <FluentTextField @bind-Value="clientSecret" Label="@L["ClientSecret"]" Placeholder="@L["ClientSecretNewPlaceholder"]" TextFieldType="TextFieldType.Password" Style="width:100%" />
-    <FluentSelect Style="width:100%" TOption="string" Items="@(["confidential", "public"])" @bind-Value="clientType" Label="@L["ClientType"]" />
+    <div class="form">
+        <div class="form-grid">
+            <div class="field">
+                <label class="field-label" for="clientId">@L["ClientId"] <span class="req">*</span></label>
+                <input id="clientId" class="input" @bind="clientId" @bind:event="oninput" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="displayName">@L["DisplayName"]</label>
+                <input id="displayName" class="input" @bind="displayName" @bind:event="oninput" />
+            </div>
+        </div>
 
-    <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
-        <FluentLabel Typo="Typography.Body">@L["RedirectUris"]</FluentLabel>
-        <UriTagManager @bind-Uris="redirectUris" />
-    </FluentStack>
+        <div class="form-grid">
+            <div class="field">
+                <label class="field-label" for="clientSecret">@L["ClientSecret"]</label>
+                <input id="clientSecret" type="password" class="input" placeholder="@L["ClientSecretNewPlaceholder"]" @bind="clientSecret" @bind:event="oninput" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="clientType">@L["ClientType"]</label>
+                <select id="clientType" class="select" @bind="clientType">
+                    <option value="confidential">confidential</option>
+                    <option value="public">public</option>
+                </select>
+            </div>
+        </div>
 
-    <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
-        <FluentLabel Typo="Typography.Body">@L["PostLogoutRedirectUris"]</FluentLabel>
-        <UriTagManager @bind-Uris="postLogoutRedirectUris" />
-    </FluentStack>
+        <div class="field">
+            <label class="field-label">@L["RedirectUris"]</label>
+            <TagInput @bind-Values="redirectUris" />
+        </div>
 
-    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
-        <FluentButton Appearance="Appearance.Accent" Disabled="@(string.IsNullOrWhiteSpace(clientId) || saving)" OnClick="SubmitAsync">@L["Create"]</FluentButton>
-        <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/applications"))">@L["Cancel"]</FluentButton>
-    </FluentStack>
-</FluentStack>
+        <div class="field">
+            <label class="field-label">@L["PostLogoutRedirectUris"]</label>
+            <TagInput @bind-Values="postLogoutRedirectUris" />
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@(string.IsNullOrWhiteSpace(clientId) || saving)" @onclick="SubmitAsync">@L["Create"]</button>
+            <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/applications")'>@L["Cancel"]</button>
+        </div>
+    </div>
+</section>
 
 @code {
     private string clientId = string.Empty;

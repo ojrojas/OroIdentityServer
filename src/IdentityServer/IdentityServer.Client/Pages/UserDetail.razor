@@ -3,6 +3,7 @@
 @inject IAdminUserService UserService
 @inject IAdminIdentificationTypeService IdentificationTypeService
 @inject IAdminTenantService TenantService
+@inject IAdminRoleService RoleService
 @inject NavigationManager Nav
 @inject IDialogService DialogService
 @inject IToastService ToastService
@@ -10,43 +11,127 @@
 
 <PageTitle>@L["UserDetailTitle"]</PageTitle>
 
-@if (item is null || identificationTypes is null || tenants is null)
-{
-    <FluentProgressRing />
-}
-else
-{
-    <FluentLabel Typo="Typography.PageTitle">@L["UserDetailTitle"]</FluentLabel>
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["UserDetailTitle"]</h2>
+    </div>
 
-    <FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Style="max-width: 560px; margin-top: 1rem;">
-        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12">
-            <FluentTextField @bind-Value="name" Label="@L["Name"]" Required="true" Style="flex:1" />
-            <FluentTextField @bind-Value="middleName" Label="@L["MiddleName"]" Style="flex:1" />
-            <FluentTextField @bind-Value="lastName" Label="@L["LastName"]" Required="true" Style="flex:1" />
-        </FluentStack>
-        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12">
-            <FluentTextField @bind-Value="userName" Label="@L["Username"]" Required="true" Style="flex:1" />
-            <FluentTextField @bind-Value="email" Label="@L["Email"]" Required="true" TextFieldType="TextFieldType.Email" Style="flex:1" />
-        </FluentStack>
-        <FluentTextField @bind-Value="password" Label="@L["Password"]" Placeholder="@L["NewPasswordRequiredPlaceholder"]" Required="true" TextFieldType="TextFieldType.Password" Style="width:100%" />
-        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12">
-            <FluentTextField @bind-Value="identification" Label="@L["Identification"]" Required="true" Style="flex:1" />
-            <FluentSelect Style="flex:1" TOption="IdentificationTypeModel" Items="identificationTypes" OptionText="@(x => x.Name)" OptionValue="@(x => x.Id.ToString())"
-                          @bind-SelectedOption="selectedIdentificationType" Label="@L["IdentificationType"]" />
-        </FluentStack>
-        <FluentSelect Style="width:100%" TOption="TenantModel" Items="tenants" OptionText="@(x => x.Name)" OptionValue="@(x => x.Id.ToString())"
-                      @bind-SelectedOption="selectedTenant" Label="@L["Tenant"]" />
+    @if (item is null || identificationTypes is null || tenants is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="name">@L["Name"] <span class="req">*</span></label>
+                    <input id="name" class="input" @bind="name" @bind:event="oninput" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="middleName">@L["MiddleName"]</label>
+                    <input id="middleName" class="input" @bind="middleName" @bind:event="oninput" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="lastName">@L["LastName"] <span class="req">*</span></label>
+                    <input id="lastName" class="input" @bind="lastName" @bind:event="oninput" />
+                </div>
+            </div>
 
-        <FluentLabel>@L["RolesAssignedLabel", item.Roles.Count == 0 ? L["None"] : string.Join(", ", item.Roles.Select(r => r.RoleId))]</FluentLabel>
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="userName">@L["Username"] <span class="req">*</span></label>
+                    <input id="userName" class="input" @bind="userName" @bind:event="oninput" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="email">@L["Email"] <span class="req">*</span></label>
+                    <input id="email" type="email" class="input" @bind="email" @bind:event="oninput" />
+                </div>
+            </div>
 
-        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
-            <FluentButton Appearance="Appearance.Accent" Disabled="@(saving || string.IsNullOrWhiteSpace(password))" OnClick="SaveAsync">@L["Save"]</FluentButton>
-            <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/users"))">@L["Back"]</FluentButton>
-            <FluentSpacer />
-            <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Regular.Size20.Delete())" OnClick="DeleteAsync">@L["Delete"]</FluentButton>
-        </FluentStack>
-    </FluentStack>
-}
+            <div class="field">
+                <label class="field-label" for="password">@L["Password"] <span class="req">*</span></label>
+                <input id="password" type="password" class="input" placeholder="@L["NewPasswordRequiredPlaceholder"]" @bind="password" @bind:event="oninput" />
+            </div>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="identification">@L["Identification"] <span class="req">*</span></label>
+                    <input id="identification" class="input" @bind="identification" @bind:event="oninput" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="identificationType">@L["IdentificationType"]</label>
+                    <select id="identificationType" class="select" @bind="SelectedIdentificationTypeId">
+                        @foreach (var type in identificationTypes)
+                        {
+                            <option value="@type.Id">@type.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="tenant">@L["Tenant"]</label>
+                <select id="tenant" class="select" @bind="SelectedTenantId">
+                    @foreach (var tenant in tenants)
+                    {
+                        <option value="@tenant.Id">@tenant.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="field">
+                <label class="field-label">@L["RoleAssignmentSection"]</label>
+                <span class="field-hint">@L["SelectRolesForUser"]</span>
+
+                <div style="display:flex; gap:8px; margin-top:6px;">
+                    <select class="select" style="flex:1" @bind="roleIdToAdd" disabled="@savingRoles">
+                        <option value="">@L["SelectRolePlaceholder"]</option>
+                        @foreach (var role in AvailableRoles)
+                        {
+                            <option value="@role.Id">@role.Name</option>
+                        }
+                    </select>
+                    <button type="button" class="btn btn-outline" style="flex-shrink:0"
+                            disabled="@(string.IsNullOrEmpty(roleIdToAdd) || savingRoles)" @onclick="AddRoleAsync">
+                        <Icon Name="plus" Size="15" Stroke="2.2" /> @L["AddRoleButton"]
+                    </button>
+                </div>
+            </div>
+
+            <div class="field">
+                @if (assignedRoles.Count == 0)
+                {
+                    <p class="field-hint">@L["NoRolesAssigned"]</p>
+                }
+                else
+                {
+                    <div class="tags">
+                        @foreach (var role in assignedRoles)
+                        {
+                            <span class="tag">
+                                <span>@role.Name</span>
+                                <button type="button" class="tag-x" title="@L["RemoveRoleTitle"]" disabled="@savingRoles"
+                                        @onclick="() => RemoveRoleAsync(role.Id)">
+                                    <Icon Name="x" Size="11" Stroke="2.4" />
+                                </button>
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" disabled="@(saving || string.IsNullOrWhiteSpace(password))" @onclick="SaveAsync">@L["Save"]</button>
+                <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/users")'>@L["Back"]</button>
+                <div class="spacer"></div>
+                <button type="button" class="btn btn-danger" @onclick="DeleteAsync">
+                    <Icon Name="trash" Size="15" /> @L["Delete"]
+                </button>
+            </div>
+        </div>
+    }
+</section>
 
 @code {
     [Parameter]
@@ -54,9 +139,14 @@ else
 
     private UserModel? item;
     private List<IdentificationTypeModel>? identificationTypes;
+    private List<RoleModel>? roles = [];
+    private List<RoleModel> assignedRoles = [];
     private List<TenantModel>? tenants;
     private IdentificationTypeModel? selectedIdentificationType;
     private TenantModel? selectedTenant;
+
+    private string roleIdToAdd = string.Empty;
+    private bool savingRoles;
 
     private string name = string.Empty;
     private string middleName = string.Empty;
@@ -67,6 +157,21 @@ else
     private string identification = string.Empty;
     private bool saving;
 
+    private IEnumerable<RoleModel> AvailableRoles =>
+        (roles ?? []).Where(r => assignedRoles.All(a => a.Id != r.Id));
+
+    private string SelectedIdentificationTypeId
+    {
+        get => selectedIdentificationType?.Id.ToString() ?? string.Empty;
+        set => selectedIdentificationType = identificationTypes?.FirstOrDefault(t => t.Id.ToString() == value);
+    }
+
+    private string SelectedTenantId
+    {
+        get => selectedTenant?.Id.ToString() ?? string.Empty;
+        set => selectedTenant = tenants?.FirstOrDefault(t => t.Id.ToString() == value);
+    }
+
     protected override async Task OnInitializedAsync()
     {
         var identificationTypesResponse = await IdentificationTypeService.GetIdentificationTypesAsync();
@@ -75,9 +180,15 @@ else
         var tenantsResponse = await TenantService.GetTenantsAsync();
         tenants = tenantsResponse?.Data?.ToList() ?? [];
 
+        var rolesResponse = await RoleService.GetRolesAsync();
+        roles = rolesResponse?.Data?.ToList() ?? [];
+
         var response = await UserService.GetUsersAsync();
         item = response?.Data?.FirstOrDefault(u => u.Id == Id);
         if (item is null) return;
+
+        var assignedIds = item.Roles.Select(r => r.RoleId).Where(id => id is not null).Select(id => id!.Value).ToHashSet();
+        assignedRoles = [.. roles.Where(r => assignedIds.Contains(r.Id))];
 
         name = item.Name ?? string.Empty;
         middleName = item.MiddleName ?? string.Empty;
@@ -107,11 +218,46 @@ else
             ToastService.ShowError(L["SaveFailedToast", (int)response.StatusCode]);
     }
 
+    private Task AddRoleAsync()
+    {
+        if (!Guid.TryParse(roleIdToAdd, out var roleId)) return Task.CompletedTask;
+
+        roleIdToAdd = string.Empty;
+        return SyncRolesAsync([.. assignedRoles.Select(r => r.Id), roleId]);
+    }
+
+    private Task RemoveRoleAsync(Guid roleId) =>
+        SyncRolesAsync(assignedRoles.Where(r => r.Id != roleId).Select(r => r.Id));
+
+    /// <summary>
+    /// AssignRolesToUserCommand replaces the user's full role set, so every add/remove
+    /// sends the complete desired list, then reloads the page to reflect what was saved
+    /// (rather than trusting optimistic local state).
+    /// </summary>
+    private async Task SyncRolesAsync(IEnumerable<Guid> roleIds)
+    {
+        savingRoles = true;
+
+        var response = await UserService.AssignRolesToUserAsync(Id, new AssignRolesRequest([.. roleIds]));
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["RolesSavedToast"]);
+            Nav.NavigateTo(Nav.Uri, forceLoad: true);
+        }
+        else
+        {
+            savingRoles = false;
+            ToastService.ShowError(L["RolesSaveFailedToast", (int)response.StatusCode]);
+        }
+    }
+
     private async Task DeleteAsync()
     {
-        var dialog = await DialogService.ShowConfirmationAsync(L["DeleteUserConfirm", userName], L["Delete"], L["Cancel"], L["ConfirmDeletionTitle"]);
-        var result = await dialog.Result;
-        if (result.Cancelled) return;
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmDeletionTitle"], L["DeleteUserConfirm", userName],
+            L["Delete"], L["Cancel"], danger: true);
+        if (!ok) return;
 
         var response = await UserService.DeleteUserAsync(Id);
         if (response.IsSuccessStatusCode)

@@ -7,16 +7,23 @@
 
 <PageTitle>@L["NewRoleTitle"]</PageTitle>
 
-<FluentLabel Typo="Typography.PageTitle">@L["NewRoleTitle"]</FluentLabel>
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["NewRoleTitle"]</h2>
+    </div>
 
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="16" Style="max-width: 480px; margin-top: 1rem;">
-    <FluentTextField @bind-Value="roleName" Label="@L["RoleName"]" Required="true" Style="width:100%" />
+    <div class="form">
+        <div class="field">
+            <label class="field-label" for="roleName">@L["RoleName"] <span class="req">*</span></label>
+            <input id="roleName" class="input" @bind="roleName" @bind:event="oninput" />
+        </div>
 
-    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8">
-        <FluentButton Appearance="Appearance.Accent" Disabled="@(string.IsNullOrWhiteSpace(roleName) || saving)" OnClick="SubmitAsync">@L["Create"]</FluentButton>
-        <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => Nav.NavigateTo("/roles"))">@L["Cancel"]</FluentButton>
-    </FluentStack>
-</FluentStack>
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@(string.IsNullOrWhiteSpace(roleName) || saving)" @onclick="SubmitAsync">@L["Create"]</button>
+            <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/roles")'>@L["Cancel"]</button>
+        </div>
+    </div>
+</section>
 
 @code {
     private string roleName = string.Empty;

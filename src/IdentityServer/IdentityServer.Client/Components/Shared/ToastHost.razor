@@ -1,0 +1,54 @@
+@implements IDisposable
+@inject IToastService ToastService
+
+@if (toasts.Count > 0)
+{
+    <div class="toast-host" aria-live="polite">
+        @foreach (var toast in toasts)
+        {
+            <div class="toast @LevelClass(toast.Level)" role="status">
+                <span class="toast-icon">
+                    <Icon Name="@LevelIcon(toast.Level)" Size="17" Stroke="2.1" />
+                </span>
+                <span class="toast-msg">@toast.Message</span>
+                <button type="button" class="toast-x" @onclick="() => ToastService.Remove(toast.Id)" aria-label="Cerrar">
+                    <Icon Name="x" Size="14" Stroke="2.2" />
+                </button>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private IReadOnlyList<ToastMessage> toasts = [];
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnChange += HandleChange;
+        toasts = ToastService.Toasts;
+    }
+
+    private void HandleChange() => InvokeAsync(() =>
+    {
+        toasts = ToastService.Toasts;
+        StateHasChanged();
+    });
+
+    private static string LevelClass(ToastLevel level) => level switch
+    {
+        ToastLevel.Success => "toast-success",
+        ToastLevel.Error => "toast-error",
+        ToastLevel.Warning => "toast-warning",
+        _ => "toast-info"
+    };
+
+    private static string LevelIcon(ToastLevel level) => level switch
+    {
+        ToastLevel.Success => "check-circle",
+        ToastLevel.Error => "x-circle",
+        ToastLevel.Warning => "alert",
+        _ => "info"
+    };
+
+    public void Dispose() => ToastService.OnChange -= HandleChange;
+}

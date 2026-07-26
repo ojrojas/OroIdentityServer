@@ -7,145 +7,196 @@
 @inject IAdminUserSessionService UserSessionService
 @inject IAdminIdentificationTypeService IdentificationTypeService
 @inject IAdminValidationLogService ValidationLogService
+@inject NavigationManager Nav
 @inject IStringLocalizer<SharedResources> L
 
 <PageTitle>@L["DashboardTitle"]</PageTitle>
 
-<FluentLabel Typo="Typography.PageTitle">@L["DashboardTitle"]</FluentLabel>
+<div class="dash-grid">
 
-<FluentGrid Style="margin-top: 1rem;">
-    <FluentGridItem xs="12" sm="6" md="3">
-        <StatCard Title="@L["StatUsers"]" Value="@userCount" Icon="@(new Icons.Regular.Size24.PeopleCommunity())" />
-    </FluentGridItem>
-    <FluentGridItem xs="12" sm="6" md="3">
-        <StatCard Title="@L["StatConnectedUsers"]" Value="@connectedUserCount" Icon="@(new Icons.Regular.Size24.PlugConnected())" />
-    </FluentGridItem>
-    <FluentGridItem xs="12" sm="6" md="3">
-        <StatCard Title="@L["StatRoles"]" Value="@roleCount" Icon="@(new Icons.Regular.Size24.Shield())" />
-    </FluentGridItem>
-    <FluentGridItem xs="12" sm="6" md="3">
-        <StatCard Title="@L["StatApplications"]" Value="@applicationCount" Icon="@(new Icons.Regular.Size24.Apps())" />
-    </FluentGridItem>
-    <FluentGridItem xs="12" sm="6" md="3">
-        <StatCard Title="@L["StatScopes"]" Value="@scopeCount" Icon="@(new Icons.Regular.Size24.Key())" />
-    </FluentGridItem>
-</FluentGrid>
+    @* ─────────── left column ─────────── *@
+    <div class="dash-col">
 
-<div class="saas-dashboard-grid">
-    <div class="saas-dashboard-main">
-        <div class="saas-card">
-            <div class="saas-card-header">
-                <p class="saas-card-title">@L["ValidationsTitle"]</p>
-                @if (validationDays is not null)
-                {
-                    <span class="saas-badge saas-badge-info">@L["Last7Days"]</span>
-                }
+        <section class="card">
+            <div class="card-head">
+                <h2 class="card-title">@L["OverviewTitle"]</h2>
+            </div>
+
+            <div class="inset">
+                <div class="stat-row">
+                    <StatCard Title="@L["StatUsers"]" Value="@userCount" IconName="users"
+                              Featured="true" Note="@L["StatUsersNote"]"
+                              Delta="@createdTodayCount" DeltaText="@TodayDeltaText" />
+
+                    <StatCard Title="@L["StatConnectedUsers"]" Value="@connectedUserCount" IconName="plug"
+                              Note="@L["StatConnectedNote"]" />
+                </div>
+
+                <div class="stat-row" style="margin-top:4px">
+                    <StatCard Title="@L["StatRoles"]" Value="@roleCount" IconName="shield" />
+                    <StatCard Title="@L["StatApplications"]" Value="@applicationCount" IconName="apps" />
+                    <StatCard Title="@L["StatScopes"]" Value="@scopeCount" IconName="key" />
+                </div>
+            </div>
+
+            @if (recentlyCreated is not null)
+            {
+                <div style="margin-top:22px">
+                    <p class="section-title">@CreatedTodayHeadline</p>
+                    <p class="section-sub">@L["RecentlyCreatedSubtitle"]</p>
+
+                    @if (recentlyCreated.Count == 0)
+                    {
+                        <div class="empty"><p>@L["NoRecentlyCreated"]</p></div>
+                    }
+                    else
+                    {
+                        <div class="people">
+                            @foreach (var entity in recentlyCreated)
+                            {
+                                <a class="person" href="@entity.Href" title="@($"{entity.Name} · {entity.TypeLabel}")">
+                                    <span class="avatar avatar-lg @entity.AvatarClass">@Initials(entity.Name)</span>
+                                    <span class="person-name">@entity.Name</span>
+                                </a>
+                            }
+                            <a class="person person-more" href="/users">
+                                <span class="avatar avatar-lg"><Icon Name="arrow-right" Size="18" Stroke="1.8" /></span>
+                                <span class="person-name">@L["ViewAll"]</span>
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2 class="card-title">@L["ValidationsTitle"]</h2>
+                <span class="badge badge-gray">@L["Last7Days"]</span>
             </div>
 
             @if (validationDays is null)
             {
-                <FluentProgressRing />
+                <div class="spinner spinner-lg spinner-center"></div>
             }
             else
             {
-                <p class="validation-chart-total">@totalValidations</p>
-                <p class="validation-chart-subtitle">@L["ValidationsSubtitle"]</p>
+                <div class="chart">
+                    <div class="chart-watermark">
+                        <b>@totalValidations.ToString("N0")</b>
+                        <small>@L["ValidationsSubtitle"]</small>
+                    </div>
 
-                <div class="validation-chart">
-                    @foreach (var day in validationDays)
-                    {
-                        var total = day.SucceededCount + day.FailedCount;
-                        var succeededPct = maxDailyTotal == 0 ? 0 : (double)day.SucceededCount / maxDailyTotal * 100;
-                        var failedPct = maxDailyTotal == 0 ? 0 : (double)day.FailedCount / maxDailyTotal * 100;
-                        var isPeak = total > 0 && total == maxDailyTotal;
-                        <div class="validation-chart-column" title="@($"{day.Date:d}: {day.SucceededCount} {L["ValidationsOk"]}, {day.FailedCount} {L["ValidationsFailed"]}")">
-                            <div class="validation-chart-bar-track">
-                                @if (isPeak)
-                                {
-                                    <span class="validation-chart-callout">@total</span>
-                                }
-                                @if (total > 0)
-                                {
-                                    <div class="validation-chart-bar validation-chart-bar-fail" style="height:@(failedPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
-                                    <div class="validation-chart-bar validation-chart-bar-success @(isPeak ? "validation-chart-bar-peak" : "")" style="height:@(succeededPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
-                                }
+                    <div class="chart-bars">
+                        @foreach (var day in validationDays)
+                        {
+                            var total = day.SucceededCount + day.FailedCount;
+                            var isPeak = total > 0 && total == maxDailyTotal;
+                            var height = maxDailyTotal == 0 ? 0 : (double)total / maxDailyTotal * 100;
+
+                            <div class="chart-col" title="@DayTooltip(day)">
+                                <div class="chart-track">
+                                    @if (isPeak)
+                                    {
+                                        <span class="bar-tip">@total.ToString("N0")</span>
+                                        <span class="bar-dot"></span>
+                                    }
+                                    <div class="bar @(isPeak ? "bar-peak" : "")"
+                                         style="height:@Pct(height)"></div>
+                                </div>
+                                <span class="chart-label">@day.Date.ToString("ddd", CultureInfo.CurrentUICulture)</span>
                             </div>
-                            <span class="validation-chart-day-label">@day.Date.ToString("ddd", System.Globalization.CultureInfo.CurrentUICulture)</span>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
 
-                <div class="validation-chart-legend">
-                    <span class="validation-chart-legend-item"><span class="validation-chart-swatch validation-chart-bar-success"></span>@L["ValidationsOk"]</span>
-                    <span class="validation-chart-legend-item"><span class="validation-chart-swatch validation-chart-bar-fail"></span>@L["ValidationsFailed"]</span>
+                <div class="chart-legend">
+                    <span class="legend-item"><span class="legend-dot is-peak"></span>@L["ValidationsPeak"]</span>
+                    <span class="legend-item"><span class="legend-dot is-base"></span>@L["ValidationsDaily"]</span>
                 </div>
             }
-        </div>
+        </section>
     </div>
 
-    <div class="saas-dashboard-side">
-        <div class="saas-card">
-            <div class="saas-card-header">
-                <p class="saas-card-title">@L["RecentConnectionsTitle"]</p>
+    @* ─────────── right column ─────────── *@
+    <div class="dash-col">
+
+        <section class="card">
+            <div class="card-head">
+                <h2 class="card-title">@L["RecentConnectionsTitle"]</h2>
             </div>
 
             @if (recentConnections is null)
             {
-                <FluentProgressRing />
+                <div class="spinner spinner-lg spinner-center"></div>
             }
             else if (recentConnections.Count == 0)
             {
-                <p class="saas-empty-text">@L["NoRecentConnections"]</p>
+                <div class="empty"><p>@L["NoRecentConnections"]</p></div>
             }
             else
             {
-                <div class="saas-list">
+                <div class="list">
                     @foreach (var connection in recentConnections)
                     {
-                        <div class="saas-list-row">
-                            <div class="saas-avatar @AvatarClass(connection.DisplayName)">@Initials(connection.DisplayName)</div>
-                            <div class="saas-list-row-body">
-                                <p class="saas-list-row-title">@connection.DisplayName</p>
-                                <p class="saas-list-row-subtitle">@(connection.Device ?? connection.IpAddress ?? "-")</p>
-                            </div>
-                            <span class="saas-badge @(connection.IsActive ? "saas-badge-success" : "saas-badge-warning")">
-                                @(connection.IsActive ? L["ActiveStatus"] : L["ExpiredStatus"])
+                        <div class="list-row">
+                            <span class="avatar @connection.AvatarClass">@Initials(connection.DisplayName)</span>
+                            <span class="list-body">
+                                <span class="list-title">@connection.DisplayName</span>
+                                <span class="list-sub">@connection.Detail</span>
+                            </span>
+                            <span class="list-meta">
+                                <span class="list-amount">@Ago(connection.LastSeen)</span>
+                                <span class="badge @(connection.IsActive ? "badge-green" : "badge-red")">
+                                    @(connection.IsActive ? L["ActiveStatus"] : L["ExpiredStatus"])
+                                </span>
                             </span>
                         </div>
                     }
                 </div>
-            }
-        </div>
 
-        <div class="saas-card" style="margin-top: 1.5rem;">
-            <div class="saas-card-header">
-                <p class="saas-card-title">@L["RecentlyCreatedTitle"]</p>
+                <div class="list-foot">
+                    <a class="btn btn-outline btn-block" href="/sessions">@L["ViewAllSessions"]</a>
+                </div>
+            }
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2 class="card-title">@L["RecentActivityTitle"]</h2>
             </div>
 
-            @if (recentlyCreated is null)
+            @if (recentActivity is null)
             {
-                <FluentProgressRing />
+                <div class="spinner spinner-lg spinner-center"></div>
             }
-            else if (recentlyCreated.Count == 0)
+            else if (recentActivity.Count == 0)
             {
-                <p class="saas-empty-text">@L["NoRecentlyCreated"]</p>
+                <div class="empty"><p>@L["NoRecentActivity"]</p></div>
             }
             else
             {
-                <div class="saas-chip-row">
-                    @foreach (var entity in recentlyCreated)
+                <div class="feed">
+                    @foreach (var entry in recentActivity)
                     {
-                        <div class="saas-chip" title="@($"{entity.Name} · {entity.TypeLabel}")">
-                            <span class="saas-avatar saas-avatar-sm @TypeAvatarClass(entity.TypeKind)">@Initials(entity.Name)</span>
-                            <span class="saas-chip-text">
-                                <span class="saas-chip-label">@entity.Name</span>
-                                <span class="saas-chip-caption">@entity.TypeLabel</span>
+                        <div class="feed-item">
+                            <span class="avatar avatar-sm @(entry.Succeeded ? "avatar-c3" : "avatar-c5")">
+                                <Icon Name="@(entry.Succeeded ? "check" : "x")" Size="14" Stroke="2.4" />
                             </span>
+                            <div class="feed-body">
+                                <p class="feed-head">
+                                    @UserLabel(entry.UserId)
+                                    <span class="muted">@L["ActivityOn"]</span>
+                                    @(entry.ClientId ?? L["UnknownClient"])
+                                </p>
+                                <p class="feed-time">@entry.OccurredAtUtc.ToLocalTime().ToString("t", CultureInfo.CurrentUICulture)</p>
+                                <p class="feed-text">@ActivityText(entry)</p>
+                            </div>
                         </div>
                     }
                 </div>
             }
-        </div>
+        </section>
     </div>
 </div>
 
@@ -155,6 +206,7 @@
     private int? roleCount;
     private int? scopeCount;
     private int? applicationCount;
+    private int createdTodayCount;
 
     private List<DailyValidationCountModel>? validationDays;
     private int totalValidations;
@@ -162,99 +214,164 @@
 
     private List<RecentConnection>? recentConnections;
     private List<RecentEntity>? recentlyCreated;
+    private List<ValidationLogEntryModel>? recentActivity;
 
-    private sealed record RecentConnection(string DisplayName, string? Device, string? IpAddress, bool IsActive, DateTime SortKey);
-    private sealed record RecentEntity(string Name, string TypeLabel, string TypeKind, DateTime CreatedAtUtc);
+    private Dictionary<Guid, string> userNames = [];
 
-    private static readonly string[] AvatarPalette = ["saas-avatar-accent", "saas-avatar-info", "saas-avatar-success", "saas-avatar-warning", "saas-avatar-danger"];
+    private sealed record RecentConnection(
+        string DisplayName, string Detail, bool IsActive, DateTime LastSeen, string AvatarClass);
 
-    private static string Initials(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return "-";
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length switch
-        {
-            0 => "-",
-            1 => parts[0][..1].ToUpperInvariant(),
-            _ => string.Concat(parts[0][..1], parts[^1][..1]).ToUpperInvariant()
-        };
-    }
+    private sealed record RecentEntity(
+        string Name, string TypeLabel, string Href, string AvatarClass, DateTime CreatedAtUtc);
 
-    private static string AvatarClass(string seed)
-    {
-        var index = Math.Abs(seed.GetHashCode()) % AvatarPalette.Length;
-        return AvatarPalette[index];
-    }
+    private string TodayDeltaText =>
+        createdTodayCount > 0 ? L["CreatedTodayShort", createdTodayCount] : string.Empty;
 
-    private static string TypeAvatarClass(string typeKind) => typeKind switch
-    {
-        "user" => "saas-avatar-accent",
-        "role" => "saas-avatar-success",
-        "identification-type" => "saas-avatar-warning",
-        _ => "saas-avatar-info"
-    };
+    private string CreatedTodayHeadline =>
+        createdTodayCount > 0 ? L["CreatedTodayHeadline", createdTodayCount] : L["LatestCreatedHeadline"];
 
     protected override async Task OnInitializedAsync()
     {
         var users = await UserService.GetUsersAsync();
         var userList = users?.Data?.ToList() ?? [];
         userCount = userList.Count;
+        userNames = userList.ToDictionary(u => u.Id, u => FullName(u));
 
         connectedUserCount = await UserSessionService.GetActiveSessionsCountAsync();
 
-        var allSessions = await UserSessionService.GetActiveSessionsAsync();
-        var sessionList = allSessions?.ToList() ?? [];
+        var sessions = (await UserSessionService.GetActiveSessionsAsync())?.ToList() ?? [];
 
         var roles = await RoleService.GetRolesAsync();
         var roleList = roles?.Data?.ToList() ?? [];
         roleCount = roleList.Count;
 
-        var applications = await ApplicationService.GetApplicationsAsync();
-        applicationCount = applications?.Count() ?? 0;
+        applicationCount = (await ApplicationService.GetApplicationsAsync())?.Count() ?? 0;
+        scopeCount = (await ScopeService.GetScopesAsync())?.Count() ?? 0;
 
-        var scopes = await ScopeService.GetScopesAsync();
-        scopeCount = scopes?.Count() ?? 0;
+        var identificationTypes =
+            (await IdentificationTypeService.GetIdentificationTypesAsync())?.Data?.ToList() ?? [];
 
-        var identificationTypesResponse = await IdentificationTypeService.GetIdentificationTypesAsync();
-        var identificationTypeList = identificationTypesResponse?.Data?.ToList() ?? [];
-
-        BuildRecentConnections(sessionList, userList);
-        BuildRecentlyCreated(userList, roleList, identificationTypeList);
+        BuildRecentConnections(sessions);
+        BuildRecentlyCreated(userList, roleList, identificationTypes);
 
         var summary = await ValidationLogService.GetDailySummaryAsync(7);
-        validationDays = summary.ToList();
+        validationDays = [.. summary];
         totalValidations = validationDays.Sum(d => d.SucceededCount + d.FailedCount);
-        maxDailyTotal = validationDays.Count == 0 ? 0 : validationDays.Max(d => d.SucceededCount + d.FailedCount);
+        maxDailyTotal = validationDays.Count == 0
+            ? 0
+            : validationDays.Max(d => d.SucceededCount + d.FailedCount);
+
+        recentActivity = [.. await ValidationLogService.GetRecentAsync(5)];
     }
 
-    private void BuildRecentConnections(List<UserSessionModel> sessions, List<UserModel> users)
+    private void BuildRecentConnections(List<UserSessionModel> sessions)
     {
         recentConnections = [.. sessions
             .Where(s => s.UserId is not null)
-            .GroupBy(s => s.UserId)
+            .GroupBy(s => s.UserId!.Value)
             .Select(g => g.OrderByDescending(s => s.LastActivityAt ?? s.CreatedAt).First())
             .OrderByDescending(s => s.LastActivityAt ?? s.CreatedAt)
-            .Take(6)
+            .Take(5)
             .Select(s =>
             {
-                var user = users.FirstOrDefault(u => u.Id == s.UserId);
-                var displayName = user is null ? s.UserId!.Value.ToString() : $"{user.Name} {user.LastName}".Trim();
-                return new RecentConnection(displayName, s.Device, s.IpAddress, s.ExpiresAt > DateTime.UtcNow, s.LastActivityAt ?? s.CreatedAt);
+                var name = userNames.TryGetValue(s.UserId!.Value, out var n) ? n : s.UserId!.Value.ToString()[..8];
+                var detail = string.Join(" · ", new[] { s.Device, s.IpAddress }.Where(x => !string.IsNullOrWhiteSpace(x)));
+
+                return new RecentConnection(
+                    name,
+                    string.IsNullOrEmpty(detail) ? "-" : detail,
+                    s.ExpiresAt > DateTime.UtcNow,
+                    s.LastActivityAt ?? s.CreatedAt,
+                    AvatarClass(name));
             })];
     }
 
-    private void BuildRecentlyCreated(List<UserModel> users, List<RoleModel> roles, List<IdentificationTypeModel> identificationTypes)
+    private void BuildRecentlyCreated(
+        List<UserModel> users, List<RoleModel> roles, List<IdentificationTypeModel> identificationTypes)
     {
-        var combined = new List<RecentEntity>();
-        combined.AddRange(users.Select(u => new RecentEntity($"{u.Name} {u.LastName}".Trim(), L["StatUsers"], "user", u.CreatedAtUtc)));
-        combined.AddRange(roles.Where(r => r.Name is not null).Select(r => new RecentEntity(r.Name!, L["StatRoles"], "role", r.CreatedAtUtc)));
-        combined.AddRange(identificationTypes.Select(i => new RecentEntity(i.Name, L["NavIdentificationTypes"], "identification-type", i.CreatedAtUtc)));
+        var all = new List<RecentEntity>();
+
+        all.AddRange(users.Select(u =>
+            new RecentEntity(FullName(u), L["StatUsers"], $"/users/{u.Id}", AvatarClass(FullName(u)), u.CreatedAtUtc)));
+
+        all.AddRange(roles.Where(r => r.Name is not null).Select(r =>
+            new RecentEntity(r.Name!, L["StatRoles"], $"/roles/{r.Id}", AvatarClass(r.Name!), r.CreatedAtUtc)));
+
+        all.AddRange(identificationTypes.Select(i =>
+            new RecentEntity(i.Name, L["NavIdentificationTypes"], $"/identification-types/{i.Id}",
+                             AvatarClass(i.Name), i.CreatedAtUtc)));
 
         var today = DateTime.UtcNow.Date;
-        var todayEntities = combined.Where(e => e.CreatedAtUtc.Date == today).OrderByDescending(e => e.CreatedAtUtc).ToList();
+        var createdToday = all.Where(e => e.CreatedAtUtc.Date == today).ToList();
+        createdTodayCount = createdToday.Count;
 
-        recentlyCreated = todayEntities.Count > 0
-            ? todayEntities.Take(8).ToList()
-            : [.. combined.OrderByDescending(e => e.CreatedAtUtc).Take(8)];
+        // Fall back to the latest entities so the row is never empty on a quiet day.
+        recentlyCreated = [.. (createdToday.Count > 0 ? createdToday : all)
+            .OrderByDescending(e => e.CreatedAtUtc)
+            .Take(5)];
+    }
+
+    private string UserLabel(Guid? userId) =>
+        userId is not null && userNames.TryGetValue(userId.Value, out var name) ? name : L["UnknownUser"];
+
+    private string ActivityText(ValidationLogEntryModel entry)
+    {
+        var what = entry.EventType switch
+        {
+            "AuthorizeSucceeded" => L["EventAuthorizeSucceeded"].Value,
+            "AuthorizeDenied" => L["EventAuthorizeDenied"].Value,
+            "TokenIssued" => L["EventTokenIssued"].Value,
+            "TokenDenied" => L["EventTokenDenied"].Value,
+            "LogoutSucceeded" => L["EventLogoutSucceeded"].Value,
+            _ => entry.EventType
+        };
+
+        var detail = entry.Succeeded ? entry.Scopes : entry.FailureReason;
+
+        return string.IsNullOrWhiteSpace(detail) ? what : $"{what} · {detail}";
+    }
+
+    private string DayTooltip(DailyValidationCountModel day) =>
+        $"{day.Date:d} — {L["ValidationsOk"]}: {day.SucceededCount}, {L["ValidationsFailed"]}: {day.FailedCount}";
+
+    private string Ago(DateTime when)
+    {
+        var span = DateTime.UtcNow - when;
+
+        if (span.TotalMinutes < 1) return L["JustNow"];
+        if (span.TotalMinutes < 60) return L["MinutesAgo", (int)span.TotalMinutes];
+        if (span.TotalHours < 24) return L["HoursAgo", (int)span.TotalHours];
+
+        return L["DaysAgo", (int)span.TotalDays];
+    }
+
+    private static string FullName(UserModel user)
+    {
+        var name = $"{user.Name} {user.LastName}".Trim();
+        return string.IsNullOrWhiteSpace(name) ? user.UserName ?? "-" : name;
+    }
+
+    private static string Pct(double value) =>
+        value.ToString("0.##", CultureInfo.InvariantCulture) + "%";
+
+    private static string Initials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        return parts.Length switch
+        {
+            0 => "?",
+            1 => parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant(),
+            _ => string.Concat(parts[0][..1], parts[^1][..1]).ToUpperInvariant()
+        };
+    }
+
+    /// <summary>Stable per-name colour so the same person keeps the same avatar.</summary>
+    private static string AvatarClass(string seed)
+    {
+        var hash = seed.Aggregate(17, (acc, c) => acc * 31 + c);
+        return $"avatar-c{Math.Abs(hash) % 5 + 1}";
     }
 }

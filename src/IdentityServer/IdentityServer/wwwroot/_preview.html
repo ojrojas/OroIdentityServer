@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard — preview</title>
+<link rel="stylesheet" href="app.css" />
+<script>
+  // ?theme=light|dark forces a theme so screenshots are deterministic
+  var t = new URLSearchParams(location.search).get('theme');
+  if (t) document.documentElement.setAttribute('data-theme', t);
+</script>
+</head>
+<body>
+
+<div class="app">
+  <div class="shell">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </span>
+        OroIdentity
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item active" href="#">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+          Dashboard
+        </a>
+
+        <div class="nav-section">Identidad</div>
+        <a class="nav-item" href="#">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+          Usuarios
+        </a>
+        <a class="nav-item" href="#">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Roles
+        </a>
+        <a class="nav-item" href="#">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          Tipos de ID
+        </a>
+
+        <div class="nav-section">Aplicaciones</div>
+        <a class="nav-item" href="#">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
+          Aplicaciones
+        </a>
+        <a class="nav-item" href="#">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.5 12.5 8-8M17 5l3 3M14.5 8.5l2.5 2.5"/></svg>
+          Scopes
+        </a>
+        <a class="nav-item" href="#">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5M9 7V2M15 7V2M6 13V8h12v5a6 6 0 0 1-12 0z"/></svg>
+          Sesiones
+        </a>
+      </nav>
+
+      <div class="rail">
+        <button class="rail-btn" title="Sesiones activas">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button class="rail-btn" id="themeBtn" title="Cambiar tema">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <div class="main">
+
+      <header class="topbar">
+        <h1 class="page-title">Dashboard</h1>
+
+        <div class="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Buscar…" />
+        </div>
+
+        <button class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Crear
+        </button>
+
+        <button class="btn-icon" title="Notificaciones">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        </button>
+        <span class="avatar avatar-c1">OR</span>
+      </header>
+
+      <div class="content">
+
+        <div class="dash-grid">
+
+          <!-- ===== LEFT COLUMN ===== -->
+          <div class="dash-col">
+
+            <!-- Overview -->
+            <section class="card">
+              <div class="card-head">
+                <h2 class="card-title">Resumen</h2>
+                <button class="pill-select">
+                  Todo
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+              </div>
+
+              <div class="inset">
+                <div class="stat-row">
+                  <div class="stat stat-featured">
+                    <div class="stat-label">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                      Usuarios
+                    </div>
+                    <div class="stat-figure">
+                      <span class="stat-value">128</span>
+                      <span class="delta delta-up">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                        3 hoy
+                      </span>
+                    </div>
+                    <p class="stat-note">Cuentas registradas</p>
+                  </div>
+
+                  <div class="stat">
+                    <div class="stat-label">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5M9 7V2M15 7V2M6 13V8h12v5a6 6 0 0 1-12 0z"/></svg>
+                      Conectados
+                    </div>
+                    <div class="stat-figure">
+                      <span class="stat-value">14</span>
+                      <span class="delta delta-flat">activas</span>
+                    </div>
+                    <p class="stat-note">Sesiones vigentes</p>
+                  </div>
+                </div>
+
+                <div class="stat-row" style="margin-top:4px">
+                  <div class="stat">
+                    <div class="stat-label">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      Roles
+                    </div>
+                    <div class="stat-figure"><span class="stat-value">6</span></div>
+                  </div>
+                  <div class="stat">
+                    <div class="stat-label">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
+                      Aplicaciones
+                    </div>
+                    <div class="stat-figure"><span class="stat-value">4</span></div>
+                  </div>
+                  <div class="stat">
+                    <div class="stat-label">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.5 12.5 8-8M17 5l3 3M14.5 8.5l2.5 2.5"/></svg>
+                      Scopes
+                    </div>
+                    <div class="stat-figure"><span class="stat-value">9</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- new entities today -->
+              <div style="margin-top:22px">
+                <p class="section-title">3 entidades creadas hoy</p>
+                <p class="section-sub">Lo último que se dio de alta en el servidor.</p>
+
+                <div class="people">
+                  <a class="person" href="#">
+                    <span class="avatar avatar-lg avatar-c1">AL</span>
+                    <span class="person-name">Ana López</span>
+                  </a>
+                  <a class="person" href="#">
+                    <span class="avatar avatar-lg avatar-c3">SU</span>
+                    <span class="person-name">Support</span>
+                  </a>
+                  <a class="person" href="#">
+                    <span class="avatar avatar-lg avatar-c4">CE</span>
+                    <span class="person-name">Cédula</span>
+                  </a>
+                  <a class="person person-more" href="#">
+                    <span class="avatar avatar-lg">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </span>
+                    <span class="person-name">Ver todos</span>
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            <!-- Chart -->
+            <section class="card">
+              <div class="card-head">
+                <h2 class="card-title">Validaciones</h2>
+                <button class="pill-select">
+                  Últimos 7 días
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+              </div>
+
+              <div class="chart">
+                <div class="chart-watermark"><b>342</b><small>peticiones esta semana</small></div>
+                <div class="chart-bars" id="bars"></div>
+              </div>
+
+              <div class="chart-legend">
+                <span class="legend-item"><span class="legend-dot is-peak"></span>Pico del período</span>
+                <span class="legend-item"><span class="legend-dot is-base"></span>Peticiones aprobadas / rechazadas</span>
+              </div>
+            </section>
+          </div>
+
+          <!-- ===== RIGHT COLUMN ===== -->
+          <div class="dash-col">
+
+            <section class="card">
+              <div class="card-head"><h2 class="card-title">Últimos conectados</h2></div>
+
+              <div class="list">
+                <a class="list-row" href="#">
+                  <span class="avatar avatar-c1">OR</span>
+                  <span class="list-body">
+                    <span class="list-title">Oscar Julián Rojas</span>
+                    <span class="list-sub">Chrome · 190.12.4.2</span>
+                  </span>
+                  <span class="list-meta">
+                    <span class="list-amount">hace 2 min</span>
+                    <span class="badge badge-green">Activa</span>
+                  </span>
+                </a>
+                <a class="list-row" href="#">
+                  <span class="avatar avatar-c2">MG</span>
+                  <span class="list-body">
+                    <span class="list-title">María Gómez</span>
+                    <span class="list-sub">Edge · 190.12.9.7</span>
+                  </span>
+                  <span class="list-meta">
+                    <span class="list-amount">hace 18 min</span>
+                    <span class="badge badge-green">Activa</span>
+                  </span>
+                </a>
+                <a class="list-row" href="#">
+                  <span class="avatar avatar-c4">JP</span>
+                  <span class="list-body">
+                    <span class="list-title">Juan Pérez</span>
+                    <span class="list-sub">Firefox · 201.5.3.9</span>
+                  </span>
+                  <span class="list-meta">
+                    <span class="list-amount">hace 3 h</span>
+                    <span class="badge badge-red">Expirada</span>
+                  </span>
+                </a>
+                <a class="list-row" href="#">
+                  <span class="avatar avatar-c3">LT</span>
+                  <span class="list-body">
+                    <span class="list-title">Laura Torres</span>
+                    <span class="list-sub">Safari · 181.44.2.1</span>
+                  </span>
+                  <span class="list-meta">
+                    <span class="list-amount">hace 5 h</span>
+                    <span class="badge badge-green">Activa</span>
+                  </span>
+                </a>
+              </div>
+
+              <div class="list-foot">
+                <a class="btn btn-outline btn-block" href="#">Ver todas las sesiones</a>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head"><h2 class="card-title">Actividad reciente</h2></div>
+
+              <div class="feed">
+                <div class="feed-item">
+                  <span class="avatar avatar-sm avatar-c3">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  </span>
+                  <div class="feed-body">
+                    <p class="feed-head">Oscar Julián <span class="muted">en</span> portal-web</p>
+                    <p class="feed-time">09:04</p>
+                    <p class="feed-text">Autorización aprobada · openid profile email</p>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <span class="avatar avatar-sm avatar-c5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                  </span>
+                  <div class="feed-body">
+                    <p class="feed-head">María Gómez <span class="muted">en</span> mobile-app</p>
+                    <p class="feed-time">08:51</p>
+                    <p class="feed-text">Token rechazado · consent_required</p>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <span class="avatar avatar-sm avatar-c3">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  </span>
+                  <div class="feed-body">
+                    <p class="feed-head">Laura Torres <span class="muted">en</span> portal-web</p>
+                    <p class="feed-time">08:32</p>
+                    <p class="feed-text">Token emitido · offline_access</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+        </div>
+
+        <!-- ===== TABLE SAMPLE (para validar páginas CRUD) ===== -->
+        <section class="card">
+          <div class="card-head">
+            <h2 class="card-title">Usuarios</h2>
+            <button class="btn btn-primary btn-sm">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              Nuevo
+            </button>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr><th>Usuario</th><th>Nombre</th><th>Email</th><th class="num">Roles</th><th>Estado</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="cell-strong">orojas</td>
+                  <td>Oscar Julián Rojas</td>
+                  <td class="cell-muted">dev@weygo.com</td>
+                  <td class="num">2</td>
+                  <td><span class="badge badge-green">Activo</span></td>
+                  <td><div class="actions">
+                    <button class="btn-row"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4v16h16v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
+                    <button class="btn-row is-danger"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td class="cell-strong">mgomez</td>
+                  <td>María Gómez</td>
+                  <td class="cell-muted">maria@weygo.com</td>
+                  <td class="num">1</td>
+                  <td><span class="badge badge-amber">Bloqueado</span></td>
+                  <td><div class="actions">
+                    <button class="btn-row"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4v16h16v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
+                    <button class="btn-row is-danger"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== FORM SAMPLE ===== -->
+        <section class="card">
+          <div class="card-head"><h2 class="card-title">Nueva aplicación</h2></div>
+          <div class="form">
+            <div class="form-grid">
+              <div class="field">
+                <label class="field-label">Client ID <span class="req">*</span></label>
+                <input class="input" placeholder="mi-app" />
+              </div>
+              <div class="field">
+                <label class="field-label">Nombre</label>
+                <input class="input" placeholder="Mi aplicación" />
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Tipo de cliente</label>
+              <select class="select"><option>confidential</option><option>public</option></select>
+            </div>
+            <div class="field">
+              <label class="field-label">Redirect URIs</label>
+              <div class="tags">
+                <span class="tag"><span>https://app.com/callback</span><button class="tag-x">×</button></span>
+                <span class="tag"><span>https://app.com/signin-oidc</span><button class="tag-x">×</button></span>
+                <input class="tag-field" placeholder="https://…  y Enter" />
+              </div>
+              <span class="field-hint">Escribe la URL y presiona Enter para añadirla.</span>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary">Crear</button>
+              <button class="btn btn-ghost">Cancelar</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- toast + modal samples -->
+<div class="toast-host">
+  <div class="toast toast-success">
+    <span class="toast-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg></span>
+    <span class="toast-msg">Aplicación creada correctamente.</span>
+    <button class="toast-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+</div>
+
+<script>
+const days = [
+  {l:'lun', v:36}, {l:'mar', v:43}, {l:'mié', v:44}, {l:'jue', v:55},
+  {l:'vie', v:68}, {l:'sáb', v:21}, {l:'dom', v:20}
+];
+const max = Math.max(...days.map(d => d.v));
+document.getElementById('bars').innerHTML = days.map(d => {
+  const peak = d.v === max;
+  const h = Math.round(d.v / max * 100);
+  return `<div class="chart-col">
+    <div class="chart-track">
+      ${peak ? `<span class="bar-tip">${d.v}</span><span class="bar-dot"></span>` : ''}
+      <div class="bar ${peak ? 'bar-peak' : ''}" style="height:${h}%"></div>
+    </div>
+    <span class="chart-label">${d.l}</span>
+  </div>`;
+}).join('');
+
+document.getElementById('themeBtn').onclick = () => {
+  const r = document.documentElement;
+  r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark';
+};
+</script>
+</body>
+</html>

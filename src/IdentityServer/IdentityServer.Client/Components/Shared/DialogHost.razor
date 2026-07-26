@@ -1,0 +1,64 @@
+@implements IDisposable
+@inject IDialogService DialogService
+
+@if (request is not null)
+{
+    <div class="modal-backdrop" @onclick="Cancel" @onkeydown="HandleKey" tabindex="-1">
+        <div class="modal" role="alertdialog" aria-modal="true" aria-label="@request.Title" @onclick:stopPropagation="true">
+            <div class="modal-head">
+                <span class="modal-icon @(request.Danger ? "is-danger" : "")">
+                    <Icon Name="@(request.Danger ? "alert" : "info")" Size="19" Stroke="1.9" />
+                </span>
+                <div>
+                    <p class="modal-title">@request.Title</p>
+                    <p class="modal-text">@request.Message</p>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button type="button" class="btn btn-ghost" @onclick="Cancel">@request.CancelText</button>
+                <button type="button" class="btn @(request.Danger ? "btn-danger" : "btn-primary")" @onclick="Confirm" @ref="confirmButton">
+                    @request.ConfirmText
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private DialogRequest? request;
+    private ElementReference confirmButton;
+    private bool shouldFocus;
+
+    protected override void OnInitialized()
+    {
+        DialogService.OnChange += HandleChange;
+        request = DialogService.Current;
+    }
+
+    private void HandleChange() => InvokeAsync(() =>
+    {
+        var wasClosed = request is null;
+        request = DialogService.Current;
+        shouldFocus = wasClosed && request is not null;
+        StateHasChanged();
+    });
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (shouldFocus && request is not null)
+        {
+            shouldFocus = false;
+            try { await confirmButton.FocusAsync(); } catch { /* element already gone */ }
+        }
+    }
+
+    private void Confirm() => DialogService.Resolve(true);
+    private void Cancel() => DialogService.Resolve(false);
+
+    private void HandleKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape") Cancel();
+    }
+
+    public void Dispose() => DialogService.OnChange -= HandleChange;
+}
