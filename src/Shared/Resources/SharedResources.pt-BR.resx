@@ -80,6 +80,7 @@
   <data name="DashboardTitle"><value>Painel</value></data>
   <data name="StatUsers"><value>Usuários</value></data>
   <data name="StatConnectedUsers"><value>Usuários conectados</value></data>
+  <data name="StatTenants"><value>Inquilinos</value></data>
   <data name="StatRoles"><value>Funções</value></data>
   <data name="StatApplications"><value>Aplicativos</value></data>
   <data name="StatScopes"><value>Escopos</value></data>

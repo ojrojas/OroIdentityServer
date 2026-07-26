@@ -1,7 +1,7 @@
 @* One figure inside the Overview inset panel. Set Featured on the primary metric. *@
 
-<div class="stat @(Featured ? "stat-featured" : "")">
-    <div class="stat-label">
+<div class="stat @(Featured ? "stat-featured" : "")" onclick="@HandleClick">
+    <div class="stat-label" >
         @if (!string.IsNullOrEmpty(IconName))
         {
             <Icon Name="@IconName" Size="15" Stroke="1.8" />
@@ -58,6 +58,14 @@
     [Parameter] public int Delta { get; set; }
 
     [Parameter] public string? DeltaText { get; set; }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    private async Task HandleClick(MouseEventArgs e)
+    {
+        await OnClick.InvokeAsync(e);
+    }
 
     private string DeltaClass => Delta switch
     {

@@ -79,6 +79,7 @@
 
   <data name="DashboardTitle"><value>Dashboard</value></data>
   <data name="StatUsers"><value>Utenti</value></data>
+  <data name="StatTenants"><value>Inquilini</value></data>
   <data name="StatConnectedUsers"><value>Utenti connessi</value></data>
   <data name="StatRoles"><value>Ruoli</value></data>
   <data name="StatApplications"><value>Applicazioni</value></data>

@@ -87,6 +87,7 @@
   <!-- Dashboard -->
   <data name="DashboardTitle"><value>Dashboard</value></data>
   <data name="StatUsers"><value>Users</value></data>
+  <data name="StatTenants"><value>Tenants</value></data>
   <data name="StatConnectedUsers"><value>Connected users</value></data>
   <data name="StatRoles"><value>Roles</value></data>
   <data name="StatApplications"><value>Applications</value></data>

@@ -9,6 +9,8 @@
 @inject IAdminValidationLogService ValidationLogService
 @inject NavigationManager Nav
 @inject IStringLocalizer<SharedResources> L
+@rendermode InteractiveAuto
+
 
 <PageTitle>@L["DashboardTitle"]</PageTitle>
 
@@ -24,18 +26,25 @@
 
             <div class="inset">
                 <div class="stat-row">
-                    <StatCard Title="@L["StatUsers"]" Value="@userCount" IconName="users"
-                              Featured="true" Note="@L["StatUsersNote"]"
-                              Delta="@createdTodayCount" DeltaText="@TodayDeltaText" />
+                    <StatCard Title="@L["StatUsers"]" Value="@userCount" IconName="users" Featured="true"
+                              Note="@L["StatUsersNote"]" Delta="@createdTodayCount" DeltaText="@TodayDeltaText"
+                              OnClick="@((e) => NavigationStat("/users"))" />
+                    <StatCard Title="@L["StatUsers"]" Value="@userCount" IconName="users" Featured="true"
+                              Note="@L["StatUsersNote"]" Delta="@createdTodayCount" DeltaText="@TodayDeltaText"
+                              OnClick="@((e) => NavigationStat("/users"))" />
 
-                    <StatCard Title="@L["StatConnectedUsers"]" Value="@connectedUserCount" IconName="plug"
-                              Note="@L["StatConnectedNote"]" />
+                    <StatCard Title="@L["StatConnectedUsers"]" Featured="true" Value="@connectedUserCount"
+                              IconName="plug" Note="@L["StatConnectedNote"]"
+                              OnClick="@((e) => NavigationStat("/sessions"))" />
                 </div>
 
                 <div class="stat-row" style="margin-top:4px">
-                    <StatCard Title="@L["StatRoles"]" Value="@roleCount" IconName="shield" />
-                    <StatCard Title="@L["StatApplications"]" Value="@applicationCount" IconName="apps" />
-                    <StatCard Title="@L["StatScopes"]" Value="@scopeCount" IconName="key" />
+                    <StatCard Featured="true" Title="@L["StatRoles"]" Value="@roleCount" IconName="shield"
+                              OnClick="@(() => NavigationStat("/roles"))" />
+                    <StatCard Featured="true" Title="@L["StatApplications"]" Value="@applicationCount" IconName="apps"
+                              OnClick="@(() => NavigationStat("/applications"))" />
+                    <StatCard Featured="true" Title="@L["StatScopes"]" Value="@scopeCount" IconName="key"
+                              OnClick="@(() => NavigationStat("/scopes"))" />
                 </div>
             </div>
 
@@ -47,7 +56,9 @@
 
                     @if (recentlyCreated.Count == 0)
                     {
-                        <div class="empty"><p>@L["NoRecentlyCreated"]</p></div>
+                        <div class="empty">
+                            <p>@L["NoRecentlyCreated"]</p>
+                        </div>
                     }
                     else
                     {
@@ -60,7 +71,9 @@
                                 </a>
                             }
                             <a class="person person-more" href="/users">
-                                <span class="avatar avatar-lg"><Icon Name="arrow-right" Size="18" Stroke="1.8" /></span>
+                                <span class="avatar avatar-lg">
+                                    <Icon Name="arrow-right" Size="18" Stroke="1.8" />
+                                </span>
                                 <span class="person-name">@L["ViewAll"]</span>
                             </a>
                         </div>
@@ -101,8 +114,7 @@
                                         <span class="bar-tip">@total.ToString("N0")</span>
                                         <span class="bar-dot"></span>
                                     }
-                                    <div class="bar @(isPeak ? "bar-peak" : "")"
-                                         style="height:@Pct(height)"></div>
+                                    <div class="bar @(isPeak ? "bar-peak" : "")" style="height:@Pct(height)"></div>
                                 </div>
                                 <span class="chart-label">@day.Date.ToString("ddd", CultureInfo.CurrentUICulture)</span>
                             </div>
@@ -132,7 +144,9 @@
             }
             else if (recentConnections.Count == 0)
             {
-                <div class="empty"><p>@L["NoRecentConnections"]</p></div>
+                <div class="empty">
+                    <p>@L["NoRecentConnections"]</p>
+                </div>
             }
             else
             {
@@ -172,7 +186,9 @@
             }
             else if (recentActivity.Count == 0)
             {
-                <div class="empty"><p>@L["NoRecentActivity"]</p></div>
+                <div class="empty">
+                    <p>@L["NoRecentActivity"]</p>
+                </div>
             }
             else
             {
@@ -189,16 +205,17 @@
                                     <span class="muted">@L["ActivityOn"]</span>
                                     @(entry.ClientId ?? L["UnknownClient"])
                                 </p>
-                                <p class="feed-time">@entry.OccurredAtUtc.ToLocalTime().ToString("t", CultureInfo.CurrentUICulture)</p>
-                                <p class="feed-text">@ActivityText(entry)</p>
+                                <p class="feed-time">@entry.OccurredAtUtc.ToLocalTime().ToString("t",
+                                                                CultureInfo.CurrentUICulture)</p>
+                                    <p class="feed-text">@ActivityText(entry)</p>
+                                </div>
                             </div>
-                        </div>
-                    }
-                </div>
-            }
-        </section>
+                        }
+                    </div>
+                }
+            </section>
+        </div>
     </div>
-</div>
 
 @code {
     private int? userCount;
@@ -373,5 +390,10 @@
     {
         var hash = seed.Aggregate(17, (acc, c) => acc * 31 + c);
         return $"avatar-c{Math.Abs(hash) % 5 + 1}";
+    }
+
+    private void NavigationStat(string pathNavigation)
+    {
+        Nav.NavigateTo(pathNavigation);
     }
 }

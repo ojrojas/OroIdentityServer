@@ -79,6 +79,7 @@
 
   <data name="DashboardTitle"><value>Tableau de bord</value></data>
   <data name="StatUsers"><value>Utilisateurs</value></data>
+  <data name="StatTenants"><value>Locataires</value></data>
   <data name="StatConnectedUsers"><value>Utilisateurs connectés</value></data>
   <data name="StatRoles"><value>Rôles</value></data>
   <data name="StatApplications"><value>Applications</value></data>
