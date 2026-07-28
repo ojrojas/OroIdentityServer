@@ -23,14 +23,17 @@ public class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
             .HasColumnName("CreatedAtUtc")
             .IsRequired();
 
-        builder.OwnsOne(r => r.Name, name =>
-        {
-            name.Property(n => n.Value)
-                .HasColumnName("Name")
-                .HasMaxLength(100)
-                .IsRequired()
-                ;
-        });
+        builder.Property(r => r.Name)
+            .HasConversion(
+                name => name.Value,
+                value => new RoleName(value))
+            .HasColumnName("Name")
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder.HasIndex(r => r.Name)
+            .IsUnique()
+            .HasDatabaseName("IX_Roles_Name");
 
         builder.Metadata
          .FindNavigation(nameof(Role.RolePermissions))!

@@ -19,20 +19,17 @@ public class IdentificationTypeEntityConfiguration : IEntityTypeConfiguration<Id
             .HasColumnName("IsActive")
             .IsRequired();
 
-        builder.OwnsOne(it => it.Name, name =>
-        {
-            name.Property(n => n.Value)
-                .HasColumnName("Name")
-                .HasMaxLength(100)
-                .IsRequired();
-            name.HasIndex(n => n.Value)
-                .IsUnique()
-                .HasDatabaseName("IX_IdentificationTypes_Name");
-        });
+        builder.Property(it => it.Name)
+            .HasConversion(
+                name => name.Value,
+                value => new IdentificationTypeName(value))
+            .HasColumnName("Name")
+            .HasMaxLength(100)
+            .IsRequired();
 
-        // builder.HasIndex(it => it.Name.Value)
-        //     .HasDatabaseName("IX_IdentificationTypes_Name")
-        //     .IsUnique();
+        builder.HasIndex(it => it.Name)
+            .IsUnique()
+            .HasDatabaseName("IX_IdentificationTypes_Name");
 
         builder.HasIndex(it => it.IsActive)
             .HasDatabaseName("IX_IdentificationTypes_IsActive");

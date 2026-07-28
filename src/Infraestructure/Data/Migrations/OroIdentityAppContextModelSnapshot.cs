@@ -363,6 +363,12 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("IsActive");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("Name");
+
                     b.Property<int>("Version")
                         .HasColumnType("integer");
 
@@ -370,6 +376,10 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
 
                     b.HasIndex("IsActive")
                         .HasDatabaseName("IX_Roles_IsActive");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Roles_Name");
 
                     b.ToTable("Roles", (string)null);
                 });
@@ -446,6 +456,194 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasDatabaseName("ix_tenant_users_tenant_id_user_id");
 
                     b.ToTable("TenantUsers", (string)null);
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.UserPreferences.Aggregates.UserPreference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAtUtc");
+
+                    b.Property<string>("DashboardLayout")
+                        .HasColumnType("text")
+                        .HasColumnName("DashboardLayout");
+
+                    b.Property<string>("DateFormat")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("DateFormat");
+
+                    b.Property<Guid?>("DefaultCompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("DefaultCompanyId");
+
+                    b.Property<string>("InboxSortDirection")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("InboxSortDirection");
+
+                    b.Property<string>("InboxSortField")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("InboxSortField");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("Language");
+
+                    b.Property<string>("NumberFormat")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("NumberFormat");
+
+                    b.Property<bool>("SidebarCollapsed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("SidebarCollapsed");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("TenantId");
+
+                    b.Property<string>("Theme")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("Theme");
+
+                    b.Property<string>("Timezone")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("Timezone");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UpdatedAtUtc");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("UserId");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "TenantId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_preferences_user_tenant");
+
+                    b.ToTable("UserPreferences", (string)null);
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.UserPreferences.Entities.TenantPreferenceConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("DefaultDateFormat")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("DefaultDateFormat");
+
+                    b.Property<string>("DefaultLanguage")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("DefaultLanguage");
+
+                    b.Property<string>("DefaultNumberFormat")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("DefaultNumberFormat");
+
+                    b.Property<string>("DefaultTheme")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("DefaultTheme");
+
+                    b.Property<string>("DefaultTimezone")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("DefaultTimezone");
+
+                    b.Property<bool>("ForceLanguage")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ForceLanguage");
+
+                    b.Property<bool>("ForceTheme")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ForceTheme");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("TenantId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_tenant_preference_configs_tenant_id");
+
+                    b.ToTable("TenantPreferenceConfigs", (string)null);
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.UserPreferences.Entities.UserCompanyPreference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CompanyId");
+
+                    b.Property<string>("DefaultChartView")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("DefaultChartView");
+
+                    b.Property<string>("DefaultReportPeriod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("DefaultReportPeriod");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("TenantId");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "TenantId", "CompanyId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_company_preferences_user_tenant_company");
+
+                    b.ToTable("UserCompanyPreferences", (string)null);
                 });
 
             modelBuilder.Entity("OroIdentityServer.Core.Modules.UserSessions.Aggregates.UserSession", b =>
@@ -729,31 +927,6 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("IdentificationTypeId");
-                        });
-
-                    b.Navigation("Name")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", b =>
-                {
-                    b.OwnsOne("OroIdentityServer.Core.Shared.RoleName", "Name", b1 =>
-                        {
-                            b1.Property<Guid>("RoleId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
-                                .HasColumnName("Name");
-
-                            b1.HasKey("RoleId");
-
-                            b1.ToTable("Roles");
-
-                            b1.WithOwner()
-                                .HasForeignKey("RoleId");
                         });
 
                     b.Navigation("Name")

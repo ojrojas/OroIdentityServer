@@ -19,27 +19,25 @@ public class TenantEntityConfiguration : IEntityTypeConfiguration<Tenant>
             .HasColumnName("IsActive")
             .IsRequired();
 
-        builder.OwnsOne(it => it.Name, name =>
-        {
-            name.Property(n => n.Value)
-                .HasColumnName("Name")
-                .HasMaxLength(100)
-                .IsRequired();
-            name.HasIndex(n => n.Value)
-                .IsUnique()
-                .HasDatabaseName("IX_Tenants_Name");
-        });
-
-        builder.OwnsOne(t => t.Slug, slug => {
-            slug.Property(s => s.Value)
-            .HasColumnName("Slug")
+        builder.Property(it => it.Name)
+            .HasConversion(
+                name => name.Value,
+                value => new TenantName(value))
+            .HasColumnName("Name")
             .HasMaxLength(100)
             .IsRequired();
-        });
 
-        // builder.HasIndex(it => it.Name.Value)
-        //     .HasDatabaseName("IX_Tenants_Name")
-        //     .IsUnique();
+        builder.HasIndex(it => it.Name)
+            .IsUnique()
+            .HasDatabaseName("IX_Tenants_Name");
+
+        builder.Property(t => t.Slug)
+            .HasConversion(
+                slug => slug.Value,
+                value => new TenantSlug(value))
+            .HasColumnName("Slug")
+            .HasMaxLength(50)
+            .IsRequired();
 
         builder.HasIndex(it => it.IsActive)
             .HasDatabaseName("IX_Tenants_IsActive");

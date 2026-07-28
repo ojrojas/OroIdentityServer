@@ -10,11 +10,12 @@ public static class InfraestructureExtensions
     {
         var connectionDatabase = configuration.GetConnectionString("identitydb");
 
-        builder.Services.AddDbContext<OroIdentityAppContext>(options =>
+        builder.Services.AddDbContextPool<OroIdentityAppContext>(options =>
         {
             options.UseNpgsql(connectionDatabase);
             options.UseOpenIddict();
             options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             if (builder.Environment.IsDevelopment())
             {
                 options.EnableDetailedErrors(); // Consider disabling in production for performance reasons

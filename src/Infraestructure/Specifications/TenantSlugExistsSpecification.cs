@@ -6,7 +6,7 @@ namespace OroIdentityServer.Infraestructure.Specifications;
 
 public sealed class TenantSlugExistsSpecification : Specification<Tenant>
 {
-    public TenantSlugExistsSpecification(TenantSlug slug) : base(t => t.Slug.Value == slug.Value)
+    public TenantSlugExistsSpecification(TenantSlug slug) : base(t => t.Slug == slug)
     {
         ApplyIgnoreQueryFilters();
     }

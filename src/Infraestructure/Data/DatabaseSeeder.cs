@@ -83,8 +83,8 @@ public static class DatabaseSeeder
 
         if (!context.UserRoles.Any())
         {
-            var adminRole = context.Roles.FirstOrDefault(r => r.Name != null && r.Name.Value == "Administrator");
-            var userRole = context.Roles.FirstOrDefault(r => r.Name != null && r.Name.Value == "User");
+            var adminRole = context.Roles.FirstOrDefault(r => r.Name == new RoleName("Administrator"));
+            var userRole = context.Roles.FirstOrDefault(r => r.Name == new RoleName("User"));
 
             if (adminRole != null && userRole != null)
             {

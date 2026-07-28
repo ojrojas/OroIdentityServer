@@ -5,4 +5,4 @@
 namespace OroIdentityServer.Infraestructure.Specifications;
 
 public sealed class GetIdentificationTypeByNameSpecification(IdentificationTypeName criteria)
-    : Specification<IdentificationType>(x => x.Name != null && x.Name.Value == criteria.Value);
+    : Specification<IdentificationType>(x => x.Name == criteria);

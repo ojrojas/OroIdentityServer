@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -156,6 +157,25 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TenantPreferenceConfigs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DefaultLanguage = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    DefaultTimezone = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    DefaultDateFormat = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    DefaultNumberFormat = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    DefaultTheme = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    ForceLanguage = table.Column<bool>(type: "boolean", nullable: false),
+                    ForceTheme = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TenantPreferenceConfigs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tenants",
                 columns: table => new
                 {
@@ -169,6 +189,48 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tenants", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserCompanyPreferences",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    CompanyId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DefaultChartView = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    DefaultReportPeriod = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserCompanyPreferences", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserPreferences",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Language = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    Timezone = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    DateFormat = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    NumberFormat = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Theme = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    DefaultCompanyId = table.Column<Guid>(type: "uuid", nullable: true),
+                    InboxSortField = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    InboxSortDirection = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    DashboardLayout = table.Column<string>(type: "text", nullable: true),
+                    SidebarCollapsed = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserPreferences", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -230,6 +292,28 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         name: "FK_RolePermissions_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TenantUsers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Role = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    JoinedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TenantUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TenantUsers_Tenants_TenantId",
+                        column: x => x.TenantId,
+                        principalTable: "Tenants",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -418,9 +502,21 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 column: "IsActive");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Roles_Name",
+                table: "Roles",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Sessions_UserId",
                 table: "Sessions",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_tenant_preference_configs_tenant_id",
+                table: "TenantPreferenceConfigs",
+                column: "TenantId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tenants_IsActive",
@@ -431,6 +527,24 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 name: "IX_Tenants_Name",
                 table: "Tenants",
                 column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_tenant_users_tenant_id_user_id",
+                table: "TenantUsers",
+                columns: new[] { "TenantId", "UserId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_company_preferences_user_tenant_company",
+                table: "UserCompanyPreferences",
+                columns: new[] { "UserId", "TenantId", "CompanyId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_user_preferences_user_tenant",
+                table: "UserPreferences",
+                columns: new[] { "UserId", "TenantId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -502,6 +616,18 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Sessions");
+
+            migrationBuilder.DropTable(
+                name: "TenantPreferenceConfigs");
+
+            migrationBuilder.DropTable(
+                name: "TenantUsers");
+
+            migrationBuilder.DropTable(
+                name: "UserCompanyPreferences");
+
+            migrationBuilder.DropTable(
+                name: "UserPreferences");
 
             migrationBuilder.DropTable(
                 name: "UserRoles");

@@ -6,7 +6,7 @@ namespace OroIdentityServer.Infraestructure.Specifications;
 
 public sealed class GetTenantBySlugSpecification : Specification<Tenant>
 {
-    public GetTenantBySlugSpecification(TenantSlug slug) : base(t => t.Slug.Value == slug.Value)
+    public GetTenantBySlugSpecification(TenantSlug slug) : base(t => t.Slug == slug)
     {
         AddInclude(t => t.TenantUsers);
     }
