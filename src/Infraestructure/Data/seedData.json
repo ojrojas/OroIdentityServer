@@ -3,20 +3,12 @@
   "Tenant": "OroIdentityServer",
   "Users": [
     {
-      "Name": "Pepe",
-      "LastName": "Perez",
-      "UserName": "pepe.perez",
-      "Email": "pepe@example.com",
-      "Identification": "123456789",
-      "PasswordHash": "Abc123456#"
-    },
-    {
-      "Name": "Maria",
-      "LastName": "Martinez",
-      "UserName": "maria.martinez",
-      "Email": "maria@example.com",
-      "Identification": "987654321",
-      "PasswordHash": "Abc123456#"
+      "Name": "Admin",
+      "LastName": "Administrator",
+      "UserName": "admin",
+      "Email": "admin@example.com",
+      "Identification": "000000001",
+      "PasswordHash": "Admin@123456"
     }
   ],
   "Roles": [

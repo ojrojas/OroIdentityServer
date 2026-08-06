@@ -1,0 +1,35 @@
+# Git / VCS
+.git/
+.gitignore
+.gitattributes
+
+# Build output
+**/bin/
+**/obj/
+artifacts/
+publish/
+
+# IDE / editor
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Local data
+data-protection-keys/
+
+# Skills / agents (not needed at runtime)
+.agents/
+.claude/
+.opencode/
+skills-lock.json
+
+# Tests and samples (not needed for the image)
+tests/
+examples/
+
+# OS / misc
+**/node_modules/
+*.log
+.DS_Store
+Thumbs.db

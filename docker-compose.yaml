@@ -10,4 +10,35 @@ services:
       POSTGRES_DB: identitydb
     ports:
       - "5432:5432"
-  
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d identitydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  identity-server:
+    build:
+      context: .
+      dockerfile: src/IdentityServer/IdentityServer/Dockerfile
+    image: oridentityserver:latest
+    container_name: identity_server
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_URLS: http://+:5080
+      ConnectionStrings__identitydb: Host=db;Port=5432;Database=identitydb;Username=postgres;Password=Weak(!)Password123
+      SymmetricSecurityKey: aXRlbnRpb25hbF9wcm9wb3NlX21pZ3JhdGlvbnM=
+      IDENTITY_ADMIN_HTTP: http://localhost:4200
+      DatabaseSeeder__Skip: "false"
+      SEED_ADMIN_USERNAME: admin
+      SEED_ADMIN_PASSWORD: Admin@123456
+      SEED_ADMIN_EMAIL: admin@example.com
+    ports:
+      - "5080:5080"
+    volumes:
+      - identity-dp-keys:/app/data-protection-keys
+
+volumes:
+  identity-dp-keys:

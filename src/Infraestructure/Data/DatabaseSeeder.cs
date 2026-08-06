@@ -35,12 +35,18 @@ public static class DatabaseSeeder
 
         await context.SaveChangesAsync(cancellationToken);
 
+        var seedAdmin = ResolveSeedAdmin(seedData, configuration);
+        var adminRoleName = configuration["SEED_ADMIN_ROLE"] ?? DefaultAdminRoleName;
+        var adminMustChangePassword = configuration.GetValue<bool?>("SEED_ADMIN_FORCE_PASSWORD_CHANGE") ?? false;
+
         if (!context.Users.Any())
         {
             foreach (var user in seedData.Users)
             {
+                var isAdmin = ReferenceEquals(user, seedAdmin);
+
                 var securityUser = SecurityUser.Create(await passwordHasher.HashPassword(user.PasswordHash));
-                if (user.UserName == "pepe.perez")
+                if (isAdmin && !adminMustChangePassword)
                     securityUser.ExemptFromPasswordChange();
 
                 context.SecurityUsers.Add(securityUser);
@@ -83,22 +89,18 @@ public static class DatabaseSeeder
 
         if (!context.UserRoles.Any())
         {
-            var adminRole = context.Roles.FirstOrDefault(r => r.Name == new RoleName("Administrator"));
+            var adminRole = context.Roles.FirstOrDefault(r => r.Name == new RoleName(adminRoleName));
             var userRole = context.Roles.FirstOrDefault(r => r.Name == new RoleName("User"));
 
-            if (adminRole != null && userRole != null)
+            foreach (var user in context.Users.ToList())
             {
-                var pepe = context.Users.FirstOrDefault(u => u.Email == "pepe@example.com");
-                var maria = context.Users.FirstOrDefault(u => u.Email == "maria@example.com");
+                var roleId = user.UserName!.Equals(seedAdmin.UserName, StringComparison.OrdinalIgnoreCase)
+                    ? adminRole?.Id
+                    : userRole?.Id;
 
-                if (pepe != null)
+                if (roleId is not null)
                 {
-                    context.UserRoles.Add(new UserRole(pepe.Id, adminRole.Id));
-                }
-
-                if (maria != null)
-                {
-                    context.UserRoles.Add(new UserRole(maria.Id, userRole.Id));
+                    context.UserRoles.Add(new UserRole(user.Id, roleId));
                 }
             }
 
@@ -120,12 +122,9 @@ public static class DatabaseSeeder
 
                 foreach (var user in usersInTenant)
                 {
-                    var role = user.UserName switch
-                    {
-                        "pepe.perez" => TenantRole.Admin,
-                        "maria.martinez" => TenantRole.Manager,
-                        _ => TenantRole.Member
-                    };
+                    var role = user.UserName!.Equals(seedAdmin.UserName, StringComparison.OrdinalIgnoreCase)
+                        ? TenantRole.Admin
+                        : TenantRole.Member;
 
                     tenant.AddUser(user.Id, role);
                 }
@@ -261,6 +260,37 @@ public static class DatabaseSeeder
         }
 
         await applicationManager.UpdateAsync(application, existing);
+    }
+
+    private const string DefaultAdminUserName = "admin";
+    private const string DefaultAdminRoleName = "Administrator";
+
+    /// <summary>
+    /// Resolves the universal bootstrap admin user from environment variables, falling back to the
+    /// values baked into the seed file. The resolved user is the one granted the Administrator role
+    /// and (by default) exempted from the forced first-login password change.
+    /// </summary>
+    private static SeedUser ResolveSeedAdmin(SeedData seedData, IConfiguration configuration)
+    {
+        var adminUserName = configuration["SEED_ADMIN_USERNAME"] ?? DefaultAdminUserName;
+
+        var candidate = seedData.Users.FirstOrDefault(u => u.UserName.Equals(adminUserName, StringComparison.OrdinalIgnoreCase))
+            ?? seedData.Users.FirstOrDefault();
+
+        if (candidate is null)
+        {
+            candidate = new SeedUser();
+            seedData.Users.Insert(0, candidate);
+        }
+
+        candidate.UserName = adminUserName;
+        candidate.Name = configuration["SEED_ADMIN_NAME"] ?? (string.IsNullOrWhiteSpace(candidate.Name) ? "Admin" : candidate.Name);
+        candidate.LastName = configuration["SEED_ADMIN_LASTNAME"] ?? (string.IsNullOrWhiteSpace(candidate.LastName) ? "Administrator" : candidate.LastName);
+        candidate.Email = configuration["SEED_ADMIN_EMAIL"] ?? (string.IsNullOrWhiteSpace(candidate.Email) ? "admin@example.com" : candidate.Email);
+        candidate.Identification = configuration["SEED_ADMIN_IDENTIFICATION"] ?? (string.IsNullOrWhiteSpace(candidate.Identification) ? "000000001" : candidate.Identification);
+        candidate.PasswordHash = configuration["SEED_ADMIN_PASSWORD"] ?? (string.IsNullOrWhiteSpace(candidate.PasswordHash) ? "Admin@123456" : candidate.PasswordHash);
+
+        return candidate;
     }
 }
 

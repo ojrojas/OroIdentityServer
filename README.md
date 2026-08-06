@@ -187,13 +187,71 @@ OroIdentityServer/
 
    > Note: without Aspire, RabbitMQ connection settings must be supplied manually if the event bus is enabled; otherwise disable/skip the RabbitMQ registration for local runs.
 
+### Containerized Deployment (Podman / Docker)
+
+The image is defined by `src/IdentityServer/IdentityServer/Dockerfile`. It exposes all runtime
+settings as environment variables, so the same image can be used by anyone — on a laptop, on a
+server, or in a cluster.
+
+```bash
+# Build the image
+podman build -f src/IdentityServer/IdentityServer/Dockerfile -t oridentityserver:latest .
+
+# Run it against a PostgreSQL instance
+podman run --rm -p 5080:5080 \
+  -e ConnectionStrings__identitydb="Host=db;Port=5432;Database=identitydb;Username=postgres;Password=Weak(!)Password123" \
+  -e SEED_ADMIN_USERNAME="admin" \
+  -e SEED_ADMIN_PASSWORD="Admin@123456" \
+  oridentityserver:latest
+```
+
+Or use the provided compose file, which builds the image and wires it to a PostgreSQL container
+(migrations and the universal `admin` seed run automatically on first start):
+
+```bash
+podman compose up -d --build
+# Open http://localhost:5080 and sign in as `admin` / `Admin@123456`
+```
+
+The universal seed creates an **Administrator** account with username `admin` (default password
+`Admin@123456`). Change it before going live — see the `SEED_ADMIN_*` variables below.
+
 ## Configuration
 
 Key configuration files:
 - `src/IdentityServer/IdentityServer/appsettings.json` / `appsettings.Development.json` — logging, OpenIddict, DB connection
 - `Directory.Build.props` — shared build properties
 - `Directory.Packages.props` — centralized (central package management) NuGet versions
-- `Data/seedData.json` (under the host project) — seed data for users, roles, applications and scopes on first run; controlled by the `DatabaseSeeder:Skip` setting. The seeded `pepe.perez` admin account is exempt from the forced first-login password change; every other user (seeded or created later) must change their password on first sign-in.
+- `Data/seedData.json` (under the host project) — seed data for users, roles, applications and scopes on first run; controlled by the `DatabaseSeeder:Skip` setting. The universal bootstrap admin is the `admin` account (role **Administrator**, username `admin`, default password `Admin@123456`), which is exempt from the forced first-login password change; every other user (seeded or created later) must change their password on first sign-in. The admin identity can be customized through the `SEED_ADMIN_*` environment variables listed below.
+
+#### Environment variables
+
+The Dockerfile declares sensible defaults for every variable; each one can be overridden with
+`-e` (Podman/Docker) or in the compose file:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `ASPNETCORE_URLS` | `http://+:5080` | URLs the Kestrel listener binds to |
+| `ASPNETCORE_ENVIRONMENT` | `Production` | ASP.NET environment |
+| `ConnectionStrings__identitydb` | `Host=db;...` | PostgreSQL connection string |
+| `SymmetricSecurityKey` | dev key | Base64 OpenIddict signing/encryption key (≥ 32 bytes) — **must be overridden in production** and shared by all instances |
+| `IDENTITY_ADMIN_HTTP` | `http://localhost:4200` | Base URL of the external admin SPA, used when seeding the OpenIddict `Admin` client |
+| `DatabaseSeeder__Skip` | `false` | Set `true` to skip the seeder on startup |
+| `SEED_ADMIN_USERNAME` | `admin` | Username of the bootstrap admin |
+| `SEED_ADMIN_PASSWORD` | `Admin@123456` | Password of the bootstrap admin |
+| `SEED_ADMIN_EMAIL` | `admin@example.com` | Email of the bootstrap admin |
+| `SEED_ADMIN_NAME` | `Admin` | First name of the bootstrap admin |
+| `SEED_ADMIN_LASTNAME` | `Administrator` | Last name of the bootstrap admin |
+| `SEED_ADMIN_IDENTIFICATION` | `000000001` | Identification number of the bootstrap admin |
+| `SEED_ADMIN_ROLE` | `Administrator` | Role granted to the bootstrap admin |
+| `SEED_ADMIN_FORCE_PASSWORD_CHANGE` | `false` | `true` forces the admin to change its password on first login |
+| `EventBus__RabbitMQ__HostName` | `localhost` | RabbitMQ host (optional) |
+| `EventBus__RabbitMQ__Port` | `5672` | RabbitMQ port (optional) |
+| `EventBus__RabbitMQ__UserName` | `guest` | RabbitMQ user (optional) |
+| `EventBus__RabbitMQ__Password` | `guest` | RabbitMQ password (optional) |
+| `EventBus__RabbitMQ__VirtualHost` | `/` | RabbitMQ virtual host (optional) |
+
+> A seed file mounted at `/app/Data/seedData.json` overrides the one baked into the image.
 
 ## API Endpoints
 
