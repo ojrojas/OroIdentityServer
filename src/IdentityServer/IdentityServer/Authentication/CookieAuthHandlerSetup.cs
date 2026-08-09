@@ -63,12 +63,12 @@ public static class CookieAuthHandlerSetup
             .AddPolicy("AdminOnly", policy =>
             {
                 policy.RequireAuthenticatedUser();
-                policy.RequireRole(TenantRole.Admin);
+                policy.RequireRole(TenantRole.Admin, TenantRole.Administrator);
             })
             .AddPolicy("ManagerOrAdmin", policy =>
             {
                 policy.RequireAuthenticatedUser();
-                policy.RequireRole(TenantRole.Admin, TenantRole.Manager);
+                policy.RequireRole(TenantRole.Admin, TenantRole.Administrator, TenantRole.Manager);
             });
 
         return services;

@@ -52,6 +52,9 @@ ENV IDENTITY_ADMIN_HTTP="http://localhost:4200"
 # Seeder control. Set to true to skip seeding entirely.
 ENV DatabaseSeeder__Skip="false"
 
+# Tenant created during seeding
+ENV SEED_TENANT_NAME="OroMasterRealm"
+
 # Universal bootstrap admin account. It is granted the Administrator role and
 # is exempt from the forced first-login password change unless
 # SEED_ADMIN_FORCE_PASSWORD_CHANGE=true.

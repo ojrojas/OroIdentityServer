@@ -7,6 +7,7 @@ namespace OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 public static class TenantRole
 {
     public const string Admin = "Admin";
+    public const string Administrator = "Administrator";
     public const string Manager = "Manager";
     public const string Member = "Member";
 

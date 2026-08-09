@@ -1,36 +1,26 @@
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
-IResourceBuilder<RedisResource> redis = builder.AddRedis("redis");
-
 IResourceBuilder<RabbitMQServerResource> rabbitMq = builder.AddRabbitMQ("oroeventdrivenexchange")
     .WithLifetime(ContainerLifetime.Persistent);
 
 IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("postgres")
-    .WithPgAdmin()
     .WithDataVolume("oro-postgres-data");
 
 IResourceBuilder<PostgresDatabaseResource> identityDb = postgres.AddDatabase("identitydb");
 
-// Paramters
 IResourceBuilder<ParameterResource> SymmetricSecurityKey = builder.AddParameter("SymmetricSecurityKey", "g9hLodrPUXAJRCxQUMZA6Bo2l8amqDjeHRerJIJAhVs=");
-var clientId = builder.AddParameter("ClientId", "OroIdentityServer.Admin");
 
-// --- Server Identity ---
-IResourceBuilder<ProjectResource> identityServer = builder.AddProject<Projects.IdentityServer>("identity-api")
-     .WithReference(rabbitMq).WaitFor(rabbitMq)
+IResourceBuilder<ContainerResource> identityServer = builder.AddContainer("identity-api", "localhost/oridentityserver:latest")
+    .WithHttpEndpoint(targetPort: 5080, name: "http")
+    .WithReference(rabbitMq).WaitFor(rabbitMq)
     .WithReference(identityDb).WaitFor(identityDb)
-    .WithEnvironment("SymmetricSecurityKey", SymmetricSecurityKey);
-
-// -- Frontend Identity Admin --
-IResourceBuilder<NodeAppResource> identityAdmin = builder.AddPnpmApp(
-    name: "identity-admin",
-    workingDirectory: "../Frontends/oroidentity-admin");
-
-identityAdmin.WithPnpmPackageInstallation()
-    .WithReference(identityServer).WaitFor(identityServer)
-    .WithHttpEndpoint(port: 30645, targetPort: 4200)
-    .WithEnvironment("CLIENT_ID", clientId);
-
-identityServer.WithReference(identityAdmin);
+    .WithEnvironment("SEED_TENANT_NAME", "OroMasterRealm")
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
+    .WithEnvironment("SymmetricSecurityKey", SymmetricSecurityKey)
+    .WithEnvironment("EventBus__RabbitMQ__HostName", "oroeventdrivenexchange")
+    .WithEnvironment("EventBus__RabbitMQ__Port", "5672")
+    .WithEnvironment("EventBus__RabbitMQ__UserName", "guest")
+    .WithEnvironment("EventBus__RabbitMQ__Password", "guest")
+    .WithEnvironment("IDENTITY_ADMIN_HTTP", "http://localhost:4200");
 
 builder.Build().Run();

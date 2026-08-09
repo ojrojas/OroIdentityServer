@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
 using OroIdentityServer.Infraestructure;
 using Quartz;
@@ -50,15 +52,15 @@ public static class OpenIddictServerConfiguration
                     Scopes.OfflineAccess,
                     "admin");
 
-                var symmetricSecurityKey = new SymmetricSecurityKey(
-                    // itentional_propose_migrations -> to migration, no real value
-                Convert.FromBase64String(builder.Configuration.GetValue<string>("SymmetricSecurityKey") ?? "aXRlbnRpb25hbF9wcm9wb3NlX21pZ3JhdGlvbnM="));
-
                 if (builder.Environment.IsDevelopment())
                     options.AddDevelopmentEncryptionCertificate()
                         .AddDevelopmentSigningCertificate();
-                else options.AddEncryptionKey(symmetricSecurityKey)
-                    .AddSigningKey(symmetricSecurityKey);
+                else
+                {
+                    var cert = LoadOrCreateSigningCertificate(builder.Configuration);
+                    options.AddEncryptionCertificate(cert);
+                    options.AddSigningCertificate(cert);
+                }
 
                 options.UseAspNetCore()
                     .EnableAuthorizationEndpointPassthrough()
@@ -75,5 +77,23 @@ public static class OpenIddictServerConfiguration
             });
 
         return builder;
+    }
+
+    private static X509Certificate2 LoadOrCreateSigningCertificate(IConfiguration configuration)
+    {
+        var certsDir = Path.Combine(AppContext.BaseDirectory, "data-protection-keys");
+        var certPath = Path.Combine(certsDir, "openiddict-signing.pfx");
+
+        if (File.Exists(certPath))
+            return X509CertificateLoader.LoadCertificateFromFile(certPath);
+
+        using var rsa = RSA.Create(2048);
+        var req = new CertificateRequest("CN=OroIdentityServer", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(5));
+
+        Directory.CreateDirectory(certsDir);
+        File.WriteAllBytes(certPath, cert.Export(X509ContentType.Pfx));
+
+        return cert;
     }
 }

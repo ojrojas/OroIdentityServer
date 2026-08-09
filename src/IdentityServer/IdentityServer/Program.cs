@@ -33,7 +33,7 @@ builder.Services.AddDataProtection()
 builder.Services.AddRazorComponents(options =>
 {
     options.DetailedErrors = builder.Environment.IsDevelopment();
-})    .AddInteractiveServerComponents()
+}).AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
 
@@ -68,10 +68,11 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 builder.Services.AddCors(setupAction =>
 {
-    setupAction.AddPolicy("OroIdentityServer", policy => {
+    setupAction.AddPolicy("OroIdentityServer", policy =>
+    {
         policy.AllowAnyHeader()
         .AllowAnyMethod()
-        .AllowAnyOrigin(); 
+        .AllowAnyOrigin();
     });
 });
 
@@ -93,7 +94,7 @@ await using (var scope = app.Services.CreateAsyncScope())
         var seedPath = Path.Combine(AppContext.BaseDirectory, "Data", "seedData.json");
         if (File.Exists(seedPath))
         {
-            await DatabaseSeeder.SeedAsync(ctx, applicationManager, seedPath, passwordHasher, configuration, scopeManager);
+            await DatabaseSeeder.SeedAsync(ctx, passwordHasher, configuration);
         }
     }
 }
