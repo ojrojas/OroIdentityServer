@@ -29,28 +29,32 @@ public static class CookieAuthHandlerSetup
                 // Requests under /api are fetched by the Blazor client's HttpClient connectors,
                 // not navigated to by the browser. Redirecting them to the HTML login page (the
                 // cookie handler's default challenge/forbid behavior) makes the client try to
-                // deserialize that HTML as JSON. Return a plain status code for those instead.
-                options.Events.OnRedirectToLogin = context =>
+                // deserialize that HTML as JSON. Return a plain status code for those instead, and
+                // write a body so the status code pages middleware does not re-execute the request
+                // (which would run POSTs against /not-found and trip the antiforgery middleware).
+                options.Events.OnRedirectToLogin = async context =>
                 {
                     if (context.Request.Path.StartsWithSegments("/api"))
                     {
                         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                        return Task.CompletedTask;
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync("{\"error\":\"unauthorized\"}");
+                        return;
                     }
 
                     context.Response.Redirect(context.RedirectUri);
-                    return Task.CompletedTask;
                 };
-                options.Events.OnRedirectToAccessDenied = context =>
+                options.Events.OnRedirectToAccessDenied = async context =>
                 {
                     if (context.Request.Path.StartsWithSegments("/api"))
                     {
                         context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                        return Task.CompletedTask;
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync("{\"error\":\"forbidden\"}");
+                        return;
                     }
 
                     context.Response.Redirect(context.RedirectUri);
-                    return Task.CompletedTask;
                 };
             });
 

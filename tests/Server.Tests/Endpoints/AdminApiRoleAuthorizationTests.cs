@@ -33,8 +33,14 @@ public sealed class AdminApiRoleAuthorizationTests(IdentityServerWebApplicationF
         var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
         var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
-        var identificationType = IdentificationType.Create("Passport");
-        context.IdentificationTypes.Add(identificationType);
+        var identificationType = context.IdentificationTypes
+            .AsEnumerable()
+            .FirstOrDefault(i => i.Name.Value == "Passport");
+        if (identificationType is null)
+        {
+            identificationType = IdentificationType.Create("Passport");
+            context.IdentificationTypes.Add(identificationType);
+        }
 
         var tenant = Tenant.Create($"Tenant-{tenantRole}-{Guid.NewGuid():N}");
         context.Tenants.Add(tenant);

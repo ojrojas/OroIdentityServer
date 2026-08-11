@@ -49,12 +49,12 @@ public interface IUserRepository
     /// <summary>
     /// Gets a user by their email address.
     /// </summary>
-    Task<User> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
+    Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets a user by their username or email (login identifier).
     /// </summary>
-    Task<User> GetUserByLoginIdentifierAsync(string loginIdentifier, CancellationToken cancellationToken);
+    Task<User?> GetUserByLoginIdentifierAsync(string loginIdentifier, CancellationToken cancellationToken);
 
     /// <summary>
     /// Change password user

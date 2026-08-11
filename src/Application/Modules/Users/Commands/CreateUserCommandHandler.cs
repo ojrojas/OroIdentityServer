@@ -19,8 +19,8 @@ public class CreateUserCommandHandler(
         {
             // Validate if user already exists
             var existingUser = await userRepository.GetUserByEmailAsync(command.Email, cancellationToken);
-            if (existingUser != null)
-                throw new InvalidOperationException("User with the given email already exists.");
+            if (existingUser is not null)
+                return Result.Failure(Error.Conflict("UserAlreadyExists", "User with the given email already exists."));
 
             // Create the User object
             var user = User.Create(

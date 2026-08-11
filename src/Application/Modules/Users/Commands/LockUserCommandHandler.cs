@@ -13,11 +13,20 @@ public sealed class LockUserCommandHandler(
 
         try
         {
-            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken) ?? throw new InvalidOperationException("User not found.");
+            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken);
+            if (user is null)
+            {
+                logger.LogWarning("User not found with UserId: {UserId}", command.UserId);
+                return Result.Failure(Error.NotFound("UserNotFound", "User not found."));
+            }
+
+            if (user.SecurityUserId is null)
+                return Result.Failure(Error.NotFound("SecurityUserNotFound", "SecurityUser not found for this user."));
+
             user.SecurityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId.Value, cancellationToken);
 
             if (user.SecurityUser is null)
-                throw new InvalidOperationException("SecurityUser not found for this user.");
+                return Result.Failure(Error.NotFound("SecurityUserNotFound", "SecurityUser not found for this user."));
 
             user.SecurityUser.SetLockoutEnabled(true);
             user.SecurityUser.LockUntil(DateTime.MaxValue);

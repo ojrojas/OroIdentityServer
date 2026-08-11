@@ -5,6 +5,10 @@
     <PackageReference Include="Aspire.Hosting.RabbitMQ" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer\IdentityServer.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <UserSecretsId>bf8052d8-56a1-4226-a69a-2cddb52b89ce</UserSecretsId>

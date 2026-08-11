@@ -148,7 +148,6 @@ app.Use(async (context, next) =>
 });
 
 app.UseAntiforgery();
-
 var supportedCultures = new[]
 {
     new CultureInfo("en"),

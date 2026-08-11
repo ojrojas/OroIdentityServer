@@ -16,6 +16,17 @@ public class GetUserByEmailQueryHandler(
 
         var user =  await repository.GetUserByEmailAsync(query.Email, cancellationToken);
 
+        if (user is null)
+        {
+            logger.LogWarning("User not found with Email: {Email}", query.Email);
+            return new GetUserByEmailResponse
+            {
+                Data = null,
+                StatusCode = (int)HttpStatusCode.NotFound,
+                Message = "User not found."
+            };
+        }
+
         GetUserByEmailResponse response = new()
         {
             Data = new UserDto

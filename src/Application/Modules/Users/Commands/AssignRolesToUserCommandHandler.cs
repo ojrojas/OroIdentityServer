@@ -13,7 +13,13 @@ public sealed class AssignRolesToUserCommandHandler(
 
         try
         {
-            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken) ?? throw new InvalidOperationException("User not found.");
+            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken);
+            if (user is null)
+            {
+                logger.LogWarning("User not found with UserId: {UserId}", command.UserId);
+                return Result.Failure(Error.NotFound("UserNotFound", "User not found."));
+            }
+
             var currentRoles = (await userRolesRepository.GetRolesByUserIdAsync(new(command.UserId), cancellationToken)).ToList();
 
             var currentRoleIds = currentRoles.Select(r => r.RoleId!.Value).ToHashSet();

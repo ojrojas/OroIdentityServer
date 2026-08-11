@@ -71,6 +71,9 @@ public static class AuthEndpoints
                 return Results.Redirect("/Account/Login");
 
             var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId.Value, ct);
+            if (securityUser is null)
+                return Results.Redirect("/Account/Login");
+
             securityUser.ChangePassword(await passwordHasher.HashPassword(input.NewPassword));
             await securityUserRepository.UpdateSecurityUserAsync(securityUser, ct);
 

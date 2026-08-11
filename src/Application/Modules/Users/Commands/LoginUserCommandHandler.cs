@@ -19,20 +19,20 @@ public class LoginUserCommandHandler(
             if (user == null)
             {
                 logger.LogWarning("Invalid login attempt for user {Username}", command.Username);
-                throw new UnauthorizedAccessException("Invalid username or password.");
+                return Result.Failure(Error.Unauthorized("InvalidCredentials", "Invalid username or password."));
             }
 
             if (user?.SecurityUser == null)
             {
                 logger.LogWarning("User or SecurityUser is null for {Username}", command.Username);
-                throw new UnauthorizedAccessException("Invalid username or password.");
+                return Result.Failure(Error.Unauthorized("InvalidCredentials", "Invalid username or password."));
             }
 
             // Check if the account is locked out
             if (user.SecurityUser.LockoutEnabled && user.SecurityUser.LockoutEnd.HasValue && user.SecurityUser.LockoutEnd.Value > DateTime.UtcNow)
             {
                 logger.LogWarning("User {Username} is locked out until {LockoutEnd}", command.Username, user.SecurityUser.LockoutEnd);
-                throw new UnauthorizedAccessException("Account is locked. Please try again later.");
+                return Result.Failure(Error.Unauthorized("AccountLocked", "Account is locked. Please try again later."));
             }
 
             // Verify the password
@@ -49,7 +49,7 @@ public class LoginUserCommandHandler(
 
                 await userRepository.UpdateUserAsync(user, cancellationToken);
                 logger.LogWarning("Invalid login attempt for user {Username}", command.Username);
-                throw new UnauthorizedAccessException("Invalid username or password.");
+                return Result.Failure(Error.Unauthorized("InvalidCredentials", "Invalid username or password."));
             }
 
             // Reset failed access count on successful login

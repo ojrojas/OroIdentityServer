@@ -17,7 +17,12 @@ public class UpdateUserCommandHandler(
         try
         {
             // Retrieve the existing user
-            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken) ?? throw new InvalidOperationException("User not found.");
+            var user = await userRepository.GetUserByIdAsync(new(command.UserId), cancellationToken);
+            if (user is null)
+            {
+                logger.LogWarning("User not found with UserId: {UserId}", command.UserId);
+                return new UpdateUserResponse { StatusCode = (int)HttpStatusCode.NotFound, Message = "User not found." };
+            }
 
             // Update user details
             user.UpdateDetails(

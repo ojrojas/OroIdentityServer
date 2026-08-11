@@ -23,6 +23,11 @@ public class GetUserByIdQueryHandler(
         GetUserByIdQueryResponse response = new();
         logger.LogInformation("Handling GetUserByIdQuery with Id: {Id}", query.Id.ToString());
         response.Data = await repository.GetUserByIdAsync(new(query.Id), cancellationToken);
+        if (response.Data is null)
+        {
+            response.StatusCode = (int)HttpStatusCode.NotFound;
+            response.Message = "User not found.";
+        }
         logger.LogInformation("Successfully handled GetUserByIdQuery");
         return response;
     }

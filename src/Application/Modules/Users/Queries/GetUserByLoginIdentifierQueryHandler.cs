@@ -12,6 +12,17 @@ public class GetUserByLoginIdentifierQueryHandler(
 
         var user = await repository.GetUserByLoginIdentifierAsync(query.LoginIdentifier, cancellationToken);
 
+        if (user is null)
+        {
+            logger.LogWarning("User not found with LoginIdentifier: {LoginIdentifier}", query.LoginIdentifier);
+            return new GetUserByLoginIdentifierResponse
+            {
+                Data = null,
+                StatusCode = (int)HttpStatusCode.NotFound,
+                Message = "User not found."
+            };
+        }
+
         GetUserByLoginIdentifierResponse response = new()
         {
             Data = new UserDto

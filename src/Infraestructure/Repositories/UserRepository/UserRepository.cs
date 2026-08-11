@@ -65,22 +65,22 @@ public class UserRepository(
         return result;
     }
 
-    public async Task<User> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
+    public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
     {
         logger.LogInformation("handling request user by email {Email}", email);
         var emailSpecification = new GetUserByEmailSpecification(email);
         var user = await repository.FirstOrDefaultAsync(emailSpecification, cancellationToken);
         logger.LogInformation("finish request get user by email");
-        return user ?? throw new InvalidOperationException("User cannot be null.");
+        return user;
     }
 
-    public async Task<User> GetUserByLoginIdentifierAsync(string loginIdentifier, CancellationToken cancellationToken)
+    public async Task<User?> GetUserByLoginIdentifierAsync(string loginIdentifier, CancellationToken cancellationToken)
     {
         logger.LogInformation("handling request user by login identifier {LoginIdentifier}", loginIdentifier);
         var specification = new GetUserByUserNameOrEmailSpecification(loginIdentifier);
         var user = await repository.FirstOrDefaultAsync(specification, cancellationToken);
         logger.LogInformation("finish request get user by login identifier");
-        return user ?? throw new InvalidOperationException("User cannot be null.");
+        return user;
     }
 
     public async Task<User?> GetUserByIdAsync(UserId id, CancellationToken cancellationToken)
@@ -104,13 +104,19 @@ public class UserRepository(
         logger.LogInformation("Validating if user can login with identifier: {LoginIdentifier}", loginIdentifier);
         var user = await GetUserByLoginIdentifierAsync(loginIdentifier, cancellationToken);
 
-        if (user is null)
+        if (user is null || user.SecurityUserId is null)
         {
             logger.LogWarning("User not found with identifier: {LoginIdentifier}", loginIdentifier);
             return false;
         }
 
-        var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId!.Value, cancellationToken);
+        var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId.Value, cancellationToken);
+
+        if (securityUser is null)
+        {
+            logger.LogWarning("Security user not found for user: {LoginIdentifier}", loginIdentifier);
+            return false;
+        }
 
         if (securityUser.LockoutEnabled && securityUser.LockoutEnd.HasValue && securityUser.LockoutEnd.Value > DateTime.UtcNow)
         {

@@ -10,11 +10,10 @@ public class SecurityUserRepository(
     ILogger<SecurityUserRepository> logger,
     IRepository<SecurityUser> repository) : ISecurityUserRepository
 {
-    public async Task<SecurityUser> GetSecurityUserAsync(Guid securityId, CancellationToken cancellationToken)
+    public async Task<SecurityUser?> GetSecurityUserAsync(Guid securityId, CancellationToken cancellationToken)
     {
         logger.LogInformation("Get security user request by id");
-        return await repository.GetByIdAsync(new SecurityUserId(securityId), cancellationToken)
-               ?? throw new Exception("Security user not found");
+        return await repository.GetByIdAsync(new SecurityUserId(securityId), cancellationToken);
     }
 
     public async Task UpdateSecurityUserAsync(SecurityUser securityUser, CancellationToken cancellationToken)

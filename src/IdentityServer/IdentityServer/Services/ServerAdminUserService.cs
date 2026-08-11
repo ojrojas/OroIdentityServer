@@ -115,7 +115,7 @@ public class ServerAdminUserService(
         var result = await queryDispatcher.SendAsync(new GetUserByIdQuery(Id), ct);
          return new ApiResponse<UserModel>
          {
-            Data  = MapUser(result.Data),
+            Data  = result.Data is null ? null : MapUser(result.Data),
             StatusCode = result.StatusCode,
             Message = result.Message,
             Errors = result.Errors  

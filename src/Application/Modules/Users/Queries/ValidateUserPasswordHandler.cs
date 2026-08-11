@@ -12,7 +12,14 @@ public class ValidateUserPasswordHandler(
         logger.LogInformation("Validating password for user with login identifier: {LoginIdentifier}", query.LoginIdentifier);
 
         var user = await repository.GetUserByLoginIdentifierAsync(query.LoginIdentifier, cancellationToken);
-        var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId!.Value, cancellationToken);
+
+        if (user?.SecurityUserId is null)
+        {
+            logger.LogWarning("User or SecurityUserId not found for login identifier: {LoginIdentifier}", query.LoginIdentifier);
+            return new GetUserPasswordValidResponse { Data = false };
+        }
+
+        var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId.Value, cancellationToken);
 
         if (securityUser == null)
         {
