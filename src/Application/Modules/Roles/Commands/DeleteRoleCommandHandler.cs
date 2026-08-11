@@ -18,14 +18,16 @@ public class DeleteRoleCommandHandler(
         try
         {
             // Validate if role exists
-            var role = await _roleRepository.GetByIdAsync(new(command.Id), cancellationToken) 
-                ?? throw new InvalidOperationException("Role not found.");
+            var role = await _roleRepository.GetByIdAsync(new(command.Id), cancellationToken);
+            if (role is null)
+            {
+                _logger.LogWarning("Role not found with RoleId: {RoleId}", command.Id);
+                return Result.Failure(Error.NotFound("RoleNotFound", "Role not found."));
+            }
 
-            // Delete the role
-            await _roleRepository.DeleteAsync(new(command.Id), cancellationToken);
-
-            // Raise domain event
-            role.RaiseDomainEvent(new RoleDeletedEvent(new(command.Id)));
+            // Soft delete the role so existing UserRole references are preserved.
+            role.Deactivate();
+            await _roleRepository.UpdateAsync(role, cancellationToken);
 
             _logger.LogInformation("Successfully deleted role with Id: {RoleId}", command.Id);
             return Result.Success();

@@ -14,4 +14,18 @@ internal static class TestDbContextFactory
 
         return new OroIdentityAppContext(options);
     }
+
+    public static OroIdentityAppContext CreateSqlite()
+    {
+        var connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
+        connection.Open();
+
+        var options = new DbContextOptionsBuilder<OroIdentityAppContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        var context = new OroIdentityAppContext(options);
+        context.Database.EnsureCreated();
+        return context;
+    }
 }

@@ -6,6 +6,8 @@ IResourceBuilder<RabbitMQServerResource> rabbitMq = builder.AddRabbitMQ("oroeven
 IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("postgres")
     .WithDataVolume("oro-postgres-data");
 
+postgres.WithPgAdmin(container => container.WithImageTag("latest"));
+
 IResourceBuilder<PostgresDatabaseResource> identityDb = postgres.AddDatabase("identitydb");
 
 IResourceBuilder<ParameterResource> SymmetricSecurityKey = builder.AddParameter("SymmetricSecurityKey", "g9hLodrPUXAJRCxQUMZA6Bo2l8amqDjeHRerJIJAhVs=");

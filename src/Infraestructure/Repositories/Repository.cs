@@ -90,7 +90,26 @@ public class Repository<T>(
     public async Task UpdateAsync(T entity, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering UpdateAsync");
-        context.Set<T>().Update(entity);
+
+        // The entity may already be tracked by the current DbContext (e.g. a long-lived
+        // scoped context that accumulated state across operations). Calling DbSet.Update on a
+        // tracked entity is harmless, but calling it on a detached instance while another
+        // instance with the same key is tracked throws an InvalidOperationException. Detect
+        // that case and copy the incoming values into the tracked instance instead.
+        var entry = context.Entry(entity);
+        if (entry.State == EntityState.Detached)
+        {
+            var tracked = FindTrackedByKey(entity);
+            if (tracked is not null)
+            {
+                context.Entry(tracked).CurrentValues.SetValues(entity);
+            }
+            else
+            {
+                context.Set<T>().Update(entity);
+            }
+        }
+
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Exiting UpdateAsync");
     }
@@ -99,8 +118,30 @@ public class Repository<T>(
     {
         logger.LogInformation("Entering DeleteAsync");
         ArgumentNullException.ThrowIfNull(entity);
-        context.Set<T>().Update(entity);
+        context.Set<T>().Remove(entity);
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Exiting DeleteAsync");
+    }
+
+    private T? FindTrackedByKey(T entity)
+    {
+        var entityType = context.Model.FindEntityType(typeof(T));
+        var key = entityType?.FindPrimaryKey();
+        if (entityType is null || key is null)
+            return default;
+
+        var properties = key.Properties;
+        var entityEntry = context.Entry(entity);
+        var keyValues = properties.Select(p => entityEntry.Property(p.Name).CurrentValue).ToArray();
+
+        foreach (var candidate in context.Set<T>().Local)
+        {
+            var candidateEntry = context.Entry(candidate);
+            var candidateValues = properties.Select(p => candidateEntry.Property(p.Name).CurrentValue).ToArray();
+            if (candidateValues.SequenceEqual(keyValues))
+                return candidate;
+        }
+
+        return default;
     }
 }

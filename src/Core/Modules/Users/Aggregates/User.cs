@@ -84,8 +84,11 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
 
     public void RemoveRole(UserRole role)
     {
-        if (!_roles.Remove(role))
+        var existing = _roles.FirstOrDefault(r => r.RoleId == role.RoleId);
+        if (existing is null)
             throw new InvalidOperationException("Role not found.");
+
+        _roles.Remove(existing);
     }
 
     public void Validate()
