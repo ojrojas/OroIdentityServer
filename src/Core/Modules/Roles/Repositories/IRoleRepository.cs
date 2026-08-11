@@ -61,4 +61,14 @@ public interface IRoleRepository
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of roles.</returns>
     Task<IEnumerable<Role>> GetRolesByUserIdAsync(UserId userId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Counts roles created on or after <paramref name="today"/> (start of day).
+    /// </summary>
+    Task<int> CountCreatedTodayAsync(DateTime today, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Returns whether the role has any associated role permissions.
+    /// </summary>
+    Task<bool> HasPermissionsAsync(RoleId roleId, CancellationToken cancellationToken);
 }

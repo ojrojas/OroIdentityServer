@@ -60,4 +60,13 @@ public class UserSessionRepository(
         logger.LogInformation("Exiting GetActiveSessionsAsync");
         return sessions;
     }
+
+    public async Task<int> CountActiveUsersAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering CountActiveUsersAsync");
+        var sessions = await repository.FindAsync(s => s.ExpiresAt > DateTime.UtcNow, cancellationToken);
+        var count = sessions.Select(s => s.UserId).Distinct().Count();
+        logger.LogInformation("Exiting CountActiveUsersAsync with {Count} active users", count);
+        return count;
+    }
 }

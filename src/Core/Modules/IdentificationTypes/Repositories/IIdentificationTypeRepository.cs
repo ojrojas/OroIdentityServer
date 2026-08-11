@@ -52,4 +52,9 @@ public interface IIdentificationTypeRepository
     /// <param name="name">The name of the identification type to retrieve.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the identification type if found; otherwise, null.</returns>
     Task<IdentificationType?> GetIdentificationTypeByNameAsync(IdentificationTypeName name, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Counts identification types created on or after <paramref name="today"/> (start of day).
+    /// </summary>
+    Task<int> CountCreatedTodayAsync(DateTime today, CancellationToken cancellationToken);
 }

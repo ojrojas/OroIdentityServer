@@ -11,4 +11,9 @@ public interface IUserRolesRepository
     Task DeleteUserRoleAsync(UserRole userRole, CancellationToken cancellationToken);
     Task<IEnumerable<UserRole>> GetAllRolesAsync(CancellationToken cancellationToken);
     Task<IEnumerable<UserRole>> GetRolesByUserIdAsync(UserId userId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Returns whether any user is assigned the given role.
+    /// </summary>
+    Task<bool> HasAnyForRoleAsync(RoleId roleId, CancellationToken cancellationToken);
 }

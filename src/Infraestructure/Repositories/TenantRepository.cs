@@ -78,6 +78,12 @@ public class TenantRepository(
         return result;
     }
 
+    public async Task<int> CountCreatedTodayAsync(DateTime today, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Counting tenants created since {Today}", today);
+        return await repository.CountAsync(new GetTenantsCreatedTodaySpecification(today), cancellationToken);
+    }
+
     public async Task<bool> SlugExistsAsync(TenantSlug slug, CancellationToken ct)
     {
         logger.LogInformation("Entering SlugExistsAsync with slug: {Slug}", slug.Value);

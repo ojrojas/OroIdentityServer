@@ -10,6 +10,9 @@ public class AdminTenantService(HttpClient client) : IAdminTenantService
     public Task<ApiResponse<IEnumerable<TenantModel>>?> GetTenantsAsync(CancellationToken ct = default)
         => client.GetFromJsonAsync<ApiResponse<IEnumerable<TenantModel>>>("api/tenants", ClientJsonOptions.Default, ct);
 
+    public Task<ApiResponse<IEnumerable<TenantModel>>?> GetMyTenantsAsync(CancellationToken ct = default)
+        => client.GetFromJsonAsync<ApiResponse<IEnumerable<TenantModel>>>("api/tenants/mine", ClientJsonOptions.Default, ct);
+
     public Task<ApiResponse<TenantDetailModel>?> GetTenantByIdAsync(Guid id, CancellationToken ct = default)
         => client.GetFromJsonAsync<ApiResponse<TenantDetailModel>>($"api/tenants/{id}", ClientJsonOptions.Default, ct);
 

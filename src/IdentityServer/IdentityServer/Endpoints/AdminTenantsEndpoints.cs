@@ -8,6 +8,14 @@ public static partial class AdminApiEndpoints
 {
     private static void MapTenants(this RouteGroupBuilder api)
     {
+        // The nav tenant switcher lists the tenants of the logged-in user, so this lookup must be
+        // available to Managers too (the /api group already requires ManagerOrAdmin), not only Admins.
+        api.MapGet("/tenants/mine", async ([FromServices] IAdminTenantService service, CancellationToken ct)
+            => Results.Ok(await service.GetMyTenantsAsync(ct)));
+
+        api.MapGet("/tenants/by-user/{userId:guid}", async (Guid userId, [FromServices] IAdminTenantService service, CancellationToken ct)
+            => Results.Ok(await service.GetTenantsByUserIdAsync(userId, ct)));
+
         var g = api.MapGroup("/tenants").RequireAuthorization("AdminOnly");
 
         g.MapGet("/", async ([FromServices] IAdminTenantService service, CancellationToken ct)
@@ -15,9 +23,6 @@ public static partial class AdminApiEndpoints
 
         g.MapGet("/{id:guid}", async (Guid id, [FromServices] IAdminTenantService service, CancellationToken ct)
             => Results.Ok(await service.GetTenantByIdAsync(id, ct)));
-
-        g.MapGet("/by-user/{userId:guid}", async (Guid userId, [FromServices] IAdminTenantService service, CancellationToken ct)
-            => Results.Ok(await service.GetTenantsByUserIdAsync(userId, ct)));
 
         g.MapPost("/", async ([FromBody] CreateTenantRequest request, [FromServices] IAdminTenantService service, CancellationToken ct)
             => await ToResultAsync(await service.CreateTenantAsync(request, ct), ct));

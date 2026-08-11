@@ -59,4 +59,10 @@ public class IdentificationTypeRepository(
         await repository.UpdateAsync(identificationType, cancellationToken);
         logger.LogInformation("Exiting UpdateIdentificationTypeAsync");
     }
+
+    public async Task<int> CountCreatedTodayAsync(DateTime today, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Counting identification types created since {Today}", today);
+        return await repository.CountAsync(new GetIdentificationTypesCreatedTodaySpecification(today), cancellationToken);
+    }
 }

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Claims;
 using BuildingBlocks.CQRS.Abstractions;
 using IdentityServer.Client.Interfaces;
 using IdentityServer.Client.Models;
@@ -9,7 +10,10 @@ using OroIdentityServer.Application.Modules.Tenants.Queries;
 
 namespace IdentityServer.Services;
 
-public class ServerAdminTenantService(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher) : IAdminTenantService
+public class ServerAdminTenantService(
+    IQueryDispatcher queryDispatcher,
+    ICommandDispatcher commandDispatcher,
+    IHttpContextAccessor httpContextAccessor) : IAdminTenantService
 {
     public async Task<ApiResponse<IEnumerable<TenantModel>>?> GetTenantsAsync(CancellationToken ct = default)
     {
@@ -21,6 +25,24 @@ public class ServerAdminTenantService(IQueryDispatcher queryDispatcher, ICommand
             Message = result.Message,
             Errors = result.Errors
         };
+    }
+
+    public async Task<ApiResponse<IEnumerable<TenantModel>>?> GetMyTenantsAsync(CancellationToken ct = default)
+    {
+        // Resolve the logged-in user from the authenticated request (like Keycloak filters
+        // realms server-side) instead of trusting a client-supplied user id.
+        var userIdClaim = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdClaim, out var userId))
+        {
+            return new ApiResponse<IEnumerable<TenantModel>>
+            {
+                Data = [],
+                StatusCode = (int)HttpStatusCode.Unauthorized,
+                Message = "User could not be identified."
+            };
+        }
+
+        return await GetTenantsByUserIdAsync(userId, ct);
     }
 
     public async Task<ApiResponse<TenantDetailModel>?> GetTenantByIdAsync(Guid id, CancellationToken ct = default)

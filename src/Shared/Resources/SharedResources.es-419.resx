@@ -40,7 +40,7 @@
   <data name="Identification"><value>Identificación</value></data>
   <data name="IdentificationType"><value>Tipo de identificación</value></data>
   <data name="Tenant"><value>Inquilino</value></data>
-  <data name="Rol"><value>Rolle</value></data>
+  <data name="Role"><value>Rol</value></data>
   <data name="Active"><value>Activo</value></data>
   <data name="Created"><value>Creado</value></data>
   <data name="SavedToast"><value>Guardado.</value></data>
@@ -227,4 +227,68 @@
   <data name="SelectRolePlaceholder"><value>Selecciona un rol…</value></data>
   <data name="NoRolesAssigned"><value>Aún no hay roles asignados.</value></data>
   <data name="RemoveRoleTitle"><value>Quitar rol</value></data>
+
+  <!-- Tenants -->
+  <data name="TenantsTitle"><value>Tenants</value></data>
+  <data name="NewTenantTitle"><value>Nuevo tenant</value></data>
+  <data name="TenantDetailTitle"><value>Tenant</value></data>
+  <data name="TenantCreatedToast"><value>Tenant creado.</value></data>
+  <data name="TenantCreateFailedToast"><value>No se pudo crear el tenant ({0}).</value></data>
+  <data name="TenantDeletedToast"><value>Tenant eliminado.</value></data>
+  <data name="TenantDeleteFailedToast"><value>No se pudo eliminar el tenant ({0}).</value></data>
+  <data name="DeleteTenantConfirm"><value>¿Eliminar el tenant &quot;{0}&quot;?</value></data>
+  <data name="TenantActivatedToast"><value>Tenant activado.</value></data>
+  <data name="TenantActivateFailedToast"><value>No se pudo activar el tenant ({0}).</value></data>
+  <data name="TenantSuspendedToast"><value>Tenant suspendido.</value></data>
+  <data name="TenantSuspendFailedToast"><value>No se pudo suspender el tenant ({0}).</value></data>
+  <data name="ActivateTenantConfirm"><value>¿Activar el tenant &quot;{0}&quot;?</value></data>
+  <data name="SuspendTenantConfirm"><value>¿Suspender el tenant &quot;{0}&quot;?</value></data>
+  <data name="Slug"><value>Slug</value></data>
+  <data name="SlugHint"><value>Identificador amigable para URL. No se puede cambiar después de crearse.</value></data>
+  <data name="TenantUsersLabel"><value>Usuarios del tenant</value></data>
+  <data name="IsTenantActiveHint"><value>Los tenants suspendidos no pueden acceder al sistema.</value></data>
+  <data name="SubscriptionLabel"><value>Suscripción actual</value></data>
+  <data name="PlanLabel"><value>Plan</value></data>
+  <data name="MaxCompanies"><value>Máx. compañías</value></data>
+  <data name="MaxUsersPerCompany"><value>Máx. usuarios/companía</value></data>
+  <data name="Suspend"><value>Suspender</value></data>
+  <data name="Activate"><value>Activar</value></data>
+  <data name="JoinedAt"><value>Se unió</value></data>
+  <data name="ColUsers"><value>Usuarios</value></data>
+  <data name="SuspendedStatus"><value>Suspendido</value></data>
+  <data name="Status"><value>Estado</value></data>
+  <data name="StatTenantsNote"><value>Organizaciones activas</value></data>
+
+  <!-- Dashboard -->
+  <data name="ConnectedUsersDetail"><value>Usuarios conectados</value></data>
+  <data name="ConfirmActionTitle"><value>Confirmar acción</value></data>
+
+  <!-- User detail sections -->
+  <data name="BasicInfoSection"><value>Información básica</value></data>
+  <data name="SecuritySection"><value>Seguridad</value></data>
+  <data name="ActiveSessionsSection"><value>Sesiones activas</value></data>
+  <data name="AccountStatusLabel"><value>Estado de la cuenta:</value></data>
+  <data name="Locked"><value>Bloqueado</value></data>
+  <data name="UnlockUser"><value>Desbloquear usuario</value></data>
+  <data name="LockUser"><value>Bloquear usuario</value></data>
+  <data name="UserLockedToast"><value>Usuario bloqueado.</value></data>
+  <data name="UserLockFailedToast"><value>No se pudo bloquear al usuario ({0}).</value></data>
+  <data name="UserUnlockedToast"><value>Usuario desbloqueado.</value></data>
+  <data name="UserUnlockFailedToast"><value>No se pudo desbloquear al usuario ({0}).</value></data>
+  <data name="LockedUntilLabel"><value>Bloqueado hasta {0}</value></data>
+  <data name="LoadSessions"><value>Cargar sesiones</value></data>
+  <data name="TerminateAllSessions"><value>Finalizar todas las sesiones</value></data>
+  <data name="TerminateAllConfirm"><value>¿Estás seguro de que quieres finalizar todas las sesiones de este usuario?</value></data>
+  <data name="AllSessionsTerminatedToast"><value>Todas las sesiones finalizadas.</value></data>
+  <data name="SessionsTerminateFailedToast"><value>No se pudieron finalizar las sesiones ({0}).</value></data>
+  <data name="Refresh"><value>Actualizar</value></data>
+  <data name="ColStatus"><value>Estado</value></data>
+  <data name="LockUserConfirm"><value>¿Bloquear al usuario &quot;{0}&quot;?</value></data>
+  <data name="UnlockUserConfirm"><value>¿Desbloquear al usuario &quot;{0}&quot;?</value></data>
+  <data name="TerminateSessionsConfirm"><value>¿Desconectar todas las sesiones de &quot;{0}&quot;?</value></data>
+  <data name="Edit"><value>Editar</value></data>
+  <data name="ToggleMenu"><value>Alternar menú</value></data>
+  <data name="AddTenant"><value>Agregar tenant</value></data>
+  <data name="StatIdentificationTypesNote"><value>Documentos de identidad</value></data>
+  <data name="RoleDeleteConflictToast"><value>No se puede eliminar el rol: está asignado a usuarios o tiene permisos asignados.</value></data>
 </root>

@@ -79,6 +79,15 @@ public class Repository<T>(
         return result;
     }
 
+    public async Task<int> CountAsync(ISpecification<T> specification, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering CountAsync");
+        var result = await SpecificationEvaluator.GetQuery(context.Set<T>().AsQueryable(), specification)
+            .CountAsync(cancellationToken);
+        logger.LogInformation("Exiting CountAsync");
+        return result;
+    }
+
     public async Task AddAsync(T entity, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering AddAsync");

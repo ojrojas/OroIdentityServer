@@ -65,6 +65,12 @@ public class UserRepository(
         return result;
     }
 
+    public async Task<int> CountCreatedTodayAsync(DateTime today, Guid? tenantId, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Counting users created since {Today} for tenant {TenantId}", today, tenantId);
+        return await repository.CountAsync(new GetUsersCreatedTodaySpecification(today, tenantId), cancellationToken);
+    }
+
     public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
     {
         logger.LogInformation("handling request user by email {Email}", email);

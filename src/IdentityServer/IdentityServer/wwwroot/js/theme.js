@@ -14,7 +14,10 @@ window.oroTenant = {
     },
 
     set: function (id) {
-        try { localStorage.setItem('oroTenantId', id); } catch (e) { /* ignore */ }
+        try {
+            localStorage.setItem('oroTenantId', id);
+            document.cookie = 'oro_tenant=' + encodeURIComponent(id) + '; path=/; max-age=31536000; samesite=lax';
+        } catch (e) { /* ignore */ }
     }
 };
 

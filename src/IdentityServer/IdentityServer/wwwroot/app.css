@@ -237,9 +237,15 @@ a { color: inherit; }
   color: var(--text-3);
 }
 
+.tenant-switcher-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .tenant-switcher-select {
-  width: 100%;
-  max-width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 8px 10px;
   border-radius: var(--r-md);
   border: 1px solid var(--border);
@@ -254,6 +260,27 @@ a { color: inherit; }
 .tenant-switcher-select:hover,
 .tenant-switcher-select:focus {
   border-color: var(--accent);
+  outline: none;
+}
+
+.tenant-switcher-add {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: border-color var(--ease), color var(--ease);
+}
+
+.tenant-switcher-add:hover,
+.tenant-switcher-add:focus {
+  border-color: var(--accent);
+  color: var(--accent);
   outline: none;
 }
 

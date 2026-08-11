@@ -13,6 +13,7 @@ public interface IRepository<TAggregate>
     Task<IEnumerable<TAggregate>> ListAsync(ISpecification<TAggregate> specification, CancellationToken cancellationToken = default);
     Task<TAggregate?> FirstOrDefaultAsync(ISpecification<TAggregate> specification, CancellationToken cancellationToken = default);
     Task<bool> AnyAsync(ISpecification<TAggregate> specification, CancellationToken cancellationToken = default);
+    Task<int> CountAsync(ISpecification<TAggregate> specification, CancellationToken cancellationToken = default);
     Task AddAsync(TAggregate aggregate, CancellationToken cancellationToken = default);
     Task UpdateAsync(TAggregate aggregate, CancellationToken cancellationToken = default);
     Task DeleteAsync(TAggregate aggregate, CancellationToken cancellationToken = default);

@@ -71,4 +71,17 @@ public class RoleRepository(
         logger.LogInformation("Exiting GetRolesByUserIdAsync");
         return roles;
     }
+
+    public async Task<int> CountCreatedTodayAsync(DateTime today, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Counting roles created since {Today}", today);
+        return await repository.CountAsync(new GetRolesCreatedTodaySpecification(today), cancellationToken);
+    }
+
+    public async Task<bool> HasPermissionsAsync(RoleId roleId, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Checking permissions for role: {RoleId}", roleId);
+        var role = await repository.FirstOrDefaultAsync(new GetRoleWithPermissionsSpecification(roleId), cancellationToken);
+        return role?.RolePermissions.Count > 0;
+    }
 }

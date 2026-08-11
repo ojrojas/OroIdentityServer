@@ -13,4 +13,9 @@ public interface IUserSessionRepository
     Task<IEnumerable<UserSession>> GetSessionsByUserIdAsync(UserId userId, CancellationToken cancellationToken);
     Task<UserSession?> GetByTokenAsync(string sessionToken, CancellationToken cancellationToken);
     Task<IEnumerable<UserSession>> GetActiveSessionsAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Counts distinct users that currently have at least one active (non-expired) session.
+    /// </summary>
+    Task<int> CountActiveUsersAsync(CancellationToken cancellationToken);
 }

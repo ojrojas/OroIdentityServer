@@ -1,5 +1,7 @@
 @page "/"
 @attribute [Authorize]
+@using IdentityServer.Client.Models.Dashboard
+@inject IAdminDashboardService DashboardService
 @inject IAdminUserService UserService
 @inject IAdminRoleService RoleService
 @inject IAdminScopeService ScopeService
@@ -27,11 +29,13 @@
 
             <div class="inset">
                 <div class="stat-row">
-                    <StatCard Title="@L["Tenants"]" Value="@tenantCount" IconName="house" Featured="true"
-                              Note="@L["StatTenantsNote"]" Delta="@createdTodayCount" 
+                    <StatCard Title="@L["StatTenants"]" Value="@tenantCount" IconName="house" Featured="true"
+                              Note="@L["StatTenantsNote"]" Delta="@(stats?.TenantsCreatedToday ?? 0)"
+                              DeltaText="@DeltaText(stats?.TenantsCreatedToday ?? 0)"
                               OnClick="@((e) => NavigationStat("/tenants"))" />
                     <StatCard Title="@L["StatUsers"]" Value="@userCount" IconName="users" Featured="true"
-                              Note="@L["StatUsersNote"]" Delta="@createdTodayCount" DeltaText="@TodayDeltaText"
+                              Note="@L["StatUsersNote"]" Delta="@(stats?.UsersCreatedToday ?? 0)"
+                              DeltaText="@DeltaText(stats?.UsersCreatedToday ?? 0)"
                               OnClick="@((e) => NavigationStat("/users"))" />
 
                 </div>
@@ -41,7 +45,8 @@
                               IconName="plug" Note="@L["StatConnectedNote"]"
                               OnClick="@((e) => NavigationStat("/sessions"))" />
                     <StatCard Featured="true" Title="@L["StatRoles"]" Value="@roleCount" IconName="shield"
-                              Note="@L["StatRolesNote"]"
+                              Note="@L["StatRolesNote"]" Delta="@(stats?.RolesCreatedToday ?? 0)"
+                              DeltaText="@DeltaText(stats?.RolesCreatedToday ?? 0)"
                               OnClick="@(() => NavigationStat("/roles"))" />
                     <StatCard Featured="true" Title="@L["StatApplications"]" Value="@applicationCount" IconName="apps"
                               Note="@L["StatApplicationsNote"]"
@@ -49,6 +54,11 @@
                     <StatCard Featured="true" Title="@L["StatScopes"]" Value="@scopeCount" IconName="key"
                               Note="@L["StatScopesNote"]"
                               OnClick="@(() => NavigationStat("/scopes"))" />
+                    <StatCard Featured="true" Title="@L["NavIdentificationTypes"]" Value="@identificationTypeCount"
+                              IconName="document" Note="@L["StatIdentificationTypesNote"]"
+                              Delta="@(stats?.IdentificationTypesCreatedToday ?? 0)"
+                              DeltaText="@DeltaText(stats?.IdentificationTypesCreatedToday ?? 0)"
+                              OnClick="@(() => NavigationStat("/identification-types"))" />
                 </div>
             </div>
 
@@ -69,8 +79,8 @@
                         <div class="people">
                             @foreach (var entity in recentlyCreated)
                             {
-                                <a class="person" href="@entity.Href" title="@($"{entity.Name} · {entity.TypeLabel}")">
-                                    <span class="avatar avatar-lg @entity.AvatarClass">@Initials(entity.Name)</span>
+                                <a class="person" href="@entity.Href" title="@($"{entity.Name} · {L[entity.TypeKey]}")">
+                                    <span class="avatar avatar-lg @AvatarClass(entity.AvatarSeed)">@Initials(entity.Name)</span>
                                     <span class="person-name">@entity.Name</span>
                                 </a>
                             }
@@ -210,16 +220,16 @@
                                     @(entry.ClientId ?? L["UnknownClient"])
                                 </p>
                                 <p class="feed-time">@entry.OccurredAtUtc.ToLocalTime().ToString("t",
-                                                                CultureInfo.CurrentUICulture)</p>
+                                                                 CultureInfo.CurrentUICulture)</p>
                                     <p class="feed-text">@ActivityText(entry)</p>
                                 </div>
                             </div>
                         }
                     </div>
                 }
-            </section>
+                </section>
+            </div>
         </div>
-    </div>
 
 @code {
     private int? tenantCount;
@@ -228,14 +238,16 @@
     private int? roleCount;
     private int? scopeCount;
     private int? applicationCount;
-    private int createdTodayCount;
+    private int? identificationTypeCount;
+
+    private DashboardStatsModel? stats;
+    private List<RecentEntityModel>? recentlyCreated;
 
     private List<DailyValidationCountModel>? validationDays;
     private int totalValidations;
     private int maxDailyTotal;
 
     private List<RecentConnection>? recentConnections;
-    private List<RecentEntity>? recentlyCreated;
     private List<ValidationLogEntryModel>? recentActivity;
 
     private Dictionary<Guid, string> userNames = [];
@@ -243,42 +255,37 @@
     private sealed record RecentConnection(
         string DisplayName, string Detail, bool IsActive, DateTime LastSeen, string AvatarClass);
 
-    private sealed record RecentEntity(
-        string Name, string TypeLabel, string Href, string AvatarClass, DateTime CreatedAtUtc);
-
-    private string TodayDeltaText =>
-        createdTodayCount > 0 ? L["CreatedTodayShort", createdTodayCount] : string.Empty;
+    private string DeltaText(int count) =>
+        count > 0 ? L["CreatedTodayShort", count] : string.Empty;
 
     private string CreatedTodayHeadline =>
-        createdTodayCount > 0 ? L["CreatedTodayHeadline", createdTodayCount] : L["LatestCreatedHeadline"];
+        recentlyCreated is { Count: > 0 } && recentlyCreated.Any(e => e.CreatedAtUtc.Date == DateTime.UtcNow.Date)
+            ? L["CreatedTodayHeadline", recentlyCreated.Count(e => e.CreatedAtUtc.Date == DateTime.UtcNow.Date)]
+            : L["LatestCreatedHeadline"];
 
     protected override async Task OnInitializedAsync()
     {
+        stats = await DashboardService.GetStatsAsync();
+        connectedUserCount = stats?.ConnectedUsers ?? 0;
+        recentlyCreated = stats?.RecentlyCreated;
+
         var tenants = await TenantService.GetTenantsAsync();
-        var tenantList = tenants.Data.ToList();
-        tenantCount = tenantList.Count();
+        tenantCount = tenants?.Data?.Count() ?? 0;
 
         var users = await UserService.GetUsersAsync();
         var userList = users?.Data?.ToList() ?? [];
         userCount = userList.Count;
         userNames = userList.ToDictionary(u => u.Id, u => FullName(u));
 
-        connectedUserCount = await UserSessionService.GetActiveSessionsCountAsync();
-
         var sessions = (await UserSessionService.GetActiveSessionsAsync())?.ToList() ?? [];
+        BuildRecentConnections(sessions);
 
         var roles = await RoleService.GetRolesAsync();
-        var roleList = roles?.Data?.ToList() ?? [];
-        roleCount = roleList.Count;
+        roleCount = roles?.Data?.Count() ?? 0;
 
         applicationCount = (await ApplicationService.GetApplicationsAsync())?.Count() ?? 0;
         scopeCount = (await ScopeService.GetScopesAsync())?.Count() ?? 0;
-
-        var identificationTypes =
-            (await IdentificationTypeService.GetIdentificationTypesAsync())?.Data?.ToList() ?? [];
-
-        BuildRecentConnections(sessions);
-        BuildRecentlyCreated(userList, roleList, identificationTypes);
+        identificationTypeCount = (await IdentificationTypeService.GetIdentificationTypesAsync())?.Data?.Count() ?? 0;
 
         var summary = await ValidationLogService.GetDailySummaryAsync(7);
         validationDays = [.. summary];
@@ -293,14 +300,14 @@
     private void BuildRecentConnections(List<UserSessionModel> sessions)
     {
         recentConnections = [.. sessions
-            .Where(s => s.UserId is not null)
+            .Where(s => s.UserId is not null && userNames.ContainsKey(s.UserId!.Value))
             .GroupBy(s => s.UserId!.Value)
             .Select(g => g.OrderByDescending(s => s.LastActivityAt ?? s.CreatedAt).First())
             .OrderByDescending(s => s.LastActivityAt ?? s.CreatedAt)
             .Take(5)
             .Select(s =>
             {
-                var name = userNames.TryGetValue(s.UserId!.Value, out var n) ? n : s.UserId!.Value.ToString()[..8];
+                var name = userNames[s.UserId!.Value];
                 var detail = string.Join(" · ", new[] { s.Device, s.IpAddress }.Where(x => !string.IsNullOrWhiteSpace(x)));
 
                 return new RecentConnection(
@@ -310,31 +317,6 @@
                     s.LastActivityAt ?? s.CreatedAt,
                     AvatarClass(name));
             })];
-    }
-
-    private void BuildRecentlyCreated(
-        List<UserModel> users, List<RoleModel> roles, List<IdentificationTypeModel> identificationTypes)
-    {
-        var all = new List<RecentEntity>();
-
-        all.AddRange(users.Select(u =>
-            new RecentEntity(FullName(u), L["StatUsers"], $"/users/{u.Id}", AvatarClass(FullName(u)), u.CreatedAtUtc)));
-
-        all.AddRange(roles.Where(r => r.Name is not null).Select(r =>
-            new RecentEntity(r.Name!, L["StatRoles"], $"/roles/{r.Id}", AvatarClass(r.Name!), r.CreatedAtUtc)));
-
-        all.AddRange(identificationTypes.Select(i =>
-            new RecentEntity(i.Name, L["NavIdentificationTypes"], $"/identification-types/{i.Id}",
-                             AvatarClass(i.Name), i.CreatedAtUtc)));
-
-        var today = DateTime.UtcNow.Date;
-        var createdToday = all.Where(e => e.CreatedAtUtc.Date == today).ToList();
-        createdTodayCount = createdToday.Count;
-
-        // Fall back to the latest entities so the row is never empty on a quiet day.
-        recentlyCreated = [.. (createdToday.Count > 0 ? createdToday : all)
-            .OrderByDescending(e => e.CreatedAtUtc)
-            .Take(5)];
     }
 
     private string UserLabel(Guid? userId) =>

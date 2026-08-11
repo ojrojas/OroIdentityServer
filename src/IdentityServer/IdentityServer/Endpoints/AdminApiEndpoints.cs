@@ -20,6 +20,7 @@ public static partial class AdminApiEndpoints
         api.MapUserSessions();
         api.MapSessions();
         api.MapValidationLogs();
+        api.MapDashboard();
         api.MapOpenIddictApplications();
         api.MapOpenIddictScopes();
 
@@ -39,6 +40,9 @@ public static partial class AdminApiEndpoints
             return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
         }
 
-        return Results.StatusCode((int)response.StatusCode);
+        // Write a JSON body so the status code pages middleware does not re-execute the request
+        // against /not-found (which only handles GET) - that re-execution turns POST/DELETE failures
+        // into 400/405 responses.
+        return Results.Json(new { status = (int)response.StatusCode }, statusCode: (int)response.StatusCode);
     }
 }

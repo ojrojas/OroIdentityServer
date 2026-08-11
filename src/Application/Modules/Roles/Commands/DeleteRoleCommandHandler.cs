@@ -5,10 +5,13 @@
 namespace OroIdentityServer.Application.Modules.Roles.Commands;
 
 public class DeleteRoleCommandHandler(
-    IRoleRepository roleRepository, ILogger<DeleteRoleCommandHandler> logger)
+    IRoleRepository roleRepository,
+    IUserRolesRepository userRolesRepository,
+    ILogger<DeleteRoleCommandHandler> logger)
     : ICommandHandler<DeleteRoleCommand>
 {
     private readonly IRoleRepository _roleRepository = roleRepository;
+    private readonly IUserRolesRepository _userRolesRepository = userRolesRepository;
     private readonly ILogger<DeleteRoleCommandHandler> _logger = logger;
 
     public async Task<Result> HandleAsync(DeleteRoleCommand command, CancellationToken cancellationToken)
@@ -25,7 +28,25 @@ public class DeleteRoleCommandHandler(
                 return Result.Failure(Error.NotFound("RoleNotFound", "Role not found."));
             }
 
-            // Soft delete the role so existing UserRole references are preserved.
+            // A role that is still assigned to users or still holds permissions cannot be deleted:
+            // it would leave dangling references and break authorization.
+            if (await _userRolesRepository.HasAnyForRoleAsync(new(command.Id), cancellationToken))
+            {
+                _logger.LogWarning("Role {RoleId} is assigned to users and cannot be deleted.", command.Id);
+                return Result.Failure(Error.Conflict(
+                    "RoleAssignedToUsers",
+                    "The role is still assigned to one or more users and cannot be deleted."));
+            }
+
+            if (await _roleRepository.HasPermissionsAsync(new(command.Id), cancellationToken))
+            {
+                _logger.LogWarning("Role {RoleId} still has permissions assigned and cannot be deleted.", command.Id);
+                return Result.Failure(Error.Conflict(
+                    "RoleHasPermissions",
+                    "The role still has permissions assigned and cannot be deleted."));
+            }
+
+            // Soft delete the role so existing references are preserved.
             role.Deactivate();
             await _roleRepository.UpdateAsync(role, cancellationToken);
 

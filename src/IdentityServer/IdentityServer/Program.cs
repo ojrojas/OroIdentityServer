@@ -123,14 +123,26 @@ app.UseRequestLocalization();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Resolve the current tenant from the header the WASM client sends on every /api call.
+// Resolve the current tenant from the header the WASM client sends on every /api call, or from the
+// oro_tenant cookie persisted by the tenant switcher. Applied before rendering so pages and queries
+// are already scoped to the selected tenant on the first pass.
 app.Use(async (context, next) =>
 {
+    Guid? tenantId = null;
+
     if (context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantHeader)
-        && Guid.TryParse(tenantHeader.ToString(), out var tenantId))
+        && Guid.TryParse(tenantHeader.ToString(), out var headerTenantId))
     {
-        context.RequestServices.GetRequiredService<ICurrentTenantContext>().SetCurrentTenantId(tenantId);
+        tenantId = headerTenantId;
     }
+    else if (context.Request.Cookies.TryGetValue("oro_tenant", out var cookieTenant)
+             && Guid.TryParse(cookieTenant, out var cookieTenantId))
+    {
+        tenantId = cookieTenantId;
+    }
+
+    if (tenantId is { } id)
+        context.RequestServices.GetRequiredService<ICurrentTenantContext>().SetCurrentTenantId(id);
 
     await next();
 });

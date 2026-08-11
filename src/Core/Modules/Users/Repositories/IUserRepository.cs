@@ -47,6 +47,11 @@ public interface IUserRepository
     Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Counts users created on or after <paramref name="today"/> (start of day), optionally restricted to a tenant.
+    /// </summary>
+    Task<int> CountCreatedTodayAsync(DateTime today, Guid? tenantId, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Gets a user by their email address.
     /// </summary>
     Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken);

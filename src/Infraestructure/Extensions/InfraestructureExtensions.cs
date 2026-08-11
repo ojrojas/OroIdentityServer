@@ -10,7 +10,7 @@ public static class InfraestructureExtensions
     {
         var connectionDatabase = configuration.GetConnectionString("identitydb");
 
-        builder.Services.AddDbContextPool<OroIdentityAppContext>(options =>
+        Action<DbContextOptionsBuilder> configureOptions = options =>
         {
             options.UseNpgsql(connectionDatabase);
             options.UseOpenIddict();
@@ -21,7 +21,14 @@ public static class InfraestructureExtensions
                 options.EnableDetailedErrors(); // Consider disabling in production for performance reasons
                 options.EnableSensitiveDataLogging(); // Consider disabling in production for security reasons
             }
-        });
+        };
+
+        builder.Services.AddDbContextPool<OroIdentityAppContext>(configureOptions);
+
+        // The dashboard aggregation (and any other read-only path) needs a short-lived, isolated
+        // context instead of the circuit's scoped one, so it can never overlap with concurrent
+        // async operations on the same DbContext in Blazor Server.
+        builder.Services.AddPooledDbContextFactory<OroIdentityAppContext>(configureOptions);
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

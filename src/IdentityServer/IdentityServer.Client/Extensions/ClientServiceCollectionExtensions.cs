@@ -25,6 +25,7 @@ public static class ClientServiceCollectionExtensions
         services.AddHttpClient<IAdminValidationLogService, AdminValidationLogService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
         services.AddHttpClient<IAdminApplicationService, AdminApplicationService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
         services.AddHttpClient<IAdminScopeService, AdminScopeService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
+        services.AddHttpClient<IAdminDashboardService, AdminDashboardService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
 
         return services;
     }

@@ -14,56 +14,127 @@
     else
     {
         <label class="tenant-switcher-label" for="tenant-switcher">@L["CurrentTenant"]</label>
-        <select id="tenant-switcher" class="tenant-switcher-select" value="@SelectedTenantId" @onchange="OnTenantChanged">
-            @foreach (var tenant in TenantContext.Tenants)
-            {
-                <option value="@tenant.Id">@tenant.Name</option>
-            }
-        </select>
+        <div class="tenant-switcher-row">
+            <select id="tenant-switcher" class="tenant-switcher-select" value="@SelectedTenantId" @onchange="OnTenantChanged">
+                @foreach (var tenant in TenantContext.Tenants)
+                {
+                    <option value="@tenant.Id">@tenant.Name</option>
+                }
+            </select>
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <button type="button" class="tenant-switcher-add" title="@L["AddTenant"]" @onclick="AddTenant">
+                        <Icon Name="plus" Size="14" Stroke="2.4" />
+                    </button>
+                </Authorized>
+            </AuthorizeView>
+        </div>
     }
 </div>
 
 @code {
     private bool loading = true;
+    private bool loaded;
 
     private string SelectedTenantId => TenantContext.CurrentTenantId?.ToString() ?? string.Empty;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
+        // Nothing async here: the tenant list is loaded on the interactive pass in
+        // OnAfterRenderAsync, never during static SSR (whose request scope can be torn
+        // down while the query runs, disposing the pooled DbContext).
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // Only the interactive pass (WASM / InteractiveServer) can call JS. During static SSR
+        // this throws, which tells us to skip the tenant query altogether.
+        string? stored;
         try
         {
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (Guid.TryParse(userIdClaim, out var userId))
-            {
-                var response = await TenantService.GetTenantsByUserIdAsync(userId);
-                var tenants = response?.Data?.ToList() ?? [];
-
-                Guid? preferred = null;
-                try
-                {
-                    var stored = await JS.InvokeAsync<string>("oroTenant.current");
-                    preferred = Guid.TryParse(stored, out var storedId) ? storedId : null;
-                }
-                catch (JSException) { /* prerender - resolved on the interactive pass */ }
-
-                TenantContext.Initialize(tenants, preferred);
-            }
+            stored = await JS.InvokeAsync<string>("oroTenant.current");
         }
-        finally
+        catch (Exception)
         {
+            return; // static SSR - skip
+        }
+
+        if (!loaded)
+        {
+            loaded = true;
+
+            var tenants = await LoadTenantsAsync();
+
+            // Prefer the persisted selection (server middleware reads the oro_tenant cookie),
+            // then the logged-in user's own tenant (tenant_id claim), then the first one.
+            var current = TenantContext.CurrentTenantId
+                ?? await GetHomeTenantIdAsync()
+                ?? tenants.FirstOrDefault()?.Id;
+
+            TenantContext.Initialize(tenants, current);
             loading = false;
         }
+
+        if (Guid.TryParse(stored, out var storedId) && TenantContext.HasTenant(storedId))
+        {
+            TenantContext.SetCurrentTenantId(storedId);
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task<List<TenantModel>> LoadTenantsAsync()
+    {
+        if (OperatingSystem.IsBrowser())
+        {
+            // WASM: the server resolves the logged-in user from the session cookie and returns
+            // only the tenants they belong to (Keycloak-style server-side filtering). If that
+            // round-trip fails, fall back to resolving the user from the client-side claims.
+            try
+            {
+                var mine = await TenantService.GetMyTenantsAsync();
+                var mineTenants = mine?.Data?.ToList();
+                if (mineTenants is { Count: > 0 })
+                    return mineTenants;
+            }
+            catch
+            {
+                // fall through to the claims-based lookup
+            }
+        }
+
+        // Resolve the user from the claims (works on every pass: WASM, prerender, InteractiveServer).
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (Guid.TryParse(userIdClaim, out var userId))
+        {
+            var response = await TenantService.GetTenantsByUserIdAsync(userId);
+            return response?.Data?.ToList() ?? [];
+        }
+
+        return [];
+    }
+
+    private async Task<Guid?> GetHomeTenantIdAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var tenantClaim = authState.User.FindFirst("tenant_id")?.Value;
+        return Guid.TryParse(tenantClaim, out var id) ? id : null;
     }
 
     private async Task OnTenantChanged(ChangeEventArgs e)
     {
-        if (Guid.TryParse(e.Value?.ToString(), out var tenantId) && TenantContext.HasTenant(tenantId))
-        {
-            TenantContext.SetCurrentTenantId(tenantId);
-            await JS.InvokeVoidAsync("oroTenant.set", tenantId.ToString());
-            Nav.NavigateTo(Nav.Uri, forceLoad: true);
-        }
+        if (!Guid.TryParse(e.Value?.ToString(), out var tenantId) || !TenantContext.HasTenant(tenantId))
+            return;
+
+        TenantContext.SetCurrentTenantId(tenantId);
+        await JS.InvokeVoidAsync("oroTenant.set", tenantId.ToString());
+        Nav.NavigateTo(Nav.Uri, forceLoad: true);
     }
+
+    private void AddTenant() => Nav.NavigateTo("/tenants/create");
 }

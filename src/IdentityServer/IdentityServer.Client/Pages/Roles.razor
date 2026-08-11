@@ -99,6 +99,10 @@
             ToastService.ShowSuccess(L["RoleDeletedToast"]);
             await LoadAsync();
         }
+        else if ((int)response.StatusCode == 409)
+        {
+            ToastService.ShowError(L["RoleDeleteConflictToast"]);
+        }
         else
         {
             ToastService.ShowError(L["RoleDeleteFailedToast", (int)response.StatusCode]);

@@ -19,4 +19,9 @@ public interface ITenantRepository
     Task<IEnumerable<Tenant>> GetByUserIdAsync(UserId userId, CancellationToken ct);
     Task<bool> SlugExistsAsync(TenantSlug slug, CancellationToken ct);
     Task UpdateAsync(Tenant entity, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Counts tenants created on or after <paramref name="today"/> (start of day).
+    /// </summary>
+    Task<int> CountCreatedTodayAsync(DateTime today, CancellationToken cancellationToken);
 }

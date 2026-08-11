@@ -77,6 +77,7 @@
 
   <!-- Nav menu -->
   <data name="CurrentTenant"><value>Tenant</value></data>
+  <data name="AddTenant"><value>Add tenant</value></data>
   <data name="NavDashboard"><value>Dashboard</value></data>
   <data name="NavUsers"><value>Users</value></data>
   <data name="NavRoles"><value>Roles</value></data>
@@ -298,4 +299,6 @@
   <data name="SelectRolePlaceholder"><value>Select a role…</value></data>
   <data name="NoRolesAssigned"><value>No roles assigned yet.</value></data>
   <data name="RemoveRoleTitle"><value>Remove role</value></data>
+  <data name="StatIdentificationTypesNote"><value>Identity documents</value></data>
+  <data name="RoleDeleteConflictToast"><value>Role cannot be deleted: it is assigned to users or has permissions assigned.</value></data>
 </root>

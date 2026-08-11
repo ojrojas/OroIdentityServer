@@ -88,6 +88,10 @@
             ToastService.ShowSuccess(L["RoleDeletedToast"]);
             Nav.NavigateTo("/roles");
         }
+        else if ((int)response.StatusCode == 409)
+        {
+            ToastService.ShowError(L["RoleDeleteConflictToast"]);
+        }
         else
         {
             ToastService.ShowError(L["RoleDeleteFailedToast", (int)response.StatusCode]);

@@ -40,6 +40,12 @@ public class UserRolesRepository(
         return roles;
     }
 
+    public async Task<bool> HasAnyForRoleAsync(RoleId roleId, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering HasAnyForRoleAsync for role: {RoleId}", roleId);
+        return await repository.AnyAsync(new GetUserRolesByRoleIdSpecification(roleId), cancellationToken);
+    }
+
     public async Task DeleteRolesByUserIdAsync(UserId userId, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering DeleteRolesByUserIdAsync");
