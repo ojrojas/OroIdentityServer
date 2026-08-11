@@ -17,6 +17,10 @@ public class GetUserSessionsQueryHandler(
 
             var sessions = await sessionRepository.GetSessionsByUserIdAsync(new(query.UserId), cancellationToken);
 
+            // When a tenant is supplied, only return sessions recorded for that tenant.
+            if (query.TenantId is { } tenantId)
+                sessions = sessions.Where(s => s.TenantId.Value == tenantId);
+
         try
         {
             response.Data = sessions.Select(s => new SessionDto

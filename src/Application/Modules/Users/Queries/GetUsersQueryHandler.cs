@@ -13,6 +13,11 @@ public class GetUsersQueryHandler(
     {
         logger.LogInformation("Handling GetUsersQuery");
         var data = await repository.GetAllUsersAsync(cancellationToken);
+
+        // When a tenant is supplied, only return users that belong to that tenant.
+        if (query.TenantId is { } tenantId)
+            data = data.Where(u => u.TenantId?.Value == tenantId);
+
         if(data == null || !data.Any())
         {
             logger.LogWarning("No users found in the repository");

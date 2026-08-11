@@ -12,16 +12,19 @@ public static class ClientServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddIdentityServerClientServices(this IServiceCollection services, Uri baseAddress)
     {
-        services.AddHttpClient<IAdminUserService, AdminUserService>(httpClient => httpClient.BaseAddress = baseAddress);
-        services.AddHttpClient<IAdminRoleService, AdminRoleService>(httpClient => httpClient.BaseAddress = baseAddress);
-        services.AddHttpClient<IAdminPermissionService, AdminPermissionService>(httpClient => httpClient.BaseAddress = baseAddress);
-        services.AddHttpClient<IAdminIdentificationTypeService, AdminIdentificationTypeService>(httpClient => httpClient.BaseAddress = baseAddress);
-        services.AddHttpClient<IAdminTenantService, AdminTenantService>(httpClient => httpClient.BaseAddress = baseAddress);
-        services.AddHttpClient<IAdminUserSessionService, AdminUserSessionService>(httpClient => httpClient.BaseAddress = baseAddress);
-        services.AddHttpClient<IAdminSessionService, AdminSessionService>(httpClient => httpClient.BaseAddress = baseAddress);
-        services.AddHttpClient<IAdminValidationLogService, AdminValidationLogService>(httpClient => httpClient.BaseAddress = baseAddress);
-        services.AddHttpClient<IAdminApplicationService, AdminApplicationService>(httpClient => httpClient.BaseAddress = baseAddress);
-        services.AddHttpClient<IAdminScopeService, AdminScopeService>(httpClient => httpClient.BaseAddress = baseAddress);
+        services.AddScoped<ICurrentTenantContext, CurrentTenantContext>();
+        services.AddTransient<TenantHeaderHandler>();
+
+        services.AddHttpClient<IAdminUserService, AdminUserService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
+        services.AddHttpClient<IAdminRoleService, AdminRoleService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
+        services.AddHttpClient<IAdminPermissionService, AdminPermissionService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
+        services.AddHttpClient<IAdminIdentificationTypeService, AdminIdentificationTypeService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
+        services.AddHttpClient<IAdminTenantService, AdminTenantService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
+        services.AddHttpClient<IAdminUserSessionService, AdminUserSessionService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
+        services.AddHttpClient<IAdminSessionService, AdminSessionService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
+        services.AddHttpClient<IAdminValidationLogService, AdminValidationLogService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
+        services.AddHttpClient<IAdminApplicationService, AdminApplicationService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
+        services.AddHttpClient<IAdminScopeService, AdminScopeService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
 
         return services;
     }
@@ -33,6 +36,7 @@ public static class ClientServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddIdentityServerUiServices(this IServiceCollection services)
     {
+        services.AddScoped<ICurrentTenantContext, CurrentTenantContext>();
         services.AddScoped<IToastService, ToastService>();
         services.AddScoped<IDialogService, DialogService>();
 

@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Application.Modules.Sessions.Queries;
 
-public record GetUserSessionsQuery(Guid UserId) : IQuery<GetUserSessionsQueryResponse>
+public record GetUserSessionsQuery(Guid UserId, Guid? TenantId = null) : IQuery<GetUserSessionsQueryResponse>
 {
     public Guid CorrelationId { get; init; } = Guid.NewGuid();
 }

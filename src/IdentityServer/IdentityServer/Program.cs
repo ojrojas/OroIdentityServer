@@ -1,4 +1,5 @@
 using IdentityServer.Client.Extensions;
+using IdentityServer.Client.Services;
 using System.Globalization;
 using IdentityServer.Components;
 using IdentityServer.Server.Extensions;
@@ -121,6 +122,18 @@ app.UseRequestLocalization();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Resolve the current tenant from the header the WASM client sends on every /api call.
+app.Use(async (context, next) =>
+{
+    if (context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantHeader)
+        && Guid.TryParse(tenantHeader.ToString(), out var tenantId))
+    {
+        context.RequestServices.GetRequiredService<ICurrentTenantContext>().SetCurrentTenantId(tenantId);
+    }
+
+    await next();
+});
 
 app.Use(async (context, next) =>
 {

@@ -8,6 +8,16 @@
     } catch (e) { /* private mode - fall back to the OS preference */ }
 })();
 
+window.oroTenant = {
+    current: function () {
+        try { return localStorage.getItem('oroTenantId'); } catch (e) { return null; }
+    },
+
+    set: function (id) {
+        try { localStorage.setItem('oroTenantId', id); } catch (e) { /* ignore */ }
+    }
+};
+
 window.oroTheme = {
     current: function () {
         var explicit = document.documentElement.getAttribute('data-theme');

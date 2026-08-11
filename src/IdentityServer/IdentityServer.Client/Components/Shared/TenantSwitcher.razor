@@ -1,0 +1,69 @@
+@using System.Security.Claims
+@inject IAdminTenantService TenantService
+@inject ICurrentTenantContext TenantContext
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
+
+<div class="tenant-switcher">
+    @if (loading)
+    {
+        <div class="tenant-switcher-label">@L["CurrentTenant"]…</div>
+    }
+    else
+    {
+        <label class="tenant-switcher-label" for="tenant-switcher">@L["CurrentTenant"]</label>
+        <select id="tenant-switcher" class="tenant-switcher-select" value="@SelectedTenantId" @onchange="OnTenantChanged">
+            @foreach (var tenant in TenantContext.Tenants)
+            {
+                <option value="@tenant.Id">@tenant.Name</option>
+            }
+        </select>
+    }
+</div>
+
+@code {
+    private bool loading = true;
+
+    private string SelectedTenantId => TenantContext.CurrentTenantId?.ToString() ?? string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (Guid.TryParse(userIdClaim, out var userId))
+            {
+                var response = await TenantService.GetTenantsByUserIdAsync(userId);
+                var tenants = response?.Data?.ToList() ?? [];
+
+                Guid? preferred = null;
+                try
+                {
+                    var stored = await JS.InvokeAsync<string>("oroTenant.current");
+                    preferred = Guid.TryParse(stored, out var storedId) ? storedId : null;
+                }
+                catch (JSException) { /* prerender - resolved on the interactive pass */ }
+
+                TenantContext.Initialize(tenants, preferred);
+            }
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task OnTenantChanged(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var tenantId) && TenantContext.HasTenant(tenantId))
+        {
+            TenantContext.SetCurrentTenantId(tenantId);
+            await JS.InvokeVoidAsync("oroTenant.set", tenantId.ToString());
+            Nav.NavigateTo(Nav.Uri, forceLoad: true);
+        }
+    }
+}

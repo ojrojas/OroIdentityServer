@@ -3,6 +3,7 @@ using BuildingBlocks.CQRS.Abstractions;
 using IdentityServer.Client.Interfaces;
 using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.Users;
+using IdentityServer.Client.Services;
 using OroIdentityServer.Application.Modules.Roles.Queries;
 using OroIdentityServer.Application.Modules.Users.Commands;
 using OroIdentityServer.Application.Modules.Users.Queries;
@@ -21,12 +22,13 @@ namespace IdentityServer.Services;
 public class ServerAdminUserService(
     IQueryDispatcher queryDispatcher,
     ICommandDispatcher commandDispatcher,
-    IHttpContextAccessor httpContextAccessor) : IAdminUserService
+    IHttpContextAccessor httpContextAccessor,
+    ICurrentTenantContext tenantContext) : IAdminUserService
 {
     private const string AdministratorRoleName = "Administrator";
     public async Task<ApiResponse<IEnumerable<UserModel>>?> GetUsersAsync(CancellationToken ct = default)
     {
-        var result = await queryDispatcher.SendAsync(new GetUsersQuery(), ct);
+        var result = await queryDispatcher.SendAsync(new GetUsersQuery(tenantContext.CurrentTenantId), ct);
         return new ApiResponse<IEnumerable<UserModel>>
         {
             Data = result.Data?.Select(MapUser).ToList() ?? [],

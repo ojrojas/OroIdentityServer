@@ -2,16 +2,19 @@ using BuildingBlocks.CQRS.Abstractions;
 using IdentityServer.Client.Interfaces;
 using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.Sessions;
+using IdentityServer.Client.Services;
 using OroIdentityServer.Application.Modules.Sessions.DTOs;
 using OroIdentityServer.Application.Modules.Sessions.Queries;
 
 namespace IdentityServer.Services;
 
-public class ServerAdminSessionService(IQueryDispatcher queryDispatcher) : IAdminSessionService
+public class ServerAdminSessionService(
+    IQueryDispatcher queryDispatcher,
+    ICurrentTenantContext tenantContext) : IAdminSessionService
 {
     public async Task<ApiResponse<IEnumerable<SessionModel>>?> GetByUserAsync(Guid userId, CancellationToken ct = default)
     {
-        var result = await queryDispatcher.SendAsync(new GetUserSessionsQuery(userId), ct);
+        var result = await queryDispatcher.SendAsync(new GetUserSessionsQuery(userId, tenantContext.CurrentTenantId), ct);
         return new ApiResponse<IEnumerable<SessionModel>>
         {
             Data = result.Data?.Select(MapSession).ToList() ?? [],

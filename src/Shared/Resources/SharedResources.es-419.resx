@@ -69,6 +69,7 @@
   <data name="YesSignOut"><value>Sí, cerrar sesión</value></data>
   <data name="NoStaySignedIn"><value>No, mantener la sesión</value></data>
 
+  <data name="CurrentTenant"><value>Tenant</value></data>
   <data name="NavDashboard"><value>Panel</value></data>
   <data name="NavUsers"><value>Usuarios</value></data>
   <data name="NavRoles"><value>Roles</value></data>

@@ -76,6 +76,7 @@
   <data name="NoStaySignedIn"><value>No, stay signed in</value></data>
 
   <!-- Nav menu -->
+  <data name="CurrentTenant"><value>Tenant</value></data>
   <data name="NavDashboard"><value>Dashboard</value></data>
   <data name="NavUsers"><value>Users</value></data>
   <data name="NavRoles"><value>Roles</value></data>

@@ -3,6 +3,7 @@
 @inject IAdminUserService UserService
 @inject IAdminIdentificationTypeService IdentificationTypeService
 @inject IAdminTenantService TenantService
+@inject ICurrentTenantContext TenantContext
 @inject IToastService ToastService
 @inject NavigationManager Nav
 @inject IStringLocalizer<SharedResources> L
@@ -125,9 +126,11 @@
         identificationTypes = identificationTypesResponse?.Data?.ToList() ?? [];
         selectedIdentificationType = identificationTypes.FirstOrDefault();
 
-        var tenantsResponse = await TenantService.GetTenantsAsync();
-        tenants = tenantsResponse?.Data?.ToList() ?? [];
-        selectedTenant = tenants.FirstOrDefault();
+        // Prefer the tenant selected in the nav switcher, falling back to the full list.
+        tenants = TenantContext.Tenants.Count > 0
+            ? TenantContext.Tenants.ToList()
+            : (await TenantService.GetTenantsAsync())?.Data?.ToList() ?? [];
+        selectedTenant = tenants.FirstOrDefault(t => t.Id == TenantContext.CurrentTenantId) ?? tenants.FirstOrDefault();
     }
 
     private async Task SubmitAsync()

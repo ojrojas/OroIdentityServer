@@ -219,6 +219,44 @@ a { color: inherit; }
   flex-shrink: 0;
 }
 
+/* Tenant switcher, between the brand and the nav */
+.tenant-switcher {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 10px 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.tenant-switcher-label {
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.tenant-switcher-select {
+  width: 100%;
+  max-width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-1);
+  font-size: .8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+.tenant-switcher-select:hover,
+.tenant-switcher-select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
 .nav { display: flex; flex-direction: column; gap: 2px; }
 
 .nav-section {
