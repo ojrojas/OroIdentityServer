@@ -37,8 +37,16 @@ services:
       SEED_ADMIN_EMAIL: admin@example.com
     ports:
       - "5080:5080"
+      - "5086:5086"
     volumes:
       - identity-dp-keys:/app/data-protection-keys
+      # To enable HTTPS alongside HTTP, mount a PFX (or PEM cert + key) and override the
+      # URLs + certificate settings, e.g.:
+      #   - ./certs/https.pfx:/app/certs/https.pfx
+      # environment:
+      #   ASPNETCORE_URLS: "http://+:5080;https://+:5086"
+      #   Kestrel__Certificates__Default__Path: /app/certs/https.pfx
+      #   Kestrel__Certificates__Default__Password: changeit
 
 volumes:
   identity-dp-keys:

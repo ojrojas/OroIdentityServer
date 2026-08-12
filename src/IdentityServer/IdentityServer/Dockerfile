@@ -32,10 +32,13 @@ COPY --from=build --chown=$APP_UID:$APP_UID /app/publish .
 # changed for real deployments).
 # ---------------------------------------------------------------------------
 
-# ASP.NET Core host
-ENV ASPNETCORE_URLS="http://+:5080"
-ENV ASPNETCORE_HTTP_PORTS="5080"
-ENV ASPNETCORE_ENVIRONMENT="Production"
+# ASP.NET Core host. The image always starts HTTP-only (port 5080), so it runs without needing
+# a certificate. To also serve HTTPS, override ASPNETCORE_URLS at run time
+# (e.g. "http://+:5080;https://+:5086") and point Kestrel at a mounted certificate via
+# Kestrel__Certificates__Default__Path (+ __Password for PFX, or __KeyPath for a PEM key).
+# A https URL without a certificate fails at startup, so keep the default below HTTP-only.
+ENV ASPNETCORE_URLS=http://+:5080;https://+:5086
+ENV ASPNETCORE_ENVIRONMENT=Production
 
 # PostgreSQL. Uses the host/container name `db` (see docker-compose.yaml).
 ENV ConnectionStrings__identitydb="Host=db;Port=5432;Database=identitydb;Username=postgres;Password=Weak(!)Password123"
@@ -75,5 +78,6 @@ ENV EventBus__RabbitMQ__Password="guest"
 ENV EventBus__RabbitMQ__VirtualHost="/"
 
 EXPOSE 5080
+EXPOSE 5086
 
 ENTRYPOINT ["dotnet", "IdentityServer.dll"]

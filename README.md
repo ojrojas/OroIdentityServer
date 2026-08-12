@@ -213,6 +213,25 @@ podman compose up -d --build
 # Open http://localhost:5080 and sign in as `admin` / `Admin@123456`
 ```
 
+The image always starts HTTP-only on port `5080`. To also serve HTTPS on port `5086`, mount a
+certificate and override the URLs + certificate settings at run time (no application changes
+needed). With HTTPS enabled, HTTP requests are redirected to HTTPS via `UseHttpsRedirection`:
+
+```bash
+podman run --rm -p 5080:5080 -p 5086:5086 \
+  -v "$PWD/certs/https.pfx:/app/certs/https.pfx:ro" \
+  -e ASPNETCORE_URLS="http://+:5080;https://+:5086" \
+  -e Kestrel__Certificates__Default__Path="/app/certs/https.pfx" \
+  -e Kestrel__Certificates__Default__Password="changeit" \
+  -e ConnectionStrings__identitydb="Host=db;Port=5432;Database=identitydb;Username=postgres;Password=Weak(!)Password123" \
+  -e SEED_ADMIN_USERNAME="admin" \
+  -e SEED_ADMIN_PASSWORD="Admin@123456" \
+  oridentityserver:latest
+```
+
+For a PEM certificate instead of a PFX, set `Kestrel__Certificates__Default__KeyPath` to the
+private key file. Without a certificate, the container runs HTTP-only on port `5080`.
+
 The universal seed creates an **Administrator** account with username `admin` (default password
 `Admin@123456`). Change it before going live — see the `SEED_ADMIN_*` variables below.
 
@@ -231,8 +250,11 @@ The Dockerfile declares sensible defaults for every variable; each one can be ov
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `ASPNETCORE_URLS` | `http://+:5080` | URLs the Kestrel listener binds to |
+| `ASPNETCORE_URLS` | `http://+:5080` | URLs Kestrel binds to. Override to `http://+:5080;https://+:5086` (with a certificate) to also serve HTTPS |
 | `ASPNETCORE_ENVIRONMENT` | `Production` | ASP.NET environment |
+| `Kestrel__Certificates__Default__Path` | *(unset)* | PFX (or PEM cert) path used for the HTTPS endpoint |
+| `Kestrel__Certificates__Default__Password` | *(unset)* | Password of the PFX certificate |
+| `Kestrel__Certificates__Default__KeyPath` | *(unset)* | Private key path for a PEM certificate |
 | `ConnectionStrings__identitydb` | `Host=db;...` | PostgreSQL connection string |
 | `SymmetricSecurityKey` | dev key | Base64 OpenIddict signing/encryption key (≥ 32 bytes) — **must be overridden in production** and shared by all instances |
 | `IDENTITY_ADMIN_HTTP` | `http://localhost:4200` | Base URL of the external admin SPA, used when seeding the OpenIddict `Admin` client |
