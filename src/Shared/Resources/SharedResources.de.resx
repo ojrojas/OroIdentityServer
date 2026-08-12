@@ -145,6 +145,16 @@
   <data name="ApplicationDetailTitle"><value>Anwendung</value></data>
   <data name="RedirectUris"><value>Weiterleitungs-URIs (kommagetrennt)</value></data>
   <data name="PostLogoutRedirectUris"><value>Weiterleitungs-URIs nach Abmeldung (kommagetrennt)</value></data>
+  <data name="ConsentType"><value>Zustimmungstyp</value></data>
+  <data name="ApplicationPermissions"><value>OpenIddict-Berechtigungen</value></data>
+  <data name="ApplicationPermissionsHint"><value>Wählen Sie die Endpunkte, Gewährungstypen, Antworttypen und Scopes, die diese Anwendung verwenden darf.</value></data>
+  <data name="Endpoints"><value>Endpunkte</value></data>
+  <data name="GrantTypes"><value>Gewährungstypen</value></data>
+  <data name="ResponseTypes"><value>Antworttypen</value></data>
+  <data name="ScopesPermissions"><value>Scopes</value></data>
+  <data name="Requirements"><value>Anforderungen</value></data>
+  <data name="AdditionalScopes"><value>Zusätzliche Scopes</value></data>
+  <data name="AdditionalScopesHint"><value>Benutzerdefinierte Scope-Namen (als scp:*-Berechtigungen hinzugefügt), z. B. tenant</value></data>
   <data name="StatUsersNote"><value>Registrierte Konten</value></data>
 
   <data name="StatConnectedNote"><value>Aktive Sitzungen</value></data>

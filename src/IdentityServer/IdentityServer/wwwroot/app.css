@@ -1070,6 +1070,69 @@ input[type="checkbox"].switch:focus-visible {
   background: var(--bg-input);
 }
 
+/* Permission checklist (OpenIddict endpoints, grant types, response types, scopes) */
+.checklist-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checklist-title {
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.checklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-inset);
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--ease);
+}
+
+.checklist-item:hover { background: var(--bg-card); }
+
+.checklist-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.checklist-label {
+  font-size: .8125rem;
+  font-weight: 500;
+  color: var(--text-1);
+  white-space: nowrap;
+}
+
+.checklist-code {
+  font-size: .6875rem;
+  color: var(--text-3);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 1px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Tag input (redirect URIs) */
 .tags {
   display: flex;

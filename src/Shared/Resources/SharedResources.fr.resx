@@ -151,6 +151,16 @@
   <data name="ApplicationDetailTitle"><value>Application</value></data>
   <data name="RedirectUris"><value>URI de redirection (séparées par des virgules)</value></data>
   <data name="PostLogoutRedirectUris"><value>URI de redirection après déconnexion (séparées par des virgules)</value></data>
+  <data name="ConsentType"><value>Type de consentement</value></data>
+  <data name="ApplicationPermissions"><value>Autorisations OpenIddict</value></data>
+  <data name="ApplicationPermissionsHint"><value>Sélectionnez les endpoints, types d'octroi, types de réponse et scopes utilisables par cette application.</value></data>
+  <data name="Endpoints"><value>Endpoints</value></data>
+  <data name="GrantTypes"><value>Types d'octroi</value></data>
+  <data name="ResponseTypes"><value>Types de réponse</value></data>
+  <data name="ScopesPermissions"><value>Scopes</value></data>
+  <data name="Requirements"><value>Exigences</value></data>
+  <data name="AdditionalScopes"><value>Scopes supplémentaires</value></data>
+  <data name="AdditionalScopesHint"><value>Noms de scope personnalisés (ajoutés en tant que permissions scp:*), ex. tenant</value></data>
 
   <data name="ScopesTitle"><value>Portées</value></data>
   <data name="NewScopeTitle"><value>Nouvelle portée</value></data>

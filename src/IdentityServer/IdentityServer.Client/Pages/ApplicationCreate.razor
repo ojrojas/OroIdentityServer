@@ -12,7 +12,7 @@
         <h2 class="card-title">@L["NewApplicationTitle"]</h2>
     </div>
 
-    <div class="form">
+    <div class="form form-wide">
         <div class="form-grid">
             <div class="field">
                 <label class="field-label" for="clientId">@L["ClientId"] <span class="req">*</span></label>
@@ -38,6 +38,22 @@
             </div>
         </div>
 
+        <div class="form-grid">
+            <div class="field">
+                <label class="field-label" for="consentType">@L["ConsentType"]</label>
+                <select id="consentType" class="select" @bind="consentType">
+                    <option value="explicit">explicit</option>
+                    <option value="implicit">implicit</option>
+                    <option value="external">external</option>
+                    <option value="system">system</option>
+                </select>
+            </div>
+            <div class="field">
+                <label class="field-label">@L["ApplicationPermissions"]</label>
+                <span class="field-hint">@L["ApplicationPermissionsHint"]</span>
+            </div>
+        </div>
+
         <div class="field">
             <label class="field-label">@L["RedirectUris"]</label>
             <TagInput @bind-Values="redirectUris" />
@@ -46,6 +62,18 @@
         <div class="field">
             <label class="field-label">@L["PostLogoutRedirectUris"]</label>
             <TagInput @bind-Values="postLogoutRedirectUris" />
+        </div>
+
+        <PermissionChecklist Title="@L["Endpoints"]" Options="OpenIddictPermissionOptions.Endpoints" Selected="permissions" SelectedChanged="@(() => { })" />
+        <PermissionChecklist Title="@L["GrantTypes"]" Options="OpenIddictPermissionOptions.GrantTypes" Selected="permissions" SelectedChanged="@(() => { })" />
+        <PermissionChecklist Title="@L["ResponseTypes"]" Options="OpenIddictPermissionOptions.ResponseTypes" Selected="permissions" SelectedChanged="@(() => { })" />
+        <PermissionChecklist Title="@L["ScopesPermissions"]" Options="OpenIddictPermissionOptions.Scopes" Selected="permissions" SelectedChanged="@(() => { })" />
+        <PermissionChecklist Title="@L["Requirements"]" Options="OpenIddictPermissionOptions.Requirements" Selected="requirements" SelectedChanged="@(() => { })" />
+
+        <div class="field">
+            <label class="field-label">@L["AdditionalScopes"]</label>
+            <span class="field-hint">@L["AdditionalScopesHint"]</span>
+            <TagInput @bind-Values="customScopes" InputType="text" Placeholder="tenant" />
         </div>
 
         <div class="form-actions">
@@ -60,6 +88,10 @@
     private string displayName = string.Empty;
     private string clientSecret = string.Empty;
     private string clientType = "confidential";
+    private string consentType = "explicit";
+    private HashSet<string> permissions = new(StringComparer.Ordinal);
+    private HashSet<string> requirements = new(StringComparer.Ordinal);
+    private List<string> customScopes = [];
     private List<string> redirectUris = [];
     private List<string> postLogoutRedirectUris = [];
     private bool saving;
@@ -67,9 +99,15 @@
     private async Task SubmitAsync()
     {
         saving = true;
+
+        var scopePermissions = customScopes
+            .Select(s => $"scp:{s}")
+            .Where(p => !permissions.Contains(p));
+        var allPermissions = permissions.Concat(scopePermissions).ToList();
+
         var model = new OpenIddictApplicationModel(
             clientId, string.IsNullOrWhiteSpace(clientSecret) ? null : clientSecret, displayName, clientType,
-            "web", "implicit", [], [], redirectUris, postLogoutRedirectUris);
+            "web", consentType, allPermissions, [.. requirements], redirectUris, postLogoutRedirectUris);
 
         var response = await ApplicationService.CreateApplicationAsync(model);
         saving = false;

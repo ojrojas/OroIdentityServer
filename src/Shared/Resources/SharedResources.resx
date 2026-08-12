@@ -190,6 +190,16 @@
   <data name="ApplicationDetailTitle"><value>Application</value></data>
   <data name="RedirectUris"><value>Redirect URIs (comma separated)</value></data>
   <data name="PostLogoutRedirectUris"><value>Post-logout redirect URIs (comma separated)</value></data>
+  <data name="ConsentType"><value>Consent type</value></data>
+  <data name="ApplicationPermissions"><value>OpenIddict permissions</value></data>
+  <data name="ApplicationPermissionsHint"><value>Select which endpoints, grant types, response types and scopes this application can use.</value></data>
+  <data name="Endpoints"><value>Endpoints</value></data>
+  <data name="GrantTypes"><value>Grant types</value></data>
+  <data name="ResponseTypes"><value>Response types</value></data>
+  <data name="ScopesPermissions"><value>Scopes</value></data>
+  <data name="Requirements"><value>Requirements</value></data>
+  <data name="AdditionalScopes"><value>Additional scopes</value></data>
+  <data name="AdditionalScopesHint"><value>Custom scope names (added as scp:* permissions), e.g. tenant</value></data>
 
   <!-- Scopes -->
   <data name="ScopesTitle"><value>Scopes</value></data>

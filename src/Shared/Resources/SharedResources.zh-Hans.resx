@@ -144,6 +144,16 @@
   <data name="ApplicationDetailTitle"><value>应用</value></data>
   <data name="RedirectUris"><value>重定向 URI（逗号分隔）</value></data>
   <data name="PostLogoutRedirectUris"><value>注销后重定向 URI（逗号分隔）</value></data>
+  <data name="ConsentType"><value>同意类型</value></data>
+  <data name="ApplicationPermissions"><value>OpenIddict 权限</value></data>
+  <data name="ApplicationPermissionsHint"><value>选择此应用可以使用的端点、授权类型、响应类型和作用域。</value></data>
+  <data name="Endpoints"><value>端点</value></data>
+  <data name="GrantTypes"><value>授权类型</value></data>
+  <data name="ResponseTypes"><value>响应类型</value></data>
+  <data name="ScopesPermissions"><value>作用域</value></data>
+  <data name="Requirements"><value>要求</value></data>
+  <data name="AdditionalScopes"><value>附加作用域</value></data>
+  <data name="AdditionalScopesHint"><value>自定义作用域名（作为 scp:* 权限添加），例如 tenant</value></data>
 
   <data name="ScopesTitle"><value>作用域</value></data>
   <data name="NewScopeTitle"><value>新建作用域</value></data>

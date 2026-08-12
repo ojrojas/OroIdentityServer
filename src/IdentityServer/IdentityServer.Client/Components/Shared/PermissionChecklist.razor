@@ -1,0 +1,32 @@
+@* Checkbox group for OpenIddict permission options (endpoints, grant types, response types, scopes, requirements). *@
+
+<div class="checklist-group">
+    <span class="checklist-title">@Title</span>
+    <div class="checklist">
+        @foreach (var option in Options)
+        {
+            <label class="checklist-item">
+                <input type="checkbox" checked="@Selected.Contains(option.Value)" @onchange="args => ToggleAsync(option.Value, (bool)args.Value!)" />
+                <span class="checklist-label">@option.Label</span>
+                <code class="checklist-code">@option.Value</code>
+            </label>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+
+    [Parameter] public IReadOnlyList<OpenIddictPermissionOptions.Option> Options { get; set; } = [];
+
+    [Parameter] public HashSet<string> Selected { get; set; } = [];
+
+    [Parameter] public EventCallback<HashSet<string>> SelectedChanged { get; set; }
+
+    private async Task ToggleAsync(string value, bool isChecked)
+    {
+        if (isChecked) Selected.Add(value);
+        else Selected.Remove(value);
+        await SelectedChanged.InvokeAsync(Selected);
+    }
+}

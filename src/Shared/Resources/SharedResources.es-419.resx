@@ -146,6 +146,16 @@
   <data name="ApplicationDetailTitle"><value>Aplicación</value></data>
   <data name="RedirectUris"><value>URIs de redirección (separadas por comas)</value></data>
   <data name="PostLogoutRedirectUris"><value>URIs de redirección post-cierre de sesión (separadas por comas)</value></data>
+  <data name="ConsentType"><value>Tipo de consentimiento</value></data>
+  <data name="ApplicationPermissions"><value>Permisos de OpenIddict</value></data>
+  <data name="ApplicationPermissionsHint"><value>Selecciona qué endpoints, tipos de concesión, tipos de respuesta y alcances puede usar esta aplicación.</value></data>
+  <data name="Endpoints"><value>Endpoints</value></data>
+  <data name="GrantTypes"><value>Tipos de concesión</value></data>
+  <data name="ResponseTypes"><value>Tipos de respuesta</value></data>
+  <data name="ScopesPermissions"><value>Alcances</value></data>
+  <data name="Requirements"><value>Requisitos</value></data>
+  <data name="AdditionalScopes"><value>Alcances adicionales</value></data>
+  <data name="AdditionalScopesHint"><value>Nombres de alcance personalizados (se agregan como permisos scp:*), p. ej. tenant</value></data>
 
   <data name="ScopesTitle"><value>Alcances</value></data>
   <data name="NewScopeTitle"><value>Nuevo alcance</value></data>

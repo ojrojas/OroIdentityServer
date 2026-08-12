@@ -151,6 +151,16 @@
   <data name="ApplicationDetailTitle"><value>Applicazione</value></data>
   <data name="RedirectUris"><value>URI di reindirizzamento (separati da virgola)</value></data>
   <data name="PostLogoutRedirectUris"><value>URI di reindirizzamento post-logout (separati da virgola)</value></data>
+  <data name="ConsentType"><value>Tipo di consenso</value></data>
+  <data name="ApplicationPermissions"><value>Autorizzazioni OpenIddict</value></data>
+  <data name="ApplicationPermissionsHint"><value>Seleziona gli endpoint, i tipi di concessione, i tipi di risposta e gli scope utilizzabili da questa applicazione.</value></data>
+  <data name="Endpoints"><value>Endpoints</value></data>
+  <data name="GrantTypes"><value>Tipi di concessione</value></data>
+  <data name="ResponseTypes"><value>Tipi di risposta</value></data>
+  <data name="ScopesPermissions"><value>Scope</value></data>
+  <data name="Requirements"><value>Requisiti</value></data>
+  <data name="AdditionalScopes"><value>Scope aggiuntivi</value></data>
+  <data name="AdditionalScopesHint"><value>Nomi di scope personalizzati (aggiunti come permessi scp:*), es. tenant</value></data>
 
   <data name="ScopesTitle"><value>Ambiti</value></data>
   <data name="NewScopeTitle"><value>Nuovo ambito</value></data>

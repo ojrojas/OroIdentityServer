@@ -151,6 +151,16 @@
   <data name="ApplicationDetailTitle"><value>アプリケーション</value></data>
   <data name="RedirectUris"><value>リダイレクトURI（カンマ区切り）</value></data>
   <data name="PostLogoutRedirectUris"><value>ログアウト後のリダイレクトURI（カンマ区切り）</value></data>
+  <data name="ConsentType"><value>同意タイプ</value></data>
+  <data name="ApplicationPermissions"><value>OpenIddict権限</value></data>
+  <data name="ApplicationPermissionsHint"><value>このアプリケーションが使用できるエンドポイント、付与タイプ、レスポンスタイプ、スコープを選択してください。</value></data>
+  <data name="Endpoints"><value>エンドポイント</value></data>
+  <data name="GrantTypes"><value>付与タイプ</value></data>
+  <data name="ResponseTypes"><value>レスポンスタイプ</value></data>
+  <data name="ScopesPermissions"><value>スコープ</value></data>
+  <data name="Requirements"><value>要件</value></data>
+  <data name="AdditionalScopes"><value>追加スコープ</value></data>
+  <data name="AdditionalScopesHint"><value>カスタムスコープ名（scp:* 権限として追加）、例: tenant</value></data>
 
   <data name="ScopesTitle"><value>スコープ</value></data>
   <data name="NewScopeTitle"><value>新規スコープ</value></data>
