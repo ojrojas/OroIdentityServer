@@ -1353,6 +1353,39 @@ input[type="checkbox"].switch:focus-visible {
 .auth-form { display: flex; flex-direction: column; gap: 15px; }
 .auth-foot { margin-top: 20px; text-align: center; font-size: .75rem; color: var(--text-3); }
 
+/* Auth layout - language picker */
+.login-layout {
+  position: relative;
+  min-height: 100vh;
+}
+
+.login-language-picker {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  z-index: 10;
+}
+
+.language-form { display: flex; }
+
+.language-select {
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-1);
+  font-size: .8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+.language-select:hover,
+.language-select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
 /* ---------- Mobile ---------- */
 
 .sidebar-toggle { display: none; }

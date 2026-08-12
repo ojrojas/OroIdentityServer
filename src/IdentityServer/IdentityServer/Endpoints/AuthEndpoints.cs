@@ -16,7 +16,7 @@ namespace OroIdentityServer.Server.Endpoints;
 public static class AuthEndpoints
 {
     public sealed record LoginRequest(string LoginIdentifier, string Password, string? ReturnUrl);
-    public sealed record ChangePasswordInputModel(string NewPassword, string ConfirmPassword);
+    public sealed record ChangePasswordInputModel(string NewPassword, string ConfirmPassword, string? ReturnUrl);
 
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
@@ -38,7 +38,13 @@ public static class AuthEndpoints
             await http.SignInAsync(CookieAuthHandlerSetup.AdminScheme, principal);
 
             if (principal.HasClaim(c => c.Type == AdminPasswordSignInService.MustChangePasswordClaimType))
-                return Results.Redirect("/Account/ChangePassword");
+            {
+                if (string.IsNullOrWhiteSpace(loginInput.ReturnUrl))
+                    return Results.Redirect("/Account/ChangePassword");
+
+                var changePasswordReturnUrl = Uri.EscapeDataString(loginInput.ReturnUrl);
+                return Results.Redirect($"/Account/ChangePassword?ReturnUrl={changePasswordReturnUrl}");
+            }
 
             var target = string.IsNullOrWhiteSpace(loginInput.ReturnUrl) ? "/" : loginInput.ReturnUrl;
             return Results.Redirect(target);
@@ -81,7 +87,8 @@ public static class AuthEndpoints
             if (principal is not null)
                 await http.SignInAsync(CookieAuthHandlerSetup.AdminScheme, principal);
 
-            return Results.Redirect("/");
+            var target = string.IsNullOrWhiteSpace(input.ReturnUrl) ? "/" : input.ReturnUrl;
+            return Results.Redirect(target);
         }).DisableAntiforgery();
 
         return app;

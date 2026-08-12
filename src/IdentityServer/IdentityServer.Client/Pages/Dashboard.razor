@@ -1,5 +1,5 @@
 @page "/"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin,Administrator,Manager")]
 @using IdentityServer.Client.Models.Dashboard
 @inject IAdminDashboardService DashboardService
 @inject IAdminUserService UserService
@@ -11,6 +11,7 @@
 @inject IAdminValidationLogService ValidationLogService
 @inject IAdminTenantService TenantService
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IStringLocalizer<SharedResources> L
 @rendermode InteractiveAuto
 
@@ -29,10 +30,13 @@
 
             <div class="inset">
                 <div class="stat-row">
-                    <StatCard Title="@L["StatTenants"]" Value="@tenantCount" IconName="house" Featured="true"
-                              Note="@L["StatTenantsNote"]" Delta="@(stats?.TenantsCreatedToday ?? 0)"
-                              DeltaText="@DeltaText(stats?.TenantsCreatedToday ?? 0)"
-                              OnClick="@((e) => NavigationStat("/tenants"))" />
+                    @if (isAdmin)
+                    {
+                        <StatCard Title="@L["StatTenants"]" Value="@tenantCount" IconName="house" Featured="true"
+                                  Note="@L["StatTenantsNote"]" Delta="@(stats?.TenantsCreatedToday ?? 0)"
+                                  DeltaText="@DeltaText(stats?.TenantsCreatedToday ?? 0)"
+                                  OnClick="@((e) => NavigationStat("/tenants"))" />
+                    }
                     <StatCard Title="@L["StatUsers"]" Value="@userCount" IconName="users" Featured="true"
                               Note="@L["StatUsersNote"]" Delta="@(stats?.UsersCreatedToday ?? 0)"
                               DeltaText="@DeltaText(stats?.UsersCreatedToday ?? 0)"
@@ -44,16 +48,19 @@
                     <StatCard Title="@L["StatConnectedUsers"]" Featured="true" Value="@connectedUserCount"
                               IconName="plug" Note="@L["StatConnectedNote"]"
                               OnClick="@((e) => NavigationStat("/sessions"))" />
-                    <StatCard Featured="true" Title="@L["StatRoles"]" Value="@roleCount" IconName="shield"
-                              Note="@L["StatRolesNote"]" Delta="@(stats?.RolesCreatedToday ?? 0)"
-                              DeltaText="@DeltaText(stats?.RolesCreatedToday ?? 0)"
-                              OnClick="@(() => NavigationStat("/roles"))" />
-                    <StatCard Featured="true" Title="@L["StatApplications"]" Value="@applicationCount" IconName="apps"
-                              Note="@L["StatApplicationsNote"]"
-                              OnClick="@(() => NavigationStat("/applications"))" />
-                    <StatCard Featured="true" Title="@L["StatScopes"]" Value="@scopeCount" IconName="key"
-                              Note="@L["StatScopesNote"]"
-                              OnClick="@(() => NavigationStat("/scopes"))" />
+                    @if (isAdmin)
+                    {
+                        <StatCard Featured="true" Title="@L["StatRoles"]" Value="@roleCount" IconName="shield"
+                                  Note="@L["StatRolesNote"]" Delta="@(stats?.RolesCreatedToday ?? 0)"
+                                  DeltaText="@DeltaText(stats?.RolesCreatedToday ?? 0)"
+                                  OnClick="@(() => NavigationStat("/roles"))" />
+                        <StatCard Featured="true" Title="@L["StatApplications"]" Value="@applicationCount" IconName="apps"
+                                  Note="@L["StatApplicationsNote"]"
+                                  OnClick="@(() => NavigationStat("/applications"))" />
+                        <StatCard Featured="true" Title="@L["StatScopes"]" Value="@scopeCount" IconName="key"
+                                  Note="@L["StatScopesNote"]"
+                                  OnClick="@(() => NavigationStat("/scopes"))" />
+                    }
                     <StatCard Featured="true" Title="@L["NavIdentificationTypes"]" Value="@identificationTypeCount"
                               IconName="document" Note="@L["StatIdentificationTypesNote"]"
                               Delta="@(stats?.IdentificationTypesCreatedToday ?? 0)"
@@ -232,6 +239,7 @@
         </div>
 
 @code {
+    private bool isAdmin;
     private int? tenantCount;
     private int? userCount;
     private int? connectedUserCount;
@@ -265,36 +273,119 @@
 
     protected override async Task OnInitializedAsync()
     {
-        stats = await DashboardService.GetStatsAsync();
-        connectedUserCount = stats?.ConnectedUsers ?? 0;
-        recentlyCreated = stats?.RecentlyCreated;
+        // The page is gated to the ManagerOrAdmin roles, but a manager must not call the
+        // Admin-only endpoints (/api/tenants, /api/roles, /api/applications, /api/scopes):
+        // they return 403 and would otherwise take down the whole dashboard.
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        isAdmin = authState.User.IsInRole("Admin") || authState.User.IsInRole("Administrator");
 
-        var tenants = await TenantService.GetTenantsAsync();
-        tenantCount = tenants?.Data?.Count() ?? 0;
+        // Each call is guarded so a transient failure or a 403 never crashes the page:
+        // the affected card simply keeps showing its loading placeholder.
+        try
+        {
+            stats = await DashboardService.GetStatsAsync();
+            connectedUserCount = stats?.ConnectedUsers ?? 0;
+            recentlyCreated = stats?.RecentlyCreated;
+        }
+        catch
+        {
+            // unreachable for the dashboard: the stats endpoint only requires authentication
+        }
 
-        var users = await UserService.GetUsersAsync();
-        var userList = users?.Data?.ToList() ?? [];
-        userCount = userList.Count;
-        userNames = userList.ToDictionary(u => u.Id, u => FullName(u));
+        try
+        {
+            var users = await UserService.GetUsersAsync();
+            var userList = users?.Data?.ToList() ?? [];
+            userCount = userList.Count;
+            userNames = userList.ToDictionary(u => u.Id, u => FullName(u));
+        }
+        catch
+        {
+            // not authorized or transient error - the Users card stays on its placeholder
+        }
 
-        var sessions = (await UserSessionService.GetActiveSessionsAsync())?.ToList() ?? [];
-        BuildRecentConnections(sessions);
+        try
+        {
+            var sessions = (await UserSessionService.GetActiveSessionsAsync())?.ToList() ?? [];
+            BuildRecentConnections(sessions);
+        }
+        catch
+        {
+            // not authorized or transient error - the connections list stays on its placeholder
+        }
 
-        var roles = await RoleService.GetRolesAsync();
-        roleCount = roles?.Data?.Count() ?? 0;
+        if (isAdmin)
+        {
+            try
+            {
+                var tenants = await TenantService.GetTenantsAsync();
+                tenantCount = tenants?.Data?.Count() ?? 0;
+            }
+            catch
+            {
+                // Admin-only endpoint refused - the Tenants card stays on its placeholder
+            }
 
-        applicationCount = (await ApplicationService.GetApplicationsAsync())?.Count() ?? 0;
-        scopeCount = (await ScopeService.GetScopesAsync())?.Count() ?? 0;
-        identificationTypeCount = (await IdentificationTypeService.GetIdentificationTypesAsync())?.Data?.Count() ?? 0;
+            try
+            {
+                var roles = await RoleService.GetRolesAsync();
+                roleCount = roles?.Data?.Count() ?? 0;
+            }
+            catch
+            {
+                // Admin-only endpoint refused - the Roles card stays on its placeholder
+            }
 
-        var summary = await ValidationLogService.GetDailySummaryAsync(7);
-        validationDays = [.. summary];
-        totalValidations = validationDays.Sum(d => d.SucceededCount + d.FailedCount);
-        maxDailyTotal = validationDays.Count == 0
-            ? 0
-            : validationDays.Max(d => d.SucceededCount + d.FailedCount);
+            try
+            {
+                applicationCount = (await ApplicationService.GetApplicationsAsync())?.Count() ?? 0;
+            }
+            catch
+            {
+                // Admin-only endpoint refused - the Applications card stays on its placeholder
+            }
 
-        recentActivity = [.. await ValidationLogService.GetRecentAsync(5)];
+            try
+            {
+                scopeCount = (await ScopeService.GetScopesAsync())?.Count() ?? 0;
+            }
+            catch
+            {
+                // Admin-only endpoint refused - the Scopes card stays on its placeholder
+            }
+        }
+
+        try
+        {
+            identificationTypeCount = (await IdentificationTypeService.GetIdentificationTypesAsync())?.Data?.Count() ?? 0;
+        }
+        catch
+        {
+            // not authorized or transient error - the Identification types card stays on its placeholder
+        }
+
+        try
+        {
+            var summary = await ValidationLogService.GetDailySummaryAsync(7);
+            validationDays = [.. summary];
+            totalValidations = validationDays.Sum(d => d.SucceededCount + d.FailedCount);
+            maxDailyTotal = validationDays.Count == 0
+                ? 0
+                : validationDays.Max(d => d.SucceededCount + d.FailedCount);
+        }
+        catch
+        {
+            // not authorized or transient error - the chart stays on its placeholder
+        }
+
+        try
+        {
+            recentActivity = [.. await ValidationLogService.GetRecentAsync(5)];
+        }
+        catch
+        {
+            // not authorized or transient error - the activity feed stays on its placeholder
+        }
     }
 
     private void BuildRecentConnections(List<UserSessionModel> sessions)

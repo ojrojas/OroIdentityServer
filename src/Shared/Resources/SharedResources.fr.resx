@@ -69,6 +69,11 @@
   <data name="YesSignOut"><value>Oui, me déconnecter</value></data>
   <data name="NoStaySignedIn"><value>Non, rester connecté</value></data>
 
+  <!-- Access denied -->
+  <data name="AccessDeniedTitle"><value>Accès refusé</value></data>
+  <data name="AccessDeniedMessage"><value>Votre compte n'a pas la permission d'accéder à cette ressource. Si vous devez utiliser le panneau d'administration, déconnectez-vous et connectez-vous avec un compte administrateur.</value></data>
+  <data name="AccessDeniedSignOut"><value>Se déconnecter</value></data>
+
   <data name="NavDashboard"><value>Tableau de bord</value></data>
   <data name="NavUsers"><value>Utilisateurs</value></data>
   <data name="NavRoles"><value>Rôles</value></data>

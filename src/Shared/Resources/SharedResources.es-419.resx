@@ -69,6 +69,11 @@
   <data name="YesSignOut"><value>Sí, cerrar sesión</value></data>
   <data name="NoStaySignedIn"><value>No, mantener la sesión</value></data>
 
+  <!-- Access denied -->
+  <data name="AccessDeniedTitle"><value>Acceso denegado</value></data>
+  <data name="AccessDeniedMessage"><value>Tu cuenta no tiene permiso para acceder a este recurso. Si necesitas usar el panel de administración, cierra sesión e inicia sesión con una cuenta de administrador.</value></data>
+  <data name="AccessDeniedSignOut"><value>Cerrar sesión</value></data>
+
   <data name="CurrentTenant"><value>Tenant</value></data>
   <data name="NavDashboard"><value>Panel</value></data>
   <data name="NavUsers"><value>Usuarios</value></data>

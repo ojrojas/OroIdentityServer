@@ -75,6 +75,11 @@
   <data name="YesSignOut"><value>Yes, sign me out</value></data>
   <data name="NoStaySignedIn"><value>No, stay signed in</value></data>
 
+  <!-- Access denied -->
+  <data name="AccessDeniedTitle"><value>Access denied</value></data>
+  <data name="AccessDeniedMessage"><value>Your account does not have permission to access this resource. If you need to use the admin panel, sign out and sign in with an administrator account.</value></data>
+  <data name="AccessDeniedSignOut"><value>Sign out</value></data>
+
   <!-- Nav menu -->
   <data name="CurrentTenant"><value>Tenant</value></data>
   <data name="AddTenant"><value>Add tenant</value></data>

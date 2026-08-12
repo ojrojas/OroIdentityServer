@@ -163,7 +163,10 @@ app.Use(async (context, next) =>
     if (!isExempt
         && HttpMethods.IsGet(context.Request.Method)
         && context.User.Identity?.IsAuthenticated == true
-        && context.User.HasClaim(c => c.Type == AdminPasswordSignInService.MustChangePasswordClaimType))
+        && context.User.HasClaim(c => c.Type == AdminPasswordSignInService.MustChangePasswordClaimType)
+        // Only lock down page navigations, not static asset requests (CSS/JS/WASM), otherwise
+        // app.css and the Blazor framework modules get 302-redirected and served as HTML.
+        && context.Request.Headers.Accept.Any(a => a is not null && a.Contains("text/html", StringComparison.OrdinalIgnoreCase)))
     {
         context.Response.Redirect("/Account/ChangePassword");
         return;

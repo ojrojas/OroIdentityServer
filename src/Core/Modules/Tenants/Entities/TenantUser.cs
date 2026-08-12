@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Core.Modules.Tenants.Entities;
 
-public sealed class TenantUser : Entity<TenantUserId>
+public sealed class TenantUser : Entity<TenantUserId>, IAggregateRoot
 {
     public TenantId TenantId { get; private set; } = null!;
     public UserId UserId { get; private set; } = null!;

@@ -119,8 +119,30 @@ public class Repository<T>(
             }
         }
 
-        await context.SaveChangesAsync(cancellationToken);
+        await SaveChangesWithConcurrencyRetryAsync(cancellationToken);
         logger.LogInformation("Exiting UpdateAsync");
+    }
+
+    private async Task SaveChangesWithConcurrencyRetryAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex) when (ex.Entries.Count == 1)
+        {
+            // The row changed after it was loaded (e.g. a concurrency token like
+            // SecurityStamp differs from the original value read from the database).
+            // Refresh the ORIGINAL values from the database (keeping the entity's
+            // pending changes) and retry the save once.
+            var dbEntry = ex.Entries[0];
+            var databaseValues = await dbEntry.GetDatabaseValuesAsync(cancellationToken);
+            if (databaseValues is null)
+                throw;
+
+            dbEntry.OriginalValues.SetValues(databaseValues);
+            await context.SaveChangesAsync(cancellationToken);
+        }
     }
 
     public async Task DeleteAsync(T entity, CancellationToken cancellationToken)

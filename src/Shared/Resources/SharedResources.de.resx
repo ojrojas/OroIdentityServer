@@ -69,6 +69,11 @@
   <data name="YesSignOut"><value>Ja, abmelden</value></data>
   <data name="NoStaySignedIn"><value>Nein, angemeldet bleiben</value></data>
 
+  <!-- Access denied -->
+  <data name="AccessDeniedTitle"><value>Zugriff verweigert</value></data>
+  <data name="AccessDeniedMessage"><value>Ihr Konto hat keine Berechtigung für diese Ressource. Wenn Sie das Admin-Panel verwenden müssen, melden Sie sich ab und mit einem Administratorkonto an.</value></data>
+  <data name="AccessDeniedSignOut"><value>Abmelden</value></data>
+
   <data name="NavDashboard"><value>Übersicht</value></data>
   <data name="NavUsers"><value>Benutzer</value></data>
   <data name="NavRoles"><value>Rollen</value></data>

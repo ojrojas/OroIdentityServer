@@ -112,8 +112,17 @@
 
         if (Guid.TryParse(userIdClaim, out var userId))
         {
-            var response = await TenantService.GetTenantsByUserIdAsync(userId);
-            return response?.Data?.ToList() ?? [];
+            // ManagerOrAdmin endpoint: a Member gets a 403 here, so fall back to an empty list
+            // rather than crashing the tenant switcher (and with it the whole layout).
+            try
+            {
+                var response = await TenantService.GetTenantsByUserIdAsync(userId);
+                return response?.Data?.ToList() ?? [];
+            }
+            catch
+            {
+                return [];
+            }
         }
 
         return [];

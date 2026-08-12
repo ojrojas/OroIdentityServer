@@ -69,6 +69,11 @@
   <data name="YesSignOut"><value>はい、サインアウトします</value></data>
   <data name="NoStaySignedIn"><value>いいえ、サインインを続けます</value></data>
 
+  <!-- Access denied -->
+  <data name="AccessDeniedTitle"><value>アクセスが拒否されました</value></data>
+  <data name="AccessDeniedMessage"><value>このリソースにアクセスする権限がありません。管理パネルを使用する必要がある場合は、サインアウトして管理者アカウントでサインインしてください。</value></data>
+  <data name="AccessDeniedSignOut"><value>サインアウト</value></data>
+
   <data name="NavDashboard"><value>ダッシュボード</value></data>
   <data name="NavUsers"><value>ユーザー</value></data>
   <data name="NavRoles"><value>ロール</value></data>

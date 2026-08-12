@@ -5,4 +5,5 @@
         "**/node_modules/*/**": true,
         "**/.hg/store/**": true,
     },
+    "dotnet.defaultSolution": "OroIdentityServer.slnx",
 }

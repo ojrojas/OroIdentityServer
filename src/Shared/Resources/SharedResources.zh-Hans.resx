@@ -69,6 +69,11 @@
   <data name="YesSignOut"><value>是，退出登录</value></data>
   <data name="NoStaySignedIn"><value>否，保持登录</value></data>
 
+  <!-- Access denied -->
+  <data name="AccessDeniedTitle"><value>访问被拒绝</value></data>
+  <data name="AccessDeniedMessage"><value>您的账户没有权限访问此资源。如果您需要使用管理面板，请退出并以管理员账户登录。</value></data>
+  <data name="AccessDeniedSignOut"><value>退出登录</value></data>
+
   <data name="NavDashboard"><value>仪表盘</value></data>
   <data name="NavUsers"><value>用户</value></data>
   <data name="NavRoles"><value>角色</value></data>

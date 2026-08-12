@@ -2,11 +2,16 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using BuildingBlocks.Kernel.Persistence;
+using OroIdentityServer.Core.Modules.Tenants.Entities;
+
 namespace OroIdentityServer.Application.Modules.Users.Commands;
 
 public class CreateUserCommandHandler(
     ILogger<CreateUserCommandHandler> logger,
     IUserRepository userRepository,
+    ITenantRepository tenantRepository,
+    IRepository<TenantUser> tenantUserRepository,
     IPasswordHasher passwordHasher)
 : ICommandHandler<CreateUserCommand>
 {
@@ -41,6 +46,16 @@ public class CreateUserCommandHandler(
 
             // Add the user to the repository
             await userRepository.AddUserAsync(user, cancellationToken);
+
+            // Associate the new user with the tenant configured at creation time. Without a
+            // TenantUser membership the user resolves to the Member role by default, losing
+            // access to the admin console (403 on the dashboard/API).
+            var tenant = await tenantRepository.GetByIdAsync(new(command.TenantId), cancellationToken);
+            if (tenant is not null)
+            {
+                var membership = tenant.AddUser(user.Id, TenantRole.Member);
+                await tenantUserRepository.AddAsync(membership, cancellationToken);
+            }
 
             logger.LogInformation("Successfully handled CreateUserCommand for UserName: {UserName}", command.UserName);
             return Result.Success();

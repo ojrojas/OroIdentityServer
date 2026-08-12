@@ -69,6 +69,11 @@
   <data name="YesSignOut"><value>Sim, sair</value></data>
   <data name="NoStaySignedIn"><value>Não, permanecer conectado</value></data>
 
+  <!-- Access denied -->
+  <data name="AccessDeniedTitle"><value>Acesso negado</value></data>
+  <data name="AccessDeniedMessage"><value>Sua conta não tem permissão para acessar este recurso. Se precisar usar o painel de administração, saia e entre com uma conta de administrador.</value></data>
+  <data name="AccessDeniedSignOut"><value>Sair</value></data>
+
   <data name="NavDashboard"><value>Painel</value></data>
   <data name="NavUsers"><value>Usuários</value></data>
   <data name="NavRoles"><value>Funções</value></data>

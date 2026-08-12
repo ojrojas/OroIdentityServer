@@ -69,6 +69,11 @@
   <data name="YesSignOut"><value>Sì, disconnettimi</value></data>
   <data name="NoStaySignedIn"><value>No, resta connesso</value></data>
 
+  <!-- Access denied -->
+  <data name="AccessDeniedTitle"><value>Accesso negato</value></data>
+  <data name="AccessDeniedMessage"><value>Il tuo account non ha il permesso di accedere a questa risorsa. Se devi utilizzare il pannello di amministrazione, esci e accedi con un account amministratore.</value></data>
+  <data name="AccessDeniedSignOut"><value>Esci</value></data>
+
   <data name="NavDashboard"><value>Dashboard</value></data>
   <data name="NavUsers"><value>Utenti</value></data>
   <data name="NavRoles"><value>Ruoli</value></data>
