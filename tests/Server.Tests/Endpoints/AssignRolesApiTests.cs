@@ -7,12 +7,11 @@ using System.Net.Http.Json;
 using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.Roles;
 using IdentityServer.Client.Models.Users;
-using Microsoft.Extensions.DependencyInjection;
-using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 using OroIdentityServer.Core.Modules.Roles.Aggregates;
 using OroIdentityServer.Core.Shared;
 using OroIdentityServer.Core.Modules.Tenants.Aggregates;
+using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 using OroIdentityServer.Core.Modules.Users.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Entities;
 using OroIdentityServer.Infraestructure;
@@ -21,16 +20,15 @@ using Xunit;
 
 namespace OroIdentityServer.Server.Tests.Endpoints;
 
-public sealed class AssignRolesApiTests(IdentityServerWebApplicationFactory factory)
-    : IClassFixture<IdentityServerWebApplicationFactory>
+[Collection(nameof(AspireTestCollection))]
+public sealed class AssignRolesApiTests(AspireIdentityServerApp app)
 {
     private const string Password = "Abc123456#";
 
     private async Task<HttpClient> LoginAsAdminAsync()
     {
-        using var scope = factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
-        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        await using var context = app.CreateDbContext();
+        var passwordHasher = app.PasswordHasher;
 
         var identificationType = context.IdentificationTypes
             .AsEnumerable()
@@ -56,10 +54,10 @@ public sealed class AssignRolesApiTests(IdentityServerWebApplicationFactory fact
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        tenant.AddUser(user.Id, OroIdentityServer.Core.Modules.Tenants.ValueObjects.TenantRole.Admin);
+        tenant.AddUser(user.Id, TenantRole.Admin);
         await context.SaveChangesAsync();
 
-        var client = factory.CreateClient(new() { AllowAutoRedirect = false });
+        var client = app.CreateClient();
         var form = new FormUrlEncodedContent(new Dictionary<string, string>
         {
             ["loginIdentifier"] = userName,
@@ -73,8 +71,7 @@ public sealed class AssignRolesApiTests(IdentityServerWebApplicationFactory fact
 
     private async Task<(Guid userId, Guid roleId, Guid roleId2)> SeedTargetUserAsync()
     {
-        using var scope = factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
+        await using var context = app.CreateDbContext();
 
         var identificationType = context.IdentificationTypes
             .AsEnumerable()
@@ -132,8 +129,7 @@ public sealed class AssignRolesApiTests(IdentityServerWebApplicationFactory fact
     {
         var client = await LoginAsAdminAsync();
 
-        using var scope = factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
+        await using var context = app.CreateDbContext();
 
         var identificationType = context.IdentificationTypes
             .AsEnumerable()
@@ -166,8 +162,7 @@ public sealed class AssignRolesApiTests(IdentityServerWebApplicationFactory fact
     {
         var client = await LoginAsAdminAsync();
 
-        using var scope = factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
+        await using var context = app.CreateDbContext();
 
         var role = new Role(new RoleName($"SoftDelete-{Guid.NewGuid():N}"));
         context.Roles.Add(role);

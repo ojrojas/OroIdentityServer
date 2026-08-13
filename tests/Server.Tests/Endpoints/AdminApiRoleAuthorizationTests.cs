@@ -4,8 +4,6 @@
 // See the LICENSE file in the project root for details.
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.Extensions.DependencyInjection;
-using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 using OroIdentityServer.Core.Modules.Tenants.Aggregates;
 using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
@@ -19,19 +17,18 @@ namespace OroIdentityServer.Server.Tests.Endpoints;
 
 /// <summary>
 /// Verifies that admin-console authorization (Admin vs. Manager tenant role) is actually enforced by
-/// the API, not just hidden in the UI - DatabaseSeeder is skipped for this factory, so each test
-/// provisions its own tenant/user/role directly against the DbContext.
+/// the API, not just hidden in the UI - the test provisions its own tenant/user/role directly against
+/// the database shared with the Aspire-hosted server.
 /// </summary>
-public sealed class AdminApiRoleAuthorizationTests(IdentityServerWebApplicationFactory factory)
-    : IClassFixture<IdentityServerWebApplicationFactory>
+[Collection(nameof(AspireTestCollection))]
+public sealed class AdminApiRoleAuthorizationTests(AspireIdentityServerApp app)
 {
     private const string Password = "Abc123456#";
 
     private async Task<HttpClient> LoginAsAsync(string tenantRole)
     {
-        using var scope = factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
-        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        await using var context = app.CreateDbContext();
+        var passwordHasher = app.PasswordHasher;
 
         var identificationType = context.IdentificationTypes
             .AsEnumerable()
@@ -61,7 +58,7 @@ public sealed class AdminApiRoleAuthorizationTests(IdentityServerWebApplicationF
         tenant.AddUser(user.Id, tenantRole);
         await context.SaveChangesAsync();
 
-        var client = factory.CreateClient(new() { AllowAutoRedirect = false });
+        var client = app.CreateClient();
         var form = new FormUrlEncodedContent(new Dictionary<string, string>
         {
             ["loginIdentifier"] = userName,

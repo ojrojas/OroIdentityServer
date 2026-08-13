@@ -3,10 +3,7 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using System.Net;
-using System.Net.Http.Json;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.DependencyInjection;
-using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 using OroIdentityServer.Core.Modules.Tenants.Aggregates;
 using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
@@ -18,8 +15,8 @@ using Xunit;
 
 namespace OroIdentityServer.Server.Tests.Endpoints;
 
-public sealed class MustChangePasswordFlowTests(IdentityServerWebApplicationFactory factory)
-    : IClassFixture<IdentityServerWebApplicationFactory>
+[Collection(nameof(AspireTestCollection))]
+public sealed class MustChangePasswordFlowTests(AspireIdentityServerApp app)
 {
     private const string Password = "Abc123456#";
 
@@ -28,10 +25,9 @@ public sealed class MustChangePasswordFlowTests(IdentityServerWebApplicationFact
     {
         var userName = $"mustchange-{Guid.NewGuid():N}";
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var context = app.CreateDbContext())
         {
-            var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
-            var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+            var passwordHasher = app.PasswordHasher;
 
             var identificationType = context.IdentificationTypes
                 .AsEnumerable()
@@ -61,7 +57,7 @@ public sealed class MustChangePasswordFlowTests(IdentityServerWebApplicationFact
         }
 
         // 1. Login -> the must_change_password claim forces a redirect to ChangePassword.
-        var client = factory.CreateClient(new() { AllowAutoRedirect = false });
+        var client = app.CreateClient();
         var login = await client.PostAsync("/auth/login", new FormUrlEncodedContent(new Dictionary<string, string>
         {
             ["loginIdentifier"] = userName,
