@@ -306,4 +306,11 @@
   <data name="TerminateSessionsConfirm"><value>断开“{0}”的所有会话？</value></data>
   <data name="StatIdentificationTypesNote"><value>身份证件</value></data>
   <data name="RoleDeleteConflictToast"><value>无法删除角色：已分配给用户或已分配权限。</value></data>
+  <data name="ConsentTitle"><value>批准访问</value></data>
+  <data name="ConsentSubtitle"><value>请检查下方应用程序请求的权限。</value></data>
+  <data name="ConsentApplicationLabel"><value>应用程序</value></data>
+  <data name="ConsentScopeHeading"><value>请求的权限</value></data>
+  <data name="ConsentRememberNotice"><value>批准后，此应用程序将可访问列出的权限。您可以随时撤销访问权限。</value></data>
+  <data name="Accept"><value>批准</value></data>
+  <data name="Deny"><value>拒绝</value></data>
 </root>

@@ -317,4 +317,13 @@
   <data name="RemoveRoleTitle"><value>Remove role</value></data>
   <data name="StatIdentificationTypesNote"><value>Identity documents</value></data>
   <data name="RoleDeleteConflictToast"><value>Role cannot be deleted: it is assigned to users or has permissions assigned.</value></data>
+
+  <!-- Consent screen -->
+  <data name="ConsentTitle"><value>Approve access</value></data>
+  <data name="ConsentSubtitle"><value>Check the permissions requested by the application below.</value></data>
+  <data name="ConsentApplicationLabel"><value>Application</value></data>
+  <data name="ConsentScopeHeading"><value>Requested permissions</value></data>
+  <data name="ConsentRememberNotice"><value>Approving will allow this application to access the listed permissions. You can revoke access at any time.</value></data>
+  <data name="Accept"><value>Approve</value></data>
+  <data name="Deny"><value>Deny</value></data>
 </root>

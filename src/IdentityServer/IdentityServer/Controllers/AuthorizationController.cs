@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using IdentityServer.Server.ViewModels;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -198,13 +197,12 @@ foreach (var claim in identity.Claims)
                             "Interactive user consent is required."
                     }));
 
-            // In every other case, render the consent form.
+            // In every other case, send the user to the interactive consent page. The full
+            // OIDC request is carried in the query string so the page can echo it back and
+            // the Accept/Deny actions below complete the authorization with the exact
+            // original parameters.
             default:
-                return View(new AuthorizeViewModel
-                {
-                    ApplicationName = await _applicationManager.GetLocalizedDisplayNameAsync(application),
-                    Scope = request.Scope
-                });
+                return Redirect("/Account/Consent" + Request.QueryString);
         }
     }
 

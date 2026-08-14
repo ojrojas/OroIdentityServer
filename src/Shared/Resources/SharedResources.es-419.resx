@@ -307,4 +307,11 @@
   <data name="AddTenant"><value>Agregar tenant</value></data>
   <data name="StatIdentificationTypesNote"><value>Documentos de identidad</value></data>
   <data name="RoleDeleteConflictToast"><value>No se puede eliminar el rol: está asignado a usuarios o tiene permisos asignados.</value></data>
+  <data name="ConsentTitle"><value>Aprobar acceso</value></data>
+  <data name="ConsentSubtitle"><value>Revisa los permisos solicitados por la aplicación a continuación.</value></data>
+  <data name="ConsentApplicationLabel"><value>Aplicación</value></data>
+  <data name="ConsentScopeHeading"><value>Permisos solicitados</value></data>
+  <data name="ConsentRememberNotice"><value>Al aprobar, esta aplicación podrá acceder a los permisos listados. Puedes revocar el acceso en cualquier momento.</value></data>
+  <data name="Accept"><value>Aprobar</value></data>
+  <data name="Deny"><value>Denegar</value></data>
 </root>
