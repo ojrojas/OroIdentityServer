@@ -22,9 +22,10 @@ namespace OroIdentityServer.Server.Authentication;
 /// </summary>
 public static class CatalogueRole
 {
-    public const string Administrator = "Administrator";
-    public const string Manager = "Manager";
-    public const string User = "User";
+    public const string Administrator = nameof(Administrator);
+    public const string Admin = nameof(Admin);
+    public const string Manager = nameof(Manager);
+    public const string User = nameof(User);
 }
 
 public sealed class AdminPasswordSignInService(
@@ -160,7 +161,8 @@ public sealed class AdminPasswordSignInService(
         if (user.TenantId is null || user.TenantId.Value != masterTenant.Id.Value) return false;
 
         return user.Roles.Any(ur => ur.Role is not null
-            && string.Equals(ur.Role.Name.Value, CatalogueRole.Administrator, StringComparison.OrdinalIgnoreCase));
+            && string.Equals(ur.Role.Name.Value, CatalogueRole.Administrator, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(ur.Role.Name.Value, CatalogueRole.Admin, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>

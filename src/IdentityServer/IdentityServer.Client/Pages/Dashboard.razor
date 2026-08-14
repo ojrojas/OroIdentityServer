@@ -280,9 +280,11 @@
         // MasterAdminOnly policy. Detect that here so we don't even try — and so the
         // dashboard doesn't surface OIDC/tenant widgets to anyone else.
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        isMasterAdmin = authState.User.HasClaim(
-            OroIdentityServer.Shared.Authorization.AuthorizationClaimTypes.IsMasterAdmin,
-            "true");
+        // The WASM client's serialized AuthenticationState only carries the identity's Name
+        // and Role claims (AddAuthenticationStateDeserialization drops custom claims like
+        // is_master_admin), so the master admin must be detected via the "Admin" role claim,
+        // which AdminPasswordSignInService issues only to the master admin.
+        isMasterAdmin = authState.User.IsInRole("Admin") || authState.User.IsInRole("Administrator");
         TenantContext.SetMasterAdmin(isMasterAdmin);
 
         // Each call is guarded so a transient failure or a 403 never crashes the page:
