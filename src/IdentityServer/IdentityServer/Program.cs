@@ -26,9 +26,9 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "data-protection-keys")))
-    .SetApplicationName("OroIdentityServer");
+// builder.Services.AddDataProtection()
+//     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "data-protection-keys")))
+//     .SetApplicationName("OroIdentityServer");
 
 // Add services to the container.
 builder.Services.AddRazorComponents(options =>
