@@ -2,8 +2,6 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
-
 namespace OroIdentityServer.Infraestructure.UnitTests;
 
 public class TenantRepositoryTests
@@ -27,7 +25,7 @@ public class TenantRepositoryTests
 
         var tenant = Tenant.Create("Acme Corp");
         var userId = UserId.New();
-        tenant.AddUser(userId, TenantRole.Admin);
+        tenant.AddUser(userId);
 
         context.Tenants.Add(tenant);
         await context.SaveChangesAsync();
@@ -45,8 +43,8 @@ public class TenantRepositoryTests
         var (sut, context, _) = CreateSut();
 
         var tenantWithUsers = Tenant.Create("Tenant With Users");
-        tenantWithUsers.AddUser(UserId.New(), TenantRole.Admin);
-        tenantWithUsers.AddUser(UserId.New(), TenantRole.Member);
+        tenantWithUsers.AddUser(UserId.New());
+        tenantWithUsers.AddUser(UserId.New());
 
         var tenantWithoutUsers = Tenant.Create("Tenant Without Users");
 
@@ -68,11 +66,11 @@ public class TenantRepositoryTests
         var targetUserId = UserId.New();
 
         var memberTenant = Tenant.Create("Member Tenant");
-        memberTenant.AddUser(targetUserId, TenantRole.Admin);
-        memberTenant.AddUser(UserId.New(), TenantRole.Member);
+        memberTenant.AddUser(targetUserId);
+        memberTenant.AddUser(UserId.New());
 
         var otherTenant = Tenant.Create("Other Tenant");
-        otherTenant.AddUser(UserId.New(), TenantRole.Admin);
+        otherTenant.AddUser(UserId.New());
 
         context.Tenants.AddRange(memberTenant, otherTenant);
         await context.SaveChangesAsync();
@@ -94,7 +92,7 @@ public class TenantRepositoryTests
         await context.SaveChangesAsync();
 
         var userId = UserId.New();
-        tenant.AddUser(userId, TenantRole.Admin);
+        tenant.AddUser(userId);
         await sut.UpdateAsync(tenant, CancellationToken.None);
 
         using var verificationContext = new OroIdentityAppContext(

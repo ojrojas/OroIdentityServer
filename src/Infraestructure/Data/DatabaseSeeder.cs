@@ -64,9 +64,11 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync(cancellationToken);
         }
 
-        if (!context.Roles.Any())
+        // Ensure the admin role exists. The original `if (!context.Roles.Any())` check skipped
+        // this branch when ANY role already existed in the table, leaving pre-existing
+        // databases without the `adminRoleName` role.
+        if (!context.Roles.IgnoreQueryFilters().Any(r => r.Name == new RoleName(adminRoleName)))
         {
-
             var newRole = new Role(new(adminRoleName));
             await context.Permissions.ForEachAsync(x => newRole.AddPermission(x), cancellationToken);
             context.Roles.Add(newRole);
@@ -74,46 +76,81 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync(cancellationToken);
         }
 
-        if (!context.UserRoles.Any())
+        // Idempotently guarantee the seed admin can navigate the console. The original
+        // UserRoles / TenantUsers sections only ran when those tables were completely
+        // empty, so a database that already had a single role assignment (e.g. from a
+        // previous run) never received the Administrator UserRole, and after MasterAdminOnly
+        // was added the admin lost access entirely.
+        await EnsureSeedAdminCanNavigateAsync(context, seedAdmin, adminRoleName, tenantName, cancellationToken);
+    }
+
+    /// <summary>
+    /// Makes sure the bootstrap admin user always ends up with everything required by the
+    /// post-multi-tenant authorization checks: a TenantUser membership in the master tenant
+    /// (so <c>GetTenantsByUserId</c> can resolve the user's home tenant) and the
+    /// Administrator catalogue role, which is what <c>IsMasterAdminAsync</c> looks for in
+    /// combination with the master tenant id to grant the <c>is_master_admin</c> claim.
+    /// </summary>
+    private static async Task EnsureSeedAdminCanNavigateAsync(
+        OroIdentityAppContext context,
+        SeedUser seedAdmin,
+        string adminRoleName,
+        string masterTenantName,
+        CancellationToken cancellationToken)
+    {
+        var seedUser = context.Users.IgnoreQueryFilters()
+            .FirstOrDefault(u => u.NormalizedUserName == seedAdmin.UserName.ToUpperInvariant());
+        if (seedUser is null)
         {
-            var adminRole = context.Roles.FirstOrDefault(r => r.Name == new RoleName(adminRoleName));
-            var userRole = context.Roles.FirstOrDefault(r => r.Name == new RoleName("User"));
-
-            foreach (var user in context.Users.ToList())
-            {
-                var roleId = user.UserName!.Equals(seedAdmin.UserName, StringComparison.OrdinalIgnoreCase)
-                    ? adminRole?.Id
-                    : userRole?.Id;
-
-                if (roleId is not null)
-                {
-                    context.UserRoles.Add(new UserRole(user.Id, roleId));
-                }
-            }
-
-            await context.SaveChangesAsync(cancellationToken);
+            return;
         }
 
-        if (!context.TenantUsers.Any())
+        var masterTenant = await context.Tenants.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(t => t.Name == new TenantName(masterTenantName), cancellationToken)
+            ?? await context.Tenants.IgnoreQueryFilters().FirstOrDefaultAsync(cancellationToken);
+        if (masterTenant is null)
         {
-            var tenant = await context.Tenants.IgnoreQueryFilters().FirstOrDefaultAsync(cancellationToken);
-
-            if (tenant is not null)
-            {
-                foreach (var user in context.Users.ToList())
-                {
-                    var role = user.UserName!.Equals(seedAdmin.UserName, StringComparison.OrdinalIgnoreCase)
-                        ? TenantRole.Admin
-                        : TenantRole.Member;
-
-                    await context.Database.ExecuteSqlRawAsync(
-                        "INSERT INTO \"TenantUsers\" (\"Id\", \"TenantId\", \"UserId\", \"Role\", \"IsActive\", \"JoinedAtUtc\") VALUES ({0}, {1}, {2}, {3}, {4}, {5})",
-                        Guid.CreateVersion7(), tenant.Id.Value, user.Id.Value, role, true, DateTime.UtcNow);
-                }
-            }
+            return;
         }
 
+        // 1. TenantUser membership in the master tenant. The row only stores the membership
+        //    now (no per-tenant Role column); the user's permissions come from the catalogue
+        //    UserRole checked below. Home tenant is recorded on User.TenantId.
+        var adminTenantUser = await context.TenantUsers.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(tu => tu.UserId == seedUser.Id && tu.TenantId == masterTenant.Id, cancellationToken);
+        if (adminTenantUser is null)
+        {
+            await context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO \"TenantUsers\" (\"Id\", \"TenantId\", \"UserId\", \"IsActive\", \"JoinedAtUtc\") VALUES ({0}, {1}, {2}, {3}, {4})",
+                Guid.CreateVersion7(), masterTenant.Id.Value, seedUser.Id.Value, true, DateTime.UtcNow);
+        }
 
+        // 2. Home tenant must be the master tenant. IsMasterAdminAsync requires
+        //    User.TenantId == masterTenant.Id, so we sync it here for pre-existing rows
+        //    via a direct UPDATE to avoid going through User.UpdateDetails (which would
+        //    require a non-null IdentificationTypeId that older seed rows might not have).
+        if (seedUser.TenantId is null || seedUser.TenantId.Value != masterTenant.Id.Value)
+        {
+            await context.Database.ExecuteSqlRawAsync(
+                "UPDATE \"Users\" SET \"TenantId\" = {0} WHERE \"Id\" = {1}",
+                masterTenant.Id.Value, seedUser.Id.Value);
+        }
+
+        // 3. Administrator catalogue role. This is what flips IsMasterAdminAsync to true
+        //    and what causes BuildPrincipalAsync to issue the "Admin" and "Administrator"
+        //    claim pair. Idempotent: pre-existing rows are detected and skipped.
+        var adminRole = context.Roles.IgnoreQueryFilters()
+            .FirstOrDefault(r => r.Name == new RoleName(adminRoleName));
+        if (adminRole is not null)
+        {
+            var hasAdminUserRole = await context.UserRoles.IgnoreQueryFilters()
+                .AnyAsync(ur => ur.UserId == seedUser.Id && ur.RoleId == adminRole.Id, cancellationToken);
+            if (!hasAdminUserRole)
+            {
+                context.UserRoles.Add(new UserRole(seedUser.Id, adminRole.Id));
+                await context.SaveChangesAsync(cancellationToken);
+            }
+        }
     }
 
     private static async Task EnsureApplicationAsync(

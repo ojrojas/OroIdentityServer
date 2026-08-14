@@ -1,9 +1,10 @@
 @page "/users/{Id:guid}"
-@attribute [Authorize(Roles = "Admin,Manager")]
+@attribute [Authorize(Roles = "Admin,Administrator,Manager")]
 @inject IAdminUserService UserService
 @inject IAdminIdentificationTypeService IdentificationTypeService
 @inject IAdminTenantService TenantService
 @inject IAdminRoleService RoleService
+@inject ICurrentTenantContext TenantContext
 @inject NavigationManager Nav
 @inject IDialogService DialogService
 @inject IToastService ToastService
@@ -177,8 +178,11 @@
         var identificationTypesResponse = await IdentificationTypeService.GetIdentificationTypesAsync();
         identificationTypes = identificationTypesResponse?.Data?.ToList() ?? [];
 
-        var tenantsResponse = await TenantService.GetTenantsAsync();
-        tenants = tenantsResponse?.Data?.ToList() ?? [];
+        // Reuse the tenant list the TenantSwitcher already loaded: it already filters down to the
+        // caller's accessible tenants (master admins see all, tenant admins see only their own).
+        tenants = TenantContext.Tenants.Count > 0
+            ? TenantContext.Tenants.ToList()
+            : (await TenantService.GetTenantsAsync())?.Data?.ToList() ?? [];
 
         var rolesResponse = await RoleService.GetRolesAsync();
         roles = rolesResponse?.Data?.ToList() ?? [];

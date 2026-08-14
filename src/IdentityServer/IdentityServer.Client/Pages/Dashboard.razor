@@ -13,6 +13,7 @@
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IStringLocalizer<SharedResources> L
+@inject ICurrentTenantContext TenantContext
 @rendermode InteractiveAuto
 
 
@@ -30,7 +31,7 @@
 
             <div class="inset">
                 <div class="stat-row">
-                    @if (isAdmin)
+                    @if (isMasterAdmin)
                     {
                         <StatCard Title="@L["StatTenants"]" Value="@tenantCount" IconName="house" Featured="true"
                                   Note="@L["StatTenantsNote"]" Delta="@(stats?.TenantsCreatedToday ?? 0)"
@@ -48,7 +49,7 @@
                     <StatCard Title="@L["StatConnectedUsers"]" Featured="true" Value="@connectedUserCount"
                               IconName="plug" Note="@L["StatConnectedNote"]"
                               OnClick="@((e) => NavigationStat("/sessions"))" />
-                    @if (isAdmin)
+                    @if (isMasterAdmin)
                     {
                         <StatCard Featured="true" Title="@L["StatRoles"]" Value="@roleCount" IconName="shield"
                                   Note="@L["StatRolesNote"]" Delta="@(stats?.RolesCreatedToday ?? 0)"
@@ -239,7 +240,7 @@
         </div>
 
 @code {
-    private bool isAdmin;
+    private bool isMasterAdmin;
     private int? tenantCount;
     private int? userCount;
     private int? connectedUserCount;
@@ -273,11 +274,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // The page is gated to the ManagerOrAdmin roles, but a manager must not call the
-        // Admin-only endpoints (/api/tenants, /api/roles, /api/applications, /api/scopes):
-        // they return 403 and would otherwise take down the whole dashboard.
+        // The page is gated to the ManagerOrAdmin roles, but only the master admin
+        // (Admin in the seed tenant) can call the OIDC endpoints (/api/tenants,
+        // /api/roles, /api/applications, /api/scopes): they are protected by the
+        // MasterAdminOnly policy. Detect that here so we don't even try — and so the
+        // dashboard doesn't surface OIDC/tenant widgets to anyone else.
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        isAdmin = authState.User.IsInRole("Admin") || authState.User.IsInRole("Administrator");
+        isMasterAdmin = authState.User.HasClaim(
+            OroIdentityServer.Shared.Authorization.AuthorizationClaimTypes.IsMasterAdmin,
+            "true");
+        TenantContext.SetMasterAdmin(isMasterAdmin);
 
         // Each call is guarded so a transient failure or a 403 never crashes the page:
         // the affected card simply keeps showing its loading placeholder.
@@ -314,7 +320,7 @@
             // not authorized or transient error - the connections list stays on its placeholder
         }
 
-        if (isAdmin)
+        if (isMasterAdmin)
         {
             try
             {

@@ -6,6 +6,5 @@ namespace OroIdentityServer.Application.Modules.Tenants.DTOs;
 
 public record TenantUserDto(
     Guid UserId,
-    string Role,
     bool IsActive,
     DateTime JoinedAtUtc);

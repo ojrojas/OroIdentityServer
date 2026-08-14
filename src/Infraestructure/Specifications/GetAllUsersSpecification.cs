@@ -9,5 +9,8 @@ public sealed class GetAllUsersSpecification : Specification<User>
     public GetAllUsersSpecification()
     {
         AddInclude(x => x.Roles);
+        // Catalogue role names are surfaced in the admin UI (UserDetail.razor assigned roles
+        // list) and consumed by the master-admin detector, so the eager load is required.
+        AddInclude("Roles.Role");
     }
 }

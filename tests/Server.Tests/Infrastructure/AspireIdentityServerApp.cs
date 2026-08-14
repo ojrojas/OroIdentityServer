@@ -28,9 +28,11 @@ public sealed class AspireIdentityServerApp : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        // Run the event bus in-memory for tests: no broker dependency, and it exercises
-        // the same in-process handler dispatch the server uses when RabbitMQ is absent.
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(["EventBus:Mode=InMemory"]);
+        // Run the event bus in-memory for tests (no broker dependency), and force a non-Development
+        // environment so the AppHost runs the IdentityServer project from source instead of the
+        // prebuilt container image.
+        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
+            ["EventBus:Mode=InMemory", "--environment=Testing"]);
         _app = await appHost.BuildAsync();
         await _app.StartAsync();
 

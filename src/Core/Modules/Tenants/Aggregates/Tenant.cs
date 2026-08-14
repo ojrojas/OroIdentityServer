@@ -93,18 +93,15 @@ public class Tenant : AggregateRoot<TenantId>, IAuditableEntity
         RaiseDomainEvent(new TenantActivatedEvent(Id));
     }
 
-    public TenantUser AddUser(UserId userId, string role)
+    public TenantUser AddUser(UserId userId)
     {
-        if (!TenantRole.IsValid(role))
-            throw new ArgumentException($"'{role}' is not a valid tenant role.", nameof(role));
-
         if (_tenantUsers.Any(tu => tu.UserId == userId))
             throw new InvalidOperationException("User is already a member of this tenant.");
 
-        var tenantUser = new TenantUser(Id, userId, role);
+        var tenantUser = new TenantUser(Id, userId);
         _tenantUsers.Add(tenantUser);
 
-        RaiseDomainEvent(new TenantUserAddedEvent(Id, userId, role));
+        RaiseDomainEvent(new TenantUserAddedEvent(Id, userId));
 
         return tenantUser;
     }

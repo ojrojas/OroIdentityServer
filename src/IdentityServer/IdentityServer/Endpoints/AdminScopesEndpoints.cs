@@ -8,7 +8,8 @@ public static partial class AdminApiEndpoints
 {
     private static void MapOpenIddictScopes(this RouteGroupBuilder api)
     {
-        var g = api.MapGroup("/scopes").RequireAuthorization("AdminOnly");
+        // OIDC scopes are global; reserved for the master admin.
+        var g = api.MapGroup("/scopes").RequireAuthorization("MasterAdminOnly");
 
         g.MapGet("/", async ([FromServices] IAdminScopeService service, CancellationToken ct)
             => Results.Ok(await service.GetScopesAsync(ct)));

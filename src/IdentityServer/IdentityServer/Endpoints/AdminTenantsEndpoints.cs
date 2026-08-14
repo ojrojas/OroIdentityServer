@@ -16,7 +16,10 @@ public static partial class AdminApiEndpoints
         api.MapGet("/tenants/by-user/{userId:guid}", async (Guid userId, [FromServices] IAdminTenantService service, CancellationToken ct)
             => Results.Ok(await service.GetTenantsByUserIdAsync(userId, ct)));
 
-        var g = api.MapGroup("/tenants").RequireAuthorization("AdminOnly");
+        // The full tenants catalogue (create, update, suspend, list all) is reserved for the
+        // master admin. Tenant admins see their own subset through /tenants/mine and
+        // /tenants/by-user above, which are scoped by the caller's accessible tenants.
+        var g = api.MapGroup("/tenants").RequireAuthorization("MasterAdminOnly");
 
         g.MapGet("/", async ([FromServices] IAdminTenantService service, CancellationToken ct)
             => Results.Ok(await service.GetTenantsAsync(ct)));

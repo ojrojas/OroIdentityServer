@@ -17,5 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Infraestructure\OroIdentityServer.Infraestructure.csproj" />
     <ProjectReference Include="..\..\src\Application\OroIdentityServer.Application.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer\IdentityServer.csproj" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 @page "/tenants"
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin,Administrator")]
 @inject IAdminTenantService TenantService
 @inject IDialogService DialogService
 @inject IToastService ToastService

@@ -90,9 +90,8 @@
     {
         if (OperatingSystem.IsBrowser())
         {
-            // WASM: the server resolves the logged-in user from the session cookie and returns
-            // only the tenants they belong to (Keycloak-style server-side filtering). If that
-            // round-trip fails, fall back to resolving the user from the client-side claims.
+            // Master admins can see every tenant; the server already filters the response for
+            // tenant admins. If that round-trip fails, fall back to the claims-based lookup.
             try
             {
                 var mine = await TenantService.GetMyTenantsAsync();

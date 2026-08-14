@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OroIdentityServer.Infraestructure;
@@ -11,9 +12,11 @@ using OroIdentityServer.Infraestructure;
 namespace OroIdentityServer.Infraestructure.Data.Migrations
 {
     [DbContext(typeof(OroIdentityAppContext))]
-    partial class OroIdentityAppContextModelSnapshot : ModelSnapshot
+    [Migration("20260814060623_DropTenantUserRoleColumn")]
+    partial class DropTenantUserRoleColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

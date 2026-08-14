@@ -39,8 +39,7 @@ public sealed class AssignRolesApiTests(AspireIdentityServerApp app)
             context.IdentificationTypes.Add(identificationType);
         }
 
-        var tenant = Tenant.Create($"Tenant-Admin-{Guid.NewGuid():N}");
-        context.Tenants.Add(tenant);
+        var tenant = context.Tenants.AsEnumerable().First(t => t.Name.Value == "OroMasterTenant");
 
         var userName = $"admin-{Guid.NewGuid():N}";
         var user = User.Create(
@@ -54,7 +53,19 @@ public sealed class AssignRolesApiTests(AspireIdentityServerApp app)
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        tenant.AddUser(user.Id, TenantRole.Admin);
+        tenant.AddUser(user.Id);
+        await context.SaveChangesAsync();
+
+        // The "Admin" login helper still needs to be a master admin to call
+        // /api/users/{id}/roles, so we give them the catalogue Administrator role too.
+        var adminRole = context.Roles.AsEnumerable().FirstOrDefault(r => r.Name.Value == "Administrator");
+        if (adminRole is null)
+        {
+            adminRole = new Role(new RoleName("Administrator"));
+            context.Roles.Add(adminRole);
+            await context.SaveChangesAsync();
+        }
+        context.UserRoles.Add(new UserRole(user.Id, adminRole.Id));
         await context.SaveChangesAsync();
 
         var client = app.CreateClient();

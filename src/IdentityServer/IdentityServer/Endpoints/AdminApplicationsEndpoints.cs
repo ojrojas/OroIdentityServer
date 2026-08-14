@@ -8,7 +8,9 @@ public static partial class AdminApiEndpoints
 {
     private static void MapOpenIddictApplications(this RouteGroupBuilder api)
     {
-        var g = api.MapGroup("/applications").RequireAuthorization("AdminOnly");
+        // The OIDC application catalogue is global; only the master admin (held by the
+        // is_master_admin claim) can list/create/edit/delete OIDC clients.
+        var g = api.MapGroup("/applications").RequireAuthorization("MasterAdminOnly");
 
         g.MapGet("/", async ([FromServices] IAdminApplicationService service, CancellationToken ct)
             => Results.Ok(await service.GetApplicationsAsync(ct)));

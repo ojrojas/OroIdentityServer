@@ -141,8 +141,16 @@ app.Use(async (context, next) =>
         tenantId = cookieTenantId;
     }
 
+    // The is_master_admin claim is added by AdminPasswordSignInService and survives cookie
+    // round-trips, so the data layer can scope queries to the current user's accessible tenants
+    // without re-querying TenantUser memberships on every request.
+    var isMasterAdmin = context.User?.Identity?.IsAuthenticated == true
+        && context.User.HasClaim(OroIdentityServer.Server.Authentication.AdminPasswordSignInService.IsMasterAdminClaimType, "true");
+
+    var tenantContext = context.RequestServices.GetRequiredService<ICurrentTenantContext>();
     if (tenantId is { } id)
-        context.RequestServices.GetRequiredService<ICurrentTenantContext>().SetCurrentTenantId(id);
+        tenantContext.SetCurrentTenantId(id);
+    tenantContext.SetMasterAdmin(isMasterAdmin);
 
     await next();
 });

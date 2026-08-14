@@ -2,6 +2,8 @@
 @inject IStringLocalizer<SharedResources> L
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject ICurrentTenantContext TenantContext
+@inject AuthenticationStateProvider AuthStateProvider
 @implements IDisposable
 
 <div class="app">
@@ -26,7 +28,7 @@
                     <Icon Name="users" Size="19" />
                     @L["NavUsers"]
                 </a>
-                <AuthorizeView Roles="Admin">
+                <AuthorizeView Roles="Admin,Administrator,Manager">
                     <Authorized>
                         <a class="nav-item @Active("/roles")" href="/roles" @onclick="CloseSidebar">
                             <Icon Name="shield" Size="19" />
@@ -39,19 +41,26 @@
                     @L["NavIdentificationTypes"]
                 </a>
 
-                <AuthorizeView Roles="Admin">
-                    <Authorized>
-                        <div class="nav-section">@L["NavApplications"]</div>
-                        <a class="nav-item @Active("/applications")" href="/applications" @onclick="CloseSidebar">
-                            <Icon Name="apps" Size="19" />
-                            @L["NavApplications"]
-                        </a>
-                        <a class="nav-item @Active("/scopes")" href="/scopes" @onclick="CloseSidebar">
-                            <Icon Name="key" Size="19" />
-                            @L["NavScopes"]
-                        </a>
-                    </Authorized>
-                </AuthorizeView>
+                @* OIDC section (applications, scopes, tenants): master-admin only.
+                   The page-level [Authorize] on the corresponding pages is enough to keep
+                   non-master-admins out, but we hide the links too so the nav doesn't tease
+                   pages that would 403 on entry. *@
+                @if (isMasterAdmin)
+                {
+                    <div class="nav-section">@L["NavApplications"]</div>
+                    <a class="nav-item @Active("/applications")" href="/applications" @onclick="CloseSidebar">
+                        <Icon Name="apps" Size="19" />
+                        @L["NavApplications"]
+                    </a>
+                    <a class="nav-item @Active("/scopes")" href="/scopes" @onclick="CloseSidebar">
+                        <Icon Name="key" Size="19" />
+                        @L["NavScopes"]
+                    </a>
+                    <a class="nav-item @Active("/tenants")" href="/tenants" @onclick="CloseSidebar">
+                        <Icon Name="house" Size="19" />
+                        @L["NavTenants"]
+                    </a>
+                }
                 <a class="nav-item @Active("/sessions")" href="/sessions" @onclick="CloseSidebar">
                     <Icon Name="plug" Size="19" />
                     @L["NavSessions"]
@@ -125,12 +134,28 @@
         var p when p.StartsWith("identification-types") => L["NavIdentificationTypes"],
         var p when p.StartsWith("applications") => L["NavApplications"],
         var p when p.StartsWith("scopes") => L["NavScopes"],
-        var p when p.StartsWith("sessions") => L["NavSessions"],
         var p when p.StartsWith("tenants/create") => L["NewTenantTitle"],
+        var p when p.StartsWith("tenants") => L["NavTenants"],
+        var p when p.StartsWith("sessions") => L["NavSessions"],
         _ => L["NavDashboard"]
     };
 
-    protected override void OnInitialized() => Nav.LocationChanged += HandleLocationChanged;
+    // Master-admin flag drives the OIDC nav section (Applications, Scopes, Tenants).
+    // It is set in OnInitializedAsync from the is_master_admin claim that
+    // AdminPasswordSignInService writes into the cookie, so it is available on
+    // both the server prerender and the interactive WASM pass.
+    private bool isMasterAdmin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        isMasterAdmin = authState.User.HasClaim(
+            OroIdentityServer.Shared.Authorization.AuthorizationClaimTypes.IsMasterAdmin,
+            "true");
+        TenantContext.SetMasterAdmin(isMasterAdmin);
+
+        Nav.LocationChanged += HandleLocationChanged;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

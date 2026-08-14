@@ -7,6 +7,7 @@ using IdentityServer.Client.Models.Tenants;
 using OroIdentityServer.Application.Modules.Tenants.Commands;
 using OroIdentityServer.Application.Modules.Tenants.DTOs;
 using OroIdentityServer.Application.Modules.Tenants.Queries;
+using OroIdentityServer.Server.Authentication;
 
 namespace IdentityServer.Services;
 
@@ -40,6 +41,13 @@ public class ServerAdminTenantService(
                 StatusCode = (int)HttpStatusCode.Unauthorized,
                 Message = "User could not be identified."
             };
+        }
+
+        var user = httpContextAccessor.HttpContext?.User;
+        var isMasterAdmin = user?.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true") == true;
+        if (isMasterAdmin)
+        {
+            return await GetTenantsAsync(ct);
         }
 
         return await GetTenantsByUserIdAsync(userId, ct);
@@ -96,7 +104,7 @@ public class ServerAdminTenantService(
 
     public async Task<HttpResponseMessage> AddTenantUserAsync(Guid id, AddTenantUserRequest request, CancellationToken ct = default)
     {
-        var command = new AddTenantUserCommand(id, request.UserId, request.Role);
+        var command = new AddTenantUserCommand(id, request.UserId);
         var result = await commandDispatcher.SendAsync(command, ct);
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }
@@ -105,7 +113,7 @@ public class ServerAdminTenantService(
 
     private static TenantDetailModel MapTenantDetail(TenantDetailDto tenant) => new(
         tenant.Id, tenant.Name, tenant.Slug, tenant.IsActive, tenant.CreatedAtUtc, tenant.UserCount,
-        [.. tenant.Users.Select(u => new TenantUserModel(u.UserId, u.Role, u.IsActive, u.JoinedAtUtc))],
+        [.. tenant.Users.Select(u => new TenantUserModel(u.UserId, u.IsActive, u.JoinedAtUtc))],
         tenant.CurrentSubscription is null ? null : new SubscriptionModel(
             tenant.CurrentSubscription.Id, tenant.CurrentSubscription.Plan, tenant.CurrentSubscription.StartDate,
             tenant.CurrentSubscription.EndDate, tenant.CurrentSubscription.IsActive,

@@ -36,7 +36,6 @@ public sealed class GetTenantByIdQueryHandler(
                 tenant.TenantUsers.Count,
                 tenant.TenantUsers.Select(u => new TenantUserDto(
                     u.UserId.Value,
-                    u.Role,
                     u.IsActive,
                     u.JoinedAtUtc)).ToList(),
                 null);

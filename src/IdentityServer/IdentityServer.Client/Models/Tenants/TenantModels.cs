@@ -18,7 +18,7 @@ public sealed record TenantDetailModel(
     List<TenantUserModel> Users,
     SubscriptionModel? CurrentSubscription);
 
-public sealed record TenantUserModel(Guid UserId, string Role, bool IsActive, DateTime JoinedAtUtc);
+public sealed record TenantUserModel(Guid UserId, bool IsActive, DateTime JoinedAtUtc);
 
 public sealed record SubscriptionModel(
     Guid Id,
@@ -33,4 +33,4 @@ public sealed record CreateTenantRequest(string Name, string Slug, Guid OwnerId)
 
 public sealed record UpdateTenantRequest(string Name);
 
-public sealed record AddTenantUserRequest(Guid UserId, string Role);
+public sealed record AddTenantUserRequest(Guid UserId);
