@@ -8,10 +8,10 @@ using Xunit;
 
 namespace OroIdentityServer.Server.Tests.Endpoints;
 
-public sealed class AuthEndpointsTests(IdentityServerWebApplicationFactory factory)
-    : IClassFixture<IdentityServerWebApplicationFactory>
+[Collection(nameof(AspireTestCollection))]
+public sealed class AuthEndpointsTests(AspireIdentityServerApp app)
 {
-    private readonly HttpClient _client = factory.CreateClient(new() { AllowAutoRedirect = false });
+    private readonly HttpClient _client = app.CreateClient();
 
     [Fact]
     public async Task Login_WithInvalidCredentials_RedirectsBackToLoginWithError()

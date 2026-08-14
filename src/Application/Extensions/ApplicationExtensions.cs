@@ -12,7 +12,7 @@ public static class ApplicationExtensions
     {
         builder.Services.AddScoped<ITenantSchemaProvisioner, TenantSchemaProvisioner>();
         builder.Services.AddBuildingBlocksCqrs(typeof(ApplicationExtensions).Assembly);
-        builder.Services.AddRabbitMQEventBus(
+        builder.Services.AddEventBus(
             configuration,
             options => options.ExchangeName = "oroeventdrivenexchange",
             typeof(ApplicationExtensions).Assembly);

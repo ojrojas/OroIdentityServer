@@ -89,6 +89,7 @@
   <data name="NavIdentificationTypes"><value>Identification Types</value></data>
   <data name="NavApplications"><value>Applications</value></data>
   <data name="NavScopes"><value>Scopes</value></data>
+  <data name="NavTenants"><value>Tenants</value></data>
   <data name="NavSessions"><value>Sessions</value></data>
 
   <!-- Dashboard -->

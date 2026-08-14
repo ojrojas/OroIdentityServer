@@ -5,8 +5,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using IdentityServer.Client.Models.Dashboard;
-using Microsoft.Extensions.DependencyInjection;
-using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 using OroIdentityServer.Core.Modules.Permissions.Aggregates;
 using OroIdentityServer.Core.Modules.Roles.Aggregates;
@@ -21,16 +19,15 @@ using Xunit;
 
 namespace OroIdentityServer.Server.Tests.Endpoints;
 
-public sealed class DashboardAndRoleGuardApiTests(IdentityServerWebApplicationFactory factory)
-    : IClassFixture<IdentityServerWebApplicationFactory>
+[Collection(nameof(AspireTestCollection))]
+public sealed class DashboardAndRoleGuardApiTests(AspireIdentityServerApp app)
 {
     private const string Password = "Abc123456#";
 
     private async Task<(HttpClient client, Guid tenantId)> LoginAsAdminAsync()
     {
-        using var scope = factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
-        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        await using var context = app.CreateDbContext();
+        var passwordHasher = app.PasswordHasher;
 
         var identificationType = context.IdentificationTypes
             .AsEnumerable()
@@ -41,8 +38,7 @@ public sealed class DashboardAndRoleGuardApiTests(IdentityServerWebApplicationFa
             context.IdentificationTypes.Add(identificationType);
         }
 
-        var tenant = Tenant.Create($"Tenant-Admin-{Guid.NewGuid():N}");
-        context.Tenants.Add(tenant);
+        var tenant = context.Tenants.AsEnumerable().First(t => t.Name.Value == "OroMasterTenant");
 
         var userName = $"admin-{Guid.NewGuid():N}";
         var user = User.Create(
@@ -56,10 +52,21 @@ public sealed class DashboardAndRoleGuardApiTests(IdentityServerWebApplicationFa
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        tenant.AddUser(user.Id, TenantRole.Admin);
+        tenant.AddUser(user.Id);
         await context.SaveChangesAsync();
 
-        var client = factory.CreateClient(new() { AllowAutoRedirect = false });
+        // Mirror the master-admin shape: catalogue Administrator + master tenant.
+        var adminRole = context.Roles.AsEnumerable().FirstOrDefault(r => r.Name.Value == "Administrator");
+        if (adminRole is null)
+        {
+            adminRole = new Role(new RoleName("Administrator"));
+            context.Roles.Add(adminRole);
+            await context.SaveChangesAsync();
+        }
+        context.UserRoles.Add(new UserRole(user.Id, adminRole.Id));
+        await context.SaveChangesAsync();
+
+        var client = app.CreateClient();
         var form = new FormUrlEncodedContent(new Dictionary<string, string>
         {
             ["loginIdentifier"] = userName,
@@ -79,10 +86,8 @@ public sealed class DashboardAndRoleGuardApiTests(IdentityServerWebApplicationFa
         var baseline = await client.GetFromJsonAsync<DashboardStatsModel>("/api/dashboard/stats");
         Assert.NotNull(baseline);
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var context = app.CreateDbContext())
         {
-            var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
-
             var identificationType = IdentificationType.Create($"StatsID-{Guid.NewGuid():N}");
             context.IdentificationTypes.Add(identificationType);
 
@@ -136,9 +141,8 @@ public sealed class DashboardAndRoleGuardApiTests(IdentityServerWebApplicationFa
         var (client, tenantId) = await LoginAsAdminAsync();
 
         // Seed a user created today in a DIFFERENT tenant: it must NOT count for this tenant.
-        using (var scope = factory.Services.CreateScope())
+        await using (var context = app.CreateDbContext())
         {
-            var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
             var identificationType = context.IdentificationTypes
                 .AsEnumerable()
                 .First(i => i.Name.Value == "Passport");
@@ -169,9 +173,8 @@ public sealed class DashboardAndRoleGuardApiTests(IdentityServerWebApplicationFa
         var (client, _) = await LoginAsAdminAsync();
 
         Guid roleId;
-        using (var scope = factory.Services.CreateScope())
+        await using (var context = app.CreateDbContext())
         {
-            var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
             var role = new Role(new RoleName($"Role-Clean-{Guid.NewGuid():N}"));
             context.Roles.Add(role);
             await context.SaveChangesAsync();
@@ -184,8 +187,7 @@ public sealed class DashboardAndRoleGuardApiTests(IdentityServerWebApplicationFa
 
     private async Task<(Guid roleId, Guid userId)> SeedRoleWithUserAsync()
     {
-        using var scope = factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
+        await using var context = app.CreateDbContext();
 
         var identificationType = context.IdentificationTypes
             .AsEnumerable()
@@ -217,8 +219,7 @@ public sealed class DashboardAndRoleGuardApiTests(IdentityServerWebApplicationFa
 
     private async Task<Guid> SeedRoleWithPermissionAsync()
     {
-        using var scope = factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
+        await using var context = app.CreateDbContext();
 
         var role = new Role(new RoleName($"Role-Perm-{Guid.NewGuid():N}"));
         var permission = Permission.Create("System", "desc", "*", "*", true);

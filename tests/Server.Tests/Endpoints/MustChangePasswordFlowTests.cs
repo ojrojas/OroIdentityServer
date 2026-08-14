@@ -3,23 +3,21 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using System.Net;
-using System.Net.Http.Json;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.DependencyInjection;
-using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
+using OroIdentityServer.Core.Modules.Roles.Aggregates;
 using OroIdentityServer.Core.Modules.Tenants.Aggregates;
-using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 using OroIdentityServer.Core.Modules.Users.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Entities;
+using OroIdentityServer.Core.Shared;
 using OroIdentityServer.Infraestructure;
 using OroIdentityServer.Server.Tests.Infrastructure;
 using Xunit;
 
 namespace OroIdentityServer.Server.Tests.Endpoints;
 
-public sealed class MustChangePasswordFlowTests(IdentityServerWebApplicationFactory factory)
-    : IClassFixture<IdentityServerWebApplicationFactory>
+[Collection(nameof(AspireTestCollection))]
+public sealed class MustChangePasswordFlowTests(AspireIdentityServerApp app)
 {
     private const string Password = "Abc123456#";
 
@@ -28,10 +26,9 @@ public sealed class MustChangePasswordFlowTests(IdentityServerWebApplicationFact
     {
         var userName = $"mustchange-{Guid.NewGuid():N}";
 
-        using (var scope = factory.Services.CreateScope())
+        await using (var context = app.CreateDbContext())
         {
-            var context = scope.ServiceProvider.GetRequiredService<OroIdentityAppContext>();
-            var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+            var passwordHasher = app.PasswordHasher;
 
             var identificationType = context.IdentificationTypes
                 .AsEnumerable()
@@ -56,12 +53,23 @@ public sealed class MustChangePasswordFlowTests(IdentityServerWebApplicationFact
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
-            tenant.AddUser(user.Id, TenantRole.Admin);
+            tenant.AddUser(user.Id);
+            await context.SaveChangesAsync();
+
+            // Mirror the master-admin shape: catalogue Administrator + master tenant.
+            var adminRole = context.Roles.AsEnumerable().FirstOrDefault(r => r.Name.Value == "Administrator");
+            if (adminRole is null)
+            {
+                adminRole = new OroIdentityServer.Core.Modules.Roles.Aggregates.Role(new OroIdentityServer.Core.Shared.RoleName("Administrator"));
+                context.Roles.Add(adminRole);
+                await context.SaveChangesAsync();
+            }
+            context.UserRoles.Add(new UserRole(user.Id, adminRole.Id));
             await context.SaveChangesAsync();
         }
 
         // 1. Login -> the must_change_password claim forces a redirect to ChangePassword.
-        var client = factory.CreateClient(new() { AllowAutoRedirect = false });
+        var client = app.CreateClient();
         var login = await client.PostAsync("/auth/login", new FormUrlEncodedContent(new Dictionary<string, string>
         {
             ["loginIdentifier"] = userName,

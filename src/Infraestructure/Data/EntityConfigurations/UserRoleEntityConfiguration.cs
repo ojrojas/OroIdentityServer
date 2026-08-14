@@ -8,9 +8,9 @@ public class UserRoleEntityConfiguration : IEntityTypeConfiguration<UserRole>
 {
     public void Configure(EntityTypeBuilder<UserRole> builder)
     {
-        builder.ToTable("UserRoles"); // O el nombre que uses
+        builder.ToTable("UserRoles");
 
-        builder.HasKey(ur => new { ur.UserId, ur.RoleId }); // Clave compuesta
+        builder.HasKey(ur => new { ur.UserId, ur.RoleId });
 
         builder.Property(ur => ur.UserId)
             .HasConversion(id => id!.Value, value => new UserId(value));
@@ -18,13 +18,15 @@ public class UserRoleEntityConfiguration : IEntityTypeConfiguration<UserRole>
         builder.Property(ur => ur.RoleId)
             .HasConversion(id => id!.Value, value => new RoleId(value));
 
-        // Configura las relaciones si es necesario
-        builder.HasOne<User>() // Relación con User
+        builder.HasOne<User>()
             .WithMany(u => u.Roles)
             .HasForeignKey(ur => ur.UserId);
 
-        builder.HasOne<Role>() // Relación con Role
-            .WithMany() // Asume que Role no tiene colección inversa
+        // The Role navigation is now a real C# property (UserRole.Role). Binding it here
+        // makes EF populate it when callers do Include("Roles.Role") so sign-in and the
+        // master-admin detector can read the catalogue role name in one round trip.
+        builder.HasOne(ur => ur.Role)
+            .WithMany()
             .HasForeignKey(ur => ur.RoleId);
     }
 }

@@ -7,7 +7,6 @@ using OroIdentityServer.Application.Modules.Users.Commands;
 using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 using OroIdentityServer.Core.Modules.Tenants.Entities;
-using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 using OroIdentityServer.Infraestructure.Interfaces;
 
 namespace OroIdentityServer.Infraestructure.UnitTests;
@@ -57,8 +56,10 @@ public class CreateUserTenantMembershipTests
         var createdUser = context.Users.Single(u => u.Email == command.Email);
         var memberships = context.TenantUsers.Where(tu => tu.UserId == createdUser.Id).ToList();
 
+        // The new user is added to the configured tenant as a member; the row no longer
+        // carries a per-tenant role (the catalogue UserRole is the single source of truth).
         Assert.Single(memberships);
         Assert.Equal(tenant.Id, memberships[0].TenantId);
-        Assert.Equal(TenantRole.Member, memberships[0].Role);
+        Assert.True(memberships[0].IsActive);
     }
 }

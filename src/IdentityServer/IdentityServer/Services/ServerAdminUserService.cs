@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Claims;
 using BuildingBlocks.CQRS.Abstractions;
 using IdentityServer.Client.Interfaces;
 using IdentityServer.Client.Models;
@@ -7,9 +8,12 @@ using IdentityServer.Client.Services;
 using OroIdentityServer.Application.Modules.Roles.Queries;
 using OroIdentityServer.Application.Modules.Users.Commands;
 using OroIdentityServer.Application.Modules.Users.Queries;
+using OroIdentityServer.Core.Modules.Tenants.Repositories;
 using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 using OroIdentityServer.Core.Modules.Users.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Entities;
+using OroIdentityServer.Core.Shared;
+using OroIdentityServer.Server.Authentication;
 
 namespace IdentityServer.Services;
 
@@ -23,7 +27,8 @@ public class ServerAdminUserService(
     IQueryDispatcher queryDispatcher,
     ICommandDispatcher commandDispatcher,
     IHttpContextAccessor httpContextAccessor,
-    ICurrentTenantContext tenantContext) : IAdminUserService
+    ICurrentTenantContext tenantContext,
+    ITenantRepository tenantRepository) : IAdminUserService
 {
     private const string AdministratorRoleName = "Administrator";
     public async Task<ApiResponse<IEnumerable<UserModel>>?> GetUsersAsync(CancellationToken ct = default)
@@ -40,6 +45,14 @@ public class ServerAdminUserService(
 
     public async Task<HttpResponseMessage> CreateUserAsync(CreateUserRequest request, CancellationToken ct = default)
     {
+        var caller = httpContextAccessor.HttpContext?.User;
+        var callerIsMasterAdmin = caller?.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true") == true;
+        if (!callerIsMasterAdmin)
+        {
+            if (!await IsAccessibleTenantAsync(caller, request.TenantId, ct))
+                return new HttpResponseMessage(HttpStatusCode.Forbidden);
+        }
+
         var command = new CreateUserCommand(
             request.Name, request.MiddleName, request.LastName, request.UserName, request.Email,
             request.Password, request.Identification, request.IdentificationTypeId, request.TenantId);
@@ -50,6 +63,14 @@ public class ServerAdminUserService(
 
     public async Task<HttpResponseMessage> UpdateUserAsync(Guid id, UpdateUserRequest request, CancellationToken ct = default)
     {
+        var caller = httpContextAccessor.HttpContext?.User;
+        var callerIsMasterAdmin = caller?.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true") == true;
+        if (!callerIsMasterAdmin)
+        {
+            if (!await IsAccessibleTenantAsync(caller, request.TenantId, ct))
+                return new HttpResponseMessage(HttpStatusCode.Forbidden);
+        }
+
         var command = new UpdateUserCommand(
             id, request.Name, request.MiddleName, request.LastName, request.UserName, request.Email,
             request.Password, request.Identification, request.IdentificationTypeId, request.TenantId);
@@ -67,10 +88,30 @@ public class ServerAdminUserService(
     public async Task<HttpResponseMessage> AssignRolesToUserAsync(Guid userId, AssignRolesRequest request, CancellationToken ct = default)
     {
         var caller = httpContextAccessor.HttpContext?.User;
-        if (caller?.IsInRole(TenantRole.Admin) != true)
+        var callerIsMasterAdmin = caller?.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true") == true;
+        var callerIsAdmin = caller?.IsInRole(TenantRole.Admin) == true || caller?.IsInRole(TenantRole.Administrator) == true;
+
+        if (!callerIsAdmin)
         {
-            var adminRole = await queryDispatcher.SendAsync(new GetRoleByNameQuery(AdministratorRoleName), ct);
-            if (adminRole.Data is not null && request.RoleIds.Contains(adminRole.Data.Id))
+            return new HttpResponseMessage(HttpStatusCode.Forbidden);
+        }
+
+        if (!callerIsMasterAdmin)
+        {
+            // Tenant admin: can only act on users in the caller's home tenant. TenantUser
+            // membership no longer carries a per-tenant role, so authorisation is just
+            // "target tenant == caller's home tenant".
+            var target = await queryDispatcher.SendAsync(new GetUserByIdQuery(userId), ct);
+            if (target.Data is null)
+            {
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+            }
+
+            var callerId = new UserId(Guid.Parse(caller!.FindFirstValue(ClaimTypes.NameIdentifier)!));
+            var callerUser = await queryDispatcher.SendAsync(new GetUserByIdQuery(callerId.Value), ct);
+            if (callerUser.Data?.TenantId is null ||
+                target.Data.TenantId is null ||
+                callerUser.Data.TenantId.Value != target.Data.TenantId.Value)
             {
                 return new HttpResponseMessage(HttpStatusCode.Forbidden);
             }
@@ -90,6 +131,20 @@ public class ServerAdminUserService(
     {
         var result = await commandDispatcher.SendAsync(new UnlockUserCommand(userId), ct);
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.OK);
+    }
+
+    private async Task<bool> IsAccessibleTenantAsync(ClaimsPrincipal? caller, Guid targetTenantId, CancellationToken ct)
+    {
+        if (caller?.Identity?.IsAuthenticated != true) return false;
+
+        // Master admin can touch any tenant; everyone else can only touch their own home tenant.
+        if (caller.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true")) return true;
+
+        var callerIdClaim = caller.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(callerIdClaim, out var callerGuid)) return false;
+
+        var callerUser = await queryDispatcher.SendAsync(new GetUserByIdQuery(callerGuid), ct);
+        return callerUser.Data?.TenantId?.Value == targetTenantId;
     }
 
     private static UserModel MapUser(User user) => new(

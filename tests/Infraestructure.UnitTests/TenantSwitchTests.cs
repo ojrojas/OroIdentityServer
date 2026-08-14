@@ -2,8 +2,6 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
-
 namespace OroIdentityServer.Infraestructure.UnitTests;
 
 public class TenantSwitchTests
@@ -20,10 +18,10 @@ public class TenantSwitchTests
         var userId = UserId.New();
 
         var memberTenant = Tenant.Create("Member Tenant");
-        memberTenant.AddUser(userId, TenantRole.Admin);
+        memberTenant.AddUser(userId);
 
         var otherTenant = Tenant.Create("Other Tenant");
-        otherTenant.AddUser(UserId.New(), TenantRole.Admin);
+        otherTenant.AddUser(UserId.New());
 
         context.Tenants.AddRange(memberTenant, otherTenant);
         await context.SaveChangesAsync();
@@ -46,7 +44,7 @@ public class TenantSwitchTests
         await context.SaveChangesAsync();
 
         var userId = UserId.New();
-        tenant.AddUser(userId, TenantRole.Admin);
+        tenant.AddUser(userId);
         await context.SaveChangesAsync();
 
         var result = (await sut.GetByUserIdAsync(userId, CancellationToken.None)).ToList();

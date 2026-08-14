@@ -26,7 +26,7 @@ public sealed class AddTenantUserCommandHandler(
             // Persist the membership as a new row (INSERT). Using UpdateAsync(tenant) with a
             // NoTracking-loaded tenant marks the new TenantUser as Modified and tries to UPDATE
             // a row that was never inserted -> DbUpdateConcurrencyException.
-            var membership = tenant.AddUser(new UserId(command.UserId), command.Role);
+            var membership = tenant.AddUser(new UserId(command.UserId));
             await tenantUserRepository.AddAsync(membership, ct);
 
             logger.LogInformation("Successfully added user {UserId} to tenant {TenantId}",

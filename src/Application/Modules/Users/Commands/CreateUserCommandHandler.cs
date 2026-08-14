@@ -47,13 +47,13 @@ public class CreateUserCommandHandler(
             // Add the user to the repository
             await userRepository.AddUserAsync(user, cancellationToken);
 
-            // Associate the new user with the tenant configured at creation time. Without a
-            // TenantUser membership the user resolves to the Member role by default, losing
-            // access to the admin console (403 on the dashboard/API).
+            // Register the membership row in the tenant so the dashboard's tenant list and
+            // /api/tenants/mine can find this user. The row no longer carries a Role - that
+            // information lives entirely in the UserRole catalogue and is read at sign-in.
             var tenant = await tenantRepository.GetByIdAsync(new(command.TenantId), cancellationToken);
             if (tenant is not null)
             {
-                var membership = tenant.AddUser(user.Id, TenantRole.Member);
+                var membership = tenant.AddUser(user.Id);
                 await tenantUserRepository.AddAsync(membership, cancellationToken);
             }
 

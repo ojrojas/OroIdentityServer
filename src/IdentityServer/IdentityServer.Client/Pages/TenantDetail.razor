@@ -1,5 +1,5 @@
 @page "/tenants/{Id:guid}"
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin,Administrator")]
 @inject IAdminTenantService TenantService
 @inject NavigationManager Nav
 @inject IDialogService DialogService
@@ -85,7 +85,7 @@
                             <div class="list-row">
                                 <span class="list-body">
                                     <span class="list-title">@user.UserId</span>
-                                    <span class="list-sub">@user.Role &middot; @L["JoinedAt"]: @user.JoinedAtUtc.ToString("yyyy-MM-dd")</span>
+                                    <span class="list-sub">@L["JoinedAt"]: @user.JoinedAtUtc.ToString("yyyy-MM-dd")</span>
                                 </span>
                                 <span class="badge @(user.IsActive ? "badge-green" : "badge-gray")">
                                     @(user.IsActive ? L["ActiveStatus"] : L["SuspendedStatus"])

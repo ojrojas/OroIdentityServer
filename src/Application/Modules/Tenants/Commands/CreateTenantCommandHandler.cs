@@ -22,7 +22,7 @@ public sealed class CreateTenantCommandHandler(
                 throw new InvalidOperationException($"A tenant with slug '{command.Slug}' already exists.");
 
             var tenant = Tenant.Create(command.Name);
-            tenant.AddUser(new UserId(command.OwnerId), TenantRole.Admin);
+            tenant.AddUser(new UserId(command.OwnerId));
 
             await tenantRepository.AddAsync(tenant, ct);
 

@@ -81,6 +81,7 @@
   <data name="NavIdentificationTypes"><value>Tipos de identificación</value></data>
   <data name="NavApplications"><value>Aplicaciones</value></data>
   <data name="NavScopes"><value>Alcances</value></data>
+  <data name="NavTenants"><value>Inquilinos</value></data>
   <data name="NavSessions"><value>Sesiones</value></data>
 
   <data name="DashboardTitle"><value>Panel</value></data>

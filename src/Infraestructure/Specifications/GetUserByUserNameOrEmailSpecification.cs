@@ -14,6 +14,9 @@ public sealed class GetUserByUserNameOrEmailSpecification : Specification<User>
             x.NormalizedEmail == normalizedLoginIdentifier;
 
         AddInclude(x => x.Roles);
+        // Catalogue role is required at sign-in to translate the user's roles into the
+        // claim names that [Authorize] policies check against.
+        AddInclude("Roles.Role");
         AddInclude(x => x.SecurityUser!);
     }
 }

@@ -2,9 +2,7 @@
   <Folder Name="/examples/">
     <Project Path="examples/AppHost/AppHost.csproj" />
   </Folder>
-  <Folder Name="/src/">
-    <Project Path="src/Shared/OroIdentityServer.Shared.csproj" />
-  </Folder>
+  <Folder Name="/src/" />
   <Folder Name="/src/Application/">
     <Project Path="src/Application/OroIdentityServer.Application.csproj" />
   </Folder>
@@ -26,6 +24,9 @@
   <Folder Name="/src/Infraestructure/">
     <Project Path="src/Infraestructure/OroIdentityServer.Infraestructure.csproj" />
   </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/OroIdentityServer.Shared.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/BuildingBlocks.CQRS.UnitTests/BuildingBlocks.CQRS.UnitTests.csproj" />
     <Project Path="tests/BuildingBlocks.EventBus.RabbitMQ.IntegrationTests/BuildingBlocks.EventBus.RabbitMQ.IntegrationTests.csproj" />
@@ -33,8 +34,10 @@
     <Project Path="tests/BuildingBlocks.Kernel.UnitTests/BuildingBlocks.Kernel.UnitTests.csproj" />
     <Project Path="tests/BuildingBlocks.Logger.UnitTests/BuildingBlocks.Logger.UnitTests.csproj" />
     <Project Path="tests/BuildingBlocks.ServicesDefaults.UnitTests/BuildingBlocks.ServicesDefaults.UnitTests.csproj" />
+    <Project Path="tests/Infraestructure.UnitTests/Infraestructure.UnitTests.csproj" />
   </Folder>
   <Folder Name="/tests/Server.Tests/">
     <Project Path="tests/Server.Tests/OroIdentityServer.Server.Tests.csproj" />
   </Folder>
+  
 </Solution>

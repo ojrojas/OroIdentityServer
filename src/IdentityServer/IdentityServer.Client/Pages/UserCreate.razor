@@ -1,5 +1,5 @@
 @page "/users/create"
-@attribute [Authorize(Roles = "Admin,Manager")]
+@attribute [Authorize(Roles = "Admin,Administrator,Manager")]
 @inject IAdminUserService UserService
 @inject IAdminIdentificationTypeService IdentificationTypeService
 @inject IAdminTenantService TenantService
@@ -126,7 +126,9 @@
         identificationTypes = identificationTypesResponse?.Data?.ToList() ?? [];
         selectedIdentificationType = identificationTypes.FirstOrDefault();
 
-        // Prefer the tenant selected in the nav switcher, falling back to the full list.
+        // Master admins see every tenant; tenant admins only see the tenants they administer
+        // (already loaded into the TenantSwitcher). Fall back to the full list when neither path
+        // gives a result (e.g. prerender before the switcher has initialised).
         tenants = TenantContext.Tenants.Count > 0
             ? TenantContext.Tenants.ToList()
             : (await TenantService.GetTenantsAsync())?.Data?.ToList() ?? [];

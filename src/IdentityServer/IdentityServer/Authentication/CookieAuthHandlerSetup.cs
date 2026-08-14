@@ -73,6 +73,15 @@ public static class CookieAuthHandlerSetup
             {
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole(TenantRole.Admin, TenantRole.Administrator, TenantRole.Manager);
+            })
+            .AddPolicy("MasterAdminOnly", policy =>
+            {
+                // Global OIDC catalogue (applications, scopes) and tenant creation are reserved for
+                // the master admin: a user with the Administrator/Admin UserRole, or Admin of the
+                // SEED_TENANT_NAME. Tenant admins must not see or modify these resources.
+                policy.RequireAuthenticatedUser();
+                policy.RequireAssertion(ctx => ctx.User.HasClaim(
+                    AdminPasswordSignInService.IsMasterAdminClaimType, "true"));
             });
 
         return services;

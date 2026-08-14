@@ -24,7 +24,6 @@ public class TenantUserConfiguration : IEntityTypeConfiguration<TenantUser>
             .HasColumnName("UserId")
             .IsRequired();
 
-        builder.Property(tu => tu.Role).HasColumnName("Role").HasMaxLength(50).IsRequired();
         builder.Property(tu => tu.IsActive).HasColumnName("IsActive").IsRequired();
         builder.Property(tu => tu.JoinedAtUtc).HasColumnName("JoinedAtUtc").IsRequired();
 
