@@ -306,4 +306,11 @@
   <data name="TerminateSessionsConfirm"><value>Alle Sitzungen für &quot;{0}&quot; trennen?</value></data>
   <data name="StatIdentificationTypesNote"><value>Ausweisdokumente</value></data>
   <data name="RoleDeleteConflictToast"><value>Rolle kann nicht gelöscht werden: Sie ist Benutzern zugewiesen oder hat Berechtigungen.</value></data>
+  <data name="ConsentTitle"><value>Zugriff genehmigen</value></data>
+  <data name="ConsentSubtitle"><value>Überprüfen Sie unten die von der Anwendung angeforderten Berechtigungen.</value></data>
+  <data name="ConsentApplicationLabel"><value>Anwendung</value></data>
+  <data name="ConsentScopeHeading"><value>Angeforderte Berechtigungen</value></data>
+  <data name="ConsentRememberNotice"><value>Durch die Genehmigung erhält diese Anwendung Zugriff auf die aufgeführten Berechtigungen. Sie können den Zugriff jederzeit widerrufen.</value></data>
+  <data name="Accept"><value>Genehmigen</value></data>
+  <data name="Deny"><value>Ablehnen</value></data>
 </root>

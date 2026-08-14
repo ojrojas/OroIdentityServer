@@ -306,4 +306,11 @@
   <data name="TerminateSessionsConfirm"><value>Desconectar todas as sessões de &quot;{0}&quot;?</value></data>
   <data name="StatIdentificationTypesNote"><value>Documentos de identidade</value></data>
   <data name="RoleDeleteConflictToast"><value>Não é possível excluir o papel: ele está atribuído a usuários ou possui permissões atribuídas.</value></data>
+  <data name="ConsentTitle"><value>Aprovar acesso</value></data>
+  <data name="ConsentSubtitle"><value>Verifique as permissões solicitadas pelo aplicativo abaixo.</value></data>
+  <data name="ConsentApplicationLabel"><value>Aplicativo</value></data>
+  <data name="ConsentScopeHeading"><value>Permissões solicitadas</value></data>
+  <data name="ConsentRememberNotice"><value>Ao aprovar, este aplicativo poderá acessar as permissões listadas. Você pode revogar o acesso a qualquer momento.</value></data>
+  <data name="Accept"><value>Aprovar</value></data>
+  <data name="Deny"><value>Negar</value></data>
 </root>

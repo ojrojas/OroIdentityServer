@@ -306,4 +306,11 @@
   <data name="TerminateSessionsConfirm"><value>Disconnettere tutte le sessioni di &quot;{0}&quot;?</value></data>
   <data name="StatIdentificationTypesNote"><value>Documenti d'identità</value></data>
   <data name="RoleDeleteConflictToast"><value>Impossibile eliminare il ruolo: è assegnato a utenti o ha permessi assegnati.</value></data>
+  <data name="ConsentTitle"><value>Approva l'accesso</value></data>
+  <data name="ConsentSubtitle"><value>Controlla le autorizzazioni richieste dall'applicazione di seguito.</value></data>
+  <data name="ConsentApplicationLabel"><value>Applicazione</value></data>
+  <data name="ConsentScopeHeading"><value>Autorizzazioni richieste</value></data>
+  <data name="ConsentRememberNotice"><value>Approvando, questa applicazione potrà accedere alle autorizzazioni elencate. Puoi revocare l'accesso in qualsiasi momento.</value></data>
+  <data name="Accept"><value>Approva</value></data>
+  <data name="Deny"><value>Nega</value></data>
 </root>

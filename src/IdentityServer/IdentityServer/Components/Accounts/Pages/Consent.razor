@@ -1,0 +1,120 @@
+@page "/Account/Consent"
+@layout LoginLayout
+@attribute [AllowAnonymous]
+@using Microsoft.AspNetCore.Antiforgery
+@using Microsoft.AspNetCore.Http
+@using Microsoft.Extensions.Primitives
+@using OpenIddict.Abstractions
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IAntiforgery Antiforgery
+@inject IOpenIddictApplicationManager ApplicationManager
+@inject IOpenIddictScopeManager ScopeManager
+@inject IStringLocalizer<SharedResources> L
+
+<div class="auth">
+    <div class="auth-card">
+        <div class="auth-head">
+            <span class="auth-mark">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 12l2 2 4-4" />
+                    <path d="M12 3l7 3v6c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z" />
+                </svg>
+            </span>
+            <h1 class="auth-title">@L["ConsentTitle"]</h1>
+            <p class="auth-sub">@L["ConsentSubtitle"]</p>
+        </div>
+
+        <form method="post" action="/connect/authorize" class="auth-form">
+            <input type="hidden" name="__RequestVerificationToken" value="@AntiforgeryToken" />
+
+            @foreach (var parameter in RequestParameters)
+            {
+                @foreach (var value in parameter.Value)
+                {
+                    <input type="hidden" name="@parameter.Key" value="@value" />
+                }
+            }
+
+            <div class="consent-section">
+                <div class="field-label">@L["ConsentApplicationLabel"]</div>
+                <div class="consent-app-name">@ApplicationName</div>
+            </div>
+
+            <div class="consent-section">
+                <div class="field-label">@L["ConsentScopeHeading"]</div>
+                <ul class="consent-scope-list">
+                    @foreach (var scope in Scopes)
+                    {
+                        <li class="consent-scope">
+                            <span class="consent-scope-name">@scope.Name</span>
+                            @if (!string.IsNullOrEmpty(scope.Display) && !string.Equals(scope.Display, scope.Name, StringComparison.Ordinal))
+                            {
+                                <span class="consent-scope-description">@scope.Display</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <p class="consent-remember">@L["ConsentRememberNotice"]</p>
+
+            <button type="submit" name="submit.Accept" value="true" class="btn btn-primary btn-block">@L["Accept"]</button>
+            <button type="submit" name="submit.Deny" value="true" class="btn btn-ghost btn-block">@L["Deny"]</button>
+        </form>
+    </div>
+</div>
+
+@code {
+    private string? AntiforgeryToken;
+    private List<KeyValuePair<string, StringValues>> RequestParameters = [];
+    private List<ConsentScope> Scopes = [];
+    private string? ApplicationName;
+
+    private sealed record ConsentScope(string Name, string? Display);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpContext = HttpContextAccessor.HttpContext ??
+            throw new InvalidOperationException("The consent page requires an HTTP context.");
+
+        // Persist the antiforgery cookie on this GET and keep the request token so the
+        // Accept/Deny actions (both [ValidateAntiForgeryToken]) accept the decision POST.
+        AntiforgeryToken = Antiforgery.GetAndStoreTokens(httpContext).RequestToken;
+
+        // Preserve every original OIDC request parameter so it round-trips to /connect/authorize.
+        foreach (var (key, value) in httpContext.Request.Query)
+        {
+            RequestParameters.Add(new KeyValuePair<string, StringValues>(key, value));
+        }
+
+        // Identify the calling client application.
+        var clientId = httpContext.Request.Query["client_id"].ToString();
+        if (!string.IsNullOrEmpty(clientId))
+        {
+            var application = await ApplicationManager.FindByClientIdAsync(clientId);
+            if (application is not null)
+            {
+                ApplicationName = await ApplicationManager.GetLocalizedDisplayNameAsync(application);
+            }
+        }
+        ApplicationName ??= string.IsNullOrEmpty(clientId) ? "?" : clientId;
+
+        // Resolve each requested scope to its registered localized description/display name,
+        // falling back to the raw scope name when the scope has no metadata.
+        foreach (var scopeName in httpContext.Request.Query["scope"].ToString()
+                     .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var scope = await ScopeManager.FindByNameAsync(scopeName);
+            if (scope is not null)
+            {
+                var description = await ScopeManager.GetLocalizedDescriptionAsync(scope);
+                var displayName = await ScopeManager.GetLocalizedDisplayNameAsync(scope);
+                Scopes.Add(new ConsentScope(scopeName, description ?? displayName));
+            }
+            else
+            {
+                Scopes.Add(new ConsentScope(scopeName, null));
+            }
+        }
+    }
+}

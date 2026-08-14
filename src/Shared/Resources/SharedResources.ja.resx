@@ -306,4 +306,11 @@
   <data name="TerminateSessionsConfirm"><value>「{0}」のすべてのセッションを切断しますか？</value></data>
   <data name="StatIdentificationTypesNote"><value>身分証明書</value></data>
   <data name="RoleDeleteConflictToast"><value>ロールを削除できません：ユーザーに割り当てられているか、権限が割り当てられています。</value></data>
+  <data name="ConsentTitle"><value>アクセスを承認</value></data>
+  <data name="ConsentSubtitle"><value>以下、アプリケーションが要求する権限を確認してください。</value></data>
+  <data name="ConsentApplicationLabel"><value>アプリケーション</value></data>
+  <data name="ConsentScopeHeading"><value>要求された権限</value></data>
+  <data name="ConsentRememberNotice"><value>承認すると、このアプリケーションはリストされた権限にアクセスできます。いつでもアクセスを無効にできます。</value></data>
+  <data name="Accept"><value>承認</value></data>
+  <data name="Deny"><value>拒否</value></data>
 </root>
