@@ -6,10 +6,12 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\IdentityServer\IdentityServer\IdentityServer.csproj" />
+    <ProjectReference Include="..\Frontends\oroidentity-admin\oroidentity-admin.esproj" />
   </ItemGroup>
 
   <PropertyGroup>

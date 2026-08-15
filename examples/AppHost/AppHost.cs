@@ -51,22 +51,35 @@ var eventBusMode = builder.Configuration["EventBus:Mode"] ?? "RabbitMQ";
 // }
 // else
 // {
-    // Runs the IdentityServer from source. Tests (Aspire.Hosting.Testing) and
-    // `aspire run` both execute the current code; `aspire publish` builds the
-    // container image from this project.
-    IResourceBuilder<ProjectResource> identityServer = builder.AddProject<Projects.IdentityServer>("identity-api")
-        .WithHttpEndpoint(port: 5080, name: "http")
-        .WithReference(rabbitMq).WaitFor(rabbitMq)
-        .WithReference(identityDb).WaitFor(identityDb)
-        .WithEnvironment("SEED_TENANT_NAME", "OroMasterTenant")
-        .WithEnvironment("ASPNETCORE_ENVIRONMENT", environment.EnvironmentName)
-        .WithEnvironment("SymmetricSecurityKey", SymmetricSecurityKey)
-        .WithEnvironment("EventBus__Mode", eventBusMode)
-        .WithEnvironment("EventBus__RabbitMQ__HostName", "oroeventdrivenexchange")
-        .WithEnvironment("EventBus__RabbitMQ__Port", "5672")
-        .WithEnvironment("EventBus__RabbitMQ__UserName", "guest")
-        .WithEnvironment("EventBus__RabbitMQ__Password", "guest")
-        .WithEnvironment("IDENTITY_ADMIN_HTTP", "http://localhost:4200");
+// Runs the IdentityServer from source. Tests (Aspire.Hosting.Testing) and
+// `aspire run` both execute the current code; `aspire publish` builds the
+// container image from this project.
+IResourceBuilder<ProjectResource> identityServer = builder.AddProject<Projects.IdentityServer>("identity-api")
+    .WithHttpEndpoint(port: 5080, name: "http")
+    .WithReference(rabbitMq).WaitFor(rabbitMq)
+    .WithReference(identityDb).WaitFor(identityDb)
+    .WithEnvironment("SEED_TENANT_NAME", "OroMasterTenant")
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", environment.EnvironmentName)
+    .WithEnvironment("SymmetricSecurityKey", SymmetricSecurityKey)
+    .WithEnvironment("EventBus__Mode", eventBusMode)
+    .WithEnvironment("EventBus__RabbitMQ__HostName", "oroeventdrivenexchange")
+    .WithEnvironment("EventBus__RabbitMQ__Port", "5672")
+    .WithEnvironment("EventBus__RabbitMQ__UserName", "guest")
+    .WithEnvironment("EventBus__RabbitMQ__Password", "guest")
+    .WithEnvironment("IDENTITY_ADMIN_HTTP", "http://localhost:4200");
 // }
+
+
+// example oroidentity-admin login angular client
+// var clientId = builder.AddParameter("ClientId", "OroIdentityServer.Admin");
+
+// var identityAdmin = builder.AddPnpmApp("oroidentity-admin", "../Frontends/oroidentity-admin").WithPnpmPackageInstallation();
+
+// identityAdmin.WithHttpEndpoint(port: 30645, targetPort: 4200)
+//    .WithEnvironment("CLIENT_ID", clientId)
+//    .WithEnvironment("IDENTITY_API_HTTPS", identityServer.GetEndpoint("https"))
+//    .WithEnvironment("IDENTITY_API_HTTP", identityServer.GetEndpoint("http"));
+
+// identityServer.WithReference(identityAdmin);
 
 builder.Build().Run();
