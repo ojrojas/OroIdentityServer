@@ -71,15 +71,15 @@ IResourceBuilder<ProjectResource> identityServer = builder.AddProject<Projects.I
 
 
 // example oroidentity-admin login angular client
-// var clientId = builder.AddParameter("ClientId", "OroIdentityServer.Admin");
+var clientId = builder.AddParameter("ClientId", "OroIdentityServer.Admin");
 
-// var identityAdmin = builder.AddPnpmApp("oroidentity-admin", "../Frontends/oroidentity-admin").WithPnpmPackageInstallation();
+var identityAdmin = builder.AddPnpmApp("oroidentity-admin", "../Frontends/oroidentity-admin").WithPnpmPackageInstallation();
 
-// identityAdmin.WithHttpEndpoint(port: 30645, targetPort: 4200)
-//    .WithEnvironment("CLIENT_ID", clientId)
-//    .WithEnvironment("IDENTITY_API_HTTPS", identityServer.GetEndpoint("https"))
-//    .WithEnvironment("IDENTITY_API_HTTP", identityServer.GetEndpoint("http"));
+identityAdmin.WithHttpEndpoint(port: 30645, targetPort: 4200)
+   .WithEnvironment("CLIENT_ID", clientId)
+   .WithEnvironment("IDENTITY_API_HTTPS", identityServer.GetEndpoint("https"))
+   .WithEnvironment("IDENTITY_API_HTTP", identityServer.GetEndpoint("http"));
 
-// identityServer.WithReference(identityAdmin);
+identityServer.WithReference(identityAdmin);
 
 builder.Build().Run();

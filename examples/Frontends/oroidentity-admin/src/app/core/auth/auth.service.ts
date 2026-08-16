@@ -47,13 +47,25 @@ export class AuthService {
   }
 
   logout(): void {
-    this.oidc.logoffAndRevokeTokens().subscribe(() => {
-      this._isAuthenticated.set(false);
-      this._userProfile.set(null);
-      this._accessToken.set(null);
-      localStorage.removeItem('access_token');
+    // Note: do NOT call logoffLocalMultiple() here. logoffAndRevokeTokens() revokes the
+    // refresh and access tokens first and reads them from storage *during* the HTTP calls;
+    // clearing storage synchronously here makes the second revocation go out without a
+    // token, which the server rejects with `missing_token` and aborts the whole logout.
+    this.oidc.logoffAndRevokeTokens().subscribe({
+      next: () => this.clearLocalSession(),
+      error: (error) => {
+        console.error('Token revocation failed; falling back to end-session.', error);
+        this.clearLocalSession();
+        this.oidc.logoff().subscribe();
+      },
     });
-    this.oidc.logoffLocalMultiple();
+  }
+
+  private clearLocalSession(): void {
+    this._isAuthenticated.set(false);
+    this._userProfile.set(null);
+    this._accessToken.set(null);
+    localStorage.removeItem('access_token');
   }
 
   getAccessToken(): string | null {

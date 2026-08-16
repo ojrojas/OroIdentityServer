@@ -1,14 +1,18 @@
 @page "/Account/Logout"
 @layout LoginLayout
+@using OpenIddict.Abstractions
 @inject NavigationManager navigationManager
+@inject IHttpContextAccessor httpContextAccessor
 @inject IStringLocalizer<SharedResources> L
+@inject IOpenIddictApplicationManager applicationManager
 @rendermode InteractiveServer
 
 <div class="auth">
     <div class="auth-card">
         <div class="auth-head">
             <span class="auth-mark">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                     <path d="M16 17l5-5-5-5" />
                     <path d="M21 12H9" />
@@ -23,8 +27,7 @@
                     @onclick="@(() => navigationManager.NavigateTo(ConfirmUrl, forceLoad: true))">
                 @L["YesSignOut"]
             </button>
-            <button type="button" class="btn btn-ghost btn-block"
-                    @onclick="@(() => navigationManager.NavigateTo("/", forceLoad: true))">
+            <button type="button" class="btn btn-ghost btn-block" @onclick="CancelSignOut">
                 @L["NoStaySignedIn"]
             </button>
         </div>
@@ -63,5 +66,36 @@
 
             return $"/connect/logout?{query}";
         }
+    }
+
+    /// <summary>
+    /// Sends the user agent back to the calling application when they choose not to
+    /// sign out. The post_logout_redirect_uri is validated against the registered
+    /// post-logout redirect URIs to prevent open-redirect attacks, since this page
+    /// can be reached directly without going through the end-session endpoint.
+    /// Note: client_id is optional in end-session requests (e.g. angular-auth-oidc-client
+    /// does not send it), so the URI is matched against all registered applications,
+    /// mirroring OpenIddict's own ValidateClientPostLogoutRedirectUri handler.
+    /// </summary>
+    private async Task CancelSignOut()
+    {
+        if (!string.IsNullOrEmpty(PostLogoutRedirectUri) &&
+            Uri.TryCreate(PostLogoutRedirectUri, UriKind.Absolute, out var requestedUri))
+        {
+            await foreach (var application in applicationManager.FindByPostLogoutRedirectUriAsync(PostLogoutRedirectUri))
+            {
+                foreach (var uri in await applicationManager.GetPostLogoutRedirectUrisAsync(application))
+                {
+                    if (Uri.TryCreate(uri, UriKind.Absolute, out var registered) &&
+                        Uri.Equals(registered, requestedUri))
+                    {
+                        navigationManager.NavigateTo(PostLogoutRedirectUri, forceLoad: true);
+                        return;
+                    }
+                }
+            }
+        }
+
+        navigationManager.NavigateTo(httpContextAccessor.HttpContext.Request.PathBase, forceLoad: true);
     }
 }
