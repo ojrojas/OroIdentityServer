@@ -195,14 +195,14 @@ server, or in a cluster.
 
 ```bash
 # Build the image
-podman build -f src/IdentityServer/IdentityServer/Dockerfile -t oridentityserver:latest .
+podman build -f src/IdentityServer/IdentityServer/Dockerfile -t oroidentityserver:latest .
 
 # Run it against a PostgreSQL instance
 podman run --rm -p 5080:5080 \
   -e ConnectionStrings__identitydb="Host=db;Port=5432;Database=identitydb;Username=postgres;Password=Weak(!)Password123" \
   -e SEED_ADMIN_USERNAME="admin" \
   -e SEED_ADMIN_PASSWORD="Admin@123456" \
-  oridentityserver:latest
+  oroidentityserver:latest
 ```
 
 Or use the provided compose file, which builds the image and wires it to a PostgreSQL container
@@ -226,7 +226,7 @@ podman run --rm -p 5080:5080 -p 5086:5086 \
   -e ConnectionStrings__identitydb="Host=db;Port=5432;Database=identitydb;Username=postgres;Password=Weak(!)Password123" \
   -e SEED_ADMIN_USERNAME="admin" \
   -e SEED_ADMIN_PASSWORD="Admin@123456" \
-  oridentityserver:latest
+  oroidentityserver:latest
 ```
 
 For a PEM certificate instead of a PFX, set `Kestrel__Certificates__Default__KeyPath` to the
