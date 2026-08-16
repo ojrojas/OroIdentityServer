@@ -15,4 +15,11 @@ public static class AuthorizationClaimTypes
     /// policy and the OIDC/tenant sections of the web console.
     /// </summary>
     public const string IsMasterAdmin = "is_master_admin";
+
+    /// <summary>
+    /// The home tenant of the signed-in user. Written into the admin cookie and into the
+    /// OIDC access/identity tokens issued by the authorization endpoint so relying party
+    /// applications can scope their data by tenant without calling userinfo.
+    /// </summary>
+    public const string TenantId = "tenant_id";
 }

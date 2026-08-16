@@ -8,6 +8,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using OroIdentityServer.Server.Authentication;
 using OroIdentityServer.Server.Helpers;
+using OroIdentityServer.Shared.Authorization;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using BuildingBlocks.CQRS.Abstractions;
 using OroIdentityServer.Application.Modules.Users.Queries;
@@ -157,6 +158,7 @@ public class AuthorizationController : Controller
                         .SetClaim(Claims.Email, user.Data.Email)
                         .SetClaim(Claims.Name, $"{user.Data.Name} {user.Data.LastName}")
                         .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
+                        .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
                         .SetClaims(Claims.Role, [.. roles.Data.Select(x=> x.Name)]);
 
                 // Note: in this sample, the granted scopes match the requested scope
@@ -259,6 +261,7 @@ foreach (var claim in identity.Claims)
                 .SetClaim(Claims.Email, user.Data.Email)
                 .SetClaim(Claims.Name, $"{user.Data.Name} {user.Data.LastName}")
                 .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
+                .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
                 .SetClaims(Claims.Role, [.. roles.Data.Select(x=> x.Name)]);
 
         // Note: in this sample, the granted scopes match the requested scope
@@ -361,7 +364,8 @@ foreach (var claim in identity.Claims)
 
         var claims = new Dictionary<string, object>(StringComparer.Ordinal)
         {
-            [Claims.Subject] = user.Data.Id.Value.ToString()
+            [Claims.Subject] = user.Data.Id.Value.ToString(),
+            [AuthorizationClaimTypes.TenantId] = user.Data.TenantId?.Value.ToString() ?? string.Empty
         };
 
         if (User.HasScope(Scopes.Email))
@@ -439,6 +443,7 @@ foreach (var claim in identity.Claims)
                     .SetClaim(Claims.Email, user.Data.Email)
                     .SetClaim(Claims.Name, $"{user.Data.Name} {user.Data.LastName}")
                     .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
+                    .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
                     .SetClaims(Claims.Role, [.. roles.Data.Select(x=> x.Name)]);
 
             var principal = new ClaimsPrincipal(identity);

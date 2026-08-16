@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for details.
 using System.Security.Claims;
 using OpenIddict.Abstractions;
+using OroIdentityServer.Shared.Authorization;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace OroIdentityServer.Server.Helpers;
@@ -36,6 +37,11 @@ public static class GetDestination
                 yield return Destinations.AccessToken;
                 if (principal.HasScope(Scopes.Profile))
                     yield return Destinations.IdentityToken;
+                yield break;
+
+            case AuthorizationClaimTypes.TenantId:
+                yield return Destinations.AccessToken;
+                yield return Destinations.IdentityToken;
                 yield break;
 
             case "AspNet.Identity.SecurityStamp":

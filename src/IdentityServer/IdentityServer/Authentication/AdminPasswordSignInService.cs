@@ -112,7 +112,7 @@ public sealed class AdminPasswordSignInService(
             new(ClaimTypes.NameIdentifier, user.Id.Value.ToString()),
             new(ClaimTypes.Name, user.UserName ?? user.Email ?? loginIdentifier),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new("tenant_id", user.TenantId?.Value.ToString() ?? string.Empty)
+            new(AuthorizationClaimTypes.TenantId, user.TenantId?.Value.ToString() ?? string.Empty)
         };
 
         // The master admin of the SEED_TENANT_NAME gets BOTH "Admin" and "Administrator" role
