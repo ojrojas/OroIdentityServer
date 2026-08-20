@@ -178,4 +178,89 @@ public class ServerAdminUserService(
             Errors = result.Errors  
          };
     }
+
+    public async Task<ApiResponse<IEnumerable<UserModel>>?> GetUsersByRoleAndTenantAsync(string role, Guid? tenantId = null, CancellationToken ct = default)
+    {
+        var caller = httpContextAccessor.HttpContext?.User;
+        var callerIsAdministrator = caller?.IsInRole(CatalogueRole.Administrator) == true;
+
+        // Resolve the requested role: try by ID first, then by name.
+        var resolvedRoleId = await ResolveRoleIdAsync(role, ct);
+        if (resolvedRoleId is null)
+        {
+            // Role not found — return empty list (consistent with spec: missing role returns empty result).
+            return new ApiResponse<IEnumerable<UserModel>>
+            {
+                Data = [],
+                StatusCode = (int)HttpStatusCode.OK,
+                Message = "No users found."
+            };
+        }
+
+        // Get the role name for authorization checks.
+        var roleById = await queryDispatcher.SendAsync(new GetRoleByIdQuery(resolvedRoleId.Value), ct);
+        var requestedRoleName = roleById.Data?.Name?.Value;
+
+        if (callerIsAdministrator)
+        {
+            // Administrator: can query any role (including Administrator), tenantId is optional.
+            // If tenantId is null, query across all tenants.
+        }
+        else
+        {
+            // Non-Administrator roles:
+            // 1. Cannot query Administrator role users.
+            if (requestedRoleName == CatalogueRole.Administrator)
+            {
+                return new ApiResponse<IEnumerable<UserModel>>
+                {
+                    Data = null,
+                    StatusCode = (int)HttpStatusCode.Forbidden,
+                    Message = "You do not have permission to query Administrator role users."
+                };
+            }
+
+            // 2. Must provide tenantId and can only query their own tenant.
+            if (!tenantId.HasValue)
+            {
+                return new ApiResponse<IEnumerable<UserModel>>
+                {
+                    Data = null,
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    Message = "tenantId is required for non-Administrator roles."
+                };
+            }
+
+            if (!await IsAccessibleTenantAsync(caller, tenantId.Value, ct))
+            {
+                return new ApiResponse<IEnumerable<UserModel>>
+                {
+                    Data = null,
+                    StatusCode = (int)HttpStatusCode.Forbidden,
+                    Message = "You do not have access to the specified tenant."
+                };
+            }
+        }
+
+        var result = await queryDispatcher.SendAsync(new GetUsersByRoleAndTenantQuery(resolvedRoleId.Value, tenantId), ct);
+        return new ApiResponse<IEnumerable<UserModel>>
+        {
+            Data = result.Data?.Select(MapUser).ToList() ?? [],
+            StatusCode = result.StatusCode,
+            Message = result.Message,
+            Errors = result.Errors
+        };
+    }
+
+    private async Task<Guid?> ResolveRoleIdAsync(string role, CancellationToken ct)
+    {
+        if (Guid.TryParse(role, out var roleId))
+        {
+            var roleById = await queryDispatcher.SendAsync(new GetRoleByIdQuery(roleId), ct);
+            return roleById.Data?.Id;
+        }
+
+        var roleByName = await queryDispatcher.SendAsync(new GetRoleByNameQuery(role), ct);
+        return roleByName.Data?.Id;
+    }
 }

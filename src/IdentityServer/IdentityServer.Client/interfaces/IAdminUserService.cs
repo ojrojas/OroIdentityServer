@@ -13,4 +13,5 @@ public interface IAdminUserService
     Task<HttpResponseMessage> AssignRolesToUserAsync(Guid userId, AssignRolesRequest request, CancellationToken ct = default);
     Task<HttpResponseMessage> LockUserAsync(Guid userId, CancellationToken ct = default);
     Task<HttpResponseMessage> UnlockUserAsync(Guid userId, CancellationToken ct = default);
+    Task<ApiResponse<IEnumerable<UserModel>>?> GetUsersByRoleAndTenantAsync(string role, Guid? tenantId = null, CancellationToken ct = default);
 }

@@ -30,4 +30,12 @@ public class AdminUserService(HttpClient client) : IAdminUserService
 
     public Task<ApiResponse<UserModel>?> GetUserByIdAsync(Guid Id, CancellationToken ct = default)
         => client.GetFromJsonAsync<ApiResponse<UserModel>>($"api/users/{Id}", ClientJsonOptions.Default, ct);
+
+    public Task<ApiResponse<IEnumerable<UserModel>>?> GetUsersByRoleAndTenantAsync(string role, Guid? tenantId = null, CancellationToken ct = default)
+    {
+        var url = $"api/users/by-role/{Uri.EscapeDataString(role)}";
+        if (tenantId.HasValue)
+            url += $"?tenantId={tenantId.Value}";
+        return client.GetFromJsonAsync<ApiResponse<IEnumerable<UserModel>>>(url, ClientJsonOptions.Default, ct);
+    }
 }

@@ -47,5 +47,19 @@ public static partial class AdminApiEndpoints
             Guid id,
             [FromServices] IAdminUserService service,
             CancellationToken ct) => await ToResultAsync(await service.UnlockUserAsync(id, ct), ct));
+
+        g.MapGet("/{role}/by-role", async (
+            string role,
+            [FromQuery] Guid? tenantId,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) =>
+        {
+            var result = await service.GetUsersByRoleAndTenantAsync(role, tenantId, ct);
+            if (result?.StatusCode == (int)System.Net.HttpStatusCode.Forbidden)
+                return Results.Forbid();
+            if (result?.StatusCode == (int)System.Net.HttpStatusCode.BadRequest)
+                return Results.BadRequest(result);
+            return Results.Ok(result);
+        });
     }
 }

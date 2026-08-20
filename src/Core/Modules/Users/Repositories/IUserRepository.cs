@@ -79,4 +79,14 @@ public interface IUserRepository
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result is <c>true</c> if the user can log in; otherwise, <c>false</c>.</returns>
     Task<bool> ValidateUserCanLoginAsync(string loginIdentifier, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Asynchronously retrieves users that are assigned the specified catalogue role,
+    /// optionally filtered by tenant.
+    /// </summary>
+    /// <param name="roleId">The catalogue role identifier to filter by.</param>
+    /// <param name="tenantId">An optional tenant identifier to further restrict results.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A collection of users assigned the specified role.</returns>
+    Task<IEnumerable<User>> GetUsersByRoleIdAsync(Guid roleId, Guid? tenantId, CancellationToken cancellationToken);
 }

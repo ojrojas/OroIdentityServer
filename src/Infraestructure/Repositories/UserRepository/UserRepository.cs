@@ -65,6 +65,15 @@ public class UserRepository(
         return result;
     }
 
+    public async Task<IEnumerable<User>> GetUsersByRoleIdAsync(Guid roleId, Guid? tenantId, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering GetUsersByRoleIdAsync with RoleId: {RoleId}, TenantId: {TenantId}", roleId, tenantId);
+        var specification = new GetUsersByRoleSpecification(roleId, tenantId);
+        var result = await repository.ListAsync(specification, cancellationToken);
+        logger.LogInformation("Exiting GetUsersByRoleIdAsync");
+        return result;
+    }
+
     public async Task<int> CountCreatedTodayAsync(DateTime today, Guid? tenantId, CancellationToken cancellationToken)
     {
         logger.LogInformation("Counting users created since {Today} for tenant {TenantId}", today, tenantId);
