@@ -96,17 +96,16 @@ public class ServerAdminUserService(
             return new HttpResponseMessage(HttpStatusCode.Forbidden);
         }
 
+        // Verify target user exists and check tenant access
+        var target = await queryDispatcher.SendAsync(new GetUserByIdQuery(userId), ct);
+        if (target.Data is null)
+        {
+            return new HttpResponseMessage(HttpStatusCode.NotFound);
+        }
+
         if (!callerIsMasterAdmin)
         {
-            // Tenant admin: can only act on users in the caller's home tenant. TenantUser
-            // membership no longer carries a per-tenant role, so authorisation is just
-            // "target tenant == caller's home tenant".
-            var target = await queryDispatcher.SendAsync(new GetUserByIdQuery(userId), ct);
-            if (target.Data is null)
-            {
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
-            }
-
+            // Tenant admin: can only act on users in the caller's home tenant.
             var callerId = new UserId(Guid.Parse(caller!.FindFirstValue(ClaimTypes.NameIdentifier)!));
             var callerUser = await queryDispatcher.SendAsync(new GetUserByIdQuery(callerId.Value), ct);
             if (callerUser.Data?.TenantId is null ||
@@ -115,6 +114,24 @@ public class ServerAdminUserService(
             {
                 return new HttpResponseMessage(HttpStatusCode.Forbidden);
             }
+        }
+
+        // Check if any of the roles being assigned is the Administrator catalogue role
+        var hasAdministratorRole = false;
+        foreach (var roleId in request.RoleIds)
+        {
+            var role = await queryDispatcher.SendAsync(new GetRoleByIdQuery(roleId), ct);
+            if (role.Data?.Name?.Value == CatalogueRole.Administrator)
+            {
+                hasAdministratorRole = true;
+                break;
+            }
+        }
+
+        // Only Admin and Administrator roles can assign the Administrator role
+        if (hasAdministratorRole && !callerIsAdmin)
+        {
+            return new HttpResponseMessage(HttpStatusCode.Forbidden);
         }
 
         var result = await commandDispatcher.SendAsync(new AssignRolesToUserCommand(userId, request.RoleIds), ct);
