@@ -47,7 +47,8 @@ public class AssignAdministratorRoleReproTests
         var userRepo = new UserRepository(
             NullLogger<UserRepository>.Instance,
             new Repository<User>(NullLogger<Repository<User>>.Instance, context),
-            Substitute.For<ISecurityUserRepository>());
+            Substitute.For<ISecurityUserRepository>(),
+            context);
         var securityUserRepo = new SecurityUserRepository(
             NullLogger<SecurityUserRepository>.Instance,
             new Repository<SecurityUser>(NullLogger<Repository<SecurityUser>>.Instance, context));

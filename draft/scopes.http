@@ -1,0 +1,38 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+
+### ============================================================
+### OPENIDDICT SCOPES API (MasterAdminOnly)
+### ============================================================
+
+### List all scopes
+GET {{baseUrl}}/api/scopes/
+Cookie: {{token}}
+
+### Create a new scope
+POST {{baseUrl}}/api/scopes/
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "name": "my_api",
+    "displayName": "My API Scope",
+    "description": "Access to My API resources",
+    "resources": ["my_api_resource"],
+    "openIdConnectClaims": ["sub", "email", "name"]
+}
+
+### Update a scope
+PUT {{baseUrl}}/api/scopes/my_api
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "displayName": "My Updated API Scope",
+    "description": "Updated scope description"
+}
+
+### Delete a scope
+DELETE {{baseUrl}}/api/scopes/my_api
+Cookie: {{token}}

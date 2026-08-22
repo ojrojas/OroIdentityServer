@@ -22,6 +22,7 @@ public class AuthorizationController : Controller
 {
     private readonly IOpenIddictApplicationManager _applicationManager;
     private readonly IOpenIddictAuthorizationManager _authorizationManager;
+    private readonly IOpenIddictTokenManager _tokenManager;
     private readonly IOpenIddictScopeManager _scopeManager;
     private readonly IQueryDispatcher _queryDispatcher;
     private readonly ICommandDispatcher _commandDispatcher;
@@ -29,12 +30,14 @@ public class AuthorizationController : Controller
     public AuthorizationController(
         IOpenIddictApplicationManager applicationManager,
         IOpenIddictAuthorizationManager authorizationManager,
+        IOpenIddictTokenManager tokenManager,
         IOpenIddictScopeManager scopeManager,
         IQueryDispatcher queryDispatcher,
         ICommandDispatcher commandDispatcher)
     {
         _applicationManager = applicationManager;
         _authorizationManager = authorizationManager;
+        _tokenManager = tokenManager;
         _scopeManager = scopeManager;
         _queryDispatcher = queryDispatcher;
         _commandDispatcher = commandDispatcher;
@@ -336,6 +339,42 @@ foreach (var claim in identity.Claims)
             var logoutSubject = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var logoutUserId = Guid.TryParse(logoutSubject, out var parsedLogoutUserId) ? parsedLogoutUserId : (Guid?)null;
             await LogValidationAsync(AuthValidationEventType.LogoutSucceeded, true, logoutUserId, null, null, null, CancellationToken.None);
+
+            // Revoke all OpenIddict authorizations and tokens for this user
+            if (!string.IsNullOrEmpty(logoutSubject))
+            {
+                await foreach (var authorization in _authorizationManager.FindBySubjectAsync(logoutSubject))
+                {
+                    try { await _authorizationManager.TryRevokeAsync(authorization); }
+                    catch { /* best-effort revocation */ }
+                }
+
+                await foreach (var token in _tokenManager.FindBySubjectAsync(logoutSubject))
+                {
+                    try { await _tokenManager.TryRevokeAsync(token); }
+                    catch { /* best-effort revocation */ }
+                }
+            }
+
+            // Deactivate the UserSession if a session_token claim is present
+            var sessionToken = User.FindFirstValue(OroIdentityServer.Server.Endpoints.AuthEndpoints.SessionTokenClaimType);
+            if (!string.IsNullOrEmpty(sessionToken) && logoutUserId.HasValue)
+            {
+                try
+                {
+                    var sessions = await _queryDispatcher.SendAsync(
+                        new OroIdentityServer.Application.Modules.UserSessions.Queries.GetUserSessionsByUserQuery(logoutUserId.Value),
+                        CancellationToken.None);
+                    var session = sessions?.FirstOrDefault(s => s.SessionToken == sessionToken);
+                    if (session is not null)
+                    {
+                        await _commandDispatcher.SendAsync(
+                            new OroIdentityServer.Application.Modules.UserSessions.Commands.DeactivateUserSessionCommand(session.Id.Value),
+                            CancellationToken.None);
+                    }
+                }
+                catch { /* session deactivation must not block logout */ }
+            }
         }
 
         // Delete the local admin cookie created when the user signed in.

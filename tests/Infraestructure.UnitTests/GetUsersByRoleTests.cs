@@ -25,7 +25,7 @@ public class GetUsersByRoleTests
     {
         var repository = new Repository<User>(NullLogger<Repository<User>>.Instance, context);
         var securityUserRepository = Substitute.For<ISecurityUserRepository>();
-        return new UserRepository(NullLogger<UserRepository>.Instance, repository, securityUserRepository);
+        return new UserRepository(NullLogger<UserRepository>.Instance, repository, securityUserRepository, context);
     }
 
     [Fact]

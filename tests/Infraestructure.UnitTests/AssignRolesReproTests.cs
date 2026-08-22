@@ -28,7 +28,8 @@ public class AssignRolesReproTests
         var userRepo = new UserRepository(
             NullLogger<UserRepository>.Instance,
             new Repository<User>(NullLogger<Repository<User>>.Instance, context),
-            Substitute.For<ISecurityUserRepository>());
+            Substitute.For<ISecurityUserRepository>(),
+            context);
 
         var roleRepo = new UserRolesRepository(
             NullLogger<UserRolesRepository>.Instance,

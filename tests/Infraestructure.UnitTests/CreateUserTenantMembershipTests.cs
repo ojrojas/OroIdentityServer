@@ -28,7 +28,8 @@ public class CreateUserTenantMembershipTests
         var userRepo = new UserRepository(
             NullLogger<UserRepository>.Instance,
             new Repository<User>(NullLogger<Repository<User>>.Instance, context),
-            Substitute.For<ISecurityUserRepository>());
+            Substitute.For<ISecurityUserRepository>(),
+            context);
         var tenantRepo = new TenantRepository(
             NullLogger<TenantRepository>.Instance,
             new Repository<Tenant>(NullLogger<Repository<Tenant>>.Instance, context));

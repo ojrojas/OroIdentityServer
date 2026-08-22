@@ -1,0 +1,39 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+
+### ============================================================
+### IDENTIFICATION TYPES API
+### ============================================================
+
+### List all identification types
+GET {{baseUrl}}/api/identification-types/
+Cookie: {{token}}
+
+### Get identification type by ID
+GET {{baseUrl}}/api/identification-types/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}
+
+### Create a new identification type
+POST {{baseUrl}}/api/identification-types/
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "name": "Passport",
+    "description": "International passport"
+}
+
+### Update an identification type
+PUT {{baseUrl}}/api/identification-types/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "name": "National ID",
+    "description": "National identification document"
+}
+
+### Delete an identification type
+DELETE {{baseUrl}}/api/identification-types/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}

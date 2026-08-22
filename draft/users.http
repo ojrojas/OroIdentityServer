@@ -1,0 +1,67 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+
+### ============================================================
+### USERS API
+### ============================================================
+
+### List all users
+GET {{baseUrl}}/api/users/
+Cookie: {{token}}
+
+### Get user by ID
+GET {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}
+
+### Create a new user
+POST {{baseUrl}}/api/users/
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "name": "Test",
+    "lastName": "User",
+    "email": "testuser@example.com",
+    "userName": "testuser",
+    "identification": "123456789",
+    "identificationTypeId": null,
+    "password": "Test@123456",
+    "tenantId": null
+}
+
+### Update a user
+PUT {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "name": "Updated",
+    "lastName": "User",
+    "email": "updateduser@example.com"
+}
+
+### Delete a user
+DELETE {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}
+
+### Update user roles
+PUT {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001/roles
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "roles": ["Admin", "Manager"]
+}
+
+### Lock user
+POST {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001/lock
+Cookie: {{token}}
+
+### Unlock user
+POST {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001/unlock
+Cookie: {{token}}
+
+### Get users by role
+GET {{baseUrl}}/api/users/Teacher/by-role?tenantId=01a01c0d-1bfb-7e56-a50c-58a4602473e5
+Cookie: {{token}}

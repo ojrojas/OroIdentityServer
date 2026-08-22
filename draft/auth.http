@@ -1,0 +1,99 @@
+### Variables
+@baseUrl = http://localhost:5080
+@adminUser = admin
+@adminPass = Admin@123456
+
+### ============================================================
+### COOKIE-BASED LOGIN (Admin Panel)
+### ============================================================
+
+### Login as Admin (Cookie Auth)
+# @name loginCookie
+POST {{baseUrl}}/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+loginIdentifier={{adminUser}}&password={{adminPass}}&ReturnUrl=/
+
+### Check cookie from loginCookie
+GET {{baseUrl}}/
+Cookie: {{loginCookie.response.headers.Set-Cookie}}
+
+### Logout (Cookie Auth)
+POST {{baseUrl}}/auth/logout
+Content-Type: application/x-www-form-urlencoded
+
+### ============================================================
+### OAUTH2 - AUTHORIZATION CODE FLOW (with PKCE)
+### ============================================================
+
+### Step 1: Generate PKCE code_verifier and code_challenge
+# @name pkce
+# The code_verifier should be 43-128 characters from [A-Z] / [a-z] / [0-9] / "-" / "." / "_" / "~"
+# The code_challenge is BASE64URL(SHA256(code_verifier))
+
+### Step 2: Get Authorization Code
+# Open this URL in browser to get the authorization code from redirect
+# NOTE: Replace CODE_CHALLENGE with actual SHA256 hash of your code_verifier
+GET {{baseUrl}}/connect/authorize?
+    &client_id=OroIdentityServer.Admin
+    &response_type=code
+    &scope=openid profile email roles offline_access admin
+    &redirect_uri=http://localhost:30645
+    &state=abc123
+    &code_challenge=YOUR_CODE_CHALLENGE
+    &code_challenge_method=S256
+
+### Step 3: Exchange Authorization Code for Tokens
+# @name tokenAuthCode
+POST {{baseUrl}}/connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+&client_id=OroIdentityServer.Admin
+&code=YOUR_AUTHORIZATION_CODE
+&redirect_uri=http://localhost:30645
+&code_verifier=YOUR_CODE_VERIFIER
+
+### ============================================================
+### CLIENT CREDENTIALS FLOW
+### ============================================================
+
+### Get token using Client Credentials
+# @name tokenClientCredentials
+POST {{baseUrl}}/connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+&client_id=YOUR_CLIENT_ID
+&client_secret=YOUR_CLIENT_SECRET
+&scope=admin
+
+### ============================================================
+### REFRESH TOKEN
+### ============================================================
+
+### Refresh Access Token
+# @name refreshToken
+POST {{baseUrl}}/connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token
+&client_id=OroIdentityServer.Admin
+&refresh_token=YOUR_REFRESH_TOKEN
+
+### ============================================================
+### USERINFO ENDPOINT
+### ============================================================
+
+### Get User Info
+GET {{baseUrl}}/connect/userinfo
+Authorization: Bearer {{tokenAuthCode.response.body.access_token}}
+
+### ============================================================
+### END SESSION (LOGOUT)
+### ============================================================
+
+### Logout (OIDC)
+GET {{baseUrl}}/connect/logout?
+    &id_token_hint=YOUR_ID_TOKEN
+    &post_logout_redirect_uri=http://localhost:30645

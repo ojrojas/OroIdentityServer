@@ -7,7 +7,8 @@ namespace OroIdentityServer.Infraestructure.Repositories;
 public class UserRepository(
     ILogger<UserRepository> logger,
     IRepository<User> repository,
-    ISecurityUserRepository securityUserRepository) : IUserRepository
+    ISecurityUserRepository securityUserRepository,
+    OroIdentityAppContext context) : IUserRepository
 {
     public async Task AddUserAsync(User user, CancellationToken cancellationToken)
     {
@@ -68,8 +69,21 @@ public class UserRepository(
     public async Task<IEnumerable<User>> GetUsersByRoleIdAsync(Guid roleId, Guid? tenantId, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering GetUsersByRoleIdAsync with RoleId: {RoleId}, TenantId: {TenantId}", roleId, tenantId);
-        var specification = new GetUsersByRoleSpecification(roleId, tenantId);
-        var result = await repository.ListAsync(specification, cancellationToken);
+
+        var allUsers = await context.Users
+            .Include(u => u.Roles)
+            .ThenInclude(ur => ur.Role)
+            .ToListAsync(cancellationToken);
+
+        IEnumerable<User> result = allUsers
+            .Where(u => u.Roles.Any(r => r.RoleId!.Value == roleId))
+            .ToList();
+
+        if (tenantId.HasValue)
+        {
+            result = result.Where(u => u.TenantId != null && u.TenantId.Value == tenantId.Value);
+        }
+
         logger.LogInformation("Exiting GetUsersByRoleIdAsync");
         return result;
     }

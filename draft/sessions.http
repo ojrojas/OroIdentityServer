@@ -1,0 +1,42 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+
+### ============================================================
+### USER SESSIONS API
+### ============================================================
+
+### Get sessions by user ID
+GET {{baseUrl}}/api/sessions/by-user/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}
+
+### Get user sessions by user ID
+GET {{baseUrl}}/api/user-sessions/by-user/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}
+
+### Get active sessions
+GET {{baseUrl}}/api/user-sessions/active
+Cookie: {{token}}
+
+### Get active session count
+GET {{baseUrl}}/api/user-sessions/active-count
+Cookie: {{token}}
+
+### Create a user session
+POST {{baseUrl}}/api/user-sessions/
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "userId": "00000000-0000-0000-0000-000000000001",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "Mozilla/5.0"
+}
+
+### Deactivate a session
+POST {{baseUrl}}/api/user-sessions/00000000-0000-0000-0000-000000000001/deactivate
+Cookie: {{token}}
+
+### Terminate all sessions for a user
+POST {{baseUrl}}/api/user-sessions/terminate-all/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}

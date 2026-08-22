@@ -1,8 +1,10 @@
 using IdentityServer.Client.Extensions;
 using IdentityServer.Client.Services;
 using System.Globalization;
+using System.Security.Claims;
 using IdentityServer.Components;
 using IdentityServer.Server.Extensions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
@@ -90,14 +92,14 @@ await using (var scope = app.Services.CreateAsyncScope())
     var passwordHasher = scope.ServiceProvider.GetRequiredService<OroIdentityServer.Core.Interfaces.IPasswordHasher>();
     var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-    if (!configuration.GetValue<bool>("DatabaseSeeder:Skip"))
-    {
-        var seedPath = Path.Combine(AppContext.BaseDirectory, "Data", "seedData.json");
-        if (File.Exists(seedPath))
+        if (!configuration.GetValue<bool>("DatabaseSeeder:Skip"))
         {
-            await DatabaseSeeder.SeedAsync(ctx, passwordHasher, configuration);
+            var seedPath = Path.Combine(AppContext.BaseDirectory, "Data", "seedData.json");
+            if (File.Exists(seedPath))
+            {
+                await DatabaseSeeder.SeedAsync(ctx, passwordHasher, configuration, applicationManager);
+            }
         }
-    }
 }
 
 
@@ -122,6 +124,48 @@ app.UseRequestLocalization();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Validate the user's session on every request. If the session has been deactivated
+// (e.g. via admin remote logout) or has expired, the user is signed out immediately.
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path;
+    var isExempt = path.StartsWithSegments("/Account")
+        || path.StartsWithSegments("/auth")
+        || path.StartsWithSegments("/connect")
+        || path.StartsWithSegments("/api")
+        || path.StartsWithSegments("/_blazor")
+        || path.StartsWithSegments("/_framework")
+        || path.StartsWithSegments("/css")
+        || path.StartsWithSegments("/js")
+        || path.StartsWithSegments("/culture");
+
+    if (!isExempt
+        && context.User.Identity?.IsAuthenticated == true
+        && context.User.FindFirstValue(OroIdentityServer.Server.Endpoints.AuthEndpoints.SessionTokenClaimType) is { Length: > 0 } sessionToken)
+    {
+        var userSessionRepo = context.RequestServices.GetRequiredService<OroIdentityServer.Core.Modules.UserSessions.Repositories.IUserSessionRepository>();
+        var session = await userSessionRepo.GetByTokenAsync(sessionToken, context.RequestAborted);
+
+        if (session is null || session.ExpiresAt <= DateTime.UtcNow)
+        {
+            await context.SignOutAsync(OroIdentityServer.Server.Authentication.CookieAuthHandlerSetup.AdminScheme);
+            context.Response.Redirect("/Account/Login");
+            return;
+        }
+
+        // Sliding expiration: refresh activity if more than half the session has elapsed
+        var halfLife = session.ExpiresAt.Subtract(session.CreatedAt).TotalSeconds / 2;
+        var elapsed = (DateTime.UtcNow - session.CreatedAt).TotalSeconds;
+        if (elapsed >= halfLife)
+        {
+            session.UpdateLastActivity();
+            await userSessionRepo.UpdateUserSessionAsync(session, context.RequestAborted);
+        }
+    }
+
+    await next();
+});
 
 // Resolve the current tenant from the header the WASM client sends on every /api call, or from the
 // oro_tenant cookie persisted by the tenant switcher. Applied before rendering so pages and queries

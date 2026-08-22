@@ -1,0 +1,43 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+
+### ============================================================
+### PERMISSIONS API (AdminOnly)
+### ============================================================
+
+### List all permissions
+GET {{baseUrl}}/api/permissions/
+Cookie: {{token}}
+
+### Get permission by ID
+GET {{baseUrl}}/api/permissions/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}
+
+### Create a new permission
+POST {{baseUrl}}/api/permissions/
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "name": "Content.Read",
+    "description": "Read content permission",
+    "provider": "Content",
+    "action": "Read",
+    "resource": "Article",
+    "isSystem": false
+}
+
+### Update a permission
+PUT {{baseUrl}}/api/permissions/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "name": "Content.Read.All",
+    "description": "Read all content permission"
+}
+
+### Delete a permission
+DELETE {{baseUrl}}/api/permissions/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}

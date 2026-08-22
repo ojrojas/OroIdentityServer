@@ -1,0 +1,11 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+
+### ============================================================
+### DASHBOARD API
+### ============================================================
+
+### Get dashboard stats (Any authenticated user)
+GET {{baseUrl}}/api/dashboard/stats
+Cookie: {{token}}

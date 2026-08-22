@@ -1,0 +1,62 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+
+### ============================================================
+### TENANTS API
+### ============================================================
+
+### Get my tenant (ManagerOrAdmin)
+GET {{baseUrl}}/api/tenants/mine
+Cookie: {{token}}
+
+### Get tenants by user ID (ManagerOrAdmin)
+GET {{baseUrl}}/api/tenants/by-user/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}
+
+### List all tenants (MasterAdminOnly)
+GET {{baseUrl}}/api/tenants/
+Cookie: {{token}}
+
+### Get tenant by ID (MasterAdminOnly)
+GET {{baseUrl}}/api/tenants/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}
+
+### Create a new tenant (MasterAdminOnly)
+POST {{baseUrl}}/api/tenants/
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "name": "NewTenant",
+    "displayName": "New Tenant",
+    "description": "A new test tenant"
+}
+
+### Update a tenant (MasterAdminOnly)
+PUT {{baseUrl}}/api/tenants/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "displayName": "Updated Tenant",
+    "description": "Updated description"
+}
+
+### Activate a tenant (MasterAdminOnly)
+POST {{baseUrl}}/api/tenants/00000000-0000-0000-0000-000000000001/activate
+Cookie: {{token}}
+
+### Suspend a tenant (MasterAdminOnly)
+POST {{baseUrl}}/api/tenants/00000000-0000-0000-0000-000000000001/suspend
+Cookie: {{token}}
+
+### Add user to tenant (MasterAdminOnly)
+POST {{baseUrl}}/api/tenants/00000000-0000-0000-0000-000000000001/users
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "userId": "00000000-0000-0000-0000-000000000002",
+    "role": "Manager"
+}

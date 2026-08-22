@@ -37,7 +37,8 @@ public static class OpenIddictServerConfiguration
                     .SetEndSessionEndpointUris("connect/logout")
                     .SetTokenEndpointUris("connect/token")
                     .SetUserInfoEndpointUris("connect/userinfo")
-                    .SetIntrospectionEndpointUris("connect/introspect");
+                    .SetIntrospectionEndpointUris("connect/introspect")
+                    .SetRevocationEndpointUris("connect/revoke");
 
                 options.AllowAuthorizationCodeFlow()
                     .AllowRefreshTokenFlow()

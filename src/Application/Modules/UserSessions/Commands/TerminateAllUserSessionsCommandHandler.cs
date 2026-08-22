@@ -1,8 +1,12 @@
+using OpenIddict.Abstractions;
+
 namespace OroIdentityServer.Application.Modules.UserSessions.Commands;
 
 public sealed class TerminateAllUserSessionsCommandHandler(
     ILogger<TerminateAllUserSessionsCommandHandler> logger,
-    IUserSessionRepository userSessionRepository
+    IUserSessionRepository userSessionRepository,
+    IOpenIddictAuthorizationManager authorizationManager,
+    IOpenIddictTokenManager tokenManager
 ) : ICommandHandler<TerminateAllUserSessionsCommand>
 {
     public async Task<Result> HandleAsync(TerminateAllUserSessionsCommand command, CancellationToken cancellationToken)
@@ -10,6 +14,21 @@ public sealed class TerminateAllUserSessionsCommandHandler(
         logger.LogInformation("Handling TerminateAllUserSessionsCommand for UserId: {UserId}", command.UserId);
         try
         {
+            // Revoke all OpenIddict authorizations and tokens for this user
+            var subject = command.UserId.ToString();
+            await foreach (var authorization in authorizationManager.FindBySubjectAsync(subject))
+            {
+                try { await authorizationManager.TryRevokeAsync(authorization); }
+                catch (Exception ex) { logger.LogWarning(ex, "Failed to revoke authorization for subject {Subject}", subject); }
+            }
+
+            await foreach (var token in tokenManager.FindBySubjectAsync(subject))
+            {
+                try { await tokenManager.TryRevokeAsync(token); }
+                catch (Exception ex) { logger.LogWarning(ex, "Failed to revoke token for subject {Subject}", subject); }
+            }
+
+            // Deactivate all UserSessions
             var sessions = await userSessionRepository.GetSessionsByUserIdAsync(new(command.UserId), cancellationToken);
             foreach (var session in sessions)
             {

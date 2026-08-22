@@ -1,0 +1,15 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+
+### ============================================================
+### VALIDATION LOGS API
+### ============================================================
+
+### Get daily summary (last 7 days)
+GET {{baseUrl}}/api/validation-logs/daily-summary?days=7
+Cookie: {{token}}
+
+### Get recent validation logs
+GET {{baseUrl}}/api/validation-logs/recent?take=10
+Cookie: {{token}}

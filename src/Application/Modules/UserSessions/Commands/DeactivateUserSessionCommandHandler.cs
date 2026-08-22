@@ -2,11 +2,15 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OpenIddict.Abstractions;
+
 namespace OroIdentityServer.Application.Modules.UserSessions.Commands;
 
 public class DeactivateUserSessionCommandHandler(
     ILogger<DeactivateUserSessionCommandHandler> logger,
-    IUserSessionRepository userSessionRepository
+    IUserSessionRepository userSessionRepository,
+    IOpenIddictAuthorizationManager authorizationManager,
+    IOpenIddictTokenManager tokenManager
 ) : ICommandHandler<DeactivateUserSessionCommand>
 {
     public async Task<Result> HandleAsync(DeactivateUserSessionCommand command, CancellationToken cancellationToken)
@@ -19,6 +23,23 @@ public class DeactivateUserSessionCommandHandler(
             {
                 logger.LogWarning("Session not found: {SessionId}", command.SessionId);
                 return Result.Success();
+            }
+
+            // Revoke OpenIddict tokens for this user before deactivating the session
+            var subject = session.UserId?.Value.ToString();
+            if (!string.IsNullOrEmpty(subject))
+            {
+                await foreach (var authorization in authorizationManager.FindBySubjectAsync(subject))
+                {
+                    try { await authorizationManager.TryRevokeAsync(authorization); }
+                    catch (Exception ex) { logger.LogWarning(ex, "Failed to revoke authorization for subject {Subject}", subject); }
+                }
+
+                await foreach (var token in tokenManager.FindBySubjectAsync(subject))
+                {
+                    try { await tokenManager.TryRevokeAsync(token); }
+                    catch (Exception ex) { logger.LogWarning(ex, "Failed to revoke token for subject {Subject}", subject); }
+                }
             }
 
             session.DeactivateSession();

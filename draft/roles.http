@@ -1,0 +1,40 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+
+### ============================================================
+### ROLES API (AdminOnly)
+### ============================================================
+
+### List all roles
+GET {{baseUrl}}/api/roles/
+Cookie: {{token}}
+
+### Get role by ID
+GET {{baseUrl}}/api/roles/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}
+
+### Create a new role
+POST {{baseUrl}}/api/roles/
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "name": "Editor",
+    "description": "Editor role with content management permissions",
+    "permissions": []
+}
+
+### Update a role
+PUT {{baseUrl}}/api/roles/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "name": "Senior Editor",
+    "description": "Senior editor role"
+}
+
+### Delete a role
+DELETE {{baseUrl}}/api/roles/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}

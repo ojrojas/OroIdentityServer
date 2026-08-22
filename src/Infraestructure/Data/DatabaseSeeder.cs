@@ -2,6 +2,9 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using OpenIddict.Abstractions;
+using static OpenIddict.Abstractions.OpenIddictConstants;
+
 namespace OroIdentityServer.Infraestructure.Data;
 
 public static class DatabaseSeeder
@@ -10,6 +13,7 @@ public static class DatabaseSeeder
         OroIdentityAppContext context,
         IPasswordHasher passwordHasher,
         IConfiguration configuration,
+        IOpenIddictApplicationManager? applicationManager = null,
         CancellationToken cancellationToken = default)
     {
         Guid userCreateId = Guid.CreateVersion7();
@@ -82,6 +86,82 @@ public static class DatabaseSeeder
         // previous run) never received the Administrator UserRole, and after MasterAdminOnly
         // was added the admin lost access entirely.
         await EnsureSeedAdminCanNavigateAsync(context, seedAdmin, adminRoleName, tenantName, cancellationToken);
+
+        // Seed OpenIddict applications with introspection permission for logout detection.
+        if (applicationManager is not null)
+        {
+            await SeedOpenIddictApplicationsAsync(applicationManager, configuration, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Seeds a default web application with the permissions required for remote logout detection
+    /// via token introspection. The application is idempotent: if a client with the same ClientId
+    /// already exists, its permissions are updated.
+    /// </summary>
+    private static async Task SeedOpenIddictApplicationsAsync(
+        IOpenIddictApplicationManager applicationManager,
+        IConfiguration configuration,
+        CancellationToken cancellationToken)
+    {
+        var defaultClientId = configuration["SEED_APP_CLIENT_ID"] ?? "oroidentity-admin-spa";
+        var defaultDisplayName = configuration["SEED_APP_DISPLAY_NAME"] ?? "OroIdentity Admin SPA";
+        var defaultRedirectUri = configuration["SEED_APP_REDIRECT_URI"] ?? "https://localhost:5001/authentication/login-callback";
+        var defaultPostLogoutUri = configuration["SEED_APP_POST_LOGOUT_URI"] ?? "https://localhost:5001/authentication/logout-callback";
+
+        var existing = await applicationManager.FindByClientIdAsync(defaultClientId);
+        if (existing is not null)
+        {
+            var descriptor = new OpenIddictApplicationDescriptor();
+            await applicationManager.PopulateAsync(descriptor, existing);
+
+            var permissionsUpdated = false;
+            if (!descriptor.Permissions.Contains("ept:introspection"))
+            {
+                descriptor.Permissions.Add("ept:introspection");
+                permissionsUpdated = true;
+            }
+            if (!descriptor.Permissions.Contains("ept:revocation"))
+            {
+                descriptor.Permissions.Add("ept:revocation");
+                permissionsUpdated = true;
+            }
+            if (permissionsUpdated)
+            {
+                await applicationManager.UpdateAsync(existing, descriptor);
+            }
+            return;
+        }
+
+        var appDescriptor = new OpenIddictApplicationDescriptor
+        {
+            ClientId = defaultClientId,
+            DisplayName = defaultDisplayName,
+            ConsentType = ConsentTypes.Implicit,
+            ApplicationType = ApplicationTypes.Web
+        };
+
+        appDescriptor.Permissions.Add("ept:authorization");
+        appDescriptor.Permissions.Add("ept:token");
+        appDescriptor.Permissions.Add("ept:end_session");
+        appDescriptor.Permissions.Add("ept:introspection");
+        appDescriptor.Permissions.Add("ept:revocation");
+        appDescriptor.Permissions.Add("ept:userinfo");
+
+        appDescriptor.Permissions.Add("gt:authorization_code");
+        appDescriptor.Permissions.Add("gt:refresh_token");
+
+        appDescriptor.Permissions.Add("scp:openid");
+        appDescriptor.Permissions.Add("scp:profile");
+        appDescriptor.Permissions.Add("scp:email");
+        appDescriptor.Permissions.Add("scp:roles");
+
+        appDescriptor.Requirements.Add("ft:pkce");
+
+        appDescriptor.RedirectUris.Add(new Uri(defaultRedirectUri));
+        appDescriptor.PostLogoutRedirectUris.Add(new Uri(defaultPostLogoutUri));
+
+        await applicationManager.CreateAsync(appDescriptor);
     }
 
     /// <summary>

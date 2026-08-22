@@ -67,7 +67,8 @@ public class SecurityUserChangePasswordTests
         var userRepo = new UserRepository(
             NullLogger<UserRepository>.Instance,
             new Repository<User>(NullLogger<Repository<User>>.Instance, context),
-            CreateRepo(context));
+            CreateRepo(context),
+            context);
 
         var loadedUser = await userRepo.GetUserByIdAsync(user.Id, CancellationToken.None);
         Assert.NotNull(loadedUser);

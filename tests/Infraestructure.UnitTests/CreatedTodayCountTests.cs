@@ -36,7 +36,8 @@ public class CreatedTodayCountTests
         var userRepo = new UserRepository(
             NullLogger<UserRepository>.Instance,
             new Repository<User>(NullLogger<Repository<User>>.Instance, context),
-            Substitute.For<ISecurityUserRepository>());
+            Substitute.For<ISecurityUserRepository>(),
+            context);
 
         var identificationType = IdentificationType.Create("Passport");
         context.IdentificationTypes.Add(identificationType);
