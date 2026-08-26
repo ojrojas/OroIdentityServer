@@ -140,6 +140,18 @@ public sealed class DashboardAndRoleGuardApiTests(AspireIdentityServerApp app)
     {
         var (client, tenantId) = await LoginAsAdminAsync();
 
+        // Baseline scoped to this tenant: the seeded master-tenant admin (and any other
+        // users created today in the master tenant by the seeder or other tests) count here.
+        var baselineRequest = new HttpRequestMessage(HttpMethod.Get, "/api/dashboard/stats");
+        baselineRequest.Headers.Add("X-Tenant-Id", tenantId.ToString());
+        var baselineResponse = await client.SendAsync(baselineRequest);
+        baselineResponse.EnsureSuccessStatusCode();
+        var baseline = await baselineResponse.Content.ReadFromJsonAsync<DashboardStatsModel>();
+        Assert.NotNull(baseline);
+
+        var globalBaseline = await client.GetFromJsonAsync<DashboardStatsModel>("/api/dashboard/stats");
+        Assert.NotNull(globalBaseline);
+
         // Seed a user created today in a DIFFERENT tenant: it must NOT count for this tenant.
         await using (var context = app.CreateDbContext())
         {
@@ -155,16 +167,19 @@ public sealed class DashboardAndRoleGuardApiTests(AspireIdentityServerApp app)
             await context.SaveChangesAsync();
         }
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "/api/dashboard/stats");
-        request.Headers.Add("X-Tenant-Id", tenantId.ToString());
-        var response = await client.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-
-        var stats = await response.Content.ReadFromJsonAsync<DashboardStatsModel>();
+        var afterRequest = new HttpRequestMessage(HttpMethod.Get, "/api/dashboard/stats");
+        afterRequest.Headers.Add("X-Tenant-Id", tenantId.ToString());
+        var afterResponse = await client.SendAsync(afterRequest);
+        afterResponse.EnsureSuccessStatusCode();
+        var stats = await afterResponse.Content.ReadFromJsonAsync<DashboardStatsModel>();
         Assert.NotNull(stats);
 
-        // Only the admin user (created today in this tenant) counts, not the other-tenant user.
-        Assert.Equal(1, stats.UsersCreatedToday);
+        // The other-tenant user is excluded from the scoped count but included globally.
+        Assert.Equal(baseline.UsersCreatedToday, stats.UsersCreatedToday);
+
+        var globalAfter = await client.GetFromJsonAsync<DashboardStatsModel>("/api/dashboard/stats");
+        Assert.NotNull(globalAfter);
+        Assert.Equal(globalBaseline.UsersCreatedToday + 1, globalAfter.UsersCreatedToday);
     }
 
     [Fact]

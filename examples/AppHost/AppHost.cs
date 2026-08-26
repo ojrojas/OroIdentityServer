@@ -1,16 +1,36 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
 var environment = builder.Environment;
 
-IResourceBuilder<RabbitMQServerResource> rabbitMq = builder.AddRabbitMQ("oroeventdrivenexchange")
-    .WithLifetime(ContainerLifetime.Persistent);
+// Optional resources can be toggled via configuration, e.g. by tests through the
+// DistributedApplicationTestingBuilder args: "Resources:RabbitMQ=false".
+var enableRabbitMq = builder.Configuration.GetValue("Resources:RabbitMQ", true);
+var enablePgAdmin = builder.Configuration.GetValue("Resources:PgAdmin", true);
+var enableIdentityAdmin = builder.Configuration.GetValue("Resources:IdentityAdmin", true);
 
-IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("postgres")
-    .WithDataVolume("oro-postgres-data");
+IResourceBuilder<RabbitMQServerResource>? rabbitMq = null;
+if (enableRabbitMq)
+{
+    rabbitMq = builder.AddRabbitMQ("oroeventdrivenexchange")
+        .WithLifetime(ContainerLifetime.Persistent);
+}
 
-postgres.WithPgAdmin(container => container.WithImageTag("latest"));
+var enableDataVolume = builder.Configuration.GetValue("Resources:PostgresDataVolume", true);
+
+IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("postgres");
+
+if (enableDataVolume)
+{
+    postgres.WithDataVolume("oro-postgres-data");
+}
+
+if (enablePgAdmin)
+{
+    postgres.WithPgAdmin(container => container.WithImageTag("latest"));
+}
 
 IResourceBuilder<PostgresDatabaseResource> identityDb = postgres.AddDatabase("identitydb");
 
@@ -56,30 +76,37 @@ var eventBusMode = builder.Configuration["EventBus:Mode"] ?? "RabbitMQ";
 // container image from this project.
 IResourceBuilder<ProjectResource> identityServer = builder.AddProject<Projects.IdentityServer>("identity-api")
     .WithHttpEndpoint(port: 5080, name: "http")
-    .WithReference(rabbitMq).WaitFor(rabbitMq)
     .WithReference(identityDb).WaitFor(identityDb)
     .WithEnvironment("SEED_TENANT_NAME", "OroMasterTenant")
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", environment.EnvironmentName)
     .WithEnvironment("SymmetricSecurityKey", SymmetricSecurityKey)
     .WithEnvironment("EventBus__Mode", eventBusMode)
-    .WithEnvironment("EventBus__RabbitMQ__HostName", "oroeventdrivenexchange")
-    .WithEnvironment("EventBus__RabbitMQ__Port", "5672")
-    .WithEnvironment("EventBus__RabbitMQ__UserName", "guest")
-    .WithEnvironment("EventBus__RabbitMQ__Password", "guest")
     .WithEnvironment("IDENTITY_ADMIN_HTTP", "http://localhost:4200");
+
+if (rabbitMq is not null)
+{
+    identityServer
+        .WithReference(rabbitMq).WaitFor(rabbitMq)
+        .WithEnvironment("EventBus__RabbitMQ__HostName", "oroeventdrivenexchange")
+        .WithEnvironment("EventBus__RabbitMQ__Port", "5672")
+        .WithEnvironment("EventBus__RabbitMQ__UserName", "guest")
+        .WithEnvironment("EventBus__RabbitMQ__Password", "guest");
+}
 // }
 
+if (enableIdentityAdmin)
+{
+    // example oroidentity-admin login angular client
+    var clientId = builder.AddParameter("ClientId", "OroIdentityServer.Admin");
 
-// example oroidentity-admin login angular client
-var clientId = builder.AddParameter("ClientId", "OroIdentityServer.Admin");
+    var identityAdmin = builder.AddPnpmApp("oroidentity-admin", "../Frontends/oroidentity-admin").WithPnpmPackageInstallation();
 
-var identityAdmin = builder.AddPnpmApp("oroidentity-admin", "../Frontends/oroidentity-admin").WithPnpmPackageInstallation();
+    identityAdmin.WithHttpEndpoint(port: 30645, targetPort: 4200)
+       .WithEnvironment("CLIENT_ID", clientId)
+       .WithEnvironment("IDENTITY_API_HTTPS", identityServer.GetEndpoint("https"))
+       .WithEnvironment("IDENTITY_API_HTTP", identityServer.GetEndpoint("http"));
 
-identityAdmin.WithHttpEndpoint(port: 30645, targetPort: 4200)
-   .WithEnvironment("CLIENT_ID", clientId)
-   .WithEnvironment("IDENTITY_API_HTTPS", identityServer.GetEndpoint("https"))
-   .WithEnvironment("IDENTITY_API_HTTP", identityServer.GetEndpoint("http"));
-
-identityServer.WithReference(identityAdmin);
+    identityServer.WithReference(identityAdmin);
+}
 
 builder.Build().Run();

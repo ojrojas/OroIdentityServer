@@ -53,7 +53,7 @@ public static class OpenIddictServerConfiguration
                     Scopes.OfflineAccess,
                     "admin");
 
-                if (builder.Environment.IsDevelopment())
+                if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName.Equals("Testing"))
                     options.AddDevelopmentEncryptionCertificate()
                         .AddDevelopmentSigningCertificate();
                 else
@@ -82,7 +82,7 @@ public static class OpenIddictServerConfiguration
 
     private static X509Certificate2 LoadOrCreateSigningCertificate(IConfiguration configuration)
     {
-        var certsDir = Path.Combine(AppContext.BaseDirectory, "data-protection-keys");
+        var certsDir = Path.Combine(AppContext.BaseDirectory, "certificates");
         var certPath = Path.Combine(certsDir, "openiddict-signing.pfx");
 
         if (File.Exists(certPath))

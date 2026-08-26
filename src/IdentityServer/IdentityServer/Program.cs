@@ -28,6 +28,14 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
+// Fingerprinted/generated static assets (scoped CSS bundle, framework JS) live under obj/ and are
+// only mapped automatically when the environment is Development. Testing runs from source like
+// Development, so wire the static web assets manifest for it too, otherwise MapStaticAssets fails.
+if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName.Equals("Testing"))
+{
+    builder.WebHost.UseStaticWebAssets();
+}
+
 // builder.Services.AddDataProtection()
 //     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "data-protection-keys")))
 //     .SetApplicationName("OroIdentityServer");
