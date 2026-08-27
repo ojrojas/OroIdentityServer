@@ -85,12 +85,14 @@ OroIdentityServer/
 │       └── BuildingBlocks.ServicesDefaults/        # Shared service registration helpers
 ├── examples/
 │   ├── AppHost/                                  # .NET Aspire orchestration (Postgres, Redis, RabbitMQ, admin UI)
-│   └── Frontends/oroidentity-admin/               # Sample Angular admin frontend
+│   ├── BlazorServerSessionExample/               # Blazor Server session example
+│   ├── Frontends/oroidentity-admin/               # Sample Angular admin frontend
+│   └── NodeJsApiExample/                         # Minimal Node.js API example
 ├── tests/
 │   ├── Server.Tests/                             # Endpoint + authorization integration tests (WebApplicationFactory)
 │   └── BuildingBlocks.*.UnitTests/                # Unit/integration tests per building block
 ├── data-protection-keys/                         # Shared DataProtection keyring for local development
-├── docker-compose.yaml                           # Standalone PostgreSQL container (manual setup)
+├── docker-compose.yaml                           # PostgreSQL + Identity Server containers
 ├── README.md
 ├── LICENCE
 └── OroIdentityServer.slnx
@@ -187,35 +189,55 @@ OroIdentityServer/
 
    > Note: without Aspire, RabbitMQ connection settings must be supplied manually if the event bus is enabled; otherwise disable/skip the RabbitMQ registration for local runs.
 
-### Containerized Deployment (Podman / Docker)
+## Containerized Deployment
 
-The image is defined by `src/IdentityServer/IdentityServer/Dockerfile`. It exposes all runtime
-settings as environment variables, so the same image can be used by anyone — on a laptop, on a
-server, or in a cluster.
+The Docker image is defined by `src/IdentityServer/IdentityServer/Dockerfile`. It exposes all
+runtime settings as environment variables, so the same image can be used by anyone — on a laptop,
+on a server, or in a cluster. The image is based on the slim `mcr.microsoft.com/dotnet/aspnet:10.0`
+runtime (no SDK) and runs as a non-root user.
+
+### Building the image
 
 ```bash
-# Build the image
 podman build -f src/IdentityServer/IdentityServer/Dockerfile -t oroidentityserver:latest .
+```
 
-# Run it against a PostgreSQL instance
+### Running standalone (with an external PostgreSQL)
+
+```bash
 podman run --rm -p 5080:5080 \
-  -e ConnectionStrings__identitydb="Host=db;Port=5432;Database=identitydb;Username=postgres;Password=Weak(!)Password123" \
+  -e ConnectionStrings__identitydb="Host=db;Port=5432;Database=identitydb;Username=postgres;Password=yourpassword" \
+  -e SymmetricSecurityKey="$(openssl rand -base64 32)" \
   -e SEED_ADMIN_USERNAME="admin" \
   -e SEED_ADMIN_PASSWORD="Admin@123456" \
   oroidentityserver:latest
 ```
 
-Or use the provided compose file, which builds the image and wires it to a PostgreSQL container
-(migrations and the universal `admin` seed run automatically on first start):
+### Running with docker-compose
+
+The provided `docker-compose.yaml` builds the image and wires it to a PostgreSQL container.
+Migrations and the universal `admin` seed run automatically on first start:
 
 ```bash
 podman compose up -d --build
 # Open http://localhost:5080 and sign in as `admin` / `Admin@123456`
 ```
 
-The image always starts HTTP-only on port `5080`. To also serve HTTPS on port `5086`, mount a
-certificate and override the URLs + certificate settings at run time (no application changes
-needed). With HTTPS enabled, HTTP requests are redirected to HTTPS via `UseHttpsRedirection`:
+The compose file creates two services:
+
+| Service | Container | Ports | Description |
+|---------|-----------|-------|-------------|
+| `db` | `postgres_db` | `5432` | PostgreSQL with health check (`pg_isready`) |
+| `identity-server` | `identity_server` | `5080`, `5086` | The identity server (depends on `db`) |
+
+A named volume `identity-dp-keys` persists ASP.NET Data Protection keys at `/app/data-protection-keys`
+so tokens and cookies survive container restarts.
+
+### Enabling HTTPS
+
+The image always starts with both HTTP (port `5080`) and HTTPS (port `5086`) bound, but HTTPS
+requires a certificate. Without one, only HTTP works. To enable HTTPS, mount a certificate and
+override the Kestrel settings at run time (no application changes needed):
 
 ```bash
 podman run --rm -p 5080:5080 -p 5086:5086 \
@@ -223,17 +245,130 @@ podman run --rm -p 5080:5080 -p 5086:5086 \
   -e ASPNETCORE_URLS="http://+:5080;https://+:5086" \
   -e Kestrel__Certificates__Default__Path="/app/certs/https.pfx" \
   -e Kestrel__Certificates__Default__Password="changeit" \
-  -e ConnectionStrings__identitydb="Host=db;Port=5432;Database=identitydb;Username=postgres;Password=Weak(!)Password123" \
+  -e ConnectionStrings__identitydb="Host=db;Port=5432;Database=identitydb;Username=postgres;Password=yourpassword" \
   -e SEED_ADMIN_USERNAME="admin" \
   -e SEED_ADMIN_PASSWORD="Admin@123456" \
   oroidentityserver:latest
 ```
 
 For a PEM certificate instead of a PFX, set `Kestrel__Certificates__Default__KeyPath` to the
-private key file. Without a certificate, the container runs HTTP-only on port `5080`.
+private key file.
 
-The universal seed creates an **Administrator** account with username `admin` (default password
-`Admin@123456`). Change it before going live — see the `SEED_ADMIN_*` variables below.
+## Integration — Using the Image in Other Projects
+
+Any application that needs OAuth2 / OpenID Connect authentication can point at a running
+OroIdentityServer instance. The image is self-contained: build it, run it, and configure your
+client to use its well-known discovery endpoints.
+
+### 1. Discover the OIDC metadata
+
+Once the server is running, the OpenID Connect discovery document is available at:
+
+```
+GET http://<host>:5080/.well-known/openid-configuration
+```
+
+This returns the full metadata including `authorization_endpoint`, `token_endpoint`,
+`userinfo_endpoint`, `jwks_uri`, supported scopes, grant types, and signing algorithms.
+Most OIDC libraries can consume this URL automatically.
+
+### 2. Register your client application
+
+Before your app can authenticate, register it as an OpenIddict client. This can be done
+via the admin API or the Blazor admin UI:
+
+**Via the API:**
+```bash
+curl -X POST http://<host>:5080/api/applications \
+  -H "Content-Type: application/json" \
+  -d '{
+    "clientId": "my-app",
+    "clientSecret": "my-secret",
+    "displayName": "My Application",
+    "consentType": "Implicit",
+    "grantTypes": ["authorization_code", "refresh_token"],
+    "redirectUris": ["http://localhost:3000/callback"],
+    "permissions": ["openid", "profile", "email", "offline_access"]
+  }'
+```
+
+**Via the admin UI:** navigate to `/` (the Blazor admin panel), go to Applications, and
+create a new entry with the same parameters.
+
+### 3. Configure your application
+
+#### .NET / ASP.NET Core (using OpenIddict client)
+
+```csharp
+builder.Services.AddAuthentication(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)
+    .AddOpenIddict(options =>
+    {
+        options.AddClient()
+            .UseAuthorizationCodeFlow()
+            .AddEphemeralEncryptionKey()
+            .AddEphemeralSigningKey()
+            .UseAspNetCore()
+            .EnableRedirectionEndpointPassthrough()
+            .EnableTokenEndpointPassthrough();
+
+        options.SetIssuer("http://localhost:5080");
+    });
+```
+
+#### Angular / Node.js / Python / any OIDC library
+
+Use the discovery endpoint directly:
+
+```javascript
+// Example: using oidc-client-ts (JavaScript/TypeScript)
+import { UserManagerSettings } from 'oidc-client-ts';
+
+const settings: UserManagerSettings = {
+  authority: 'http://localhost:5080',
+  client_id: 'my-app',
+  redirect_uri: 'http://localhost:3000/callback',
+  response_type: 'code',
+  scope: 'openid profile email',
+  post_logout_redirect_uri: 'http://localhost:3000',
+};
+
+const userManager = new UserManager(settings);
+```
+
+```python
+# Example: using Authlib (Python)
+from authlib.integrations.flask_client import OAuth
+
+oauth = OAuth()
+oauth.register(
+    'identity',
+    server_metadata_url='http://localhost:5080/.well-known/openid-configuration',
+    client_id='my-app',
+    client_secret='my-secret',
+    request_token_params={'scope': 'openid profile email'},
+)
+```
+
+### 4. Supported flows
+
+| Flow | Grant Type | Use Case |
+|------|-----------|----------|
+| Authorization Code | `authorization_code` | Web apps (recommended). Redirects user to `/connect/authorize`, exchanges code at `/connect/token`. |
+| Client Credentials | `client_credentials` | Machine-to-machine. No user interaction. Token from `/connect/token` directly. |
+| Password | `password` | Legacy / first-party apps. Username + password exchanged at `/connect/token`. |
+| Refresh Token | `refresh_token` | Obtain a new access token without re-authentication. |
+
+### 5. Key endpoints for clients
+
+| Endpoint | URL | Purpose |
+|----------|-----|---------|
+| Discovery | `GET /.well-known/openid-configuration` | OIDC metadata (auto-configures most libraries) |
+| Authorize | `GET/POST /connect/authorize` | Authorization code / consent flow |
+| Token | `POST /connect/token` | Exchange code or credentials for tokens |
+| UserInfo | `GET /connect/userinfo` | Retrieve user claims (requires bearer token) |
+| Introspect | `POST /connect/introspect` | Validate a token's validity and metadata |
+| Revoke | `POST /connect/revoke` | Revoke an access or refresh token |
+| End Session | `GET/POST /connect/logout` | Initiate single logout |
 
 ## Configuration
 
@@ -243,22 +378,23 @@ Key configuration files:
 - `Directory.Packages.props` — centralized (central package management) NuGet versions
 - `Data/seedData.json` (under the host project) — seed data for users, roles, applications and scopes on first run; controlled by the `DatabaseSeeder:Skip` setting. The universal bootstrap admin is the `admin` account (role **Administrator**, username `admin`, default password `Admin@123456`), which is exempt from the forced first-login password change; every other user (seeded or created later) must change their password on first sign-in. The admin identity can be customized through the `SEED_ADMIN_*` environment variables listed below.
 
-#### Environment variables
+### Environment variables
 
 The Dockerfile declares sensible defaults for every variable; each one can be overridden with
 `-e` (Podman/Docker) or in the compose file:
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `ASPNETCORE_URLS` | `http://+:5080` | URLs Kestrel binds to. Override to `http://+:5080;https://+:5086` (with a certificate) to also serve HTTPS |
+| `ASPNETCORE_URLS` | `http://+:5080;https://+:5086` | URLs Kestrel binds to. Override to `http://+:5080` (HTTP-only) or keep both with a certificate for HTTPS |
 | `ASPNETCORE_ENVIRONMENT` | `Production` | ASP.NET environment |
 | `Kestrel__Certificates__Default__Path` | *(unset)* | PFX (or PEM cert) path used for the HTTPS endpoint |
 | `Kestrel__Certificates__Default__Password` | *(unset)* | Password of the PFX certificate |
 | `Kestrel__Certificates__Default__KeyPath` | *(unset)* | Private key path for a PEM certificate |
 | `ConnectionStrings__identitydb` | `Host=db;...` | PostgreSQL connection string |
-| `SymmetricSecurityKey` | dev key | Base64 OpenIddict signing/encryption key (≥ 32 bytes) — **must be overridden in production** and shared by all instances |
+| `SymmetricSecurityKey` | dev key | Base64 OpenIddict signing/encryption key (>= 32 bytes) — **must be overridden in production** and shared by all instances |
 | `IDENTITY_ADMIN_HTTP` | `http://localhost:4200` | Base URL of the external admin SPA, used when seeding the OpenIddict `Admin` client |
 | `DatabaseSeeder__Skip` | `false` | Set `true` to skip the seeder on startup |
+| `SEED_TENANT_NAME` | `OroMasterRealm` | Tenant name created during seeding |
 | `SEED_ADMIN_USERNAME` | `admin` | Username of the bootstrap admin |
 | `SEED_ADMIN_PASSWORD` | `Admin@123456` | Password of the bootstrap admin |
 | `SEED_ADMIN_EMAIL` | `admin@example.com` | Email of the bootstrap admin |
@@ -277,43 +413,160 @@ The Dockerfile declares sensible defaults for every variable; each one can be ov
 
 ## API Endpoints
 
-All admin endpoints are grouped under `/api` and generally require authentication/authorization; the `/auth` group is for sign-in/sign-out.
+### Authorization Policies
 
-### Auth
-- `POST /auth/login` — admin sign-in (invalid credentials redirect back to `/Account/Login` with an inline error)
-- `POST /auth/logout` — admin sign-out (used by the panel's own header button, no confirmation step)
-- `POST /auth/change-password` — sets a new password and clears the `must_change_password` claim
-- `GET /Account/Login`, `/Account/ChangePassword`, `/Account/Logout` — the corresponding Blazor pages (static SSR)
-- `GET/POST ~/connect/logout` — OpenIddict end-session endpoint; redirects to `/Account/Logout` for confirmation before signing out unless called with `confirmed=true`
-- `GET /culture/set?culture={code}&redirectUri={uri}` — sets the `.AspNetCore.Culture` cookie and redirects back
+Admin API endpoints are protected by role-based authorization policies:
 
-### Users — `/api/users`
-- `GET /` · `POST /` · `PUT /{id}` · `DELETE /{id}`
+| Policy | Where Applied | Meaning |
+|--------|--------------|---------|
+| `ManagerOrAdmin` | `/api` root group | Authenticated user with Manager or Admin role |
+| `AdminOnly` | `/api/roles`, `/api/permissions` | Admin role required |
+| `MasterAdminOnly` | `/api/applications`, `/api/scopes`, `/api/tenants` (full CRUD) | Requires `is_master_admin` claim |
+| `[Authorize]` (default) | `/api/dashboard/stats` | Any authenticated user |
 
-### Roles — `/api/roles`
-- `GET /` · `GET /{id}` · `POST /` · `PUT /{id}` · `DELETE /{id}`
+### OpenIddict Connect Endpoints
 
-### Permissions — `/api/permissions`
-- `GET /` · `GET /{id}` · `POST /` · `PUT /{id}` · `DELETE /{id}`
+These are the OAuth2 / OpenID Connect protocol endpoints:
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET/POST` | `/connect/authorize` | Authorization endpoint. Triggers consent flow for external clients, issues authorization codes. |
+| `POST` | `/connect/token` | Token exchange. Handles `authorization_code`, `refresh_token`, `client_credentials`, and `password` grants. |
+| `GET/POST` | `/connect/logout` | End-session. Redirects to `/Account/Logout` for confirmation before signing out. |
+| `GET` | `/connect/userinfo` | Returns user claims (subject, email, name, roles, tenant_id). Requires a valid bearer token. |
+| `POST` | `/connect/introspect` | Token introspection. Validates a token's validity and metadata. |
+| `POST` | `/connect/revoke` | Token revocation. Invalidates an access or refresh token. |
+
+### Auth — `/auth`
+
+| Method | Route | Description | Auth |
+|--------|-------|-------------|------|
+| `POST` | `/auth/login` | Admin sign-in via form data (`LoginIdentifier`, `Password`). Creates session cookie and `UserSession` record. Redirects to `ReturnUrl` or `/`. | No |
+| `GET/POST` | `/auth/logout` | Admin sign-out. Deactivates the `UserSession`, revokes all OpenIddict tokens/authorizations. | No |
+| `POST` | `/auth/change-password` | Changes the authenticated user's password. Body: `NewPassword`, `ConfirmPassword`. | Yes |
+
+### Users — `/api/users` (ManagerOrAdmin)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/users` | List all users |
+| `GET` | `/api/users/{id}` | Get user by ID |
+| `POST` | `/api/users` | Create a new user |
+| `PUT` | `/api/users/{id}` | Update a user |
+| `DELETE` | `/api/users/{id}` | Delete a user |
+| `PUT` | `/api/users/{id}/roles` | Assign roles to a user |
+| `POST` | `/api/users/{id}/lock` | Lock a user account |
+| `POST` | `/api/users/{id}/unlock` | Unlock a user account |
+| `GET` | `/api/users/{role}/by-role` | Get users by role name. Query param: `tenantId` (optional) |
+
+### Roles — `/api/roles` (AdminOnly)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/roles` | List all roles |
+| `GET` | `/api/roles/{id}` | Get role by ID |
+| `POST` | `/api/roles` | Create a role |
+| `PUT` | `/api/roles/{id}` | Update a role |
+| `DELETE` | `/api/roles/{id}` | Delete a role |
+
+### Permissions — `/api/permissions` (AdminOnly)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/permissions` | List all permissions |
+| `GET` | `/api/permissions/{id}` | Get permission by ID |
+| `POST` | `/api/permissions` | Create a permission |
+| `PUT` | `/api/permissions/{id}` | Update a permission |
+| `DELETE` | `/api/permissions/{id}` | Delete a permission |
 
 ### Tenants — `/api/tenants`
-- `GET /` · `GET /{id}` · `GET /by-user/{userId}` · `POST /`
-- `PUT /{id}` · `POST /{id}/activate` · `POST /{id}/suspend` · `POST /{id}/users`
 
-### Applications (OpenIddict clients) — `/api/applications`
-- `GET /` · `GET /{clientId}` · `POST /` · `PUT /{clientId}` · `DELETE /{clientId}`
+| Method | Route | Description | Auth |
+|--------|-------|-------------|------|
+| `GET` | `/api/tenants/mine` | Tenants accessible to the current user | ManagerOrAdmin |
+| `GET` | `/api/tenants/by-user/{userId}` | Tenants for a specific user | ManagerOrAdmin |
+| `GET` | `/api/tenants` | List all tenants | MasterAdminOnly |
+| `GET` | `/api/tenants/{id}` | Get tenant by ID | MasterAdminOnly |
+| `POST` | `/api/tenants` | Create a tenant | MasterAdminOnly |
+| `PUT` | `/api/tenants/{id}` | Update a tenant | MasterAdminOnly |
+| `POST` | `/api/tenants/{id}/activate` | Activate a tenant | MasterAdminOnly |
+| `POST` | `/api/tenants/{id}/suspend` | Suspend a tenant | MasterAdminOnly |
+| `POST` | `/api/tenants/{id}/users` | Add a user to a tenant | MasterAdminOnly |
 
-### Scopes — `/api/scopes`
-- `GET /` · `POST /` · `PUT /{name}` · `DELETE /{name}`
+### Applications (OpenIddict clients) — `/api/applications` (MasterAdminOnly)
 
-### Identification Types — `/api/identification-types`
-- `GET /` · `GET /{id}` · `POST /` · `PUT /{id}` · `DELETE /{id}`
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/applications` | List all OIDC client applications |
+| `GET` | `/api/applications/{clientId}` | Get application by client ID |
+| `POST` | `/api/applications` | Create an OIDC application |
+| `PUT` | `/api/applications/{clientId}` | Update an OIDC application |
+| `DELETE` | `/api/applications/{clientId}` | Delete an OIDC application |
 
-### Sessions — `/api/sessions`
-- `GET /by-user/{userId}` — login sessions for a user
+### Scopes — `/api/scopes` (MasterAdminOnly)
 
-### User Sessions — `/api/user-sessions`
-- `GET /by-user/{userId}` · `GET /active-count` · `POST /` · `POST /{id}/deactivate`
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/scopes` | List all OIDC scopes |
+| `POST` | `/api/scopes` | Create a scope |
+| `PUT` | `/api/scopes/{name}` | Update a scope by name |
+| `DELETE` | `/api/scopes/{name}` | Delete a scope by name |
+
+### Identification Types — `/api/identification-types` (ManagerOrAdmin)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/identification-types` | List all identification types |
+| `GET` | `/api/identification-types/{id}` | Get identification type by ID |
+| `POST` | `/api/identification-types` | Create an identification type |
+| `PUT` | `/api/identification-types/{id}` | Update an identification type |
+| `DELETE` | `/api/identification-types/{id}` | Delete an identification type |
+
+### User Sessions — `/api/user-sessions` (ManagerOrAdmin)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/user-sessions/by-user/{userId}` | Get sessions for a specific user |
+| `GET` | `/api/user-sessions/active` | Get all active sessions |
+| `GET` | `/api/user-sessions/active-count` | Get count of active sessions |
+| `POST` | `/api/user-sessions` | Create a user session |
+| `POST` | `/api/user-sessions/{id}/deactivate` | Deactivate a specific session |
+| `POST` | `/api/user-sessions/terminate-all/{userId}` | Terminate all sessions for a user |
+
+### Sessions — `/api/sessions` (ManagerOrAdmin)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/sessions/by-user/{userId}` | Get sessions for a user (admin session model) |
+
+### Validation Logs — `/api/validation-logs` (ManagerOrAdmin)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/validation-logs/daily-summary` | Daily validation log summary. Query: `days` (default: 7) |
+| `GET` | `/api/validation-logs/recent` | Recent validation log entries. Query: `take` (default: 6) |
+
+### Dashboard — `/api/dashboard` (any authenticated user)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/dashboard/stats` | Dashboard statistics (user counts, session counts, etc.) |
+
+### Utility
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/culture/set` | Sets the `.AspNetCore.Culture` cookie and redirects. Query: `culture` (required), `redirectUri` (optional) |
+
+### Blazor UI Pages (static SSR)
+
+| Route | Purpose |
+|-------|---------|
+| `/Account/Login` | Login page (renders form that POSTs to `/auth/login`) |
+| `/Account/ChangePassword` | Must-change-password page (renders form that POSTs to `/auth/change-password`) |
+| `/Account/Consent` | OIDC consent page (renders form that POSTs to `/connect/authorize`) |
+| `/Account/Logout` | Logout confirmation page |
+| `/Account/AccessDenied` | Access denied page |
 
 ## Testing
 
