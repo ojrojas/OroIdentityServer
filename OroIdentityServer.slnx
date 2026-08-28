@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/examples/">
     <Project Path="examples/AppHost/AppHost.csproj" />
+    <Project Path="examples/BlazorServerSessionExample/BlazorServerSessionExample.csproj" />
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Application/">
