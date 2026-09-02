@@ -2,7 +2,6 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
-using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace OroIdentityServer.Infraestructure.Data;
@@ -80,6 +79,8 @@ public static class DatabaseSeeder
             await context.SaveChangesAsync(cancellationToken);
         }
 
+        await EnsureHierarchyRolesAsync(context, cancellationToken);
+
         // Idempotently guarantee the seed admin can navigate the console. The original
         // UserRoles / TenantUsers sections only ran when those tables were completely
         // empty, so a database that already had a single role assignment (e.g. from a
@@ -109,11 +110,11 @@ public static class DatabaseSeeder
         var defaultRedirectUri = configuration["SEED_APP_REDIRECT_URI"] ?? "https://localhost:5001/authentication/login-callback";
         var defaultPostLogoutUri = configuration["SEED_APP_POST_LOGOUT_URI"] ?? "https://localhost:5001/authentication/logout-callback";
 
-        var existing = await applicationManager.FindByClientIdAsync(defaultClientId);
+        var existing = await applicationManager.FindByClientIdAsync(defaultClientId, cancellationToken);
         if (existing is not null)
         {
             var descriptor = new OpenIddictApplicationDescriptor();
-            await applicationManager.PopulateAsync(descriptor, existing);
+            await applicationManager.PopulateAsync(descriptor, existing, cancellationToken);
 
             var permissionsUpdated = false;
             if (!descriptor.Permissions.Contains("ept:introspection"))
@@ -128,7 +129,7 @@ public static class DatabaseSeeder
             }
             if (permissionsUpdated)
             {
-                await applicationManager.UpdateAsync(existing, descriptor);
+                await applicationManager.UpdateAsync(existing, descriptor, cancellationToken);
             }
             return;
         }
@@ -161,7 +162,7 @@ public static class DatabaseSeeder
         appDescriptor.RedirectUris.Add(new Uri(defaultRedirectUri));
         appDescriptor.PostLogoutRedirectUris.Add(new Uri(defaultPostLogoutUri));
 
-        await applicationManager.CreateAsync(appDescriptor);
+        await applicationManager.CreateAsync(appDescriptor, cancellationToken);
     }
 
     /// <summary>
@@ -179,7 +180,7 @@ public static class DatabaseSeeder
         CancellationToken cancellationToken)
     {
         var seedUser = context.Users.IgnoreQueryFilters()
-            .FirstOrDefault(u => u.NormalizedUserName == seedAdmin.UserName.ToUpperInvariant());
+            .FirstOrDefault(u => u.NormalizedUserName.Equals(seedAdmin.UserName, StringComparison.InvariantCultureIgnoreCase));
         if (seedUser is null)
         {
             return;
@@ -280,6 +281,45 @@ public static class DatabaseSeeder
         await applicationManager.UpdateAsync(application, existing);
     }
 
+    private static async Task EnsureHierarchyRolesAsync(OroIdentityAppContext context, CancellationToken cancellationToken)
+    {
+        var roleDefinitions = new[]
+        {
+            (Name: "Administrator", Level: 90, Parent: (string?)null),
+            (Name: "Manager", Level: 70, Parent: "Administrator"),
+            (Name: "User", Level: 10, Parent: "Manager"),
+        };
+
+        var existingRoles = await context.Roles.IgnoreQueryFilters().ToListAsync(cancellationToken);
+        var byName = existingRoles.ToDictionary(r => r.Name.Value, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (Name, Level, Parent) in roleDefinitions)
+        {
+            if (!byName.TryGetValue(Name, out var role))
+            {
+                RoleId? parentId = null;
+                if (Parent != null && byName.TryGetValue(Parent, out var parent))
+                    parentId = parent.Id;
+                var newRole = new Role(new RoleName(Name), Level, parentId);
+                context.Roles.Add(newRole);
+                byName[Name] = newRole;
+            }
+            else
+            {
+                if (role.Level != Level)
+                {
+                    role.SetLevel(Level);
+                }
+                if (Parent != null && byName.TryGetValue(Parent, out var parent))
+                {
+                    if (role.ParentRoleId?.Value != parent.Id.Value)
+                        role.SetParentRole(parent.Id);
+                }
+            }
+        }
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     private const string DefaultAdminUserName = "admin";
     private const string DefaultAdminRoleName = "Administrator";
 
@@ -328,5 +368,7 @@ public class SeedRole
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public int Level { get; set; } = 10;
+    public string? ParentRole { get; set; }
 }
 

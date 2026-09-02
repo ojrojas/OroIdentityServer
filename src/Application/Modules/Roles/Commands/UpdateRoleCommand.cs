@@ -7,7 +7,7 @@ namespace OroIdentityServer.Application.Modules.Roles.Commands;
 /// <summary>
 /// Represents a command to update an existing role in the system.
 /// </summary>
-public record UpdateRoleCommand(Guid Id, string RoleName) : ICommand
+public record UpdateRoleCommand(Guid Id, string RoleName, int Level, Guid? ParentRoleId) : ICommand
 {
     public Guid CorrelationId { get; init; } = Guid.NewGuid();
 }

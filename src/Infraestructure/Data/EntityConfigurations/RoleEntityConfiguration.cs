@@ -23,6 +23,23 @@ public class RoleEntityConfiguration : IEntityTypeConfiguration<Role>
             .HasColumnName("CreatedAtUtc")
             .IsRequired();
 
+        builder.Property(r => r.Level)
+            .HasColumnName("Level")
+            .IsRequired()
+            .HasDefaultValue(10);
+
+        builder.Property(r => r.ParentRoleId)
+            .HasConversion(
+                id => id != null ? id.Value : (Guid?)null,
+                value => value != null ? new RoleId(value.Value) : null)
+            .HasColumnName("ParentRoleId")
+            .IsRequired(false);
+
+        builder.HasOne(r => r.ParentRole)
+            .WithMany()
+            .HasForeignKey(r => r.ParentRoleId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Property(r => r.Name)
             .HasConversion(
                 name => name.Value,

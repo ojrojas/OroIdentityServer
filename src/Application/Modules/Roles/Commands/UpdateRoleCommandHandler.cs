@@ -24,6 +24,8 @@ public class UpdateRoleCommandHandler(
             }
 
             role.UpdateName(new (command.RoleName));
+            role.SetLevel(command.Level);
+            role.SetParentRole(command.ParentRoleId.HasValue ? new RoleId(command.ParentRoleId.Value) : null);
             await roleRepository.UpdateAsync(role, cancellationToken);
 
             logger.LogInformation("Successfully updated role with Id: {RoleId}", command.Id);

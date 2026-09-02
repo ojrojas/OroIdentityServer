@@ -12,8 +12,8 @@ using OroIdentityServer.Infraestructure;
 namespace OroIdentityServer.Infraestructure.Data.Migrations
 {
     [DbContext(typeof(OroIdentityAppContext))]
-    [Migration("20260814060623_DropTenantUserRoleColumn")]
-    partial class DropTenantUserRoleColumn
+    [Migration("20260902174004_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -282,6 +282,135 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.ToTable("AuthValidationLogs", (string)null);
                 });
 
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Hierarchy.Entities.RelationshipAuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Action");
+
+                    b.Property<string>("Details")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("Details");
+
+                    b.Property<DateTime>("PerformedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("PerformedAtUtc");
+
+                    b.Property<Guid?>("PerformedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("PerformedByUserId");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("Reason");
+
+                    b.Property<Guid>("RelationshipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("RelationshipId");
+
+                    b.Property<string>("RelationshipType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("RelationshipType");
+
+                    b.Property<Guid>("ReportsToUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ReportsToUserId");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("TenantId");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PerformedAtUtc")
+                        .HasDatabaseName("IX_RelationshipAuditLogs_PerformedAtUtc");
+
+                    b.HasIndex("RelationshipId")
+                        .HasDatabaseName("IX_RelationshipAuditLogs_RelationshipId");
+
+                    b.HasIndex("TenantId", "UserId")
+                        .HasDatabaseName("IX_RelationshipAuditLogs_Tenant_User");
+
+                    b.ToTable("RelationshipAuditLogs", (string)null);
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Hierarchy.Entities.UserReportingRelationship", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAtUtc");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatedByUserId");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsActive");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer")
+                        .HasColumnName("Priority");
+
+                    b.Property<string>("RelationshipType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("RelationshipType");
+
+                    b.Property<Guid>("ReportsToUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ReportsToUserId");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("TenantId");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UpdatedAtUtc");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_UserReportingRelationships_IsActive");
+
+                    b.HasIndex("ReportsToUserId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("TenantId", "ReportsToUserId")
+                        .HasDatabaseName("IX_UserReportingRelationships_Tenant_ReportsTo");
+
+                    b.HasIndex("TenantId", "UserId")
+                        .HasDatabaseName("IX_UserReportingRelationships_Tenant_User");
+
+                    b.HasIndex("TenantId", "UserId", "ReportsToUserId", "RelationshipType")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserReportingRelationships_Unique");
+
+                    b.ToTable("UserReportingRelationships", (string)null);
+                });
+
             modelBuilder.Entity("OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates.IdentificationType", b =>
                 {
                     b.Property<Guid>("Id")
@@ -376,11 +505,21 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("IsActive");
 
+                    b.Property<int>("Level")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(10)
+                        .HasColumnName("Level");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("Name");
+
+                    b.Property<Guid?>("ParentRoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ParentRoleId");
 
                     b.Property<int>("Version")
                         .HasColumnType("integer");
@@ -393,6 +532,8 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique()
                         .HasDatabaseName("IX_Roles_Name");
+
+                    b.HasIndex("ParentRoleId");
 
                     b.ToTable("Roles", (string)null);
                 });
@@ -456,6 +597,12 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
 
+                    b.Property<int>("HierarchyLevel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(10)
+                        .HasColumnName("HierarchyLevel");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("IsActive");
@@ -463,6 +610,10 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Property<DateTime>("JoinedAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("JoinedAtUtc");
+
+                    b.Property<Guid?>("PrimaryReportsToUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("PrimaryReportsToUserId");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid")
@@ -473,6 +624,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasColumnName("UserId");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PrimaryReportsToUserId")
+                        .HasDatabaseName("IX_TenantUsers_PrimaryReportsToUserId");
 
                     b.HasIndex("TenantId", "UserId")
                         .IsUnique()
@@ -927,6 +1081,43 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Navigation("Authorization");
                 });
 
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Hierarchy.Entities.UserReportingRelationship", b =>
+                {
+                    b.HasOne("OroIdentityServer.Core.Modules.Users.Aggregates.User", "ReportsToUser")
+                        .WithMany()
+                        .HasForeignKey("ReportsToUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OroIdentityServer.Core.Modules.Tenants.Aggregates.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OroIdentityServer.Core.Modules.Users.Aggregates.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReportsToUser");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", b =>
+                {
+                    b.HasOne("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", "ParentRole")
+                        .WithMany()
+                        .HasForeignKey("ParentRoleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ParentRole");
+                });
+
             modelBuilder.Entity("OroIdentityServer.Core.Modules.Roles.Entities.RolePermission", b =>
                 {
                     b.HasOne("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", null)
@@ -938,11 +1129,17 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
 
             modelBuilder.Entity("OroIdentityServer.Core.Modules.Tenants.Entities.TenantUser", b =>
                 {
+                    b.HasOne("OroIdentityServer.Core.Modules.Users.Aggregates.User", "PrimaryReportsToUser")
+                        .WithMany()
+                        .HasForeignKey("PrimaryReportsToUserId");
+
                     b.HasOne("OroIdentityServer.Core.Modules.Tenants.Aggregates.Tenant", null)
                         .WithMany("TenantUsers")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("PrimaryReportsToUser");
                 });
 
             modelBuilder.Entity("OroIdentityServer.Core.Modules.UserSessions.Entities.Session", b =>

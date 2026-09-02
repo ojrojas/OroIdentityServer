@@ -16,15 +16,15 @@ public sealed class TerminateAllUserSessionsCommandHandler(
         {
             // Revoke all OpenIddict authorizations and tokens for this user
             var subject = command.UserId.ToString();
-            await foreach (var authorization in authorizationManager.FindBySubjectAsync(subject))
+            await foreach (var authorization in authorizationManager.FindBySubjectAsync(subject, cancellationToken))
             {
-                try { await authorizationManager.TryRevokeAsync(authorization); }
+                try { await authorizationManager.TryRevokeAsync(authorization, cancellationToken); }
                 catch (Exception ex) { logger.LogWarning(ex, "Failed to revoke authorization for subject {Subject}", subject); }
             }
 
-            await foreach (var token in tokenManager.FindBySubjectAsync(subject))
+            await foreach (var token in tokenManager.FindBySubjectAsync(subject, cancellationToken))
             {
-                try { await tokenManager.TryRevokeAsync(token); }
+                try { await tokenManager.TryRevokeAsync(token, cancellationToken); }
                 catch (Exception ex) { logger.LogWarning(ex, "Failed to revoke token for subject {Subject}", subject); }
             }
 

@@ -7,7 +7,7 @@ namespace OroIdentityServer.Application.Modules.Roles.Commands;
 /// <summary>
 /// Represents a command to create a new role in the system.
 /// </summary>
-public record CreateRoleCommand(string RoleName) : ICommand
+public record CreateRoleCommand(string RoleName, int Level = 10, Guid? ParentRoleId = null) : ICommand
 {
     /// <summary>
     /// Gets the unique correlation identifier for this command instance.

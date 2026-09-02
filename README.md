@@ -52,7 +52,15 @@ OroIdentityServer is an identity and authentication management system built on *
 - OpenTelemetry instrumentation and Quartz-backed OpenIddict cleanup jobs
 - FluentUI Blazor components for the built-in admin UI (Interactive Server + WebAssembly render modes)
 
-### 9. Local Orchestration with .NET Aspire
+### 9. User Hierarchy & Matrix Organization
+- `UserReportingRelationship` entity with `RelationshipType` enum (Functional, Project, Matrix, Mentor, Temporary) and priority ordering
+- Recursive CTE queries (PostgreSQL) for command chain, all subordinates, and organization tree traversal with cycle detection and configurable depth/limits
+- `HierarchyService` with CRUD, cycle prevention, primary superior sync (`TenantUser.PrimaryReportsToUserId`), and authority verification (`CanCommand`/`CanCommandByType`)
+- Hierarchy claims (`hierarchy_level`, `direct_superior_ids`, `primary_superior_id`, `relationship_types`) injected at sign-in via `AdminPasswordSignInService`
+- Authorization policies `CanManageHierarchy` (≥70), `CanViewSubordinates` (≥40), `CanLeadProject`/`CanAssignMatrixRelationships` (≥60) plus `HierarchyAuthorizationHandler` for runtime authority checks
+- REST API under `/api/hierarchy/*` and Blazor components `OrganizationTree` + `RelationshipManager` with `/hierarchy/manage` page (filters by level/type, secondary relationship badges)
+
+### 10. Local Orchestration with .NET Aspire
 - `examples/AppHost` wires up Postgres (+ pgAdmin), Redis, RabbitMQ and the identity server for local development
 - `examples/Frontends/oroidentity-admin` is a sample Angular admin frontend, run through Aspire's Node/pnpm integration
 
@@ -415,13 +423,18 @@ The Dockerfile declares sensible defaults for every variable; each one can be ov
 
 ### Authorization Policies
 
-Admin API endpoints are protected by role-based authorization policies:
+Admin API endpoints are protected by role-based and hierarchy-based authorization policies:
 
 | Policy | Where Applied | Meaning |
 |--------|--------------|---------|
 | `ManagerOrAdmin` | `/api` root group | Authenticated user with Manager or Admin role |
 | `AdminOnly` | `/api/roles`, `/api/permissions` | Admin role required |
 | `MasterAdminOnly` | `/api/applications`, `/api/scopes`, `/api/tenants` (full CRUD) | Requires `is_master_admin` claim |
+| `CanManageHierarchy` | `POST/PUT/DELETE /api/hierarchy/relationships`, `POST /api/hierarchy/sync-primary` | Hierarchy level ≥70 (or Manager/Admin role) |
+| `CanViewSubordinates` | `GET /api/hierarchy/subordinates/*` | Hierarchy level ≥40 |
+| `CanLeadProject` | Project relationship assignments | Hierarchy level ≥60 |
+| `CanAssignMatrixRelationships` | Matrix relationship assignments | Hierarchy level ≥60 |
+| `HierarchyRequirement` | Runtime handler `HierarchyAuthorizationHandler` | Verifies `CanCommand`/`CanCommandByType` against live hierarchy |
 | `[Authorize]` (default) | `/api/dashboard/stats` | Any authenticated user |
 
 ### OpenIddict Connect Endpoints
@@ -545,6 +558,28 @@ These are the OAuth2 / OpenID Connect protocol endpoints:
 |--------|-------|-------------|
 | `GET` | `/api/validation-logs/daily-summary` | Daily validation log summary. Query: `days` (default: 7) |
 | `GET` | `/api/validation-logs/recent` | Recent validation log entries. Query: `take` (default: 6) |
+
+### Hierarchy — `/api/hierarchy` (hierarchy policies)
+
+| Method | Route | Description | Auth |
+|--------|-------|-------------|------|
+| `POST` | `/api/hierarchy/relationships` | Create reporting relationship (body: `UserId`, `ReportsToUserId`, `Type`, `Priority`; validates cycle/duplicate/limits) | `CanManageHierarchy` |
+| `PUT` | `/api/hierarchy/relationships/{id}/priority` | Update relationship priority (syncs `PrimaryReportsToUserId` for Functional priority 1) | `CanManageHierarchy` |
+| `DELETE` | `/api/hierarchy/relationships/{id}` | Soft-delete relationship, audit log | `CanManageHierarchy` |
+| `GET` | `/api/hierarchy/relationships/{userId}` | All active relationships for a user | Authenticated |
+| `GET` | `/api/hierarchy/superiors/{userId?}` | Direct superiors (optional `userId` defaults to current user) | Authenticated |
+| `GET` | `/api/hierarchy/superiors/{userId?}/primary` | Primary superior (Functional priority 1) | Authenticated |
+| `GET` | `/api/hierarchy/superiors/{userId?}/by-type/{type}` | Superiors filtered by relationship type | Authenticated |
+| `GET` | `/api/hierarchy/subordinates/{userId?}` | Direct subordinates (query `?type=` optional filter) | `CanViewSubordinates` |
+| `GET` | `/api/hierarchy/subordinates/{userId?}/all` | All subordinates recursively (CTE, primary path, depth-limited) | `CanViewSubordinates` |
+| `GET` | `/api/hierarchy/chain/{userId?}` | Command chain up to root (CTE, primary path) | Authenticated |
+| `GET` | `/api/hierarchy/tree` | Organization tree (primary Functional relationships only) | Authenticated |
+| `GET` | `/api/hierarchy/tree/full` | Full tree with secondary relationships per node | Authenticated |
+| `GET` | `/api/hierarchy/can-command/{commanderId}/{targetId}` | Check command authority (query `?type=` for type-specific) | Authenticated |
+| `GET` | `/api/hierarchy/level/{userId?}` | Effective hierarchy level (from `TenantUser`/`Role`) | Authenticated |
+| `POST` | `/api/hierarchy/sync-primary/{userId}` | Sync `TenantUser.PrimaryReportsToUserId` from Functional priority 1 | `CanManageHierarchy` |
+
+Hierarchy claims added at sign-in: `hierarchy_level` (int), `direct_superior_ids` (JSON array), `primary_superior_id` (Guid), `relationship_types` (JSON array). `Role.Level` is 10–100 (default 10) with optional `ParentRoleId`; `TenantUser` carries `PrimaryReportsToUserId` + `HierarchyLevel` synced from the hierarchy.
 
 ### Dashboard — `/api/dashboard` (any authenticated user)
 

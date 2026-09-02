@@ -18,6 +18,26 @@
             <input id="roleName" class="input" @bind="roleName" @bind:event="oninput" />
         </div>
 
+        <div class="field">
+            <label class="field-label" for="roleLevel">@L["HierarchyLevel"] <span class="req">*</span></label>
+            <input id="roleLevel" class="input" type="number" min="10" max="100" step="10" @bind="roleLevel" />
+            <span class="field-hint">10 (Guest) .. 100 (MasterAdmin)</span>
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="parentRole">@L["ParentRole"]</label>
+            <select id="parentRole" class="select" @bind="parentRoleId">
+                <option value="">@L["None"]</option>
+                @if (allRoles != null)
+                {
+                    @foreach (var r in allRoles)
+                    {
+                        <option value="@r.Id">@r.Name (@r.Level)</option>
+                    }
+                }
+            </select>
+        </div>
+
         <div class="form-actions">
             <button type="button" class="btn btn-primary" disabled="@(string.IsNullOrWhiteSpace(roleName) || saving)" @onclick="SubmitAsync">@L["Create"]</button>
             <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/roles")'>@L["Cancel"]</button>
@@ -27,12 +47,22 @@
 
 @code {
     private string roleName = string.Empty;
+    private int roleLevel = 10;
+    private string? parentRoleId;
+    private List<RoleModel>? allRoles;
     private bool saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var resp = await RoleService.GetRolesAsync();
+        allRoles = resp?.Data?.ToList();
+    }
 
     private async Task SubmitAsync()
     {
         saving = true;
-        var response = await RoleService.CreateRoleAsync(new CreateRoleRequest(roleName));
+        Guid? parentGuid = string.IsNullOrWhiteSpace(parentRoleId) ? null : Guid.Parse(parentRoleId);
+        var response = await RoleService.CreateRoleAsync(new CreateRoleRequest(roleName, roleLevel, parentGuid));
         saving = false;
 
         if (response.IsSuccessStatusCode)

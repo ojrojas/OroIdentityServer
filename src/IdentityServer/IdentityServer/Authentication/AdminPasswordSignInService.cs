@@ -3,6 +3,8 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using System.Security.Claims;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Modules.Tenants.Aggregates;
@@ -10,6 +12,7 @@ using OroIdentityServer.Core.Modules.Tenants.Repositories;
 using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 using OroIdentityServer.Core.Modules.Users.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Repositories;
+using OroIdentityServer.Infraestructure;
 using OroIdentityServer.Infraestructure.Interfaces;
 using OroIdentityServer.Shared.Authorization;
 
@@ -28,14 +31,34 @@ public static class CatalogueRole
     public const string User = nameof(User);
 }
 
-public sealed class AdminPasswordSignInService(
-    ILogger<AdminPasswordSignInService> logger,
-    IUserRepository userRepository,
-    ISecurityUserRepository securityUserRepository,
-    ITenantRepository tenantRepository,
-    IPasswordHasher passwordHasher,
-    IConfiguration configuration)
+public sealed class AdminPasswordSignInService
 {
+    private readonly ILogger<AdminPasswordSignInService> _logger;
+    private readonly IUserRepository _userRepository;
+    private readonly ISecurityUserRepository _securityUserRepository;
+    private readonly ITenantRepository _tenantRepository;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly IConfiguration _configuration;
+    private readonly OroIdentityAppContext? _appContext;
+
+    public AdminPasswordSignInService(
+        ILogger<AdminPasswordSignInService> logger,
+        IUserRepository userRepository,
+        ISecurityUserRepository securityUserRepository,
+        ITenantRepository tenantRepository,
+        IPasswordHasher passwordHasher,
+        IConfiguration configuration,
+        OroIdentityAppContext? appContext = null)
+    {
+        _logger = logger;
+        _userRepository = userRepository;
+        _securityUserRepository = securityUserRepository;
+        _tenantRepository = tenantRepository;
+        _passwordHasher = passwordHasher;
+        _configuration = configuration;
+        _appContext = appContext;
+    }
+
     public const string MustChangePasswordClaimType = "must_change_password";
 
     /// <summary>
@@ -52,30 +75,30 @@ public sealed class AdminPasswordSignInService(
         User? user;
         try
         {
-            user = await userRepository.GetUserByLoginIdentifierAsync(loginIdentifier, ct);
+            user = await _userRepository.GetUserByLoginIdentifierAsync(loginIdentifier, ct);
         }
         catch
         {
-            logger.LogWarning("Login failed: user not found for {LoginIdentifier}", loginIdentifier);
+            _logger.LogWarning("Login failed: user not found for {LoginIdentifier}", loginIdentifier);
             return null;
         }
 
         if (user?.SecurityUserId is null)
         {
-            logger.LogWarning("Login failed: security user missing for {LoginIdentifier}", loginIdentifier);
+            _logger.LogWarning("Login failed: security user missing for {LoginIdentifier}", loginIdentifier);
             return null;
         }
 
-        var securityUser = await securityUserRepository.GetSecurityUserAsync(user.SecurityUserId!.Value, ct);
+        var securityUser = await _securityUserRepository.GetSecurityUserAsync(user.SecurityUserId!.Value, ct);
         if (securityUser?.PasswordHash is null)
         {
-            logger.LogWarning("Login failed: security user missing for {LoginIdentifier}", loginIdentifier);
+            _logger.LogWarning("Login failed: security user missing for {LoginIdentifier}", loginIdentifier);
             return null;
         }
 
-        if (!await passwordHasher.VerifyPassword(password, securityUser.PasswordHash))
+        if (!await _passwordHasher.VerifyPassword(password, securityUser.PasswordHash))
         {
-            logger.LogWarning("Login failed: invalid password for {LoginIdentifier}", loginIdentifier);
+            _logger.LogWarning("Login failed: invalid password for {LoginIdentifier}", loginIdentifier);
             return null;
         }
 
@@ -89,7 +112,7 @@ public sealed class AdminPasswordSignInService(
     /// </summary>
     public async Task<ClaimsPrincipal?> RefreshPrincipalAsync(Guid userId, CancellationToken ct)
     {
-        var user = await userRepository.GetUserByIdAsync(new(userId), ct);
+        var user = await _userRepository.GetUserByIdAsync(new(userId), ct);
         if (user is null) return null;
 
         return await BuildPrincipalAsync(user, mustChangePassword: false, user.UserName ?? user.Email ?? string.Empty, ct);
@@ -141,8 +164,62 @@ public sealed class AdminPasswordSignInService(
         if (mustChangePassword)
             claims.Add(new Claim(MustChangePasswordClaimType, "true"));
 
+        // Hierarchy claims
+        try
+        {
+            await AddHierarchyClaimsAsync(claims, user, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to add hierarchy claims for user {UserId}", user.Id.Value);
+        }
+
         var identity = new ClaimsIdentity(claims, CookieAuthHandlerSetup.AdminScheme);
         return new ClaimsPrincipal(identity);
+    }
+
+    private async Task AddHierarchyClaimsAsync(List<Claim> claims, User user, CancellationToken ct)
+    {
+        if (_appContext is null) return;
+
+        var tenantId = user.TenantId;
+        if (tenantId is null) return;
+
+        // Determine hierarchy level: max role level or TenantUser level
+        int hierarchyLevel = 10;
+        var tenantUser = await _appContext.TenantUsers.AsNoTracking().FirstOrDefaultAsync(tu => tu.TenantId == tenantId && tu.UserId == user.Id, ct);
+        if (tenantUser != null)
+        {
+            hierarchyLevel = tenantUser.HierarchyLevel;
+        }
+        else
+        {
+            // Fallback to max role level
+            var maxLevel = user.Roles
+                .Where(ur => ur.Role != null)
+                .Select(ur => ur.Role!.Level)
+                .DefaultIfEmpty(10)
+                .Max();
+            hierarchyLevel = maxLevel;
+        }
+
+        claims.Add(new Claim(HierarchyClaimTypes.HierarchyLevel, hierarchyLevel.ToString()));
+
+        // Direct superiors
+        var relationships = await _appContext.UserReportingRelationships
+            .AsNoTracking()
+            .Where(r => r.TenantId == tenantId && r.UserId == user.Id && r.IsActive)
+            .ToListAsync(ct);
+
+        var superiorIds = relationships.Select(r => r.ReportsToUserId.Value.ToString()).Distinct().ToList();
+        claims.Add(new Claim(HierarchyClaimTypes.DirectSuperiorIds, JsonSerializer.Serialize(superiorIds)));
+
+        var primary = relationships.FirstOrDefault(r => r.RelationshipType == Core.Modules.Hierarchy.Enums.RelationshipType.Functional && r.Priority == 1);
+        if (primary != null)
+            claims.Add(new Claim(HierarchyClaimTypes.PrimarySuperiorId, primary.ReportsToUserId.Value.ToString()));
+
+        var types = relationships.Select(r => r.RelationshipType.ToString()).Distinct().ToList();
+        claims.Add(new Claim(HierarchyClaimTypes.RelationshipTypes, JsonSerializer.Serialize(types)));
     }
 
     /// <summary>
@@ -154,8 +231,8 @@ public sealed class AdminPasswordSignInService(
     /// </summary>
     public async Task<bool> IsMasterAdminAsync(User user, CancellationToken ct)
     {
-        var masterTenantName = configuration["SEED_TENANT_NAME"] ?? DefaultMasterTenantName;
-        var masterTenant = await tenantRepository.FindSingleAsync(t => t.Name == new TenantName(masterTenantName), ct);
+        var masterTenantName = _configuration["SEED_TENANT_NAME"] ?? DefaultMasterTenantName;
+        var masterTenant = await _tenantRepository.FindSingleAsync(t => t.Name == new TenantName(masterTenantName), ct);
         if (masterTenant is null) return false;
 
         if (user.TenantId is null || user.TenantId.Value != masterTenant.Id.Value) return false;
@@ -175,9 +252,9 @@ public sealed class AdminPasswordSignInService(
     {
         if (await IsMasterAdminAsync(user, ct))
         {
-            return (await tenantRepository.GetAllAsync(ct)).ToList();
+            return (await _tenantRepository.GetAllAsync(ct)).ToList();
         }
 
-        return (await tenantRepository.GetByUserIdAsync(user.Id, ct)).ToList();
+        return (await _tenantRepository.GetByUserIdAsync(user.Id, ct)).ToList();
     }
 }

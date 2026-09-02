@@ -37,13 +37,13 @@ public class ServerAdminRoleService(IQueryDispatcher queryDispatcher, ICommandDi
 
     public async Task<HttpResponseMessage> CreateRoleAsync(CreateRoleRequest request, CancellationToken ct = default)
     {
-        var result = await commandDispatcher.SendAsync(new CreateRoleCommand(request.RoleName), ct);
+        var result = await commandDispatcher.SendAsync(new CreateRoleCommand(request.RoleName, request.Level, request.ParentRoleId), ct);
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.Created);
     }
 
     public async Task<HttpResponseMessage> UpdateRoleAsync(Guid id, UpdateRoleRequest request, CancellationToken ct = default)
     {
-        var result = await commandDispatcher.SendAsync(new UpdateRoleCommand(id, request.RoleName), ct);
+        var result = await commandDispatcher.SendAsync(new UpdateRoleCommand(id, request.RoleName, request.Level, request.ParentRoleId), ct);
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }
 
@@ -58,5 +58,7 @@ public class ServerAdminRoleService(IQueryDispatcher queryDispatcher, ICommandDi
         role.IsActive,
         role.Name?.Value,
         role.Claims.Select(c => new RolePermissionModel(c.RoleId, c.PermissionId)),
-        role.CreatedAtUtc);
+        role.CreatedAtUtc,
+        role.Level,
+        role.ParentRoleId);
 }

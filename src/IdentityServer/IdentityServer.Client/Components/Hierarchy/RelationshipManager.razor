@@ -1,0 +1,185 @@
+@using IdentityServer.Client.Models.Hierarchy
+@using IdentityServer.Client.Models.Users
+@inject IAdminHierarchyService HierarchyService
+@inject IAdminUserService UserService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<div class="card relationship-manager">
+    <div class="card-head">
+        <h3 class="card-title">@L["RelationshipsFor", UserId]</h3>
+        <button class="btn btn-primary btn-sm" @onclick="() => { showCreate = !showCreate; }">@L["NewRelationship"]</button>
+    </div>
+
+    @if (relationships is null)
+    {
+        <div class="spinner spinner-center"></div>
+    }
+    else if (relationships.Count == 0)
+    {
+        <div class="empty"><p>@L["NoRelationships"]</p></div>
+    }
+    else
+    {
+        <table class="table">
+            <thead><tr><th>@L["Superior"]</th><th>@L["Type"]</th><th>@L["Priority"]</th><th>@L["Active"]</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var r in relationships)
+            {
+                <tr>
+                    <td class="cell-strong">@(GetUserName(r.ReportsToUserId) ?? r.ReportsToUserId.ToString())</td>
+                    <td><span class="badge badge-purple">@r.RelationshipType</span></td>
+                    <td>
+                        <input type="number" min="1" value="@r.Priority" @onchange="(e => UpdatePriorityAsync(r, e))" class="input-sm" style="width:60px" />
+                    </td>
+                    <td>@(r.IsActive ? L["ActiveStatus"] : L["InactiveStatus"])</td>
+                    <td>
+                        <button class="btn-row is-danger" @onclick="() => DeleteAsync(r)">@L["Delete"]</button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+
+    @if (showCreate)
+    {
+        <div class="card" style="margin-top:1rem;padding:1rem;border:1px solid #e2e8f0">
+            <h4>@L["NewRelationship"]</h4>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:end">
+                <div class="field" style="flex:1;min-width:150px">
+                    <label class="field-label">@L["ReportsToUserId"]</label>
+                    <select class="select" @bind="createReportsTo">
+                        <option value="">@L["SelectUserPlaceholder"]</option>
+                        @if (allUsers != null)
+                        {
+                            @foreach (var u in allUsers.Where(u => u.Id != UserId))
+                            {
+                                <option value="@u.Id">@u.UserName (@u.Email) - Lvl @GetUserLevel(u)</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="field" style="min-width:120px">
+                    <label class="field-label">@L["Type"]</label>
+                    <select class="select" @bind="createType">
+                        <option value="Functional">Functional</option>
+                        <option value="Project">Project</option>
+                        <option value="Matrix">Matrix</option>
+                        <option value="Mentor">Mentor</option>
+                        <option value="Temporary">Temporary</option>
+                    </select>
+                </div>
+                <div class="field" style="width:80px">
+                    <label class="field-label">@L["Priority"]</label>
+                    <input type="number" min="1" @bind="createPriority" class="input" />
+                </div>
+                <button class="btn btn-primary" @onclick="CreateAsync">@L["CreateRelationship"]</button>
+                <button class="btn" @onclick="() => showCreate = false">@L["Cancel"]</button>
+            </div>
+            @if (!string.IsNullOrEmpty(createError))
+            {
+                <p class="text-danger">@createError</p>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid UserId { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    private List<HierarchyRelationshipModel>? relationships;
+    private List<UserModel>? allUsers;
+    private bool showCreate;
+    private string createReportsTo = string.Empty;
+    private string createType = "Functional";
+    private int createPriority = 1;
+    private string? createError;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        relationships = (await HierarchyService.GetRelationshipsAsync(UserId))?.ToList();
+        if (allUsers is null)
+        {
+            var resp = await UserService.GetUsersAsync();
+            allUsers = resp?.Data?.ToList();
+        }
+        StateHasChanged();
+    }
+
+    private string? GetUserName(Guid userId)
+    {
+        return allUsers?.FirstOrDefault(u => u.Id == userId)?.UserName;
+    }
+
+    private int GetUserLevel(UserModel u)
+    {
+        return 10;
+    }
+
+    private async Task CreateAsync()
+    {
+        createError = null;
+        if (!Guid.TryParse(createReportsTo, out var reportsTo))
+        {
+            createError = L["InvalidReportsTo"];
+            return;
+        }
+        var req = new CreateRelationshipRequest(UserId, reportsTo, createType, createPriority);
+        var resp = await HierarchyService.CreateRelationshipAsync(req);
+        if (resp.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["RelationshipCreatedToast"]);
+            showCreate = false;
+            createReportsTo = string.Empty;
+            await LoadAsync();
+            await OnChanged.InvokeAsync();
+        }
+        else
+        {
+            var body = await resp.Content.ReadAsStringAsync();
+            createError = body;
+            ToastService.ShowError(body);
+        }
+    }
+
+    private async Task UpdatePriorityAsync(HierarchyRelationshipModel rel, ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), out var newPriority)) return;
+        var resp = await HierarchyService.UpdatePriorityAsync(rel.Id, new UpdatePriorityRequest(newPriority));
+        if (resp.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["RelationshipUpdatedToast"]);
+            await LoadAsync();
+            await OnChanged.InvokeAsync();
+        }
+        else
+        {
+            var body = await resp.Content.ReadAsStringAsync();
+            ToastService.ShowError(body);
+            await LoadAsync();
+        }
+    }
+
+    private async Task DeleteAsync(HierarchyRelationshipModel rel)
+    {
+        var resp = await HierarchyService.DeleteRelationshipAsync(rel.Id);
+        if (resp.IsSuccessStatusCode || resp.StatusCode == System.Net.HttpStatusCode.NoContent)
+        {
+            ToastService.ShowSuccess(L["RelationshipDeletedToast"]);
+            await LoadAsync();
+            await OnChanged.InvokeAsync();
+        }
+        else
+        {
+            var body = await resp.Content.ReadAsStringAsync();
+            ToastService.ShowError(body);
+        }
+    }
+}

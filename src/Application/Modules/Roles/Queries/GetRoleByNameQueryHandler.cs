@@ -36,7 +36,9 @@ public class GetRoleByNameQueryHandler(
                   role.Name,
                   role.RolePermissions.Select(
                     rp => new RolePermissionDto(rp.RoleId.Value, rp.PermissionId.Value)),
-                  role.CreatedAtUtc
+                  role.CreatedAtUtc,
+                  role.Level,
+                  role.ParentRoleId?.Value
                 )
             });
         }

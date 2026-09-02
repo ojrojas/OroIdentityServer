@@ -27,6 +27,21 @@ public class TenantUserConfiguration : IEntityTypeConfiguration<TenantUser>
         builder.Property(tu => tu.IsActive).HasColumnName("IsActive").IsRequired();
         builder.Property(tu => tu.JoinedAtUtc).HasColumnName("JoinedAtUtc").IsRequired();
 
+        builder.Property(tu => tu.PrimaryReportsToUserId)
+            .HasConversion(
+                id => id != null ? id.Value : (Guid?)null,
+                value => value != null ? new UserId(value.Value) : null)
+            .HasColumnName("PrimaryReportsToUserId")
+            .IsRequired(false);
+
+        builder.Property(tu => tu.HierarchyLevel)
+            .HasColumnName("HierarchyLevel")
+            .IsRequired()
+            .HasDefaultValue(10);
+
+        builder.HasIndex(tu => tu.PrimaryReportsToUserId)
+            .HasDatabaseName("IX_TenantUsers_PrimaryReportsToUserId");
+
         builder.HasIndex(tu => new { tu.TenantId, tu.UserId })
             .IsUnique()
             .HasDatabaseName("ix_tenant_users_tenant_id_user_id");

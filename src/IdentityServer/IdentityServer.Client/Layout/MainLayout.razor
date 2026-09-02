@@ -65,6 +65,14 @@
                     <Icon Name="plug" Size="19" />
                     @L["NavSessions"]
                 </a>
+                <AuthorizeView Roles="Admin,Administrator,Manager">
+                    <Authorized>
+                        <a class="nav-item @Active("/hierarchy/manage")" href="/hierarchy/manage" @onclick="CloseSidebar">
+                            <Icon Name="users" Size="19" />
+                            @L["NavHierarchy"]
+                        </a>
+                    </Authorized>
+                </AuthorizeView>
             </nav>
 
             <div class="rail">
@@ -137,6 +145,7 @@
         var p when p.StartsWith("tenants/create") => L["NewTenantTitle"],
         var p when p.StartsWith("tenants") => L["NavTenants"],
         var p when p.StartsWith("sessions") => L["NavSessions"],
+        var p when p.StartsWith("hierarchy") => L["NavHierarchy"],
         _ => L["NavDashboard"]
     };
 

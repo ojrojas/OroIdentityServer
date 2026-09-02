@@ -11,6 +11,9 @@ public sealed class Role : AggregateRoot<RoleId>, IAuditableEntity
     public bool IsActive { get; private set; }
     public RoleName Name { get; private set; }
     public DateTime CreatedAtUtc { get; private set; } = DateTime.UtcNow;
+    public int Level { get; private set; } = 10;
+    public RoleId? ParentRoleId { get; private set; }
+    public Role? ParentRole { get; private set; }
 
     public IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.AsReadOnly();
 
@@ -19,13 +22,29 @@ public sealed class Role : AggregateRoot<RoleId>, IAuditableEntity
         Name = null!;
     }
 
-    public Role(RoleName name)
+    public Role(RoleName name, int level = 10, RoleId? parentRoleId = null)
     {
         Id = RoleId.New();
         Name = name ?? throw new Exception("role.name.required Role name is required");
         IsActive = true;
+        SetLevel(level);
+        ParentRoleId = parentRoleId;
 
         RaiseDomainEvent(new RoleCreateEvent(Id));
+    }
+
+    public void SetLevel(int level)
+    {
+        if (level < 10 || level > 100)
+            throw new ArgumentOutOfRangeException(nameof(level), "Level must be between 10 and 100");
+        Level = level;
+    }
+
+    public void SetParentRole(RoleId? parentRoleId)
+    {
+        if (parentRoleId != null && parentRoleId.Value == Id.Value)
+            throw new InvalidOperationException("Role cannot be its own parent");
+        ParentRoleId = parentRoleId;
     }
 
     public void AddPermission(Permission permission)

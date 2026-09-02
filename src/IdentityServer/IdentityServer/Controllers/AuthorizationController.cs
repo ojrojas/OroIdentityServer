@@ -117,18 +117,13 @@ public class AuthorizationController : Controller
            throw new InvalidOperationException("The user details cannot be retrieved.");
 
         // Retrieve the application details from the database.
-        var application = await _applicationManager.FindByClientIdAsync(request.ClientId!) ??
+        var application = await _applicationManager.FindByClientIdAsync(request.ClientId!, cancellationToken: cancellationToken) ??
             throw new InvalidOperationException("Details concerning the calling client application cannot be found.");
 
         // Retrieve the permanent authorizations associated with the user and the calling client application.
-        var authorizations = await _authorizationManager.FindAsync(
-            subject: user.Data.Id.Value.ToString(),
-            client: await _applicationManager.GetIdAsync(application),
-            status: Statuses.Valid,
-            type: AuthorizationTypes.Permanent,
-            scopes: request.GetScopes()).ToListAsync();
+        var authorizations = await _authorizationManager.FindAsync(subject: user.Data.Id.Value.ToString(), client: await _applicationManager.GetIdAsync(application, cancellationToken), status: Statuses.Valid, type: AuthorizationTypes.Permanent, scopes: request.GetScopes(), cancellationToken: cancellationToken).ToListAsync(cancellationToken: cancellationToken);
 
-        switch (await _applicationManager.GetConsentTypeAsync(application))
+        switch (await _applicationManager.GetConsentTypeAsync(application, cancellationToken))
         {
             // If the consent is external (e.g when authorizations are granted by a sysadmin),
             // immediately return an error if no authorization can be found in the database.
@@ -168,19 +163,14 @@ public class AuthorizationController : Controller
                 // but you may want to allow the user to uncheck specific scopes.
                 // For that, simply restrict the list of scopes before calling SetScopes.
                 identity.SetScopes(request.GetScopes());
-                identity.SetResources(await _scopeManager.ListResourcesAsync(identity.GetScopes()).ToListAsync());
+                identity.SetResources(await _scopeManager.ListResourcesAsync(identity.GetScopes(), cancellationToken).ToListAsync(cancellationToken: cancellationToken));
 
                 // Automatically create a permanent authorization to avoid requiring explicit consent
                 // for future authorization or token requests containing the same scopes.
                 var authorization = authorizations.LastOrDefault();
-                authorization ??= await _authorizationManager.CreateAsync(
-                    identity: identity,
-                    subject: user.Data.Id.Value.ToString(),
-                    client: (await _applicationManager.GetIdAsync(application))!,
-                    type: AuthorizationTypes.Permanent,
-                    scopes: identity.GetScopes());
+                authorization ??= await _authorizationManager.CreateAsync(identity: identity, subject: user.Data.Id.Value.ToString(), client: (await _applicationManager.GetIdAsync(application, cancellationToken))!, type: AuthorizationTypes.Permanent, scopes: identity.GetScopes(), cancellationToken: cancellationToken);
 
-                identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization));
+                identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization, cancellationToken));
                 var principal = new ClaimsPrincipal(identity);
 foreach (var claim in identity.Claims)
     claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
@@ -225,21 +215,16 @@ foreach (var claim in identity.Claims)
             throw new InvalidOperationException("The user details cannot be retrieved.");
 
         // Retrieve the application details from the database.
-        var application = await _applicationManager.FindByClientIdAsync(request.ClientId!) ??
+        var application = await _applicationManager.FindByClientIdAsync(request.ClientId!, cancellationToken: cancellationToken) ??
             throw new InvalidOperationException("Details concerning the calling client application cannot be found.");
 
         // Retrieve the permanent authorizations associated with the user and the calling client application.
-        var authorizations = await _authorizationManager.FindAsync(
-            subject: user.Data.Id.Value.ToString(),
-            client: await _applicationManager.GetIdAsync(application),
-            status: Statuses.Valid,
-            type: AuthorizationTypes.Permanent,
-            scopes: request.GetScopes()).ToListAsync();
+        var authorizations = await _authorizationManager.FindAsync(subject: user.Data.Id.Value.ToString(), client: await _applicationManager.GetIdAsync(application, cancellationToken), status: Statuses.Valid, type: AuthorizationTypes.Permanent, scopes: request.GetScopes(), cancellationToken: cancellationToken).ToListAsync(cancellationToken: cancellationToken);
 
         // Note: the same check is already made in the other action but is repeated
         // here to ensure a malicious user can't abuse this POST-only endpoint and
         // force it to return a valid response without the external authorization.
-        if (authorizations.Count is 0 && await _applicationManager.HasConsentTypeAsync(application, ConsentTypes.External))
+        if (authorizations.Count is 0 && await _applicationManager.HasConsentTypeAsync(application, ConsentTypes.External, cancellationToken))
         {
             return Forbid(
                 authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
@@ -271,19 +256,14 @@ foreach (var claim in identity.Claims)
         // but you may want to allow the user to uncheck specific scopes.
         // For that, simply restrict the list of scopes before calling SetScopes.
         identity.SetScopes(request.GetScopes());
-        identity.SetResources(await _scopeManager.ListResourcesAsync(identity.GetScopes()).ToListAsync());
+        identity.SetResources(await _scopeManager.ListResourcesAsync(identity.GetScopes(), cancellationToken).ToListAsync(cancellationToken: cancellationToken));
 
         // Automatically create a permanent authorization to avoid requiring explicit consent
         // for future authorization or token requests containing the same scopes.
         var authorization = authorizations.LastOrDefault();
-        authorization ??= await _authorizationManager.CreateAsync(
-            identity: identity,
-            subject: user.Data.Id.Value.ToString(),
-            client: (await _applicationManager.GetIdAsync(application))!,
-            type: AuthorizationTypes.Permanent,
-            scopes: identity.GetScopes());
+        authorization ??= await _authorizationManager.CreateAsync(identity: identity, subject: user.Data.Id.Value.ToString(), client: (await _applicationManager.GetIdAsync(application, cancellationToken))!, type: AuthorizationTypes.Permanent, scopes: identity.GetScopes(), cancellationToken: cancellationToken);
 
-        identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization));
+        identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization, cancellationToken));
         var principal = new ClaimsPrincipal(identity);
 foreach (var claim in identity.Claims)
     claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());

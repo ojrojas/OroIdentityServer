@@ -82,6 +82,38 @@
   <data name="NavScopes"><value>作用域</value></data>
   <data name="NavSessions"><value>会话</value></data>
 
+  <data name="NavHierarchy"><value>层级</value></data>
+
+  <!-- Hierarchy -->
+  <data name="HierarchyTitle"><value>层级</value></data>
+  <data name="HierarchyManageTitle"><value>层级管理</value></data>
+  <data name="OrganizationHierarchy"><value>组织层级</value></data>
+  <data name="NoHierarchyData"><value>暂无层级数据。请创建关系以构建树。</value></data>
+  <data name="PrimaryTree"><value>主树</value></data>
+  <data name="FullTree"><value>完整树</value></data>
+  <data name="UserDetails"><value>用户详情</value></data>
+  <data name="HierarchyLevel"><value>层级</value></data>
+  <data name="CommandChain"><value>指挥链</value></data>
+  <data name="SelectUserInTree"><value>在树中选择用户以查看详情</value></data>
+  <data name="RelationshipsFor"><value>{0} 的关系</value></data>
+  <data name="NoRelationships"><value>暂无关系</value></data>
+  <data name="NewRelationship"><value>新建关系</value></data>
+  <data name="ReportsToUserId"><value>上级ID</value></data>
+  <data name="RelationshipType"><value>关系类型</value></data>
+  <data name="Priority"><value>优先级</value></data>
+  <data name="Superior"><value>上级</value></data>
+  <data name="Type"><value>类型</value></data>
+  <data name="CreateRelationship"><value>创建</value></data>
+  <data name="RelationshipCreatedToast"><value>关系已创建。</value></data>
+  <data name="RelationshipUpdatedToast"><value>优先级已更新。</value></data>
+  <data name="RelationshipDeletedToast"><value>关系已删除。</value></data>
+  <data name="InvalidReportsTo"><value>无效的上级ID</value></data>
+  <data name="InactiveStatus"><value>未激活</value></data>
+  <data name="SuperiorUser"><value>上级（汇报对象）</value></data>
+  <data name="SubordinateUser"><value>下属（用户）</value></data>
+  <data name="MinLevel"><value>最小层级</value></data>
+  <data name="All"><value>全部</value></data>
+
   <data name="DashboardTitle"><value>仪表盘</value></data>
   <data name="StatUsers"><value>用户</value></data>
   <data name="StatConnectedUsers"><value>在线用户</value></data>
@@ -116,6 +148,7 @@
   <data name="RoleDeleteFailedToast"><value>无法删除角色（{0}）。</value></data>
   <data name="RoleDetailTitle"><value>角色</value></data>
   <data name="PermissionsAssignedLabel"><value>已分配权限：{0}</value></data>
+  <data name="ParentRole"><value>Parent Role</value></data>
   <data name="ActiveLabel"><value>启用：{0}</value></data>
 
   <data name="IdentificationTypesTitle"><value>证件类型</value></data>

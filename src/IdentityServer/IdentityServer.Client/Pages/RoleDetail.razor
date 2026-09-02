@@ -25,6 +25,25 @@
                 <input id="roleName" class="input" @bind="roleName" @bind:event="oninput" />
             </div>
 
+            <div class="field">
+                <label class="field-label" for="roleLevel">@L["HierarchyLevel"]</label>
+                <input id="roleLevel" class="input" type="number" min="10" max="100" step="10" @bind="roleLevel" />
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="parentRole">@L["ParentRole"]</label>
+                <select id="parentRole" class="select" @bind="parentRoleId">
+                    <option value="">@L["None"]</option>
+                    @if (allRoles != null)
+                    {
+                        @foreach (var r in allRoles.Where(x => x.Id != Id))
+                        {
+                            <option value="@r.Id">@r.Name (@r.Level)</option>
+                        }
+                    }
+                </select>
+            </div>
+
             <label class="switch-row" for="isActive">
                 <span class="switch-row-text">
                     <span class="switch-row-label">@L["Active"]</span>
@@ -52,6 +71,9 @@
 
     private RoleModel? item;
     private string roleName = string.Empty;
+    private int roleLevel = 10;
+    private string? parentRoleId;
+    private List<RoleModel>? allRoles;
     private bool isActive = false;
     private bool saving;
 
@@ -60,13 +82,20 @@
         var response = await RoleService.GetRoleByIdAsync(Id);
         item = response?.Data;
         if (item is not null)
+        {
             roleName = item.Name ?? string.Empty;
+            roleLevel = item.Level;
+            parentRoleId = item.ParentRoleId?.ToString();
+        }
+        var all = await RoleService.GetRolesAsync();
+        allRoles = all?.Data?.ToList();
     }
 
     private async Task SaveAsync()
     {
         saving = true;
-        var response = await RoleService.UpdateRoleAsync(Id, new UpdateRoleRequest(roleName));
+        Guid? parentGuid = string.IsNullOrWhiteSpace(parentRoleId) ? null : Guid.Parse(parentRoleId);
+        var response = await RoleService.UpdateRoleAsync(Id, new UpdateRoleRequest(roleName, roleLevel, parentGuid));
         saving = false;
 
         if (response.IsSuccessStatusCode)

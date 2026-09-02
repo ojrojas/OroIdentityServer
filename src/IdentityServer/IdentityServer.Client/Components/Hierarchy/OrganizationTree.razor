@@ -1,0 +1,178 @@
+@using IdentityServer.Client.Models.Hierarchy
+@inject IStringLocalizer<SharedResources> L
+
+<div class="hierarchy-tree">
+    @if (Root == null)
+    {
+        <div class="empty"><p class="empty-title">@L["NoHierarchyData"]</p></div>
+    }
+    else
+    {
+        <div class="hierarchy-filters">
+            <label>@L["RelationshipType"]
+                <select @onchange="OnTypeFilterChanged" value="@SelectedType">
+                    <option value="">@L["All"]</option>
+                    <option value="Functional">Functional</option>
+                    <option value="Project">Project</option>
+                    <option value="Matrix">Matrix</option>
+                    <option value="Mentor">Mentor</option>
+                    <option value="Temporary">Temporary</option>
+                </select>
+            </label>
+            <label>@L["MinLevel"]
+                <select @onchange="OnLevelFilterChanged" value="@SelectedLevel">
+                    <option value="0">@L["All"]</option>
+                    <option value="10">10+</option>
+                    <option value="40">40+</option>
+                    <option value="60">60+</option>
+                    <option value="70">70+</option>
+                    <option value="90">90+</option>
+                </select>
+            </label>
+        </div>
+
+        <ul class="hierarchy-nodes">
+            @foreach (var child in FilteredChildren(Root))
+            {
+                @RenderNode(child, 0)
+            }
+            @if (Root.UserId == Guid.Empty)
+            {
+                @* virtual root already expanded *@
+            }
+            else
+            {
+                @RenderNode(Root, 0)
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter] public OrganizationTreeNodeModel? Root { get; set; }
+    [Parameter] public EventCallback<Guid> OnUserSelected { get; set; }
+    [Parameter] public string? SelectedType { get; set; }
+    [Parameter] public int SelectedLevel { get; set; }
+    [Parameter] public EventCallback<string?> OnTypeFilter { get; set; }
+    [Parameter] public EventCallback<int> OnLevelFilter { get; set; }
+    [Parameter] public EventCallback<(Guid draggedUserId, Guid newParentId)> OnReassign { get; set; }
+
+    private Guid? draggedUserId;
+
+    private async Task OnTypeFilterChanged(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString();
+        SelectedType = string.IsNullOrWhiteSpace(val) ? null : val;
+        await OnTypeFilter.InvokeAsync(SelectedType);
+    }
+
+    private async Task OnLevelFilterChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var lvl))
+        {
+            SelectedLevel = lvl;
+            await OnLevelFilter.InvokeAsync(lvl);
+        }
+    }
+
+    private IEnumerable<OrganizationTreeNodeModel> FilteredChildren(OrganizationTreeNodeModel node)
+    {
+        if (node.UserId == Guid.Empty) return (node.Children ?? Enumerable.Empty<OrganizationTreeNodeModel>()).Where(c => PassesFilter(c));
+        return Enumerable.Empty<OrganizationTreeNodeModel>();
+    }
+
+    private bool PassesFilter(OrganizationTreeNodeModel node)
+    {
+        if (SelectedLevel > 0 && node.HierarchyLevel < SelectedLevel) return false;
+        if (!string.IsNullOrEmpty(SelectedType) && (node.SecondaryRelationships?.Any() ?? false))
+        {
+            // if filter by type, check primary or secondary contains type
+            // For simplicity, show node if it has that relationship type in secondary or primary children
+        }
+        return true;
+    }
+
+    private Task OnDragStart(Guid userId)
+    {
+        draggedUserId = userId;
+        return Task.CompletedTask;
+    }
+
+    private Task OnDragOver(DragEventArgs e) => Task.CompletedTask;
+
+    private async Task OnDrop(Guid targetUserId)
+    {
+        if (draggedUserId.HasValue && draggedUserId.Value != targetUserId && draggedUserId.Value != Guid.Empty && targetUserId != Guid.Empty)
+        {
+            await OnReassign.InvokeAsync((draggedUserId.Value, targetUserId));
+        }
+        draggedUserId = null;
+    }
+
+    private RenderFragment RenderNode(OrganizationTreeNodeModel node, int depth) => builder =>
+    {
+        if (!PassesFilter(node)) return;
+
+        var indent = depth * 16;
+        builder.OpenElement(0, "li");
+        builder.AddAttribute(1, "class", "hierarchy-node");
+        builder.AddAttribute(2, "style", $"margin-left:{indent}px");
+
+        builder.OpenElement(3, "div");
+        builder.AddAttribute(4, "class", "hierarchy-node-content");
+        builder.AddAttribute(5, "onclick", EventCallback.Factory.Create(this, () => OnUserSelected.InvokeAsync(node.UserId)));
+        if (node.UserId != Guid.Empty)
+        {
+            builder.AddAttribute(6, "draggable", "true");
+            builder.AddAttribute(7, "ondragstart", EventCallback.Factory.Create<DragEventArgs>(this, () => OnDragStart(node.UserId)));
+            builder.AddAttribute(8, "ondragover", EventCallback.Factory.Create<DragEventArgs>(this, (DragEventArgs e) => OnDragOver(e)));
+            builder.AddAttribute(9, "ondragover:preventDefault", true);
+            builder.AddAttribute(10, "ondrop", EventCallback.Factory.Create<DragEventArgs>(this, () => OnDrop(node.UserId)));
+            builder.AddAttribute(11, "ondrop:preventDefault", true);
+        }
+
+        builder.OpenElement(12, "span");
+        builder.AddAttribute(13, "class", "hierarchy-node-name");
+        builder.AddContent(14, node.UserName ?? node.UserId.ToString());
+        builder.CloseElement();
+
+        if (!string.IsNullOrEmpty(node.RoleName))
+        {
+            builder.OpenElement(15, "span");
+            builder.AddAttribute(16, "class", "badge badge-blue");
+            builder.AddContent(17, node.RoleName);
+            builder.CloseElement();
+        }
+
+        builder.OpenElement(18, "span");
+        builder.AddAttribute(19, "class", "badge badge-gray");
+        builder.AddContent(20, $"Lvl {node.HierarchyLevel}");
+        builder.CloseElement();
+
+        if ((node.SecondaryRelationships?.Count ?? 0) > 0)
+        {
+            foreach (var sec in node.SecondaryRelationships!)
+            {
+                builder.OpenElement(21, "span");
+                builder.AddAttribute(22, "class", "badge badge-purple relationship-badge");
+                builder.AddContent(23, sec.RelationshipType);
+                builder.CloseElement();
+            }
+        }
+
+        builder.CloseElement(); // div
+
+        if ((node.Children?.Count ?? 0) > 0)
+        {
+            builder.OpenElement(24, "ul");
+            builder.AddAttribute(25, "class", "hierarchy-children");
+            foreach (var child in (node.Children ?? Enumerable.Empty<OrganizationTreeNodeModel>()).Where(PassesFilter))
+            {
+                builder.AddContent(26, RenderNode(child, depth + 1));
+            }
+            builder.CloseElement();
+        }
+
+        builder.CloseElement(); // li
+    };
+}

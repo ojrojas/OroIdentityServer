@@ -34,6 +34,8 @@
                 <thead>
                     <tr>
                         <th>@L["Name"]</th>
+                        <th>@L["HierarchyLevel"]</th>
+                        <th>@L["ParentRole"]</th>
                         <th>@L["Active"]</th>
                         <th class="num">@L["ColPermissions"]</th>
                         <th></th>
@@ -44,6 +46,8 @@
                     {
                         <tr>
                             <td class="cell-strong">@item.Name</td>
+                            <td><span class="badge badge-gray">@item.Level</span></td>
+                            <td class="cell-muted">@(items.FirstOrDefault(x => x.Id == item.ParentRoleId)?.Name ?? "—")</td>
                             <td>
                                 @if (item.IsActive)
                                 {

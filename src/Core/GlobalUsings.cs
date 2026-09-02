@@ -35,5 +35,9 @@ global using OroIdentityServer.Core.Modules.UserPreferences.Events;
 global using System.Text.RegularExpressions;
 global using OroIdentityServer.Core.Modules.Roles.Entities;
 
+global using OroIdentityServer.Core.Modules.Hierarchy.Entities;
+global using OroIdentityServer.Core.Modules.Hierarchy.Enums;
+global using OroIdentityServer.Core.Modules.Hierarchy.ValueObjects;
+
 global using BuildingBlocks.Kernel.Events;
 global using BuildingBlocks.Kernel.Domain;

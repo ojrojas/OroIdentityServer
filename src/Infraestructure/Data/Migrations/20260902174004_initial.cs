@@ -123,6 +123,27 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RelationshipAuditLogs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RelationshipId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReportsToUserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RelationshipType = table.Column<string>(type: "text", nullable: false),
+                    Action = table.Column<string>(type: "text", nullable: false),
+                    PerformedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    PerformedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Details = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    Reason = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RelationshipAuditLogs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
@@ -130,11 +151,19 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false, defaultValue: 10),
+                    ParentRoleId = table.Column<Guid>(type: "uuid", nullable: true),
                     Version = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Roles_Roles_ParentRoleId",
+                        column: x => x.ParentRoleId,
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -182,7 +211,7 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    Slug = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Slug = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Version = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -297,28 +326,6 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TenantUsers",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    TenantId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Role = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    JoinedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TenantUsers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TenantUsers_Tenants_TenantId",
-                        column: x => x.TenantId,
-                        principalTable: "Tenants",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -419,6 +426,72 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TenantUsers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    JoinedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PrimaryReportsToUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    HierarchyLevel = table.Column<int>(type: "integer", nullable: false, defaultValue: 10)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TenantUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TenantUsers_Tenants_TenantId",
+                        column: x => x.TenantId,
+                        principalTable: "Tenants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TenantUsers_Users_PrimaryReportsToUserId",
+                        column: x => x.PrimaryReportsToUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserReportingRelationships",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReportsToUserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RelationshipType = table.Column<string>(type: "text", nullable: false),
+                    Priority = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedByUserId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserReportingRelationships", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserReportingRelationships_Tenants_TenantId",
+                        column: x => x.TenantId,
+                        principalTable: "Tenants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserReportingRelationships_Users_ReportsToUserId",
+                        column: x => x.ReportsToUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserReportingRelationships_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserRoles",
                 columns: table => new
                 {
@@ -497,6 +570,21 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_RelationshipAuditLogs_PerformedAtUtc",
+                table: "RelationshipAuditLogs",
+                column: "PerformedAtUtc");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RelationshipAuditLogs_RelationshipId",
+                table: "RelationshipAuditLogs",
+                column: "RelationshipId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RelationshipAuditLogs_Tenant_User",
+                table: "RelationshipAuditLogs",
+                columns: new[] { "TenantId", "UserId" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Roles_IsActive",
                 table: "Roles",
                 column: "IsActive");
@@ -506,6 +594,11 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 table: "Roles",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Roles_ParentRoleId",
+                table: "Roles",
+                column: "ParentRoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Sessions_UserId",
@@ -536,6 +629,11 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_TenantUsers_PrimaryReportsToUserId",
+                table: "TenantUsers",
+                column: "PrimaryReportsToUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_user_company_preferences_user_tenant_company",
                 table: "UserCompanyPreferences",
                 columns: new[] { "UserId", "TenantId", "CompanyId" },
@@ -546,6 +644,37 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 table: "UserPreferences",
                 columns: new[] { "UserId", "TenantId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserReportingRelationships_IsActive",
+                table: "UserReportingRelationships",
+                column: "IsActive");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserReportingRelationships_ReportsToUserId",
+                table: "UserReportingRelationships",
+                column: "ReportsToUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserReportingRelationships_Tenant_ReportsTo",
+                table: "UserReportingRelationships",
+                columns: new[] { "TenantId", "ReportsToUserId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserReportingRelationships_Tenant_User",
+                table: "UserReportingRelationships",
+                columns: new[] { "TenantId", "UserId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserReportingRelationships_Unique",
+                table: "UserReportingRelationships",
+                columns: new[] { "TenantId", "UserId", "ReportsToUserId", "RelationshipType" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserReportingRelationships_UserId",
+                table: "UserReportingRelationships",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
@@ -612,6 +741,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 name: "Permissions");
 
             migrationBuilder.DropTable(
+                name: "RelationshipAuditLogs");
+
+            migrationBuilder.DropTable(
                 name: "RolePermissions");
 
             migrationBuilder.DropTable(
@@ -628,6 +760,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserPreferences");
+
+            migrationBuilder.DropTable(
+                name: "UserReportingRelationships");
 
             migrationBuilder.DropTable(
                 name: "UserRoles");

@@ -35,6 +35,9 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+[Oo]bj\Debug
+[Oo]bj/Debug
+
 # Visual Studio 2015/2017 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
@@ -492,5 +495,3 @@ pnpm-lock.yaml
 pnpm-workspace.yaml
 
 orodientityserver-admin.db
-examples/Frontends/oroidentity-admin/obj/Debug//package.g.props
-examples/Frontends/oroidentity-admin/obj/Debug//package.g.props

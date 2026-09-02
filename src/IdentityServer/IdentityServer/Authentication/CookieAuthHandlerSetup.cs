@@ -2,8 +2,12 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
+using OroIdentityServer.Server.Authorization;
+using OroIdentityServer.Shared.Authorization;
 
 namespace OroIdentityServer.Server.Authentication;
 
@@ -82,7 +86,54 @@ public static class CookieAuthHandlerSetup
                 policy.RequireAuthenticatedUser();
                 policy.RequireAssertion(ctx => ctx.User.HasClaim(
                     AdminPasswordSignInService.IsMasterAdminClaimType, "true"));
+            })
+            .AddPolicy("CanManageHierarchy", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireAssertion(ctx =>
+                {
+                    var levelClaim = ctx.User.FindFirstValue(HierarchyClaimTypes.HierarchyLevel);
+                    if (int.TryParse(levelClaim, out var level))
+                        return level >= 70;
+                    // Fallback to role check
+                    return ctx.User.IsInRole(TenantRole.Administrator) || ctx.User.IsInRole(TenantRole.Manager) || ctx.User.IsInRole(TenantRole.Admin);
+                });
+            })
+            .AddPolicy("CanViewSubordinates", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireAssertion(ctx =>
+                {
+                    var levelClaim = ctx.User.FindFirstValue(HierarchyClaimTypes.HierarchyLevel);
+                    if (int.TryParse(levelClaim, out var level))
+                        return level >= 40;
+                    return ctx.User.IsInRole(TenantRole.Administrator) || ctx.User.IsInRole(TenantRole.Manager) || ctx.User.IsInRole(TenantRole.Admin);
+                });
+            })
+            .AddPolicy("CanLeadProject", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireAssertion(ctx =>
+                {
+                    var levelClaim = ctx.User.FindFirstValue(HierarchyClaimTypes.HierarchyLevel);
+                    if (int.TryParse(levelClaim, out var level))
+                        return level >= 60;
+                    return ctx.User.IsInRole(TenantRole.Administrator) || ctx.User.IsInRole(TenantRole.Manager) || ctx.User.IsInRole(TenantRole.Admin);
+                });
+            })
+            .AddPolicy("CanAssignMatrixRelationships", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireAssertion(ctx =>
+                {
+                    var levelClaim = ctx.User.FindFirstValue(HierarchyClaimTypes.HierarchyLevel);
+                    if (int.TryParse(levelClaim, out var level))
+                        return level >= 60;
+                    return ctx.User.IsInRole(TenantRole.Administrator) || ctx.User.IsInRole(TenantRole.Manager) || ctx.User.IsInRole(TenantRole.Admin);
+                });
             });
+
+        services.AddScoped<IAuthorizationHandler, HierarchyAuthorizationHandler>();
 
         return services;
     }

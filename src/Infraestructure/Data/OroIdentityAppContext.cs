@@ -22,6 +22,8 @@ public class OroIdentityAppContext(
     public DbSet<AuthValidationLog> AuthValidationLogs { get; set; }
     public DbSet<UserPreference> UserPreferences { get; set; }
     public DbSet<UserCompanyPreference> UserCompanyPreferences { get; set; }
+    public DbSet<UserReportingRelationship> UserReportingRelationships { get; set; }
+    public DbSet<RelationshipAuditLog> RelationshipAuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -42,5 +44,7 @@ public class OroIdentityAppContext(
         builder.ApplyConfiguration(new UserPreferenceConfiguration());
         builder.ApplyConfiguration(new UserRoleEntityConfiguration());
         builder.ApplyConfiguration(new UserSessionEntityConfiguration());
+        builder.ApplyConfiguration(new UserReportingRelationshipEntityConfiguration());
+        builder.ApplyConfiguration(new RelationshipAuditLogEntityConfiguration());
     }
 }

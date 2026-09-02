@@ -91,6 +91,37 @@
   <data name="NavScopes"><value>Scopes</value></data>
   <data name="NavTenants"><value>Tenants</value></data>
   <data name="NavSessions"><value>Sessions</value></data>
+  <data name="NavHierarchy"><value>Hierarchy</value></data>
+
+  <!-- Hierarchy -->
+  <data name="HierarchyTitle"><value>Hierarchy</value></data>
+  <data name="HierarchyManageTitle"><value>Hierarchy Management</value></data>
+  <data name="OrganizationHierarchy"><value>Organization Hierarchy</value></data>
+  <data name="NoHierarchyData"><value>No hierarchy data. Create relationships to build the tree.</value></data>
+  <data name="PrimaryTree"><value>Primary Tree</value></data>
+  <data name="FullTree"><value>Full Tree</value></data>
+  <data name="UserDetails"><value>User Details</value></data>
+  <data name="HierarchyLevel"><value>Hierarchy Level</value></data>
+  <data name="CommandChain"><value>Command Chain</value></data>
+  <data name="SelectUserInTree"><value>Select a user in the tree to view details</value></data>
+  <data name="RelationshipsFor"><value>Relationships for {0}</value></data>
+  <data name="NoRelationships"><value>No relationships</value></data>
+  <data name="NewRelationship"><value>New Relationship</value></data>
+  <data name="ReportsToUserId"><value>Reports To User ID</value></data>
+  <data name="RelationshipType"><value>Relationship Type</value></data>
+  <data name="Priority"><value>Priority</value></data>
+  <data name="Superior"><value>Superior</value></data>
+  <data name="Type"><value>Type</value></data>
+  <data name="CreateRelationship"><value>Create</value></data>
+  <data name="RelationshipCreatedToast"><value>Relationship created.</value></data>
+  <data name="RelationshipUpdatedToast"><value>Priority updated.</value></data>
+  <data name="RelationshipDeletedToast"><value>Relationship deleted.</value></data>
+  <data name="InvalidReportsTo"><value>Invalid ReportsTo UserId</value></data>
+  <data name="SubordinateUser"><value>Subordinate (User)</value></data>
+  <data name="SuperiorUser"><value>Superior (Reports To)</value></data>
+  <data name="InactiveStatus"><value>Inactive</value></data>
+  <data name="MinLevel"><value>Min Level</value></data>
+  <data name="All"><value>All</value></data>
 
   <!-- Dashboard -->
   <data name="DashboardTitle"><value>Dashboard</value></data>
@@ -130,6 +161,7 @@
   <data name="RoleDeleteFailedToast"><value>Could not delete role ({0}).</value></data>
   <data name="RoleDetailTitle"><value>Role</value></data>
   <data name="PermissionsAssignedLabel"><value>Permissions assigned: {0}</value></data>
+  <data name="ParentRole"><value>Parent Role</value></data>
   <data name="ActiveLabel"><value>Active: {0}</value></data>
 
   <!-- Identification types -->

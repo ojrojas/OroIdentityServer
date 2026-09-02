@@ -1,0 +1,275 @@
+@page "/hierarchy/manage"
+@attribute [Authorize(Roles = "Admin,Administrator,Manager")]
+@using IdentityServer.Client.Models.Hierarchy
+@using IdentityServer.Client.Models.Users
+@using IdentityServer.Client.Interfaces
+@using IdentityServer.Client.Components.Hierarchy
+@using Microsoft.AspNetCore.Authorization
+@using IdentityServer.Shared.Resources
+@using Microsoft.Extensions.Localization
+@inject IAdminHierarchyService HierarchyService
+@inject IAdminUserService UserService
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
+@inject IDialogService DialogService
+@inject IToastService ToastService
+
+<PageTitle>@L["HierarchyManageTitle"]</PageTitle>
+
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["OrganizationHierarchy"]</h2>
+        <div style="display:flex;gap:0.5rem">
+            <button class="btn btn-secondary btn-sm" @onclick="LoadTreeAsync">@L["Refresh"]</button>
+            <button class="btn btn-secondary btn-sm" @onclick="ToggleFullTree">@(showFull ? L["PrimaryTree"] : L["FullTree"])</button>
+        </div>
+    </div>
+
+    @if (tree is null && !loading)
+    {
+        <div style="padding:1.5rem">
+            <div class="empty"><p>@L["NoHierarchyData"]</p></div>
+            <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:end">
+                <div class="field" style="flex:1;min-width:180px">
+                    <label class="field-label">@L["SubordinateUser"]</label>
+                    <select class="select" @bind="firstSubordinateId">
+                        <option value="">@L["SelectUserPlaceholder"]</option>
+                        @if (allUsers != null)
+                        {
+                            @foreach (var u in allUsers)
+                            {
+                                <option value="@u.Id">@u.UserName (@u.Email)</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="field" style="flex:1;min-width:180px">
+                    <label class="field-label">@L["SuperiorUser"]</label>
+                    <select class="select" @bind="firstSuperiorId">
+                        <option value="">@L["SelectUserPlaceholder"]</option>
+                        @if (allUsers != null)
+                        {
+                            @foreach (var u in allUsers)
+                            {
+                                <option value="@u.Id">@u.UserName (@u.Email)</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="field" style="min-width:120px">
+                    <label class="field-label">@L["Type"]</label>
+                    <select class="select" @bind="firstType">
+                        <option value="Functional">Functional</option>
+                        <option value="Project">Project</option>
+                        <option value="Matrix">Matrix</option>
+                        <option value="Mentor">Mentor</option>
+                        <option value="Temporary">Temporary</option>
+                    </select>
+                </div>
+                <div class="field" style="width:80px">
+                    <label class="field-label">@L["Priority"]</label>
+                    <input type="number" min="1" @bind="firstPriority" class="input" />
+                </div>
+                <button class="btn btn-primary" disabled="@(!CanCreateFirst)" @onclick="CreateFirstAsync">@L["CreateRelationship"]</button>
+            </div>
+            @if (!string.IsNullOrEmpty(firstError))
+            {
+                <p class="text-danger" style="margin-top:0.5rem">@firstError</p>
+            }
+        </div>
+    }
+    else if (loading)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else
+    {
+        <div style="display:grid;grid-template-columns: 1fr 380px;gap:1rem">
+            <div>
+                <OrganizationTree Root="tree" OnUserSelected="OnUserSelected" OnReassign="OnReassignAsync" SelectedType="@selectedType" SelectedLevel="@selectedLevel" OnTypeFilter="OnTypeFilter" OnLevelFilter="OnLevelFilter" />
+            </div>
+            <div>
+                @if (selectedUserId.HasValue)
+                {
+                    <div class="card" style="padding:1rem">
+                        <h3>@L["UserDetails"]</h3>
+                        <p><strong>UserId:</strong> @selectedUserId.Value</p>
+                        @if (selectedUserInfo != null)
+                        {
+                            <p><strong>@L["Name"]:</strong> @selectedUserInfo.UserName</p>
+                            <p><strong>@L["Email"]:</strong> @selectedUserInfo.Email</p>
+                            <p><strong>@L["Role"]:</strong> @selectedUserInfo.RoleName <span class="badge badge-gray">Lvl @selectedUserInfo.HierarchyLevel</span></p>
+                        }
+                        @if (hierarchyLevel != null)
+                        {
+                            <p><strong>@L["HierarchyLevel"]:</strong> @hierarchyLevel.Level</p>
+                        }
+                        <RelationshipManager UserId="@selectedUserId.Value" OnChanged="LoadTreeAsync" />
+
+                        @if (commandChain != null && commandChain.Any())
+                        {
+                            <h4 style="margin-top:1rem">@L["CommandChain"]</h4>
+                            <ul>
+                                @foreach (var sup in commandChain)
+                                {
+                                    <li>@sup.UserName (@sup.RoleName) - Lvl @sup.HierarchyLevel</li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty"><p>@L["SelectUserInTree"]</p></div>
+                }
+            </div>
+        </div>
+    }
+</section>
+
+@code {
+    private OrganizationTreeNodeModel? tree;
+    private bool loading = true;
+    private bool showFull = false;
+    private Guid? selectedUserId;
+    private SuperiorModel? selectedUserInfo;
+    private HierarchyLevelModel? hierarchyLevel;
+    private IEnumerable<SuperiorModel>? commandChain;
+    private string? selectedType;
+    private int selectedLevel;
+
+    private List<UserModel>? allUsers;
+    private string firstSubordinateId = string.Empty;
+    private string firstSuperiorId = string.Empty;
+    private string firstType = "Functional";
+    private int firstPriority = 1;
+    private string? firstError;
+    private bool CanCreateFirst => !string.IsNullOrWhiteSpace(firstSubordinateId) && !string.IsNullOrWhiteSpace(firstSuperiorId) && firstSubordinateId != firstSuperiorId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var resp = await UserService.GetUsersAsync();
+        allUsers = resp?.Data?.ToList();
+        await LoadTreeAsync();
+    }
+
+    private async Task LoadTreeAsync()
+    {
+        loading = true;
+        try
+        {
+            tree = showFull ? await HierarchyService.GetFullTreeAsync() : await HierarchyService.GetTreeAsync();
+        }
+        finally { loading = false; }
+    }
+
+    private async Task ToggleFullTree()
+    {
+        showFull = !showFull;
+        await LoadTreeAsync();
+    }
+
+    private async Task CreateFirstAsync()
+    {
+        firstError = null;
+        if (!Guid.TryParse(firstSubordinateId, out var subId) || !Guid.TryParse(firstSuperiorId, out var supId))
+        {
+            firstError = L["InvalidReportsTo"];
+            return;
+        }
+
+        var req = new CreateRelationshipRequest(subId, supId, firstType, firstPriority);
+        var resp = await HierarchyService.CreateRelationshipAsync(req);
+        if (resp.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["RelationshipCreatedToast"]);
+            await LoadTreeAsync();
+        }
+        else
+        {
+            var body = await resp.Content.ReadAsStringAsync();
+            firstError = body;
+            ToastService.ShowError(body);
+        }
+    }
+
+    private async Task OnUserSelected(Guid userId)
+    {
+        selectedUserId = userId;
+        selectedUserInfo = null;
+        hierarchyLevel = null;
+        commandChain = null;
+
+        try
+        {
+            hierarchyLevel = await HierarchyService.GetLevelAsync(userId);
+            commandChain = await HierarchyService.GetCommandChainAsync(userId);
+        }
+        catch { }
+
+        selectedUserInfo = FindNode(tree, userId) is { } node
+            ? new SuperiorModel(node.UserId, node.UserName, node.Email, "Functional", 1, node.HierarchyLevel, node.RoleName)
+            : null;
+
+        StateHasChanged();
+    }
+
+    private OrganizationTreeNodeModel? FindNode(OrganizationTreeNodeModel? root, Guid id)
+    {
+        if (root == null) return null;
+        if (root.UserId == id) return root;
+        if (root.Children == null) return null;
+        foreach (var child in root.Children)
+        {
+            var found = FindNode(child, id);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    private Task OnTypeFilter(string? type)
+    {
+        selectedType = type;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private Task OnLevelFilter(int level)
+    {
+        selectedLevel = level;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private async Task OnReassignAsync((Guid draggedUserId, Guid newParentId) args)
+    {
+        var ok = await DialogService.ConfirmAsync(L["ConfirmDeletionTitle"], $"Reasignar usuario {args.draggedUserId} a nuevo superior {args.newParentId}?", L["Save"], L["Cancel"]);
+        if (!ok) return;
+
+        try
+        {
+            var existing = await HierarchyService.GetRelationshipsAsync(args.draggedUserId);
+            var primary = existing?.FirstOrDefault(r => r.RelationshipType == "Functional" && r.Priority == 1);
+            if (primary != null)
+            {
+                await HierarchyService.DeleteRelationshipAsync(primary.Id);
+            }
+
+            var resp = await HierarchyService.CreateRelationshipAsync(new CreateRelationshipRequest(args.draggedUserId, args.newParentId, "Functional", 1));
+            if (resp.IsSuccessStatusCode)
+            {
+                ToastService.ShowSuccess(L["RelationshipCreatedToast"]);
+                await LoadTreeAsync();
+            }
+            else
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                ToastService.ShowError($"{L["SaveFailedToast", (int)resp.StatusCode]}: {body}");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError(ex.Message);
+        }
+    }
+}

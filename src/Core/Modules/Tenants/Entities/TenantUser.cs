@@ -16,14 +16,33 @@ public sealed class TenantUser : Entity<TenantUserId>, IAggregateRoot
     public UserId UserId { get; private set; } = null!;
     public bool IsActive { get; private set; }
     public DateTime JoinedAtUtc { get; private set; }
+    public UserId? PrimaryReportsToUserId { get; private set; }
+    public int HierarchyLevel { get; private set; } = 10;
 
-    internal TenantUser(TenantId tenantId, UserId userId)
+    // Navigation properties
+    public User? PrimaryReportsToUser { get; private set; }
+
+    public TenantUser(TenantId tenantId, UserId userId, UserId? primaryReportsToUserId = null, int hierarchyLevel = 10)
     {
         Id = TenantUserId.New();
         TenantId = tenantId;
         UserId = userId;
         IsActive = true;
         JoinedAtUtc = DateTime.UtcNow;
+        PrimaryReportsToUserId = primaryReportsToUserId;
+        HierarchyLevel = hierarchyLevel;
+    }
+
+    public void SetPrimaryReportsTo(UserId? primaryReportsToUserId)
+    {
+        PrimaryReportsToUserId = primaryReportsToUserId;
+    }
+
+    public void SetHierarchyLevel(int level)
+    {
+        if (level < 10 || level > 100)
+            throw new ArgumentOutOfRangeException(nameof(level), "HierarchyLevel must be between 10 and 100");
+        HierarchyLevel = level;
     }
 
     private TenantUser() { }

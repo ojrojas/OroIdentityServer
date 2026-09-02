@@ -82,6 +82,38 @@
   <data name="NavScopes"><value>Berechtigungsbereiche</value></data>
   <data name="NavSessions"><value>Sitzungen</value></data>
 
+  <data name="NavHierarchy"><value>Hierarchie</value></data>
+
+  <!-- Hierarchy -->
+  <data name="HierarchyTitle"><value>Hierarchie</value></data>
+  <data name="HierarchyManageTitle"><value>Hierarchieverwaltung</value></data>
+  <data name="OrganizationHierarchy"><value>Organisationshierarchie</value></data>
+  <data name="NoHierarchyData"><value>Keine Hierarchiedaten. Erstellen Sie Beziehungen, um den Baum aufzubauen.</value></data>
+  <data name="PrimaryTree"><value>Primärer Baum</value></data>
+  <data name="FullTree"><value>Vollständiger Baum</value></data>
+  <data name="UserDetails"><value>Benutzerdetails</value></data>
+  <data name="HierarchyLevel"><value>Hierarchiestufe</value></data>
+  <data name="CommandChain"><value>Befehlskette</value></data>
+  <data name="SelectUserInTree"><value>Wählen Sie einen Benutzer im Baum, um Details anzuzeigen</value></data>
+  <data name="RelationshipsFor"><value>Beziehungen für {0}</value></data>
+  <data name="NoRelationships"><value>Keine Beziehungen</value></data>
+  <data name="NewRelationship"><value>Neue Beziehung</value></data>
+  <data name="ReportsToUserId"><value>Vorgesetzten-ID</value></data>
+  <data name="RelationshipType"><value>Beziehungstyp</value></data>
+  <data name="Priority"><value>Priorität</value></data>
+  <data name="Superior"><value>Vorgesetzter</value></data>
+  <data name="Type"><value>Typ</value></data>
+  <data name="CreateRelationship"><value>Erstellen</value></data>
+  <data name="RelationshipCreatedToast"><value>Beziehung erstellt.</value></data>
+  <data name="RelationshipUpdatedToast"><value>Priorität aktualisiert.</value></data>
+  <data name="RelationshipDeletedToast"><value>Beziehung gelöscht.</value></data>
+  <data name="InvalidReportsTo"><value>Ungültige Vorgesetzten-ID</value></data>
+  <data name="InactiveStatus"><value>Inaktiv</value></data>
+  <data name="SuperiorUser"><value>Vorgesetzter (Berichtet an)</value></data>
+  <data name="SubordinateUser"><value>Untergebener (Benutzer)</value></data>
+  <data name="MinLevel"><value>Min. Stufe</value></data>
+  <data name="All"><value>Alle</value></data>
+
   <data name="DashboardTitle"><value>Übersicht</value></data>
   <data name="StatUsers"><value>Benutzer</value></data>
   <data name="StatTenants"><value>Mieter</value></data>
@@ -117,6 +149,7 @@
   <data name="RoleDeleteFailedToast"><value>Rolle konnte nicht gelöscht werden ({0}).</value></data>
   <data name="RoleDetailTitle"><value>Rolle</value></data>
   <data name="PermissionsAssignedLabel"><value>Zugewiesene Berechtigungen: {0}</value></data>
+  <data name="ParentRole"><value>Parent Role</value></data>
   <data name="ActiveLabel"><value>Aktiv: {0}</value></data>
 
   <data name="IdentificationTypesTitle"><value>Ausweistypen</value></data>

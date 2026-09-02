@@ -28,7 +28,9 @@ public class GetRolesQueryHandler(
                      r.Name,
                      [.. r.RolePermissions.Select(rp => new RolePermissionDto(
                         rp.RoleId.Value, rp.PermissionId.Value))],
-                     r.CreatedAtUtc
+                     r.CreatedAtUtc,
+                     r.Level,
+                     r.ParentRoleId?.Value
                 )),
                 StatusCode = 200,
                 Message = "Roles retrieved successfully."

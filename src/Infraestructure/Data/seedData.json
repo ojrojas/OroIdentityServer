@@ -15,6 +15,7 @@
     {
       "Name": "Administrator",
       "Description": "Administrator role",
+      "Level": 90,
       "RoleClaims": [
         {
           "ClaimType": "Permission",
@@ -25,6 +26,8 @@
     {
       "Name": "Manager",
       "Description": "Manager role",
+      "Level": 70,
+      "ParentRole": "Administrator",
       "RoleClaims": [
         {
           "ClaimType": "Permission",
@@ -35,6 +38,8 @@
     {
       "Name": "User",
       "Description": "User role",
+      "Level": 10,
+      "ParentRole": "Manager",
       "RoleClaims": [
         {
           "ClaimType": "Permission",

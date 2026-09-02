@@ -20,6 +20,7 @@ public static partial class AdminApiEndpoints
         api.MapUserSessions();
         api.MapSessions();
         api.MapValidationLogs();
+        api.MapHierarchy();
         app.MapDashboard();
         api.MapOpenIddictApplications();
         api.MapOpenIddictScopes();

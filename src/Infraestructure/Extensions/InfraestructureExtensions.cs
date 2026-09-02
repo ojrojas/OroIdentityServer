@@ -45,5 +45,10 @@ public static class InfraestructureExtensions
         builder.Services.AddScoped<ISessionRepository, SessionRepository>();
         builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         builder.Services.AddScoped<IAuthValidationLogRepository, AuthValidationLogRepository>();
+
+        builder.Services.AddMemoryCache();
+        builder.Services.Configure<OroIdentityServer.Core.Modules.Hierarchy.Services.HierarchyOptions>(
+            configuration.GetSection(OroIdentityServer.Core.Modules.Hierarchy.Services.HierarchyOptions.SectionName));
+        builder.Services.AddScoped<OroIdentityServer.Core.Modules.Hierarchy.Services.IHierarchyService, OroIdentityServer.Infraestructure.Services.Hierarchy.HierarchyService>();
     }
 }

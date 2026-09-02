@@ -1521,3 +1521,21 @@ input[type="checkbox"].switch:focus-visible {
 }
 
 .blazor-error-boundary::before { content: "An error has occurred."; }
+
+/* ---------- Hierarchy ---------- */
+.hierarchy-tree { display: flex; flex-direction: column; gap: 12px; }
+.hierarchy-filters { display: flex; gap: 12px; flex-wrap: wrap; padding: 12px; background: var(--bg-inset); border-radius: var(--r-md); }
+.hierarchy-filters label { display: flex; flex-direction: column; gap: 4px; font-size: .8125rem; font-weight: 600; color: var(--text-2); }
+.hierarchy-filters select { height: 34px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-input); color: var(--text-1); }
+.hierarchy-nodes { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.hierarchy-node { list-style: none; }
+.hierarchy-node-content { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--r-sm); cursor: pointer; transition: background var(--ease); border: 1px solid transparent; }
+.hierarchy-node-content:hover { background: var(--bg-inset); border-color: var(--border); }
+.hierarchy-node-name { font-weight: 600; color: var(--text-1); }
+.hierarchy-children { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.relationship-badge { background: var(--violet-soft); color: var(--violet); font-size: .6875rem; }
+.badge-purple { background: var(--violet-soft); color: var(--violet); }
+.badge-blue { background: var(--blue-soft); color: var(--blue); }
+.input-sm { height: 32px; padding: 0 8px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-input); color: var(--text-1); }
+.text-danger { color: var(--red); font-size: .8125rem; margin-top: 4px; }
+.relationship-manager { display: flex; flex-direction: column; gap: 8px; }
