@@ -77,6 +77,12 @@ ENV EventBus__RabbitMQ__UserName="guest"
 ENV EventBus__RabbitMQ__Password="guest"
 ENV EventBus__RabbitMQ__VirtualHost="/"
 
+ENV Branding__AppName="OroIdentity"
+ENV Branding__FullName="OroIdentityServer"
+ENV Branding__DisplayName="OroIdentity Admin SPA"
+ENV Branding__LogoUrl=null
+ENV Branding__FullLogoUrl=null
+
 EXPOSE 5080
 EXPOSE 5086
 
