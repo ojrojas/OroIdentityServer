@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using IdentityServer.Client.Interfaces;
 using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.UserSessions;
@@ -10,8 +11,17 @@ public class AdminUserSessionService(HttpClient client) : IAdminUserSessionServi
     public Task<IEnumerable<UserSessionModel>?> GetActiveSessionsAsync(CancellationToken ct = default)
         => client.GetFromJsonAsync<IEnumerable<UserSessionModel>>("api/user-sessions/active", ClientJsonOptions.Default, ct);
 
-    public Task<IEnumerable<UserSessionModel>?> GetByUserAsync(Guid userId, CancellationToken ct = default)
-        => client.GetFromJsonAsync<IEnumerable<UserSessionModel>>($"api/user-sessions/by-user/{userId}", ClientJsonOptions.Default, ct);
+    public async Task<IEnumerable<UserSessionModel>?> GetByUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Query, "api/user-sessions/by-user")
+        {
+            Content = JsonContent.Create(userId)
+        };
+
+        var response = client.SendAsync(request, ct);
+        var read = await response.Result.Content.ReadAsStringAsync(ct);
+        return JsonSerializer.Deserialize<IEnumerable<UserSessionModel>>(read);
+    }
 
     public Task<int> GetActiveSessionsCountAsync(CancellationToken ct = default)
         => client.GetFromJsonAsync<int>("api/user-sessions/active-count", ClientJsonOptions.Default, ct);

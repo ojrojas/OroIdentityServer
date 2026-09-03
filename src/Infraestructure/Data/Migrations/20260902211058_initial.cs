@@ -330,6 +330,7 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     LastName = table.Column<string>(type: "text", nullable: true),
@@ -697,6 +698,11 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                 name: "IX_Users_IdentificationTypeId",
                 table: "Users",
                 column: "IdentificationTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_IsActive",
+                table: "Users",
+                column: "IsActive");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_SecurityUserId",

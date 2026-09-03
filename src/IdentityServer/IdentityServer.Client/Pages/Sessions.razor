@@ -14,6 +14,10 @@
         <h2 class="card-title">@L["NavUsers"]</h2>
     </div>
 
+    <div class="card-search">
+        <input class="input" placeholder="@L["Search"]" @bind="userSearchTerm" @bind:event="oninput" @onkeydown="UserSearchKeyDown" />
+    </div>
+
     @if (users is null)
     {
         <div class="spinner spinner-lg spinner-center"></div>
@@ -54,6 +58,9 @@
                 </tbody>
             </table>
         </div>
+
+        <Pagination PageNumber="@userPageNumber" TotalPages="@userTotalPages" TotalCount="@userTotalCount"
+                    PageSize="@userPageSize" PageNumberChanged="OnUserPageNumberChanged" PageSizeChanged="OnUserPageSizeChanged" />
     }
 </section>
 
@@ -66,6 +73,18 @@
 
     @if (selectedUser is not null)
     {
+        <div class="card-filters">
+            <div class="field">
+                <label class="field-label" for="dateFrom">@L["DateFrom"]</label>
+                <input id="dateFrom" type="date" class="input" @bind="dateFrom" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="dateTo">@L["DateTo"]</label>
+                <input id="dateTo" type="date" class="input" @bind="dateTo" />
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" @onclick="LoadSessionsAsync">@L["Filter"]</button>
+        </div>
+
         @if (sessions is null)
         {
             <div class="spinner spinner-lg spinner-center"></div>
@@ -120,6 +139,18 @@
             <h2 class="card-title">@L["SessionHistory"]</h2>
         </div>
 
+        <div class="card-filters">
+            <div class="field">
+                <label class="field-label" for="historyDateFrom">@L["DateFrom"]</label>
+                <input id="historyDateFrom" type="date" class="input" @bind="historyDateFrom" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="historyDateTo">@L["DateTo"]</label>
+                <input id="historyDateTo" type="date" class="input" @bind="historyDateTo" />
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" @onclick="LoadHistoryAsync">@L["Filter"]</button>
+        </div>
+
         @if (sessionHistory is null)
         {
             <div class="spinner spinner-lg spinner-center"></div>
@@ -164,6 +195,9 @@
                     </tbody>
                 </table>
             </div>
+
+            <Pagination PageNumber="@historyPageNumber" TotalPages="@historyTotalPages" TotalCount="@historyTotalCount"
+                        PageSize="@historyPageSize" PageNumberChanged="OnHistoryPageNumberChanged" PageSizeChanged="OnHistoryPageSizeChanged" />
         }
     </section>
 }
@@ -174,10 +208,57 @@
     private List<UserSessionModel>? sessions;
     private List<SessionModel>? sessionHistory;
 
-    protected override async Task OnInitializedAsync()
+    private string userSearchTerm = string.Empty;
+    private int userPageNumber = 1;
+    private int userPageSize = 20;
+    private int userTotalCount;
+    private int userTotalPages;
+
+    private DateTime? dateFrom;
+    private DateTime? dateTo;
+
+    private DateTime? historyDateFrom;
+    private DateTime? historyDateTo;
+    private int historyPageNumber = 1;
+    private int historyPageSize = 20;
+    private int historyTotalCount;
+    private int historyTotalPages;
+
+    protected override async Task OnInitializedAsync() => await LoadUsersAsync();
+
+    private async Task LoadUsersAsync()
     {
-        var response = await UserService.GetUsersAsync();
-        users = response?.Data?.ToList() ?? [];
+        var response = await UserService.GetUsersPagedAsync(new PagedRequest
+        {
+            SearchTerm = userSearchTerm,
+            PageNumber = userPageNumber,
+            PageSize = userPageSize
+        });
+        users = response?.Data?.Items?.ToList() ?? [];
+        userTotalCount = response?.Data?.TotalCount ?? 0;
+        userTotalPages = (int)Math.Ceiling((double)userTotalCount / userPageSize);
+    }
+
+    private async Task UserSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            userPageNumber = 1;
+            await LoadUsersAsync();
+        }
+    }
+
+    private async Task OnUserPageNumberChanged(int page)
+    {
+        userPageNumber = page;
+        await LoadUsersAsync();
+    }
+
+    private async Task OnUserPageSizeChanged(int size)
+    {
+        userPageSize = size;
+        userPageNumber = 1;
+        await LoadUsersAsync();
     }
 
     private async Task SelectUserAsync(UserModel user)
@@ -185,11 +266,57 @@
         selectedUser = user;
         sessions = null;
         sessionHistory = null;
-        var result = await UserSessionService.GetByUserAsync(user.Id);
-        sessions = result?.ToList() ?? [];
+        historyPageNumber = 1;
+        await LoadSessionsAsync();
+        await LoadHistoryAsync();
+    }
 
-        var historyResponse = await SessionService.GetByUserAsync(user.Id);
-        sessionHistory = historyResponse?.Data?.ToList() ?? [];
+    private async Task LoadSessionsAsync()
+    {
+        if (selectedUser is null) return;
+
+        sessions = null;
+        var result = await UserSessionService.GetByUserAsync(selectedUser.Id);
+        var allSessions = result?.ToList() ?? [];
+
+        if (dateFrom.HasValue)
+            allSessions = allSessions.Where(s => s.CreatedAt >= dateFrom.Value).ToList();
+        if (dateTo.HasValue)
+            allSessions = allSessions.Where(s => s.CreatedAt <= dateTo.Value.AddDays(1)).ToList();
+
+        sessions = allSessions;
+    }
+
+    private async Task LoadHistoryAsync()
+    {
+        if (selectedUser is null) return;
+
+        sessionHistory = null;
+        var historyResponse = await SessionService.GetByUserAsync(selectedUser.Id);
+        var allHistory = historyResponse?.Data?.ToList() ?? [];
+
+        if (historyDateFrom.HasValue)
+            allHistory = allHistory.Where(s => s.StartedAtUtc >= historyDateFrom.Value).ToList();
+        if (historyDateTo.HasValue)
+            allHistory = allHistory.Where(s => s.StartedAtUtc <= historyDateTo.Value.AddDays(1)).ToList();
+
+        historyTotalCount = allHistory.Count;
+        var skip = (historyPageNumber - 1) * historyPageSize;
+        sessionHistory = allHistory.Skip(skip).Take(historyPageSize).ToList();
+        historyTotalPages = (int)Math.Ceiling((double)historyTotalCount / historyPageSize);
+    }
+
+    private async Task OnHistoryPageNumberChanged(int page)
+    {
+        historyPageNumber = page;
+        await LoadHistoryAsync();
+    }
+
+    private async Task OnHistoryPageSizeChanged(int size)
+    {
+        historyPageSize = size;
+        historyPageNumber = 1;
+        await LoadHistoryAsync();
     }
 
     private async Task DisconnectAsync(UserSessionModel session)
@@ -204,7 +331,7 @@
         {
             ToastService.ShowSuccess(L["SessionDisconnectedToast"]);
             if (selectedUser is not null)
-                await SelectUserAsync(selectedUser);
+                await LoadSessionsAsync();
         }
         else
         {

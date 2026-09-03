@@ -15,13 +15,26 @@ public class GetRolesQueryHandler(
 
         try
         {
-            var roles = await roleRepository.GetAllAsync(cancellationToken);
+            var allRoles = await roleRepository.GetAllAsync(cancellationToken);
+            var rolesList = allRoles.ToList();
+
+            if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+            {
+                var term = query.SearchTerm.Trim();
+                rolesList = rolesList.Where(r =>
+                    r.Name != null && r.Name.Value.Contains(term, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            var totalCount = rolesList.Count;
+            var skip = (query.PageNumber - 1) * query.PageSize;
+            var pagedRoles = rolesList.Skip(skip).Take(query.PageSize).ToList();
 
             logger.LogInformation("Successfully retrieved roles");
 
             return new GetRolesResponse
             {
-                Data = roles.Select(r => new RoleDto
+                Data = pagedRoles.Select(r => new RoleDto
                 (
                     r.Id.Value,
                      r.IsActive,
@@ -32,6 +45,9 @@ public class GetRolesQueryHandler(
                      r.Level,
                      r.ParentRoleId?.Value
                 )),
+                TotalCount = totalCount,
+                PageNumber = query.PageNumber,
+                PageSize = query.PageSize,
                 StatusCode = 200,
                 Message = "Roles retrieved successfully."
             };

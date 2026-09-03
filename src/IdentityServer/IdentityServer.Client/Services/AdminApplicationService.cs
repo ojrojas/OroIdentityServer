@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using IdentityServer.Client.Interfaces;
 using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.OpenIddict;
@@ -7,8 +8,16 @@ namespace IdentityServer.Client.Services;
 
 public class AdminApplicationService(HttpClient client) : IAdminApplicationService
 {
-    public Task<IEnumerable<OpenIddictApplicationModel>?> GetApplicationsAsync(CancellationToken ct = default)
-        => client.GetFromJsonAsync<IEnumerable<OpenIddictApplicationModel>>("api/applications", ClientJsonOptions.Default, ct);
+    public async Task<PagedResponse<OpenIddictApplicationModel>?> GetApplicationsAsync(PagedRequest? request = null, CancellationToken ct = default)
+    {
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Query, "api/applications")
+        {
+            Content = JsonContent.Create(request ?? new PagedRequest())
+        };
+        var response = await client.SendAsync(httpRequest, ct);
+        var content = await response.Content.ReadAsStringAsync(ct);
+        return JsonSerializer.Deserialize<PagedResponse<OpenIddictApplicationModel>>(content, ClientJsonOptions.Default);
+    }
 
     public Task<OpenIddictApplicationModel?> GetApplicationByClientIdAsync(string clientId, CancellationToken ct = default)
         => client.GetFromJsonAsync<OpenIddictApplicationModel>($"api/applications/{clientId}", ClientJsonOptions.Default, ct);

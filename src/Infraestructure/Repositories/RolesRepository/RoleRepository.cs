@@ -43,6 +43,15 @@ public class RoleRepository(
         return result;
     }
 
+    public async Task<Role?> GetByIdIgnoringFiltersAsync(RoleId id, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering GetByIdIgnoringFiltersAsync with id: {Id}", id);
+        var specification = new GetRoleByIdIgnoringFiltersSpecification(id);
+        var result = await repository.FirstOrDefaultAsync(specification, cancellationToken);
+        logger.LogInformation("Exiting GetByIdIgnoringFiltersAsync");
+        return result;
+    }
+
     public async Task UpdateAsync(Role role, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering UpdateAsync for roleId: {RoleId}", role.Id);

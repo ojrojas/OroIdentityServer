@@ -8,6 +8,8 @@
 
 <PageTitle>@L["TenantDetailTitle"]</PageTitle>
 
+<Breadcrumb Items="@([new BreadcrumbItem(L["NavTenants"], "/tenants"), new BreadcrumbItem(string.IsNullOrWhiteSpace(name) ? L["TenantDetailTitle"] : name)])" />
+
 <section class="card">
     <div class="card-head">
         <h2 class="card-title">@L["TenantDetailTitle"]</h2>
@@ -165,7 +167,9 @@
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess(L["TenantActivatedToast"]);
-            Nav.NavigateTo(Nav.Uri, forceLoad: true);
+            var r = await TenantService.GetTenantByIdAsync(Id);
+            item = r?.Data;
+            if (item is not null) isActive = item.IsActive;
         }
         else
         {
@@ -184,7 +188,9 @@
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess(L["TenantSuspendedToast"]);
-            Nav.NavigateTo(Nav.Uri, forceLoad: true);
+            var r = await TenantService.GetTenantByIdAsync(Id);
+            item = r?.Data;
+            if (item is not null) isActive = item.IsActive;
         }
         else
         {

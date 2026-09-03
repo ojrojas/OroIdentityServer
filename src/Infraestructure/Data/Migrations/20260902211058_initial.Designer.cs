@@ -12,7 +12,7 @@ using OroIdentityServer.Infraestructure;
 namespace OroIdentityServer.Infraestructure.Data.Migrations
 {
     [DbContext(typeof(OroIdentityAppContext))]
-    [Migration("20260902174004_initial")]
+    [Migration("20260902211058_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -937,6 +937,10 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Property<Guid?>("IdentificationTypeId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsActive");
+
                     b.Property<string>("LastName")
                         .HasColumnType("text");
 
@@ -975,6 +979,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .IsUnique();
 
                     b.HasIndex("IdentificationTypeId");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_Users_IsActive");
 
                     b.HasIndex("SecurityUserId")
                         .IsUnique();

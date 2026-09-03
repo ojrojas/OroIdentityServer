@@ -1,8 +1,6 @@
 // OroIdentityServer
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
-using OroIdentityServer.Core.Modules.Hierarchy.Enums;
-
 namespace OroIdentityServer.Core.Modules.Hierarchy.DTOs;
 
 public sealed record HierarchyRelationshipDto(

@@ -121,6 +121,15 @@ public class UserRepository(
         return user;
     }
 
+    public async Task<User?> GetUserByIdAsyncIgnoreFilters(UserId id, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Entering GetUserByIdAsyncIgnoreFilters with id: {Id}", id);
+        var specification = new GetUserByIdIgnoringFiltersSpecification(id);
+        var user = await repository.FirstOrDefaultAsync(specification, cancellationToken);
+        logger.LogInformation("Exiting GetUserByIdAsyncIgnoreFilters");
+        return user;
+    }
+
     public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)
     {
         logger.LogInformation("Entering UpdateUserAsync");
@@ -136,6 +145,12 @@ public class UserRepository(
         if (user is null || user.SecurityUserId is null)
         {
             logger.LogWarning("User not found with identifier: {LoginIdentifier}", loginIdentifier);
+            return false;
+        }
+
+        if (!user.IsActive)
+        {
+            logger.LogWarning("User is deactivated: {LoginIdentifier}", loginIdentifier);
             return false;
         }
 

@@ -4,7 +4,6 @@
 // See the LICENSE file in the project root for details.
 using OroIdentityServer.Core.Modules.Diagnostics.Aggregates;
 using OroIdentityServer.Core.Modules.Diagnostics.Enums;
-using OroIdentityServer.Core.Modules.Diagnostics.Repositories;
 
 namespace OroIdentityServer.Infraestructure.UnitTests;
 

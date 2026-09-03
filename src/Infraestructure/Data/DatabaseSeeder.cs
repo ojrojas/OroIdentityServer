@@ -180,7 +180,7 @@ public static class DatabaseSeeder
         CancellationToken cancellationToken)
     {
         var seedUser = context.Users.IgnoreQueryFilters()
-            .FirstOrDefault(u => u.NormalizedUserName.Equals(seedAdmin.UserName, StringComparison.InvariantCultureIgnoreCase));
+            .FirstOrDefault(u => u.NormalizedUserName == seedAdmin.UserName.ToUpperInvariant());
         if (seedUser is null)
         {
             return;

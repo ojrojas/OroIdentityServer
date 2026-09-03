@@ -6,5 +6,7 @@ namespace OroIdentityServer.Application.Modules.Users.Queries;
 
 public record GetUsersQueryResponse: BaseResponse<IEnumerable<User>>
 {
-    
+    public int TotalCount { get; set; }
+    public int PageNumber { get; set; }
+    public int PageSize { get; set; }
 }

@@ -16,7 +16,6 @@ public class DeleteUserCommandHander(
 
         try
         {
-            // Validate if user exists
             var user = await userRepository.GetUserByIdAsync(new(command.Id), cancellationToken);
             if (user is null)
             {
@@ -24,10 +23,10 @@ public class DeleteUserCommandHander(
                 return Result.Failure(Error.NotFound("UserNotFound", "User not found."));
             }
 
-            // Delete the user
-            await userRepository.DeleteUserAsync(new(command.Id), cancellationToken);
+            user.Deactivate();
+            await userRepository.UpdateUserAsync(user, cancellationToken);
 
-            logger.LogInformation("Successfully handled DeleteUserCommand for Id: {Id}", command.Id);
+            logger.LogInformation("Successfully deactivated user {Id}", command.Id);
             return Result.Success();
         }
         catch (Exception ex)

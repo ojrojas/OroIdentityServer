@@ -6,7 +6,8 @@ namespace OroIdentityServer.Application.Modules.Users.Commands;
 
 public class UpdateUserCommandHandler(
     ILogger<UpdateUserCommandHandler> logger,
-    IUserRepository userRepository
+    IUserRepository userRepository,
+    IPasswordHasher passwordHasher
 ) : ICommandHandler<UpdateUserCommand, UpdateUserResponse>
 {
     public async Task<UpdateUserResponse> HandleAsync(UpdateUserCommand command, CancellationToken cancellationToken)
@@ -35,6 +36,17 @@ public class UpdateUserCommandHandler(
                 new(command.IdentificationTypeId),
                 new(command.TenantId)
             );
+
+            // Update password only when a new value is provided (not masked, not empty)
+            const string masked = "**********";
+            if (!string.IsNullOrWhiteSpace(command.Password) && command.Password != masked)
+            {
+                if (user.SecurityUser is null)
+                    return new UpdateUserResponse { StatusCode = (int)HttpStatusCode.BadRequest, Message = "Security user not found." };
+
+                var hashed = await passwordHasher.HashPassword(command.Password);
+                user.SecurityUser.ChangePassword(hashed);
+            }
 
             // Persist changes
             await userRepository.UpdateUserAsync(user, cancellationToken);

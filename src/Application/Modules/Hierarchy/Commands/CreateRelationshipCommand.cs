@@ -1,8 +1,6 @@
 // OroIdentityServer
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
-using BuildingBlocks.CQRS.Abstractions;
-
 namespace OroIdentityServer.Application.Modules.Hierarchy.Commands;
 
 public record CreateRelationshipCommand(

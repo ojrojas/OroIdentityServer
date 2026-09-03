@@ -5,7 +5,6 @@
 using NSubstitute;
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 using OroIdentityServer.Core.Modules.Roles.Aggregates;
-using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 using OroIdentityServer.Core.Modules.Users.Entities;
 using OroIdentityServer.Infraestructure.Interfaces;
 

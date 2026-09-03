@@ -5,7 +5,6 @@ using System.Security.Claims;
 using IdentityServer.Components;
 using IdentityServer.Server.Extensions;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;

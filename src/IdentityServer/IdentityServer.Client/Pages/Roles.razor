@@ -16,6 +16,10 @@
         </button>
     </div>
 
+    <div class="card-search">
+        <input class="input" placeholder="@L["Search"]" @bind="searchTerm" @bind:event="oninput" @onkeydown="SearchKeyDown" />
+    </div>
+
     @if (items is null)
     {
         <div class="spinner spinner-lg spinner-center"></div>
@@ -47,7 +51,7 @@
                         <tr>
                             <td class="cell-strong">@item.Name</td>
                             <td><span class="badge badge-gray">@item.Level</span></td>
-                            <td class="cell-muted">@(items.FirstOrDefault(x => x.Id == item.ParentRoleId)?.Name ?? "—")</td>
+                            <td class="cell-muted">@(allRoles.FirstOrDefault(x => x.Id == item.ParentRoleId)?.Name ?? "—")</td>
                             <td>
                                 @if (item.IsActive)
                                 {
@@ -55,7 +59,7 @@
                                 }
                                 else
                                 {
-                                    <span class="cell-muted">—</span>
+                                    <span class="badge badge-red">@L["Inactive"]</span>
                                 }
                             </td>
                             <td class="num">@(item.Claims == null ? 0 : item.Claims.Count())</td>
@@ -64,6 +68,12 @@
                                     <button type="button" class="btn-row" title="@L["Edit"]" @onclick="@(() => Nav.NavigateTo($"/roles/{item.Id}"))">
                                         <Icon Name="edit" Size="15" />
                                     </button>
+                                    @if (!item.IsActive)
+                                    {
+                                        <button type="button" class="btn-row" title="@L["Activate"]" @onclick="@(() => ActivateAsync(item))">
+                                            <Icon Name="check-circle" Size="15" />
+                                        </button>
+                                    }
                                     <button type="button" class="btn-row is-danger" title="@L["Delete"]" @onclick="@(() => DeleteAsync(item))">
                                         <Icon Name="trash" Size="15" />
                                     </button>
@@ -74,21 +84,81 @@
                 </tbody>
             </table>
         </div>
+
+        <Pagination PageNumber="@pageNumber" TotalPages="@totalPages" TotalCount="@totalCount"
+                    PageSize="@pageSize" PageNumberChanged="OnPageNumberChanged" PageSizeChanged="OnPageSizeChanged" />
     }
 </section>
 
 @code {
     private List<RoleModel>? items;
+    private List<RoleModel> allRoles = [];
+    private string searchTerm = string.Empty;
+    private int pageNumber = 1;
+    private int pageSize = 20;
+    private int totalCount;
+    private int totalPages;
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
     private async Task LoadAsync()
     {
-        var response = await RoleService.GetRolesAsync();
-        items = response?.Data?.ToList() ?? [];
+        var response = await RoleService.GetRolesAsync(new PagedRequest
+        {
+            SearchTerm = searchTerm,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        });
+        items = response?.Data?.Items?.ToList() ?? [];
+        totalCount = response?.Data?.TotalCount ?? 0;
+        totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+        var all = await RoleService.GetRolesAsync(new PagedRequest { PageSize = 1000 });
+        allRoles = all?.Data?.Items?.ToList() ?? [];
+    }
+
+    private async Task SearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            pageNumber = 1;
+            await LoadAsync();
+        }
+    }
+
+    private async Task OnPageNumberChanged(int page)
+    {
+        pageNumber = page;
+        await LoadAsync();
+    }
+
+    private async Task OnPageSizeChanged(int size)
+    {
+        pageSize = size;
+        pageNumber = 1;
+        await LoadAsync();
     }
 
     private void CreateAsync() => Nav.NavigateTo("/roles/create");
+
+    private async Task ActivateAsync(RoleModel item)
+    {
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmActionTitle"], L["ActivateRoleConfirm", item.Name ?? string.Empty],
+            L["Activate"], L["Cancel"]);
+        if (!ok) return;
+
+        var response = await RoleService.ActivateRoleAsync(item.Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["RoleActivatedToast"]);
+            await LoadAsync();
+        }
+        else
+        {
+            ToastService.ShowError(L["RoleActivateFailedToast", (int)response.StatusCode]);
+        }
+    }
 
     private async Task DeleteAsync(RoleModel item)
     {

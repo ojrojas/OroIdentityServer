@@ -43,6 +43,24 @@ public class ServerAdminUserService(
         };
     }
 
+    public async Task<ApiResponse<PagedResponse<UserModel>>?> GetUsersPagedAsync(PagedRequest request, CancellationToken ct = default)
+    {
+        var result = await queryDispatcher.SendAsync(new GetUsersQuery(tenantContext.CurrentTenantId, request.SearchTerm, request.PageNumber, request.PageSize), ct);
+        return new ApiResponse<PagedResponse<UserModel>>
+        {
+            Data = new PagedResponse<UserModel>
+            {
+                Items = result.Data?.Select(MapUser).ToList() ?? [],
+                TotalCount = result.TotalCount,
+                PageNumber = result.PageNumber,
+                PageSize = result.PageSize
+            },
+            StatusCode = result.StatusCode,
+            Message = result.Message,
+            Errors = result.Errors
+        };
+    }
+
     public async Task<HttpResponseMessage> CreateUserAsync(CreateUserRequest request, CancellationToken ct = default)
     {
         var caller = httpContextAccessor.HttpContext?.User;
@@ -150,6 +168,18 @@ public class ServerAdminUserService(
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.OK);
     }
 
+    public async Task<HttpResponseMessage> DeactivateUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var result = await commandDispatcher.SendAsync(new DeactivateUserCommand(userId), ct);
+        return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
+    }
+
+    public async Task<HttpResponseMessage> ActivateUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        var result = await commandDispatcher.SendAsync(new ActivateUserCommand(userId), ct);
+        return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
+    }
+
     private async Task<bool> IsAccessibleTenantAsync(ClaimsPrincipal? caller, Guid targetTenantId, CancellationToken ct)
     {
         if (caller?.Identity?.IsAuthenticated != true) return false;
@@ -177,6 +207,7 @@ public class ServerAdminUserService(
         user.NormalizedUserName,
         user.TenantId?.Value,
         user.SecurityUserId?.Value,
+        user.IsActive,
         user.SecurityUser?.IsLockedOut() ?? false,
         user.SecurityUser?.LockoutEnd,
         user.Roles.Select(MapUserRole).ToList(),

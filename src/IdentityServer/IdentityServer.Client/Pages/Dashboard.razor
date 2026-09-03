@@ -336,8 +336,8 @@
 
             try
             {
-                var roles = await RoleService.GetRolesAsync();
-                roleCount = roles?.Data?.Count() ?? 0;
+                var roles = await RoleService.GetRolesAsync(new PagedRequest { PageSize = 1 });
+                roleCount = roles?.Data?.TotalCount ?? 0;
             }
             catch
             {
@@ -346,7 +346,8 @@
 
             try
             {
-                applicationCount = (await ApplicationService.GetApplicationsAsync())?.Count() ?? 0;
+                var apps = await ApplicationService.GetApplicationsAsync(new PagedRequest { PageSize = 1 });
+                applicationCount = apps?.TotalCount ?? 0;
             }
             catch
             {

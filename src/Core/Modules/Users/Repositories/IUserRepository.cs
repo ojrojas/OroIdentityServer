@@ -39,6 +39,7 @@ public interface IUserRepository
     /// <param name="id">The unique identifier of the user to retrieve.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the user entity if found; otherwise, null.</returns>
     Task<User?> GetUserByIdAsync(UserId id, CancellationToken cancellationToken);
+    Task<User?> GetUserByIdAsyncIgnoreFilters(UserId id, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously retrieves all users from the repository.

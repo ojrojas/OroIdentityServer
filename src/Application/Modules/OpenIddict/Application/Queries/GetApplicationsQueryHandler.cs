@@ -7,9 +7,9 @@ namespace OroIdentityServer.Application.Modules.Openddict.Queries;
 public class GetApplicationsQueryHandler(
     ILogger<GetApplicationsQueryHandler> logger, 
     IOpenIddictApplicationManager applicationManager
-) : IQueryHandler<GetApplicationsQuery, IEnumerable<OpenIddictApplicationDescriptor>>
+) : IQueryHandler<GetApplicationsQuery, GetApplicationsPagedResponse>
 {
-    public async Task<IEnumerable<OpenIddictApplicationDescriptor>> HandleAsync(GetApplicationsQuery query, CancellationToken cancellationToken)
+    public async Task<GetApplicationsPagedResponse> HandleAsync(GetApplicationsQuery query, CancellationToken cancellationToken)
     {
         try
         {
@@ -38,8 +38,27 @@ public class GetApplicationsQueryHandler(
                 applications.Add(descriptor);
             }
 
-            logger.LogInformation("Retrieved {Count} applications successfully.", applications.Count);
-            return applications;
+            if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+            {
+                var term = query.SearchTerm.Trim();
+                applications = applications.Where(a =>
+                    (a.ClientId != null && a.ClientId.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                    (a.DisplayName != null && a.DisplayName.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
+            }
+
+            var totalCount = applications.Count;
+            var skip = (query.PageNumber - 1) * query.PageSize;
+            var pagedApplications = applications.Skip(skip).Take(query.PageSize).ToList();
+
+            logger.LogInformation("Retrieved {Count} applications successfully.", pagedApplications.Count);
+            return new GetApplicationsPagedResponse
+            {
+                Data = pagedApplications,
+                TotalCount = totalCount,
+                PageNumber = query.PageNumber,
+                PageSize = query.PageSize
+            };
         }
         catch (Exception ex)
         {

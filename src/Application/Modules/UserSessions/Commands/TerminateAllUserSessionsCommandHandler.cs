@@ -1,5 +1,3 @@
-using OpenIddict.Abstractions;
-
 namespace OroIdentityServer.Application.Modules.UserSessions.Commands;
 
 public sealed class TerminateAllUserSessionsCommandHandler(

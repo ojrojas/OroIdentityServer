@@ -21,6 +21,13 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
             .HasColumnName("CreatedAtUtc")
             .IsRequired();
 
+        builder.Property(u => u.IsActive)
+            .HasColumnName("IsActive")
+            .IsRequired();
+
+        builder.HasIndex(u => u.IsActive)
+            .HasDatabaseName("IX_Users_IsActive");
+
         builder.HasIndex(u => u.Email).IsUnique();
         builder.HasIndex(u => u.UserName).IsUnique();
         builder.HasIndex(u => u.Identification).IsUnique();
@@ -48,5 +55,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<User>
             .WithOne()
             .HasForeignKey<User>(u => u.SecurityUserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasQueryFilter(u => u.IsActive);
     }
 }

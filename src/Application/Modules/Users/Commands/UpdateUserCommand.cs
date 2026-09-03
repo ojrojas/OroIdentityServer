@@ -10,9 +10,9 @@ public record UpdateUserCommand(
     string Name,
     string MiddleName,
     string LastName,
-    string UserName, 
-    string Email, 
-    string Password,
+    string UserName,
+    string Email,
+    string? Password,
     string Identification,
     Guid IdentificationTypeId,
     Guid TenantId

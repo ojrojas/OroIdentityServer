@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.Users;
 using IdentityServer.Client.Interfaces;
 
@@ -12,6 +13,12 @@ public static partial class AdminApiEndpoints
 
         g.MapGet("/", async ([FromServices] IAdminUserService service, CancellationToken ct)
             => Results.Ok(await service.GetUsersAsync(ct)));
+
+        g.MapMethods("/paged", [HttpMethods.Query], async (
+            [FromBody] PagedRequest request,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct)
+            => Results.Ok(await service.GetUsersPagedAsync(request, ct)));
 
         g.MapGet("/{id:guid}", async ( Guid id, [FromServices] IAdminUserService service, CancellationToken ct)
             => Results.Ok(await service.GetUserByIdAsync(id, ct)));
@@ -47,6 +54,16 @@ public static partial class AdminApiEndpoints
             Guid id,
             [FromServices] IAdminUserService service,
             CancellationToken ct) => await ToResultAsync(await service.UnlockUserAsync(id, ct), ct));
+
+        g.MapPost("/{id:guid}/deactivate", async (
+            Guid id,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) => await ToResultAsync(await service.DeactivateUserAsync(id, ct), ct));
+
+        g.MapPost("/{id:guid}/activate", async (
+            Guid id,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) => await ToResultAsync(await service.ActivateUserAsync(id, ct), ct));
 
         g.MapGet("/{role}/by-role", async (
             string role,

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.OpenIddict;
 using IdentityServer.Client.Interfaces;
 
@@ -8,12 +9,13 @@ public static partial class AdminApiEndpoints
 {
     private static void MapOpenIddictApplications(this RouteGroupBuilder api)
     {
-        // The OIDC application catalogue is global; only the master admin (held by the
-        // is_master_admin claim) can list/create/edit/delete OIDC clients.
         var g = api.MapGroup("/applications").RequireAuthorization("MasterAdminOnly");
 
-        g.MapGet("/", async ([FromServices] IAdminApplicationService service, CancellationToken ct)
-            => Results.Ok(await service.GetApplicationsAsync(ct)));
+        g.MapMethods("/", [HttpMethods.Query], async (
+            [FromBody] PagedRequest? request,
+            [FromServices] IAdminApplicationService service,
+            CancellationToken ct)
+            => Results.Ok(await service.GetApplicationsAsync(request, ct)));
 
         g.MapGet("/{clientId}", async (string clientId, [FromServices] IAdminApplicationService service, CancellationToken ct)
             => Results.Ok(await service.GetApplicationByClientIdAsync(clientId, ct)));

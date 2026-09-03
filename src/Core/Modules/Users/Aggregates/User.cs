@@ -6,6 +6,7 @@ namespace OroIdentityServer.Core.Modules.Users.Aggregates;
 
 public class User : AggregateRoot<UserId>, IAuditableEntity
 {
+    public bool IsActive { get; private set; } = true;
     public DateTime CreatedAtUtc { get; private set; } = DateTime.UtcNow;
     public string? Name { get; private set; } = string.Empty;
     public string? LastName { get; private set; } = string.Empty;
@@ -89,6 +90,22 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
             throw new InvalidOperationException("Role not found.");
 
         _roles.Remove(existing);
+    }
+
+    public void Deactivate()
+    {
+        if (!IsActive)
+            throw new InvalidOperationException("User is already inactive.");
+        IsActive = false;
+        RaiseDomainEvent(new UserDeactivatedEvent(Id));
+    }
+
+    public void Activate()
+    {
+        if (IsActive)
+            throw new InvalidOperationException("User is already active.");
+        IsActive = true;
+        RaiseDomainEvent(new UserActivatedEvent(Id));
     }
 
     public void Validate()

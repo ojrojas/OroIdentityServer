@@ -14,11 +14,7 @@ public class GetUsersQueryHandler(
         logger.LogInformation("Handling GetUsersQuery");
         var data = await repository.GetAllUsersAsync(cancellationToken);
 
-        // When a tenant is supplied, only return users that belong to that tenant.
-        if (query.TenantId is { } tenantId)
-            data = data.Where(u => u.TenantId?.Value == tenantId);
-
-        if(data == null || !data.Any())
+        if (data is null)
         {
             logger.LogWarning("No users found in the repository");
             return new GetUsersQueryResponse
@@ -29,9 +25,33 @@ public class GetUsersQueryHandler(
             };
         }
 
+        var userList = data.ToList();
+
+        if (query.TenantId is { } tenantId)
+            userList = userList.Where(u => u.TenantId?.Value == tenantId).ToList();
+
+        if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+        {
+            var term = query.SearchTerm.Trim();
+            userList = userList.Where(u =>
+                (u.UserName != null && u.UserName.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                (u.Email != null && u.Email.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                (u.Name != null && u.Name.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                (u.LastName != null && u.LastName.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                (u.Identification != null && u.Identification.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+        }
+
+        var totalCount = userList.Count;
+        var skip = (query.PageNumber - 1) * query.PageSize;
+        var pagedUsers = userList.Skip(skip).Take(query.PageSize).ToList();
+
         GetUsersQueryResponse response = new()
         {
-            Data = data,
+            Data = pagedUsers,
+            TotalCount = totalCount,
+            PageNumber = query.PageNumber,
+            PageSize = query.PageSize,
             StatusCode = (int)HttpStatusCode.OK,
             Message = "Users retrieved successfully."
         };

@@ -91,4 +91,13 @@ public sealed class Role : AggregateRoot<RoleId>, IAuditableEntity
         IsActive = false;
         RaiseDomainEvent(new RoleDeactivatedEvent(Id));
     }
+
+    public void Activate()
+    {
+        if (IsActive)
+            throw new Exception("role.already_active Role is already active");
+
+        IsActive = true;
+        RaiseDomainEvent(new RoleActivatedEvent(Id));
+    }
 }

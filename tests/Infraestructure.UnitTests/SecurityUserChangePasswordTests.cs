@@ -4,7 +4,6 @@
 // See the LICENSE file in the project root for details.
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Entities;
-using OroIdentityServer.Infraestructure.Interfaces;
 
 namespace OroIdentityServer.Infraestructure.UnitTests;
 

@@ -5,7 +5,6 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Modules.Tenants.Aggregates;
 using OroIdentityServer.Core.Modules.Tenants.Repositories;

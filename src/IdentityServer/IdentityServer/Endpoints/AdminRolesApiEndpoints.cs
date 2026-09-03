@@ -3,6 +3,7 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using Microsoft.AspNetCore.Mvc;
+using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.Roles;
 using IdentityServer.Client.Interfaces;
 
@@ -14,8 +15,11 @@ public static partial class AdminApiEndpoints
     {
         var g = api.MapGroup("/roles").RequireAuthorization("AdminOnly");
 
-        g.MapGet("/", async ([FromServices] IAdminRoleService service, CancellationToken ct)
-            => Results.Ok(await service.GetRolesAsync(ct)));
+        g.MapMethods("/", [HttpMethods.Query], async (
+            [FromBody] PagedRequest? request,
+            [FromServices] IAdminRoleService service,
+            CancellationToken ct)
+            => Results.Ok(await service.GetRolesAsync(request, ct)));
 
         g.MapGet("/{id:guid}", async (Guid id, [FromServices] IAdminRoleService service, CancellationToken ct)
             => Results.Ok(await service.GetRoleByIdAsync(id, ct)));
@@ -28,5 +32,8 @@ public static partial class AdminApiEndpoints
 
         g.MapDelete("/{id:guid}", async (Guid id, [FromServices] IAdminRoleService service, CancellationToken ct)
             => await ToResultAsync(await service.DeleteRoleAsync(id, ct), ct));
+
+        g.MapPost("/{id:guid}/activate", async (Guid id, [FromServices] IAdminRoleService service, CancellationToken ct)
+            => await ToResultAsync(await service.ActivateRoleAsync(id, ct), ct));
     }
 }

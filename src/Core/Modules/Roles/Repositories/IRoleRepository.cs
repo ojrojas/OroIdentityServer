@@ -40,6 +40,8 @@ public interface IRoleRepository
     /// <returns>A task that represents the asynchronous operation. The task result contains the role if found; otherwise, null.</returns>
     Task<Role?> GetByIdAsync(RoleId id, CancellationToken cancellationToken);
 
+    Task<Role?> GetByIdIgnoringFiltersAsync(RoleId id, CancellationToken cancellationToken);
+
     /// <summary>
     /// Asynchronously retrieves all roles from the repository.
     /// </summary>

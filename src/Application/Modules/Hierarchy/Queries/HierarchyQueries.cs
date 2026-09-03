@@ -1,12 +1,9 @@
 // OroIdentityServer
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
-using BuildingBlocks.CQRS.Abstractions;
 using OroIdentityServer.Application.Modules.Hierarchy.DTOs;
-using OroIdentityServer.Application.Shared;
 using OroIdentityServer.Core.Modules.Hierarchy.Enums;
 using OroIdentityServer.Core.Modules.Hierarchy.Services;
-using OroIdentityServer.Core.Shared;
 
 namespace OroIdentityServer.Application.Modules.Hierarchy.Queries;
 

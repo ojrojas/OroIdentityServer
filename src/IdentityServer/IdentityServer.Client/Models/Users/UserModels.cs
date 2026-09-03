@@ -13,6 +13,7 @@ public sealed record UserModel(
     string? NormalizedUserName,
     Guid? TenantId,
     Guid? SecurityUserId,
+    bool IsActive,
     bool IsLocked,
     DateTime? LockoutEnd,
     IReadOnlyCollection<UserRoleModel> Roles,
@@ -37,7 +38,7 @@ public sealed record UpdateUserRequest(
     string LastName,
     string UserName,
     string Email,
-    string Password,
+    string? Password,
     string Identification,
     Guid IdentificationTypeId,
     Guid TenantId);

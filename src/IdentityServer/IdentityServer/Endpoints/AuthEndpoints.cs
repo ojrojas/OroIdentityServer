@@ -11,7 +11,6 @@ using OpenIddict.Abstractions;
 using OroIdentityServer.Application.Modules.UserSessions.Commands;
 using OroIdentityServer.Application.Modules.UserSessions.Queries;
 using OroIdentityServer.Core.Interfaces;
-using OroIdentityServer.Core.Modules.UserSessions.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Repositories;
 using OroIdentityServer.Infraestructure.Interfaces;
 using OroIdentityServer.Server.Authentication;

@@ -7,6 +7,8 @@
 
 <PageTitle>@L["NewRoleTitle"]</PageTitle>
 
+<Breadcrumb Items="@([new BreadcrumbItem(L["NavRoles"], "/roles"), new BreadcrumbItem(L["New"])])" />
+
 <section class="card">
     <div class="card-head">
         <h2 class="card-title">@L["NewRoleTitle"]</h2>
@@ -47,15 +49,15 @@
 
 @code {
     private string roleName = string.Empty;
-    private int roleLevel = 10;
+    private int roleLevel = 99; // none parent role
     private string? parentRoleId;
     private List<RoleModel>? allRoles;
     private bool saving;
 
     protected override async Task OnInitializedAsync()
     {
-        var resp = await RoleService.GetRolesAsync();
-        allRoles = resp?.Data?.ToList();
+        var resp = await RoleService.GetRolesAsync(new PagedRequest { PageSize = 1000 });
+        allRoles = resp?.Data?.Items?.ToList();
     }
 
     private async Task SubmitAsync()

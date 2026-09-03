@@ -12,6 +12,8 @@
 
 <PageTitle>@L["UserDetailTitle"]</PageTitle>
 
+<Breadcrumb Items="@([new BreadcrumbItem(L["NavUsers"], "/users"), new BreadcrumbItem(string.IsNullOrWhiteSpace(userName) ? L["UserDetailTitle"] : userName)])" />
+
 <section class="card">
     <div class="card-head">
         <h2 class="card-title">@L["UserDetailTitle"]</h2>
@@ -51,8 +53,8 @@
             </div>
 
             <div class="field">
-                <label class="field-label" for="password">@L["Password"] <span class="req">*</span></label>
-                <input id="password" type="password" class="input" placeholder="@L["NewPasswordRequiredPlaceholder"]" @bind="password" @bind:event="oninput" />
+                <label class="field-label" for="password">@L["Password"]</label>
+                <input id="password" type="password" class="input" value="@password" @onfocus="OnPasswordFocus" @oninput="OnPasswordInput" placeholder="@L["NewPasswordRequiredPlaceholder"]" />
             </div>
 
             <div class="form-grid">
@@ -80,6 +82,14 @@
                     }
                 </select>
             </div>
+
+            <label class="switch-row" for="isActive">
+                <span class="switch-row-text">
+                    <span class="switch-row-label">@L["Active"]</span>
+                    <span class="switch-row-sub">@L["IsActiveHint"]</span>
+                </span>
+                <input id="isActive" type="checkbox" class="switch" @bind="isActive" />
+            </label>
 
             <div class="field">
                 <label class="field-label">@L["RoleAssignmentSection"]</label>
@@ -123,7 +133,7 @@
             </div>
 
             <div class="form-actions">
-                <button type="button" class="btn btn-primary" disabled="@(saving || string.IsNullOrWhiteSpace(password))" @onclick="SaveAsync">@L["Save"]</button>
+                <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SaveAsync">@L["Save"]</button>
                 <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/users")'>@L["Back"]</button>
                 <div class="spacer"></div>
                 <button type="button" class="btn btn-danger" @onclick="DeleteAsync">
@@ -154,9 +164,13 @@
     private string lastName = string.Empty;
     private string userName = string.Empty;
     private string email = string.Empty;
-    private string password = string.Empty;
+    private string password = "**********";
     private string identification = string.Empty;
+    private bool isActive = true;
     private bool saving;
+
+    private void OnPasswordFocus(FocusEventArgs _) { if (password == "**********") password = string.Empty; }
+    private void OnPasswordInput(ChangeEventArgs e) => password = e.Value?.ToString() ?? string.Empty;
 
     private IEnumerable<RoleModel> AvailableRoles =>
         (roles ?? []).Where(r => assignedRoles.All(a => a.Id != r.Id));
@@ -184,8 +198,8 @@
             ? TenantContext.Tenants.ToList()
             : (await TenantService.GetTenantsAsync())?.Data?.ToList() ?? [];
 
-        var rolesResponse = await RoleService.GetRolesAsync();
-        roles = rolesResponse?.Data?.ToList() ?? [];
+        var rolesResponse = await RoleService.GetRolesAsync(new PagedRequest { PageSize = 1000 });
+        roles = rolesResponse?.Data?.Items?.ToList() ?? [];
 
         var response = await UserService.GetUsersAsync();
         item = response?.Data?.FirstOrDefault(u => u.Id == Id);
@@ -206,6 +220,8 @@
         userName = item.UserName ?? string.Empty;
         email = item.Email ?? string.Empty;
         identification = item.Identification ?? string.Empty;
+        password = "**********";
+        isActive = item.IsActive;
         selectedIdentificationType = identificationTypes.FirstOrDefault(t => t.Id == item.IdentificationTypeId);
         selectedTenant = tenants.FirstOrDefault(t => t.Id == item.TenantId);
     }
@@ -220,6 +236,27 @@
             selectedIdentificationType.Id, selectedTenant.Id);
 
         var response = await UserService.UpdateUserAsync(Id, request);
+
+        if (response.IsSuccessStatusCode && item is not null)
+        {
+            if (isActive && !item.IsActive)
+            {
+                await UserService.ActivateUserAsync(Id);
+            }
+            else if (!isActive && item.IsActive)
+            {
+                await UserService.DeactivateUserAsync(Id);
+            }
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            password = "**********";
+            // refresh local item state so toggle logic stays consistent
+            var refreshed = await UserService.GetUserByIdAsync(Id);
+            if (refreshed?.Data is not null) item = refreshed.Data;
+        }
+
         saving = false;
 
         if (response.IsSuccessStatusCode)
@@ -253,7 +290,17 @@
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess(L["RolesSavedToast"]);
-            Nav.NavigateTo(Nav.Uri, forceLoad: true);
+            var r = await UserService.GetUserByIdAsync(Id);
+            if (r?.Data is not null)
+            {
+                item = r.Data;
+                assignedRoles = [.. (roles ?? []).Join(
+                    item.Roles,
+                    role => (Guid?)role.Id,
+                    userRole => userRole.RoleId,
+                    (role, _) => role)];
+            }
+            savingRoles = false;
         }
         else
         {

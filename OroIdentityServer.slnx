@@ -38,6 +38,5 @@
   </Folder>
   <Folder Name="/tests/Server.Tests/">
     <Project Path="tests/Server.Tests/OroIdentityServer.Server.Tests.csproj" />
-  </Folder>
-  
+  </Folder> 
 </Solution>

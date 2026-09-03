@@ -8,6 +8,8 @@
 
 <PageTitle>@L["NewTenantTitle"]</PageTitle>
 
+<Breadcrumb Items="@([new BreadcrumbItem(L["NavTenants"], "/tenants"), new BreadcrumbItem(L["New"])])" />
+
 <section class="card">
     <div class="card-head">
         <h2 class="card-title">@L["NewTenantTitle"]</h2>
@@ -66,8 +68,7 @@
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowSuccess(L["TenantCreatedToast"]);
-            // forceLoad so the nav tenant switcher picks up the newly created tenant.
-            Nav.NavigateTo("/tenants", forceLoad: true);
+            Nav.NavigateTo("/tenants");
         }
         else
         {

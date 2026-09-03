@@ -1,16 +1,10 @@
 // OroIdentityServer
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OroIdentityServer.Core.Modules.Hierarchy.DTOs;
-using OroIdentityServer.Core.Modules.Hierarchy.Entities;
-using OroIdentityServer.Core.Modules.Hierarchy.Enums;
 using OroIdentityServer.Core.Modules.Hierarchy.Services;
-using OroIdentityServer.Core.Modules.Hierarchy.ValueObjects;
-using OroIdentityServer.Infraestructure;
 
 namespace OroIdentityServer.Infraestructure.Services.Hierarchy;
 

@@ -7,7 +7,7 @@ namespace OroIdentityServer.Application.Modules.Roles.Queries;
 /// <summary>
 /// Represents a query to retrieve all roles.
 /// </summary>
-public sealed record GetRolesQuery() : IQuery<GetRolesResponse>
+public sealed record GetRolesQuery(string? SearchTerm = null, int PageNumber = 1, int PageSize = 20) : IQuery<GetRolesResponse>
 {
     public Guid CorrelationId { get; init; } = Guid.NewGuid();
 }

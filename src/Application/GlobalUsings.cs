@@ -37,7 +37,6 @@ global using OroIdentityServer.Core.Modules.IdentificationTypes.Repositories;
 global using OroIdentityServer.Core.Modules.Permissions.Aggregates;
 global using OroIdentityServer.Core.Modules.Permissions.Repositories;
 global using OroIdentityServer.Core.Modules.Roles.Aggregates;
-global using OroIdentityServer.Core.Modules.Roles.DomainEvents;
 global using OroIdentityServer.Core.Modules.Roles.Repositories;
 global using OroIdentityServer.Core.Modules.Tenants.Aggregates;
 global using OroIdentityServer.Core.Modules.Tenants.Repositories;

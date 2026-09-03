@@ -3,7 +3,6 @@
 // Licensed under the GNU AGPL v3.0 or later.
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using OroIdentityServer.Core.Modules.Hierarchy.Enums;
 using OroIdentityServer.Core.Modules.Hierarchy.Services;
 using OroIdentityServer.Core.Shared;

@@ -11,12 +11,19 @@ namespace IdentityServer.Services;
 
 public class ServerAdminRoleService(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher) : IAdminRoleService
 {
-    public async Task<ApiResponse<IEnumerable<RoleModel>>?> GetRolesAsync(CancellationToken ct = default)
+    public async Task<ApiResponse<PagedResponse<RoleModel>>?> GetRolesAsync(PagedRequest? request = null, CancellationToken ct = default)
     {
-        var result = await queryDispatcher.SendAsync(new GetRolesQuery(), ct);
-        return new ApiResponse<IEnumerable<RoleModel>>
+        var req = request ?? new PagedRequest();
+        var result = await queryDispatcher.SendAsync(new GetRolesQuery(req.SearchTerm, req.PageNumber, req.PageSize), ct);
+        return new ApiResponse<PagedResponse<RoleModel>>
         {
-            Data = result.Data?.Select(MapRole).ToList() ?? [],
+            Data = new PagedResponse<RoleModel>
+            {
+                Items = result.Data?.Select(MapRole).ToList() ?? [],
+                TotalCount = result.TotalCount,
+                PageNumber = result.PageNumber,
+                PageSize = result.PageSize
+            },
             StatusCode = result.StatusCode,
             Message = result.Message,
             Errors = result.Errors
@@ -50,6 +57,12 @@ public class ServerAdminRoleService(IQueryDispatcher queryDispatcher, ICommandDi
     public async Task<HttpResponseMessage> DeleteRoleAsync(Guid id, CancellationToken ct = default)
     {
         var result = await commandDispatcher.SendAsync(new DeleteRoleCommand(id), ct);
+        return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
+    }
+
+    public async Task<HttpResponseMessage> ActivateRoleAsync(Guid id, CancellationToken ct = default)
+    {
+        var result = await commandDispatcher.SendAsync(new ActivateRoleCommand(id), ct);
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }
 

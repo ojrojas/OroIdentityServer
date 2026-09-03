@@ -1,0 +1,22 @@
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    @foreach (var crumb in Items)
+    {
+        @if (!string.IsNullOrEmpty(crumb.Href))
+        {
+            <a href="@crumb.Href" class="breadcrumb-link">@crumb.Label</a>
+        }
+        else
+        {
+            <span class="breadcrumb-current">@crumb.Label</span>
+        }
+        @if (crumb != Items.Last())
+        {
+            <span class="breadcrumb-sep">/</span>
+        }
+    }
+</nav>
+
+@code {
+    [Parameter, EditorRequired]
+    public List<BreadcrumbItem> Items { get; set; } = [];
+}

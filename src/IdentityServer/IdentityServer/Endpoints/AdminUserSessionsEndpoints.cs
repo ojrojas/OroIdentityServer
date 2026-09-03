@@ -10,7 +10,7 @@ public static partial class AdminApiEndpoints
     {
         var g = api.MapGroup("/user-sessions");
 
-        g.MapGet("/by-user/{userId:guid}", async (Guid userId, [FromServices] IAdminUserSessionService service, CancellationToken ct)
+        g.MapMethods("/by-user", [HttpMethods.Query], async (Guid userId, [FromServices] IAdminUserSessionService service, CancellationToken ct)
             => Results.Ok(await service.GetByUserAsync(userId, ct)));
 
         g.MapGet("/active", async ([FromServices] IAdminUserSessionService service, CancellationToken ct)

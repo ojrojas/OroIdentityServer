@@ -2,9 +2,6 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 using OroIdentityServer.Core.Modules.Hierarchy.DTOs;
-using OroIdentityServer.Core.Modules.Hierarchy.Entities;
-using OroIdentityServer.Core.Modules.Hierarchy.Enums;
-using OroIdentityServer.Core.Modules.Hierarchy.ValueObjects;
 
 namespace OroIdentityServer.Core.Modules.Hierarchy.Services;
 

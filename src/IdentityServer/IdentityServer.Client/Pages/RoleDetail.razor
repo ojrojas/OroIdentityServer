@@ -8,6 +8,8 @@
 
 <PageTitle>@L["RoleDetailTitle"]</PageTitle>
 
+<Breadcrumb Items="@([new BreadcrumbItem(L["NavRoles"], "/roles"), new BreadcrumbItem(string.IsNullOrWhiteSpace(roleName) ? L["RoleDetailTitle"] : roleName)])" />
+
 <section class="card">
     <div class="card-head">
         <h2 class="card-title">@L["RoleDetailTitle"]</h2>
@@ -87,8 +89,8 @@
             roleLevel = item.Level;
             parentRoleId = item.ParentRoleId?.ToString();
         }
-        var all = await RoleService.GetRolesAsync();
-        allRoles = all?.Data?.ToList();
+        var all = await RoleService.GetRolesAsync(new PagedRequest { PageSize = 1000 });
+        allRoles = all?.Data?.Items?.ToList();
     }
 
     private async Task SaveAsync()
@@ -96,6 +98,15 @@
         saving = true;
         Guid? parentGuid = string.IsNullOrWhiteSpace(parentRoleId) ? null : Guid.Parse(parentRoleId);
         var response = await RoleService.UpdateRoleAsync(Id, new UpdateRoleRequest(roleName, roleLevel, parentGuid));
+
+        if (response.IsSuccessStatusCode && item is not null)
+        {
+            if (isActive && !item.IsActive)
+            {
+                await RoleService.ActivateRoleAsync(Id);
+            }
+        }
+
         saving = false;
 
         if (response.IsSuccessStatusCode)

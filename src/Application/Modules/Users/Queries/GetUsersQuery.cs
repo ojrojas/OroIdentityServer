@@ -5,7 +5,7 @@
 
 namespace OroIdentityServer.Application.Modules.Users.Queries;
 
-public record GetUsersQuery(Guid? TenantId = null) : IQuery<GetUsersQueryResponse>
+public record GetUsersQuery(Guid? TenantId = null, string? SearchTerm = null, int PageNumber = 1, int PageSize = 20) : IQuery<GetUsersQueryResponse>
 {
     public Guid CorrelationId { get; init; } = Guid.NewGuid();
 }

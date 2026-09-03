@@ -6,4 +6,7 @@ namespace OroIdentityServer.Application.Modules.Roles.Queries;
 
 public record GetRolesResponse : BaseResponse<IEnumerable<RoleDto>>
 {
+    public int TotalCount { get; set; }
+    public int PageNumber { get; set; }
+    public int PageSize { get; set; }
 }

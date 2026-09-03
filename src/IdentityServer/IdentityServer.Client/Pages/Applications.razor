@@ -16,6 +16,10 @@
         </button>
     </div>
 
+    <div class="card-search">
+        <input class="input" placeholder="@L["Search"]" @bind="searchTerm" @bind:event="oninput" @onkeydown="SearchKeyDown" />
+    </div>
+
     @if (items is null)
     {
         <div class="spinner spinner-lg spinner-center"></div>
@@ -61,18 +65,55 @@
                 </tbody>
             </table>
         </div>
+
+        <Pagination PageNumber="@pageNumber" TotalPages="@totalPages" TotalCount="@totalCount"
+                    PageSize="@pageSize" PageNumberChanged="OnPageNumberChanged" PageSizeChanged="OnPageSizeChanged" />
     }
 </section>
 
 @code {
     private List<OpenIddictApplicationModel>? items;
+    private string searchTerm = string.Empty;
+    private int pageNumber = 1;
+    private int pageSize = 20;
+    private int totalCount;
+    private int totalPages;
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
     private async Task LoadAsync()
     {
-        var response = await ApplicationService.GetApplicationsAsync();
-        items = response?.ToList() ?? [];
+        var response = await ApplicationService.GetApplicationsAsync(new PagedRequest
+        {
+            SearchTerm = searchTerm,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        });
+        items = response?.Items?.ToList() ?? [];
+        totalCount = response?.TotalCount ?? 0;
+        totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+    }
+
+    private async Task SearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            pageNumber = 1;
+            await LoadAsync();
+        }
+    }
+
+    private async Task OnPageNumberChanged(int page)
+    {
+        pageNumber = page;
+        await LoadAsync();
+    }
+
+    private async Task OnPageSizeChanged(int size)
+    {
+        pageSize = size;
+        pageNumber = 1;
+        await LoadAsync();
     }
 
     private void CreateAsync() => Nav.NavigateTo("/applications/create");

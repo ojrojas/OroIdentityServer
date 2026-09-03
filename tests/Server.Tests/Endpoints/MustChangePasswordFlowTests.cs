@@ -5,12 +5,9 @@
 using System.Net;
 using System.Text.RegularExpressions;
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
-using OroIdentityServer.Core.Modules.Roles.Aggregates;
 using OroIdentityServer.Core.Modules.Tenants.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Entities;
-using OroIdentityServer.Core.Shared;
-using OroIdentityServer.Infraestructure;
 using OroIdentityServer.Server.Tests.Infrastructure;
 using Xunit;
 

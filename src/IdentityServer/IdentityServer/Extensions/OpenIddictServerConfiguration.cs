@@ -4,7 +4,6 @@
 // See the LICENSE file in the project root for details.
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Tokens;
 using OroIdentityServer.Infraestructure;
 using Quartz;
 using static OpenIddict.Abstractions.OpenIddictConstants;
