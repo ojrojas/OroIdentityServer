@@ -1,0 +1,14 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+
+### ============================================================
+### BRANDING API (AllowAnonymous — also used by login & sidebar)
+### ============================================================
+
+### Get effective branding (AppName, FullName, DisplayName, LogoUrl)
+GET {{baseUrl}}/api/branding
+
+### Get branding as authenticated user
+GET {{baseUrl}}/api/branding
+Cookie: {{token}}

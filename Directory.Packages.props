@@ -9,8 +9,8 @@
     <PackageVersion Include="AdminKit.Components" Version="1.0.0" />
     <PackageVersion Include="AdminKit.Theming" Version="1.0.0" />
     <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.4.6" />
-    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.5.2" />
-    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.5.2" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.5.3" />
+    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.5.3" />
     <PackageVersion Include="Aspire.Hosting.Redis" Version="13.4.6" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
     <PackageVersion Include="Aspire.Npgsql" Version="13.2.4" />

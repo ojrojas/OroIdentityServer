@@ -1,0 +1,81 @@
+### Variables
+@baseUrl = http://localhost:5080
+@token = {{loginCookie.response.headers.Set-Cookie}}
+@userId = 00000000-0000-0000-0000-000000000001
+
+### ============================================================
+### HIERARCHY API
+### ============================================================
+
+### Create reporting relationship (CanManageHierarchy ≥70)
+POST {{baseUrl}}/api/hierarchy/relationships
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+  "userId": "00000000-0000-0000-0000-000000000001",
+  "reportsToUserId": "00000000-0000-0000-0000-000000000002",
+  "type": "Functional",
+  "priority": 1
+}
+
+### Update relationship priority
+PUT {{baseUrl}}/api/hierarchy/relationships/00000000-0000-0000-0000-000000000003/priority
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+  "priority": 2
+}
+
+### Delete (soft) relationship
+DELETE {{baseUrl}}/api/hierarchy/relationships/00000000-0000-0000-0000-000000000003
+Cookie: {{token}}
+
+### Get all relationships for a user
+GET {{baseUrl}}/api/hierarchy/relationships/{{userId}}
+Cookie: {{token}}
+
+### Get direct superiors (defaults to current user if userId omitted)
+GET {{baseUrl}}/api/hierarchy/superiors/{{userId}}
+Cookie: {{token}}
+
+### Get primary superior
+GET {{baseUrl}}/api/hierarchy/superiors/{{userId}}/primary
+Cookie: {{token}}
+
+### Get superiors by type
+GET {{baseUrl}}/api/hierarchy/superiors/{{userId}}/by-type/Functional
+Cookie: {{token}}
+
+### Get direct subordinates (optional ?type=)
+GET {{baseUrl}}/api/hierarchy/subordinates/{{userId}}?type=Functional
+Cookie: {{token}}
+
+### Get all subordinates recursively (CTE)
+GET {{baseUrl}}/api/hierarchy/subordinates/{{userId}}/all
+Cookie: {{token}}
+
+### Get command chain to root
+GET {{baseUrl}}/api/hierarchy/chain/{{userId}}
+Cookie: {{token}}
+
+### Get organization tree (primary Functional only)
+GET {{baseUrl}}/api/hierarchy/tree
+Cookie: {{token}}
+
+### Get full tree with secondary relationships
+GET {{baseUrl}}/api/hierarchy/tree/full
+Cookie: {{token}}
+
+### Can command check (optional ?type=)
+GET {{baseUrl}}/api/hierarchy/can-command/00000000-0000-0000-0000-000000000001/00000000-0000-0000-0000-000000000002?type=Functional
+Cookie: {{token}}
+
+### Get hierarchy level
+GET {{baseUrl}}/api/hierarchy/level/{{userId}}
+Cookie: {{token}}
+
+### Sync primary reports-to from Functional priority 1
+POST {{baseUrl}}/api/hierarchy/sync-primary/{{userId}}
+Cookie: {{token}}

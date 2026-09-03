@@ -3,12 +3,23 @@
 @token = {{loginCookie.response.headers.Set-Cookie}}
 
 ### ============================================================
-### USERS API
+### USERS API — ManagerOrAdmin (roles/tenant-aware)
 ### ============================================================
 
-### List all users
+### List all users (legacy, non-paged)
 GET {{baseUrl}}/api/users/
 Cookie: {{token}}
+
+### List users paged + search (QUERY — new)
+QUERY {{baseUrl}}/api/users/paged
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+  "searchTerm": "admin",
+  "pageNumber": 1,
+  "pageSize": 20
+}
 
 ### Get user by ID
 GET {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001
@@ -20,41 +31,73 @@ Content-Type: application/json
 Cookie: {{token}}
 
 {
-    "name": "Test",
-    "lastName": "User",
-    "email": "testuser@example.com",
-    "userName": "testuser",
-    "identification": "123456789",
-    "identificationTypeId": null,
-    "password": "Test@123456",
-    "tenantId": null
+  "name": "Test",
+  "middleName": "",
+  "lastName": "User",
+  "userName": "testuser",
+  "email": "testuser@example.com",
+  "password": "Test@123456",
+  "identification": "123456789",
+  "identificationTypeId": "00000000-0000-0000-0000-000000000010",
+  "tenantId": "00000000-0000-0000-0000-000000000020"
 }
 
-### Update a user
+### Update a user (password nullable — send null or "**********" to keep)
 PUT {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001
 Content-Type: application/json
 Cookie: {{token}}
 
 {
-    "name": "Updated",
-    "lastName": "User",
-    "email": "updateduser@example.com"
+  "name": "Updated",
+  "middleName": "",
+  "lastName": "User",
+  "userName": "testuser",
+  "email": "updateduser@example.com",
+  "password": null,
+  "identification": "123456789",
+  "identificationTypeId": "00000000-0000-0000-0000-000000000010",
+  "tenantId": "00000000-0000-0000-0000-000000000020"
 }
 
-### Delete a user
+### Update a user — change password
+PUT {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+  "name": "Updated",
+  "middleName": "",
+  "lastName": "User",
+  "userName": "testuser",
+  "email": "updateduser@example.com",
+  "password": "NewPass@123456",
+  "identification": "123456789",
+  "identificationTypeId": "00000000-0000-0000-0000-000000000010",
+  "tenantId": "00000000-0000-0000-0000-000000000020"
+}
+
+### Delete a user (soft-delete → IsActive=false)
 DELETE {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001
 Cookie: {{token}}
 
-### Update user roles
+### Deactivate a user (explicit soft-delete)
+POST {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001/deactivate
+Cookie: {{token}}
+
+### Activate a deactivated user (bypasses query filter)
+POST {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001/activate
+Cookie: {{token}}
+
+### Update user roles (replace full set)
 PUT {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001/roles
 Content-Type: application/json
 Cookie: {{token}}
 
 {
-    "roles": ["Admin", "Manager"]
+  "roleIds": ["00000000-0000-0000-0000-000000000100", "00000000-0000-0000-0000-000000000101"]
 }
 
-### Lock user
+### Lock user (blocks login, distinct from deactivation)
 POST {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000001/lock
 Cookie: {{token}}
 

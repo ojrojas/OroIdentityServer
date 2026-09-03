@@ -6,11 +6,18 @@
 ### OPENIDDICT APPLICATIONS API (MasterAdminOnly)
 ### ============================================================
 
-### List all applications
-GET {{baseUrl}}/api/applications/
+### List all applications — paged + search (QUERY — new, secrets masked sk-****xyz)
+QUERY {{baseUrl}}/api/applications/
+Content-Type: application/json
 Cookie: {{token}}
 
-### Get application by client ID
+{
+  "searchTerm": "Admin",
+  "pageNumber": 1,
+  "pageSize": 20
+}
+
+### Get application by client ID (secret masked if confidential)
 GET {{baseUrl}}/api/applications/OroIdentityServer.Admin
 Cookie: {{token}}
 
@@ -45,14 +52,14 @@ Cookie: {{token}}
     "postLogoutRedirectUris": ["http://localhost:4200"]
 }
 
-### Create a new application (confidential client - API)
+### Create a new confidential application — auto-generates secret if empty (sk- returned once)
 POST {{baseUrl}}/api/applications/
 Content-Type: application/json
 Cookie: {{token}}
 
 {
     "clientId": "my-api-client",
-    "clientSecret": "super-secret-key-change-me",
+    "clientSecret": null,
     "displayName": "My API Client",
     "clientType": "confidential",
     "applicationType": "web",
@@ -67,14 +74,38 @@ Cookie: {{token}}
     "postLogoutRedirectUris": []
 }
 
-### Update an application
+### Create confidential with explicit secret
+POST {{baseUrl}}/api/applications/
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+    "clientId": "my-api-client-2",
+    "clientSecret": "super-secret-key-change-me",
+    "displayName": "My API Client 2",
+    "clientType": "confidential",
+    "applicationType": "web",
+    "consentType": "implicit",
+    "permissions": ["ept:token", "gt:client_credentials", "scp:admin"],
+    "requirements": [],
+    "redirectUris": [],
+    "postLogoutRedirectUris": []
+}
+
+### Update an application (leave clientSecret empty to keep existing)
 PUT {{baseUrl}}/api/applications/my-spa-client
 Content-Type: application/json
 Cookie: {{token}}
 
 {
+    "clientId": "my-spa-client",
+    "clientSecret": null,
     "displayName": "Updated SPA Client",
+    "clientType": "public",
+    "applicationType": "web",
     "consentType": "explicit",
+    "permissions": ["ept:authorization", "ept:token", "ept:end_session"],
+    "requirements": ["ft:pkce"],
     "redirectUris": ["http://localhost:4200/callback", "http://localhost:3000/callback"],
     "postLogoutRedirectUris": ["http://localhost:4200", "http://localhost:3000"]
 }

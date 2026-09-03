@@ -6,9 +6,16 @@
 ### ROLES API (AdminOnly)
 ### ============================================================
 
-### List all roles
-GET {{baseUrl}}/api/roles/
+### List all roles — paged + search (QUERY — new)
+QUERY {{baseUrl}}/api/roles/
+Content-Type: application/json
 Cookie: {{token}}
+
+{
+  "searchTerm": "Admin",
+  "pageNumber": 1,
+  "pageSize": 20
+}
 
 ### Get role by ID
 GET {{baseUrl}}/api/roles/00000000-0000-0000-0000-000000000001
@@ -20,9 +27,20 @@ Content-Type: application/json
 Cookie: {{token}}
 
 {
-    "name": "Editor",
-    "description": "Editor role with content management permissions",
-    "permissions": []
+  "roleName": "Editor",
+  "level": 40,
+  "parentRoleId": null
+}
+
+### Create a role with parent (hierarchy)
+POST {{baseUrl}}/api/roles/
+Content-Type: application/json
+Cookie: {{token}}
+
+{
+  "roleName": "SeniorEditor",
+  "level": 60,
+  "parentRoleId": "00000000-0000-0000-0000-000000000002"
 }
 
 ### Update a role
@@ -31,10 +49,15 @@ Content-Type: application/json
 Cookie: {{token}}
 
 {
-    "name": "Senior Editor",
-    "description": "Senior editor role"
+  "roleName": "Senior Editor",
+  "level": 60,
+  "parentRoleId": "00000000-0000-0000-0000-000000000002"
 }
 
-### Delete a role
+### Delete a role (soft-delete → IsActive=false)
 DELETE {{baseUrl}}/api/roles/00000000-0000-0000-0000-000000000001
+Cookie: {{token}}
+
+### Activate a deactivated role
+POST {{baseUrl}}/api/roles/00000000-0000-0000-0000-000000000001/activate
 Cookie: {{token}}
