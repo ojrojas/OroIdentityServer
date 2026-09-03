@@ -2,17 +2,25 @@
 @layout LoginLayout
 @attribute [AllowAnonymous]
 @inject IStringLocalizer<SharedResources> L
+@inject Microsoft.Extensions.Options.IOptions<OroIdentityServer.Shared.Options.BrandingOptions> Branding
 
 <div class="auth">
     <div class="auth-card">
         <div class="auth-head">
-            <span class="auth-mark">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3l7 3v6c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z" />
-                    <path d="M9 12l2 2 4-4" />
-                </svg>
-            </span>
-            <h1 class="auth-title">@L["SignInTitle"]</h1>
+            @if (!string.IsNullOrWhiteSpace(Branding.Value.EffectiveLogoUrl))
+            {
+                <img src="@Branding.Value.EffectiveLogoUrl" alt="@Branding.Value.AppName" class="auth-logo" />
+            }
+            else
+            {
+                <span class="auth-mark">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3l7 3v6c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z" />
+                        <path d="M9 12l2 2 4-4" />
+                    </svg>
+                </span>
+            }
+            <h1 class="auth-title">@Branding.Value.FullName — @L["SignInTitle"]</h1>
             <p class="auth-sub">@L["SignInSubtitle"]</p>
         </div>
 

@@ -4,6 +4,8 @@
         "**/.git/subtree-cache/**": true,
         "**/node_modules/*/**": true,
         "**/.hg/store/**": true,
+        "**/obj/**": true,
+        "**/bin/**": true
     },
     "dotnet.defaultSolution": "OroIdentityServer.slnx",
 }

@@ -223,6 +223,25 @@ a { color: inherit; }
   flex-shrink: 0;
 }
 
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: contain;
+  flex-shrink: 0;
+  background: white;
+}
+
+.auth-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 16px;
+  background: white;
+}
+
 /* Tenant switcher, between the brand and the nav */
 .tenant-switcher {
   display: flex;

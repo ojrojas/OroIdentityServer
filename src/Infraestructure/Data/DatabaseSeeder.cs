@@ -106,7 +106,7 @@ public static class DatabaseSeeder
         CancellationToken cancellationToken)
     {
         var defaultClientId = configuration["SEED_APP_CLIENT_ID"] ?? "oroidentity-admin-spa";
-        var defaultDisplayName = configuration["SEED_APP_DISPLAY_NAME"] ?? "OroIdentity Admin SPA";
+        var defaultDisplayName = configuration["SEED_APP_DISPLAY_NAME"] ?? configuration["Branding:DisplayName"] ?? "OroIdentity Admin SPA";
         var defaultRedirectUri = configuration["SEED_APP_REDIRECT_URI"] ?? "https://localhost:5001/authentication/login-callback";
         var defaultPostLogoutUri = configuration["SEED_APP_POST_LOGOUT_URI"] ?? "https://localhost:5001/authentication/logout-callback";
 

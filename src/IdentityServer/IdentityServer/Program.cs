@@ -76,6 +76,9 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
+builder.Services.Configure<OroIdentityServer.Shared.Options.BrandingOptions>(
+    builder.Configuration.GetSection(OroIdentityServer.Shared.Options.BrandingOptions.SectionName));
+
 builder.Services.AddCors(setupAction =>
 {
     setupAction.AddPolicy("OroIdentityServer", policy =>
@@ -272,6 +275,7 @@ app.MapGet("/culture/set", (HttpContext http, string culture, string? redirectUr
 
 app.MapAuthEndpoints();
 app.MapAdminApiEndpoints();
+app.MapBranding();
 app.MapControllers();
 
 app.MapStaticAssets();

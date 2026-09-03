@@ -24,6 +24,8 @@ public static class ServerAdminServiceCollectionExtensions
         services.AddScoped<IAdminValidationLogService,ServerAdminValidationLogService>();
         services.AddScoped<IAdminDashboardService, ServerAdminDashboardService>();
         services.AddScoped<IAdminHierarchyService, ServerAdminHierarchyService>();
+        services.AddScoped<IAdminBrandingService, ServerBrandingService>();
+
 
         return services;
     }

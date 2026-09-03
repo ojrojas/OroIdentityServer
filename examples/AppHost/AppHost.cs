@@ -80,6 +80,12 @@ IResourceBuilder<ProjectResource> identityServer = builder.AddProject<Projects.I
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", environment.EnvironmentName)
     .WithEnvironment("SymmetricSecurityKey", SymmetricSecurityKey)
     .WithEnvironment("EventBus__Mode", eventBusMode)
+    .WithEnvironment("Branding__AppName", "OroKanban")
+    .WithEnvironment("Branding__FullName", "OroKanban")
+    .WithEnvironment("Branding__DisplayName", "Kanban Management")
+    .WithEnvironment("Branding__LogoUrl", "https://huggingface.co/front/assets/huggingface_logo-noborder.svg")
+    .WithEnvironment("Branding__FullLogoUrl", "null")
+
     .WithEnvironment("IDENTITY_ADMIN_HTTP", "http://localhost:4200");
 
 if (rabbitMq is not null)

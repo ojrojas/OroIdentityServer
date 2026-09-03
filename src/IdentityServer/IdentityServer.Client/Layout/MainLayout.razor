@@ -1,9 +1,13 @@
+@using Microsoft.Extensions.Options
+@using OroIdentityServer.Shared.Options
 @inherits LayoutComponentBase
 @inject IStringLocalizer<SharedResources> L
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 @inject ICurrentTenantContext TenantContext
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IAdminBrandingService BrandingService
+@inject IServiceProvider ServiceProvider
 @implements IDisposable
 
 <div class="app">
@@ -11,8 +15,15 @@
 
         <aside class="sidebar @(sidebarOpen ? "open" : "")">
             <div class="brand">
-                <span class="brand-mark"><Icon Name="shield" Size="18" Stroke="1.8" /></span>
-                OroIdentity
+                @if (!string.IsNullOrWhiteSpace(brandingLogoUrl))
+                {
+                    <img src="@brandingLogoUrl" alt="@brandingAppName" class="brand-logo" />
+                }
+                else
+                {
+                    <span class="brand-mark"><Icon Name="shield" Size="18" Stroke="1.8" /></span>
+                }
+                @brandingAppName
             </div>
 
             <TenantSwitcher />
@@ -132,6 +143,8 @@
     private bool sidebarOpen;
     private bool isDark = true;
     private string search = string.Empty;
+    private string brandingAppName = "OroIdentity";
+    private string? brandingLogoUrl = "/img/logo.png";
 
     /// <summary>Set by pages through <c>CascadingValue</c>-free convention: derived from the route.</summary>
     private string PageTitle => Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0].TrimEnd('/') switch
@@ -166,6 +179,31 @@
         TenantContext.SetMasterAdmin(isMasterAdmin);
 
         Nav.LocationChanged += HandleLocationChanged;
+
+        // Try IOptions first (works during server prerender where BrandingOptions is registered)
+        try
+        {
+            IOptions<BrandingOptions>? brandingOpt = ServiceProvider.GetService(typeof(IOptions<BrandingOptions>)) as IOptions<BrandingOptions>;
+            if (brandingOpt is not null)
+            {
+                brandingAppName = brandingOpt.Value.AppName;
+                brandingLogoUrl = brandingOpt.Value.EffectiveLogoUrl;
+                return;
+            }
+        }
+        catch { }
+
+        try
+        {
+            
+            var branding = await BrandingService.GetBrandingOptionsAsync(default);
+            if (branding is not null)
+            {
+                brandingAppName = branding.AppName;
+                brandingLogoUrl = branding.EffectiveLogoUrl;
+            }
+        }
+        catch { /* fallback to defaults */ }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

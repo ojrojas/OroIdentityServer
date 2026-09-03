@@ -88,7 +88,8 @@ public static class OpenIddictServerConfiguration
             return X509CertificateLoader.LoadCertificateFromFile(certPath);
 
         using var rsa = RSA.Create(2048);
-        var req = new CertificateRequest("CN=OroIdentityServer", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        var cn = configuration["Branding:FullName"] ?? "OroIdentityServer";
+        var req = new CertificateRequest($"CN={cn}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(5));
 
         Directory.CreateDirectory(certsDir);
