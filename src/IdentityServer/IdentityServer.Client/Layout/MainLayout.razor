@@ -8,6 +8,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IAdminBrandingService BrandingService
 @inject IServiceProvider ServiceProvider
+@inject PersistentComponentState ApplicationState
 @implements IDisposable
 
 <div class="app">
@@ -145,6 +146,8 @@
     private string search = string.Empty;
     private string brandingAppName = "OroIdentity";
     private string? brandingLogoUrl = "/img/logo.png";
+    private PersistingComponentStateSubscription? persistingSubscription;
+    private sealed record PersistedLayoutState(bool IsMasterAdmin, string BrandingAppName, string? BrandingLogoUrl);
 
     /// <summary>Set by pages through <c>CascadingValue</c>-free convention: derived from the route.</summary>
     private string PageTitle => Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0].TrimEnd('/') switch
@@ -170,6 +173,17 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // Restore persisted state from server prerender (avoids 2nd flash after WASM hydration / culture change)
+        if (ApplicationState.TryTakeFromJson<PersistedLayoutState>("layout", out var persisted))
+        {
+            isMasterAdmin = persisted.IsMasterAdmin;
+            brandingAppName = persisted.BrandingAppName;
+            brandingLogoUrl = persisted.BrandingLogoUrl;
+            TenantContext.SetMasterAdmin(isMasterAdmin);
+            Nav.LocationChanged += HandleLocationChanged;
+            return;
+        }
+
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         // The WASM client's serialized AuthenticationState only carries the identity's Name
         // and Role claims (AddAuthenticationStateDeserialization drops custom claims like
@@ -188,22 +202,36 @@
             {
                 brandingAppName = brandingOpt.Value.AppName;
                 brandingLogoUrl = brandingOpt.Value.EffectiveLogoUrl;
-                return;
             }
-        }
-        catch { }
-
-        try
-        {
-            
-            var branding = await BrandingService.GetBrandingOptionsAsync(default);
-            if (branding is not null)
+            else
             {
-                brandingAppName = branding.AppName;
-                brandingLogoUrl = branding.EffectiveLogoUrl;
+                var branding = await BrandingService.GetBrandingOptionsAsync(default);
+                if (branding is not null)
+                {
+                    brandingAppName = branding.AppName;
+                    brandingLogoUrl = branding.EffectiveLogoUrl;
+                }
             }
         }
-        catch { /* fallback to defaults */ }
+        catch
+        {
+            try
+            {
+                var branding = await BrandingService.GetBrandingOptionsAsync(default);
+                if (branding is not null)
+                {
+                    brandingAppName = branding.AppName;
+                    brandingLogoUrl = branding.EffectiveLogoUrl;
+                }
+            }
+            catch { /* fallback to defaults */ }
+        }
+
+        persistingSubscription = ApplicationState.RegisterOnPersisting(() =>
+        {
+            ApplicationState.PersistAsJson("layout", new PersistedLayoutState(isMasterAdmin, brandingAppName, brandingLogoUrl));
+            return Task.CompletedTask;
+        });
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -265,5 +293,9 @@
         };
     }
 
-    public void Dispose() => Nav.LocationChanged -= HandleLocationChanged;
+    public void Dispose()
+    {
+        Nav.LocationChanged -= HandleLocationChanged;
+        persistingSubscription?.Dispose();
+    }
 }
