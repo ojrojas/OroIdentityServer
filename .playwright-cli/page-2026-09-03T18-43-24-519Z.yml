@@ -1,0 +1,80 @@
+- generic [ref=f3e3]:
+  - complementary [ref=f3e4]:
+    - generic [ref=f3e5]:
+      - img "OroKanban" [ref=f3e6]
+      - text: OroKanban
+    - generic [ref=f3e7]:
+      - generic [ref=f3e8]: Tenant
+      - generic [ref=f3e9]:
+        - combobox "Tenant" [ref=f3e10] [cursor=pointer]:
+          - option "OroMasterTenant" [selected]
+        - button "Add tenant" [ref=f3e11] [cursor=pointer]
+    - navigation [ref=f3e14]:
+      - link "Dashboard" [ref=f3e15] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f3e21]: Users
+      - link "Users" [ref=f3e22] [cursor=pointer]:
+        - /url: /users
+      - link "Roles" [ref=f3e27] [cursor=pointer]:
+        - /url: /roles
+      - link "Identification Types" [ref=f3e30] [cursor=pointer]:
+        - /url: /identification-types
+      - generic [ref=f3e34]: Applications
+      - link "Applications" [ref=f3e35] [cursor=pointer]:
+        - /url: /applications
+      - link "Scopes" [ref=f3e39] [cursor=pointer]:
+        - /url: /scopes
+      - link "Tenants" [ref=f3e43] [cursor=pointer]:
+        - /url: /tenants
+      - link "Sessions" [ref=f3e46] [cursor=pointer]:
+        - /url: /sessions
+      - link "Hierarchy" [ref=f3e49] [cursor=pointer]:
+        - /url: /hierarchy/manage
+    - generic [ref=f3e54]:
+      - button "Toggle theme" [ref=f3e55] [cursor=pointer]
+      - link "Sign out" [ref=f3e58] [cursor=pointer]:
+        - /url: /Account/Logout
+  - generic [ref=f3e62]:
+    - banner [ref=f3e63]:
+      - heading "Hierarchy" [active] [level=1] [ref=f3e64]
+      - textbox "Search…" [ref=f3e69]
+      - generic "admin" [ref=f3e70]: AD
+    - generic [ref=f3e72]:
+      - generic [ref=f3e73]:
+        - heading "Organization Hierarchy" [level=2] [ref=f3e74]
+        - generic [ref=f3e75]:
+          - button "Refresh" [ref=f3e76] [cursor=pointer]
+          - button "Full Tree" [ref=f3e77] [cursor=pointer]
+      - generic [ref=f3e78]:
+        - paragraph [ref=f3e80]: No hierarchy data. Create relationships to build the tree.
+        - generic [ref=f3e81]:
+          - generic [ref=f3e82]:
+            - generic [ref=f3e83]: Subordinate (User)
+            - combobox [ref=f3e84] [cursor=pointer]:
+              - option "SelectUserPlaceholder"
+              - option "admin (admin@oroclash.local)"
+              - option "manager1 (manager1@example.com)" [selected]
+              - option "manager2 (manager2@example.com)"
+              - option "operator1 (operator1@example.com)"
+              - option "operator2 (operator2@example.com)"
+          - generic [ref=f3e85]:
+            - generic [ref=f3e86]: Superior (Reports To)
+            - combobox [ref=f3e87] [cursor=pointer]:
+              - option "SelectUserPlaceholder"
+              - option "admin (admin@oroclash.local)" [selected]
+              - option "manager1 (manager1@example.com)"
+              - option "manager2 (manager2@example.com)"
+              - option "operator1 (operator1@example.com)"
+              - option "operator2 (operator2@example.com)"
+          - generic [ref=f3e88]:
+            - generic [ref=f3e89]: Type
+            - combobox [ref=f3e90] [cursor=pointer]:
+              - option "Functional" [selected]
+              - option "Project"
+              - option "Matrix"
+              - option "Mentor"
+              - option "Temporary"
+          - generic [ref=f3e91]:
+            - generic [ref=f3e92]: Priority
+            - spinbutton [ref=f3e93]: "1"
+          - button "Create" [disabled] [ref=f3e94]

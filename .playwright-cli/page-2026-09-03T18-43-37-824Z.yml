@@ -1,0 +1,85 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e3]:
+    - complementary [ref=f3e4]:
+      - generic [ref=f3e5]:
+        - img "OroKanban" [ref=f3e6]
+        - text: OroKanban
+      - generic [ref=f3e7]:
+        - generic [ref=f3e8]: Tenant
+        - generic [ref=f3e9]:
+          - combobox "Tenant" [ref=f3e10] [cursor=pointer]:
+            - option "OroMasterTenant" [selected]
+          - button "Add tenant" [ref=f3e11] [cursor=pointer]
+      - navigation [ref=f3e14]:
+        - link "Dashboard" [ref=f3e15] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f3e21]: Users
+        - link "Users" [ref=f3e22] [cursor=pointer]:
+          - /url: /users
+        - link "Roles" [ref=f3e27] [cursor=pointer]:
+          - /url: /roles
+        - link "Identification Types" [ref=f3e30] [cursor=pointer]:
+          - /url: /identification-types
+        - generic [ref=f3e34]: Applications
+        - link "Applications" [ref=f3e35] [cursor=pointer]:
+          - /url: /applications
+        - link "Scopes" [ref=f3e39] [cursor=pointer]:
+          - /url: /scopes
+        - link "Tenants" [ref=f3e43] [cursor=pointer]:
+          - /url: /tenants
+        - link "Sessions" [ref=f3e46] [cursor=pointer]:
+          - /url: /sessions
+        - link "Hierarchy" [ref=f3e49] [cursor=pointer]:
+          - /url: /hierarchy/manage
+      - generic [ref=f3e54]:
+        - button "Toggle theme" [ref=f3e55] [cursor=pointer]
+        - link "Sign out" [ref=f3e58] [cursor=pointer]:
+          - /url: /Account/Logout
+    - generic [ref=f3e62]:
+      - banner [ref=f3e63]:
+        - heading "Hierarchy" [level=1] [ref=f3e64]
+        - textbox "Search…" [ref=f3e69]
+        - generic "admin" [ref=f3e70]: AD
+      - generic [ref=f3e72]:
+        - generic [ref=f3e73]:
+          - heading "Organization Hierarchy" [level=2] [ref=f3e74]
+          - generic [ref=f3e75]:
+            - button "Refresh" [ref=f3e76] [cursor=pointer]
+            - button "Full Tree" [ref=f3e77] [cursor=pointer]
+        - generic [ref=f3e95]:
+          - generic [ref=f3e97]:
+            - generic [ref=f3e98]:
+              - generic [ref=f3e99]:
+                - text: Relationship Type
+                - combobox "Relationship Type" [ref=f3e100]:
+                  - option "All" [selected]
+                  - option "Functional"
+                  - option "Project"
+                  - option "Matrix"
+                  - option "Mentor"
+                  - option "Temporary"
+              - generic [ref=f3e101]:
+                - text: Min Level
+                - combobox "Min Level" [ref=f3e102]:
+                  - option "All" [selected]
+                  - option "10+"
+                  - option "40+"
+                  - option "60+"
+                  - option "70+"
+                  - option "90+"
+            - list [ref=f3e103]:
+              - listitem [ref=f3e104]:
+                - generic [ref=f3e105] [cursor=pointer]:
+                  - generic [ref=f3e106]: admin
+                  - generic [ref=f3e107]: Administrator
+                  - generic [ref=f3e108]: Lvl 10
+                - list [ref=f3e109]:
+                  - listitem [ref=f3e110]:
+                    - generic [ref=f3e111] [cursor=pointer]:
+                      - generic [ref=f3e112]: manager1
+                      - generic [ref=f3e113]: Manager
+                      - generic [ref=f3e114]: Lvl 70
+          - paragraph [ref=f3e117]: Select a user in the tree to view details
+  - status [ref=f3e119]:
+    - generic [ref=f3e124]: Relationship created.
+    - button "Cerrar" [ref=f3e125] [cursor=pointer]

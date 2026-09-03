@@ -80,10 +80,10 @@ ENV EventBus__RabbitMQ__VirtualHost="/"
 ENV Branding__AppName="OroIdentity"
 ENV Branding__FullName="OroIdentityServer"
 ENV Branding__DisplayName="OroIdentity Admin SPA"
-ENV Branding__LogoUrl=null
-ENV Branding__FullLogoUrl=null
-ENV Branding__EffectiveLogoUrl=null
-ENV Branding__EffectiveFullLogoUrl=null
+ENV Branding__LogoUrl=
+ENV Branding__FullLogoUrl=
+ENV Branding__EffectiveLogoUrl=
+ENV Branding__EffectiveFullLogoUrl=
 
 EXPOSE 5080
 EXPOSE 5086

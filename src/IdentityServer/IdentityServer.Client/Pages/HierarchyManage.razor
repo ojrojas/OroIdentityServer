@@ -124,6 +124,58 @@
                 }
             </div>
         </div>
+
+        @* Global add form: always visible after tree exists to allow adding users not yet in tree *@
+        <div style="padding:1.5rem;border-top:1px solid #e2e8f0;margin-top:1rem">
+            <h3 style="margin-bottom:0.75rem">@L["NewRelationship"]</h3>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:end">
+                <div class="field" style="flex:1;min-width:180px">
+                    <label class="field-label">@L["SubordinateUser"]</label>
+                    <select class="select" @bind="firstSubordinateId">
+                        <option value="">@L["SelectUserPlaceholder"]</option>
+                        @if (allUsers != null)
+                        {
+                            @foreach (var u in allUsers)
+                            {
+                                <option value="@u.Id">@u.UserName (@u.Email)</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="field" style="flex:1;min-width:180px">
+                    <label class="field-label">@L["SuperiorUser"]</label>
+                    <select class="select" @bind="firstSuperiorId">
+                        <option value="">@L["SelectUserPlaceholder"]</option>
+                        @if (allUsers != null)
+                        {
+                            @foreach (var u in allUsers)
+                            {
+                                <option value="@u.Id">@u.UserName (@u.Email)</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="field" style="min-width:120px">
+                    <label class="field-label">@L["Type"]</label>
+                    <select class="select" @bind="firstType">
+                        <option value="Functional">Functional</option>
+                        <option value="Project">Project</option>
+                        <option value="Matrix">Matrix</option>
+                        <option value="Mentor">Mentor</option>
+                        <option value="Temporary">Temporary</option>
+                    </select>
+                </div>
+                <div class="field" style="width:80px">
+                    <label class="field-label">@L["Priority"]</label>
+                    <input type="number" min="1" @bind="firstPriority" class="input" />
+                </div>
+                <button class="btn btn-primary" disabled="@(!CanCreateFirst)" @onclick="CreateFirstAsync">@L["CreateRelationship"]</button>
+            </div>
+            @if (!string.IsNullOrEmpty(firstError))
+            {
+                <p class="text-danger" style="margin-top:0.5rem">@firstError</p>
+            }
+        </div>
     }
 </section>
 

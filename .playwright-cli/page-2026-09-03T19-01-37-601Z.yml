@@ -1,0 +1,130 @@
+- generic [ref=f1e3]:
+  - complementary [ref=f1e4]:
+    - generic [ref=f1e5]:
+      - img "OroKanban" [ref=f1e6]
+      - text: OroKanban
+    - generic [ref=f1e7]:
+      - generic [ref=f1e8]: Tenant
+      - generic [ref=f1e9]:
+        - combobox "Tenant" [ref=f1e10] [cursor=pointer]:
+          - option "OroMasterTenant" [selected]
+        - button "Add tenant" [ref=f1e11] [cursor=pointer]
+    - navigation [ref=f1e14]:
+      - link "Dashboard" [ref=f1e15] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f1e21]: Users
+      - link "Users" [ref=f1e22] [cursor=pointer]:
+        - /url: /users
+      - link "Roles" [ref=f1e27] [cursor=pointer]:
+        - /url: /roles
+      - link "Identification Types" [ref=f1e30] [cursor=pointer]:
+        - /url: /identification-types
+      - generic [ref=f1e34]: Applications
+      - link "Applications" [ref=f1e35] [cursor=pointer]:
+        - /url: /applications
+      - link "Scopes" [ref=f1e39] [cursor=pointer]:
+        - /url: /scopes
+      - link "Tenants" [ref=f1e43] [cursor=pointer]:
+        - /url: /tenants
+      - link "Sessions" [ref=f1e46] [cursor=pointer]:
+        - /url: /sessions
+      - link "Hierarchy" [ref=f1e49] [cursor=pointer]:
+        - /url: /hierarchy/manage
+    - generic [ref=f1e54]:
+      - button "Toggle theme" [ref=f1e55] [cursor=pointer]
+      - link "Sign out" [ref=f1e58] [cursor=pointer]:
+        - /url: /Account/Logout
+  - generic [ref=f1e62]:
+    - banner [ref=f1e63]:
+      - heading "Hierarchy" [active] [level=1] [ref=f1e64]
+      - textbox "Search…" [ref=f1e69]
+      - generic "admin" [ref=f1e70]: AD
+    - generic [ref=f1e72]:
+      - generic [ref=f1e73]:
+        - heading "Organization Hierarchy" [level=2] [ref=f1e74]
+        - generic [ref=f1e75]:
+          - button "Refresh" [ref=f1e76] [cursor=pointer]
+          - button "Full Tree" [ref=f1e77] [cursor=pointer]
+      - generic [ref=f1e78]:
+        - generic [ref=f1e80]:
+          - generic [ref=f1e81]:
+            - generic [ref=f1e82]:
+              - text: Relationship Type
+              - combobox "Relationship Type" [ref=f1e83]:
+                - option "All" [selected]
+                - option "Functional"
+                - option "Project"
+                - option "Matrix"
+                - option "Mentor"
+                - option "Temporary"
+            - generic [ref=f1e84]:
+              - text: Min Level
+              - combobox "Min Level" [ref=f1e85]:
+                - option "All" [selected]
+                - option "10+"
+                - option "40+"
+                - option "60+"
+                - option "70+"
+                - option "90+"
+          - list [ref=f1e86]:
+            - listitem [ref=f1e87]:
+              - generic [ref=f1e88] [cursor=pointer]:
+                - generic [ref=f1e89]: admin
+                - generic [ref=f1e90]: Administrator
+                - generic [ref=f1e91]: Lvl 90
+              - list [ref=f1e92]:
+                - listitem [ref=f1e93]:
+                  - generic [ref=f1e94] [cursor=pointer]:
+                    - generic [ref=f1e95]: manager1
+                    - generic [ref=f1e96]: Manager
+                    - generic [ref=f1e97]: Lvl 70
+                  - list [ref=f1e98]:
+                    - listitem [ref=f1e99]:
+                      - generic [ref=f1e100] [cursor=pointer]:
+                        - generic [ref=f1e101]: operator1
+                        - generic [ref=f1e102]: Contributor
+                        - generic [ref=f1e103]: Lvl 10
+                    - listitem [ref=f1e104]:
+                      - generic [ref=f1e105] [cursor=pointer]:
+                        - generic [ref=f1e106]: operator2
+                        - generic [ref=f1e107]: Contributor
+                        - generic [ref=f1e108]: Lvl 10
+                - listitem [ref=f1e109]:
+                  - generic [ref=f1e110] [cursor=pointer]:
+                    - generic [ref=f1e111]: manager2
+                    - generic [ref=f1e112]: Manager
+                    - generic [ref=f1e113]: Lvl 70
+        - paragraph [ref=f1e116]: Select a user in the tree to view details
+      - generic [ref=f1e117]:
+        - heading "New Relationship" [level=3] [ref=f1e118]
+        - generic [ref=f1e119]:
+          - generic [ref=f1e120]:
+            - generic [ref=f1e121]: Subordinate (User)
+            - combobox [ref=f1e122] [cursor=pointer]:
+              - option "SelectUserPlaceholder"
+              - option "admin (admin@oroclash.local)"
+              - option "manager1 (manager1@example.com)"
+              - option "manager2 (manager2@example.com)"
+              - option "operator1 (operator1@example.com)" [selected]
+              - option "operator2 (operator2@example.com)"
+          - generic [ref=f1e123]:
+            - generic [ref=f1e124]: Superior (Reports To)
+            - combobox [ref=f1e125] [cursor=pointer]:
+              - option "SelectUserPlaceholder"
+              - option "admin (admin@oroclash.local)"
+              - option "manager1 (manager1@example.com)"
+              - option "manager2 (manager2@example.com)" [selected]
+              - option "operator1 (operator1@example.com)"
+              - option "operator2 (operator2@example.com)"
+          - generic [ref=f1e126]:
+            - generic [ref=f1e127]: Type
+            - combobox [ref=f1e128] [cursor=pointer]:
+              - option "Functional"
+              - option "Project"
+              - option "Matrix" [selected]
+              - option "Mentor"
+              - option "Temporary"
+          - generic [ref=f1e129]:
+            - generic [ref=f1e130]: Priority
+            - spinbutton [ref=f1e131]: "1"
+          - button "Create" [ref=f1e132] [cursor=pointer]

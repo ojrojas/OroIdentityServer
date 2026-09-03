@@ -1,0 +1,92 @@
+- generic [ref=f2e3]:
+  - complementary [ref=f2e4]:
+    - generic [ref=f2e5]:
+      - img "OroKanban" [ref=f2e6]
+      - text: OroKanban
+    - generic [ref=f2e7]: Tenant…
+    - navigation [ref=f2e9]:
+      - link "Dashboard" [ref=f2e10] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f2e16]: Users
+      - link "Users" [ref=f2e17] [cursor=pointer]:
+        - /url: /users
+      - link "Roles" [ref=f2e22] [cursor=pointer]:
+        - /url: /roles
+      - link "Identification Types" [ref=f2e25] [cursor=pointer]:
+        - /url: /identification-types
+      - generic [ref=f2e29]: Applications
+      - link "Applications" [ref=f2e30] [cursor=pointer]:
+        - /url: /applications
+      - link "Scopes" [ref=f2e34] [cursor=pointer]:
+        - /url: /scopes
+      - link "Tenants" [ref=f2e38] [cursor=pointer]:
+        - /url: /tenants
+      - link "Sessions" [ref=f2e41] [cursor=pointer]:
+        - /url: /sessions
+      - link "Hierarchy" [ref=f2e44] [cursor=pointer]:
+        - /url: /hierarchy/manage
+    - generic [ref=f2e49]:
+      - button "Toggle theme" [ref=f2e50] [cursor=pointer]
+      - link "Sign out" [ref=f2e54] [cursor=pointer]:
+        - /url: /Account/Logout
+  - generic [ref=f2e58]:
+    - banner [ref=f2e59]:
+      - heading "Hierarchy" [level=1] [ref=f2e60]
+      - textbox "Search…" [ref=f2e65]
+      - generic "admin" [ref=f2e66]: AD
+    - generic [ref=f2e68]:
+      - generic [ref=f2e69]:
+        - heading "Organization Hierarchy" [level=2] [ref=f2e70]
+        - generic [ref=f2e71]:
+          - button "Refresh" [ref=f2e72] [cursor=pointer]
+          - button "Full Tree" [ref=f2e73] [cursor=pointer]
+      - generic [ref=f2e74]:
+        - generic [ref=f2e76]:
+          - generic [ref=f2e77]:
+            - generic [ref=f2e78]:
+              - text: Relationship Type
+              - combobox "Relationship Type" [ref=f2e79]:
+                - option "All" [selected]
+                - option "Functional"
+                - option "Project"
+                - option "Matrix"
+                - option "Mentor"
+                - option "Temporary"
+            - generic [ref=f2e80]:
+              - text: Min Level
+              - combobox "Min Level" [ref=f2e81]:
+                - option "All" [selected]
+                - option "10+"
+                - option "40+"
+                - option "60+"
+                - option "70+"
+                - option "90+"
+          - list [ref=f2e82]:
+            - listitem [ref=f2e83]:
+              - generic [ref=f2e84] [cursor=pointer]:
+                - generic [ref=f2e85]: admin
+                - generic [ref=f2e86]: Administrator
+                - generic [ref=f2e87]: Lvl 90
+              - list [ref=f2e88]:
+                - listitem [ref=f2e89]:
+                  - generic [ref=f2e90] [cursor=pointer]:
+                    - generic [ref=f2e91]: manager1
+                    - generic [ref=f2e92]: Manager
+                    - generic [ref=f2e93]: Lvl 70
+                  - list [ref=f2e94]:
+                    - listitem [ref=f2e95]:
+                      - generic [ref=f2e96] [cursor=pointer]:
+                        - generic [ref=f2e97]: operator1
+                        - generic [ref=f2e98]: Contributor
+                        - generic [ref=f2e99]: Lvl 10
+                    - listitem [ref=f2e100]:
+                      - generic [ref=f2e101] [cursor=pointer]:
+                        - generic [ref=f2e102]: operator2
+                        - generic [ref=f2e103]: Contributor
+                        - generic [ref=f2e104]: Lvl 10
+                - listitem [ref=f2e105]:
+                  - generic [ref=f2e106] [cursor=pointer]:
+                    - generic [ref=f2e107]: manager2
+                    - generic [ref=f2e108]: Manager
+                    - generic [ref=f2e109]: Lvl 70
+        - paragraph [ref=f2e112]: Select a user in the tree to view details
