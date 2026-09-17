@@ -12,6 +12,7 @@ using OroIdentityServer.Shared.Authorization;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using BuildingBlocks.CQRS.Abstractions;
 using OroIdentityServer.Application.Modules.Users.Queries;
+using OroIdentityServer.Application.Modules.Tenants.Queries;
 using OroIdentityServer.Application.Modules.Roles.Queries;
 using OroIdentityServer.Application.Modules.Diagnostics.Commands;
 using OroIdentityServer.Core.Modules.Diagnostics.Enums;
@@ -398,6 +399,19 @@ foreach (var claim in identity.Claims)
             claims[Claims.GivenName] = user.Data.Name!;
             claims[Claims.FamilyName] = user.Data.LastName!;
             claims[Claims.PreferredUsername] = user.Data.UserName!;
+
+            // Shell consumers (e.g. OroPosSales nav) need the tenant display
+            // name without an admin-cookie round-trip: userinfo is fetched
+            // with the user's own access token, so it can carry it.
+            if (user.Data.TenantId?.Value is { } tenantId && tenantId != Guid.Empty)
+            {
+                var tenant = await _queryDispatcher.SendAsync(
+                    new GetTenantByIdQuery(tenantId), cancellationToken);
+                if (!string.IsNullOrWhiteSpace(tenant.Data?.Name))
+                {
+                    claims["tenant_name"] = tenant.Data.Name;
+                }
+            }
         }
 
         if (User.HasScope(Scopes.Roles))
