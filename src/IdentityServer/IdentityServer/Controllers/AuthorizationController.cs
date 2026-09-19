@@ -16,6 +16,7 @@ using OroIdentityServer.Application.Modules.Tenants.Queries;
 using OroIdentityServer.Application.Modules.Roles.Queries;
 using OroIdentityServer.Application.Modules.Diagnostics.Commands;
 using OroIdentityServer.Core.Modules.Diagnostics.Enums;
+using System.Collections.Immutable;
 
 namespace OroIdentityServer.Server.Controllers;
 
@@ -158,7 +159,7 @@ public class AuthorizationController : Controller
                         .SetClaim(Claims.Name, $"{user.Data.Name} {user.Data.LastName}")
                         .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
                         .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
-                        .SetClaims(Claims.Role, [.. roles.Data.Select(x=> x.Name)]);
+                        .SetClaims(Claims.Role, [.. roles.Data.Select(x => x.Name.Value)]);
 
                 // Note: in this sample, the granted scopes match the requested scope
                 // but you may want to allow the user to uncheck specific scopes.
@@ -173,8 +174,8 @@ public class AuthorizationController : Controller
 
                 identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization, cancellationToken));
                 var principal = new ClaimsPrincipal(identity);
-foreach (var claim in identity.Claims)
-    claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
+                foreach (var claim in identity.Claims)
+                    claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
                 await LogValidationAsync(AuthValidationEventType.AuthorizeSucceeded, true, user.Data.Id.Value, request.ClientId, string.Join(" ", request.GetScopes()), null, cancellationToken);
                 return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
@@ -251,7 +252,7 @@ foreach (var claim in identity.Claims)
                 .SetClaim(Claims.Name, $"{user.Data.Name} {user.Data.LastName}")
                 .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
                 .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
-                .SetClaims(Claims.Role, [.. roles.Data.Select(x=> x.Name)]);
+                .SetClaims(Claims.Role, [.. roles.Data.Select(x => x.Name.Value)]);
 
         // Note: in this sample, the granted scopes match the requested scope
         // but you may want to allow the user to uncheck specific scopes.
@@ -266,8 +267,8 @@ foreach (var claim in identity.Claims)
 
         identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization, cancellationToken));
         var principal = new ClaimsPrincipal(identity);
-foreach (var claim in identity.Claims)
-    claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
+        foreach (var claim in identity.Claims)
+            claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
         await LogValidationAsync(AuthValidationEventType.AuthorizeSucceeded, true, user.Data.Id.Value, request.ClientId, string.Join(" ", request.GetScopes()), null, cancellationToken);
 
@@ -417,7 +418,7 @@ foreach (var claim in identity.Claims)
         if (User.HasScope(Scopes.Roles))
         {
             var roles = await _queryDispatcher.SendAsync(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
-            claims[Claims.Role] = roles.Data.Select(x => x.Name).ToArray();
+            claims[Claims.Role] = roles.Data.Select(x => x.Name.Value).ToArray();
         }
 
         return Ok(claims);
@@ -435,8 +436,8 @@ foreach (var claim in identity.Claims)
             var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
 
             // Retrieve the user profile corresponding to the authorization code/refresh token.
-              var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(Guid.Parse(result.Principal.GetClaim(Claims.Subject))), cancellationToken) ??
-           throw new InvalidOperationException("The user details cannot be retrieved.");
+            var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(Guid.Parse(result.Principal.GetClaim(Claims.Subject))), cancellationToken) ??
+         throw new InvalidOperationException("The user details cannot be retrieved.");
 
             if (user is null)
             {
@@ -477,11 +478,11 @@ foreach (var claim in identity.Claims)
                     .SetClaim(Claims.Name, $"{user.Data.Name} {user.Data.LastName}")
                     .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
                     .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
-                    .SetClaims(Claims.Role, [.. roles.Data.Select(x=> x.Name)]);
+                    .SetClaims(Claims.Role, [.. roles.Data.Select(x => x.Name.Value)]);
 
             var principal = new ClaimsPrincipal(identity);
-foreach (var claim in identity.Claims)
-    claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
+            foreach (var claim in identity.Claims)
+                claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
             await LogValidationAsync(AuthValidationEventType.TokenIssued, true, user.Data.Id.Value, HttpContext.GetOpenIddictServerRequest()?.ClientId, string.Join(" ", identity.GetScopes()), null, cancellationToken);
 
