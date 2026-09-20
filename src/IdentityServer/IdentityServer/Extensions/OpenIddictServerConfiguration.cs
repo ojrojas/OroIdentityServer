@@ -5,6 +5,7 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using OroIdentityServer.Infraestructure;
+using OroIdentityServer.Shared.Authorization;
 using Quartz;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -50,7 +51,8 @@ public static class OpenIddictServerConfiguration
                     Scopes.Email,
                     Scopes.Roles,
                     Scopes.OfflineAccess,
-                    "admin");
+                    AuthorizationClaimTypes.TenantId
+                    );
 
                 if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName.Equals("Testing"))
                     options.AddDevelopmentEncryptionCertificate()

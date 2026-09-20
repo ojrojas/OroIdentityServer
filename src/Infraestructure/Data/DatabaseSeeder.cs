@@ -37,7 +37,6 @@ public static class DatabaseSeeder
 
         if (!context.Users.Any())
         {
-
             SecurityUser securityUser = SecurityUser.Create(await passwordHasher.HashPassword(seedAdmin.PasswordHash));
             securityUser.ExemptFromPasswordChange();
 
@@ -285,9 +284,7 @@ public static class DatabaseSeeder
     {
         var roleDefinitions = new[]
         {
-            (Name: "Administrator", Level: 90, Parent: (string?)null),
-            (Name: "Manager", Level: 70, Parent: "Administrator"),
-            (Name: "User", Level: 10, Parent: "Manager"),
+            (Name: "Administrator", Level: 90, Parent: (string?)null)
         };
 
         var existingRoles = await context.Roles.IgnoreQueryFilters().ToListAsync(cancellationToken);
