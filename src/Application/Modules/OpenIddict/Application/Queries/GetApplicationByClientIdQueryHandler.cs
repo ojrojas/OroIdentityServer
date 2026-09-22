@@ -47,13 +47,20 @@ public class GetApplicationByClientIdQueryHandler(
         var redirectUrisTask = applicationManager.GetRedirectUrisAsync(application, cancellationToken).AsTask();
         var postLogoutUrisTask = applicationManager.GetPostLogoutRedirectUrisAsync(application, cancellationToken).AsTask();
         var requirementsTask = applicationManager.GetRequirementsAsync(application, cancellationToken).AsTask();
+        var applicationTypeTask = applicationManager.GetApplicationTypeAsync(application, cancellationToken).AsTask();
+        var clientTypeTask = applicationManager.GetClientTypeAsync(application, cancellationToken).AsTask();
+        var consentTypeTask = applicationManager.GetConsentTypeAsync(application, cancellationToken).AsTask();
 
-        await Task.WhenAll(displayNameTask, permissionsTask, redirectUrisTask, postLogoutUrisTask, requirementsTask);
+        await Task.WhenAll(displayNameTask, permissionsTask, redirectUrisTask, postLogoutUrisTask, requirementsTask,
+            applicationTypeTask, clientTypeTask, consentTypeTask);
 
         var descriptor = new OpenIddictApplicationDescriptor
         {
             ClientId = clientId,
-            DisplayName = await displayNameTask
+            DisplayName = await displayNameTask,
+            ApplicationType = await applicationTypeTask,
+            ClientType = await clientTypeTask,
+            ConsentType = await consentTypeTask
         };
 
         foreach (var permission in await permissionsTask)

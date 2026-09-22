@@ -346,4 +346,6 @@
   <data name="ConsentRememberNotice"><value>Durch die Genehmigung erhält diese Anwendung Zugriff auf die aufgeführten Berechtigungen. Sie können den Zugriff jederzeit widerrufen.</value></data>
   <data name="Accept"><value>Genehmigen</value></data>
   <data name="Deny"><value>Ablehnen</value></data>
+  <data name="RolePermissionsLabel"><value>Berechtigungen</value></data>
+  <data name="RolePermissionsHint"><value>Wählen Sie die dieser Rolle zugewiesenen Domänenberechtigungen aus.</value></data>
 </root>

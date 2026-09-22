@@ -126,6 +126,11 @@ public static class DatabaseSeeder
                 descriptor.Permissions.Add("ept:revocation");
                 permissionsUpdated = true;
             }
+            if (!descriptor.Permissions.Contains("scp:permissions"))
+            {
+                descriptor.Permissions.Add("scp:permissions");
+                permissionsUpdated = true;
+            }
             if (permissionsUpdated)
             {
                 await applicationManager.UpdateAsync(existing, descriptor, cancellationToken);
@@ -155,6 +160,7 @@ public static class DatabaseSeeder
         appDescriptor.Permissions.Add("scp:profile");
         appDescriptor.Permissions.Add("scp:email");
         appDescriptor.Permissions.Add("scp:roles");
+        appDescriptor.Permissions.Add("scp:permissions");
 
         appDescriptor.Requirements.Add("ft:pkce");
 

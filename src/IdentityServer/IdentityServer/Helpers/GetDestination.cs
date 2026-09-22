@@ -44,6 +44,12 @@ public static class GetDestination
                 yield return Destinations.IdentityToken;
                 yield break;
 
+            case AuthorizationClaimTypes.Permission:
+                yield return Destinations.AccessToken;
+                if (principal.HasScope(AuthorizationScopes.Permissions))
+                    yield return Destinations.IdentityToken;
+                yield break;
+
             case "AspNet.Identity.SecurityStamp":
                 yield break;
 

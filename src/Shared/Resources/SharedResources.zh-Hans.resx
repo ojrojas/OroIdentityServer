@@ -346,4 +346,6 @@
   <data name="ConsentRememberNotice"><value>批准后，此应用程序将可访问列出的权限。您可以随时撤销访问权限。</value></data>
   <data name="Accept"><value>批准</value></data>
   <data name="Deny"><value>拒绝</value></data>
+  <data name="RolePermissionsLabel"><value>权限</value></data>
+  <data name="RolePermissionsHint"><value>选择授予此角色的域权限。</value></data>
 </root>

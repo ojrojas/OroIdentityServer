@@ -52,13 +52,6 @@ public class ServerAdminApplicationService(
         var descriptor = MapDescriptor(application);
         descriptor.ClientId = clientId;
 
-        if (descriptor.ClientType == "confidential" && string.IsNullOrWhiteSpace(descriptor.ClientSecret))
-        {
-            var existing = await queryDispatcher.SendAsync(new GetApplicationByClientIdQuery(clientId), ct);
-            if (existing is not null)
-                descriptor.ClientSecret = existing.ClientSecret;
-        }
-
         var result = await commandDispatcher.SendAsync(new UpdateApplicationCommand(descriptor), ct);
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }

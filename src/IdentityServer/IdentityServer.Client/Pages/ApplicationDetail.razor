@@ -37,7 +37,7 @@
                 <div class="field">
                     <label class="field-label" for="clientSecret">@L["ClientSecret"]</label>
                     <input id="clientSecret" type="password" class="input" placeholder="@L["ClientSecretEditPlaceholder"]" @bind="clientSecret" @bind:event="oninput" />
-                    @if (clientType == "confidential" && item?.ClientSecret is not null)
+                    @if (clientType == "confidential")
                     {
                         <span class="field-hint">@L["SecretMasked"]</span>
                     }
@@ -144,7 +144,7 @@
             .ToList();
 
         var model = new OpenIddictApplicationModel(
-            ClientId, string.IsNullOrWhiteSpace(clientSecret) ? item!.ClientSecret : clientSecret, displayName, clientType,
+            ClientId, string.IsNullOrWhiteSpace(clientSecret) ? null : clientSecret, displayName, clientType,
             item!.ApplicationType, consentType, allPermissions, [.. requirements], redirectUris, postLogoutRedirectUris);
 
         var response = await ApplicationService.UpdateApplicationAsync(ClientId, model);

@@ -1,6 +1,7 @@
 @page "/roles/{Id:guid}"
 @attribute [Authorize(Roles = "Admin,Administrator,Manager")]
 @inject IAdminRoleService RoleService
+@inject IAdminPermissionService PermissionService
 @inject NavigationManager Nav
 @inject IDialogService DialogService
 @inject IToastService ToastService
@@ -53,7 +54,28 @@
                 </span>
                 <input id="isActive" type="checkbox" class="switch" @bind="isActive" />
             </label>
-            <span class="field-hint">@L["PermissionsAssignedLabel", item.Claims?.Count() ?? 0]</span>
+
+            <div class="field">
+                <label class="field-label">@L["RolePermissionsLabel"]</label>
+                <span class="field-hint">@L["RolePermissionsHint"]</span>
+                @if (allPermissions is null)
+                {
+                    <div class="spinner spinner-sm"></div>
+                }
+                else
+                {
+                    <div class="checklist">
+                        @foreach (var p in allPermissions)
+                        {
+                            <label class="checklist-item">
+                                <input type="checkbox" checked="@selectedPermissions.Contains(p.PermissionId)" @onchange="args => TogglePermission(p.PermissionId, (bool)args.Value!)" />
+                                <span class="checklist-label">@p.Description</span>
+                                <code class="checklist-code">@PermissionName(p)</code>
+                            </label>
+                        }
+                    </div>
+                }
+            </div>
 
             <div class="form-actions">
                 <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SaveAsync">@L["Save"]</button>
@@ -78,6 +100,8 @@
     private List<RoleModel>? allRoles;
     private bool isActive = false;
     private bool saving;
+    private List<PermissionModel>? allPermissions;
+    private readonly HashSet<Guid> selectedPermissions = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,10 +112,27 @@
             roleName = item.Name ?? string.Empty;
             roleLevel = item.Level;
             parentRoleId = item.ParentRoleId?.ToString();
+
+            selectedPermissions.Clear();
+            foreach (var claim in item.Claims ?? [])
+                selectedPermissions.Add(claim.PermissionId);
         }
+
         var all = await RoleService.GetRolesAsync(new PagedRequest { PageSize = 1000 });
         allRoles = all?.Data?.Items?.ToList();
+
+        var permissions = await PermissionService.GetPermissionsAsync();
+        allPermissions = permissions?.Data?.ToList();
     }
+
+    private void TogglePermission(Guid permissionId, bool isChecked)
+    {
+        if (isChecked) selectedPermissions.Add(permissionId);
+        else selectedPermissions.Remove(permissionId);
+    }
+
+    private static string PermissionName(PermissionModel permission)
+        => $"{permission.Provider}.{permission.Resource}.{permission.Action}".ToLowerInvariant();
 
     private async Task SaveAsync()
     {
@@ -99,11 +140,20 @@
         Guid? parentGuid = string.IsNullOrWhiteSpace(parentRoleId) ? null : Guid.Parse(parentRoleId);
         var response = await RoleService.UpdateRoleAsync(Id, new UpdateRoleRequest(roleName, roleLevel, parentGuid));
 
-        if (response.IsSuccessStatusCode && item is not null)
+        if (response.IsSuccessStatusCode)
         {
-            if (isActive && !item.IsActive)
+            if (item is not null && isActive && !item.IsActive)
             {
                 await RoleService.ActivateRoleAsync(Id);
+            }
+
+            var permissionsResponse = await RoleService.SetRolePermissionsAsync(
+                Id, new SetRolePermissionsRequest([.. selectedPermissions]));
+            if (!permissionsResponse.IsSuccessStatusCode)
+            {
+                saving = false;
+                ToastService.ShowError(L["SaveFailedToast", (int)permissionsResponse.StatusCode]);
+                return;
             }
         }
 

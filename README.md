@@ -12,6 +12,7 @@ OroIdentityServer is an identity and authentication management system built on *
 - Login form rejects invalid credentials in place and shows an error, instead of silently redirecting
 - Forced password change on first login for every user except the seeded admin account, enforced via a `must_change_password` claim and a redirect middleware that locks the UI to `/Account/ChangePassword` until cleared
 - Relying-party-initiated logout (`~/connect/logout`) shows an IdentityServer-owned confirmation page (`/Account/Logout`) before ending the session, so signing out of a client app doesn't silently sign the admin out of IdentityServer itself
+- **User authorization permissions** (domain `Permission`, name `provider.resource.action`) are assigned to roles and emitted as `Claim("permission", <name>)`: the access token always carries them, and the id token / `userinfo` carry them only with the `permissions` scope. Enforced with exact-match policies named `perm:<name>`. See [docs/authorization.md](docs/authorization.md). Do not confuse them with OpenIddict **client** permissions (`ept:`/`gt:`/`rst:`/`scp:`/`ft:`).
 
 ### 2. Blazor Admin UI
 - Admin panel (list, detail/edit, create, delete-with-confirmation) for Users, Roles, Applications, Scopes, Identification Types and Tenants — lists use search, pagination and configurable page size (10/20/50/100) via `QUERY` (`HttpMethod.Query`) with `PagedRequest`/`PagedResponse<T>` (server-side filtering), tables show real `IsActive` state
@@ -463,6 +464,7 @@ Admin API endpoints are protected by role-based and hierarchy-based authorizatio
 | `CanLeadProject` | Project relationship assignments | Hierarchy level ≥60 |
 | `CanAssignMatrixRelationships` | Matrix relationship assignments | Hierarchy level ≥60 |
 | `HierarchyRequirement` | Runtime handler `HierarchyAuthorizationHandler` | Verifies `CanCommand`/`CanCommandByType` against live hierarchy |
+| `perm:<permission-name>` | Any endpoint/component (built on demand by `PermissionPolicyProvider`) | Requires the authenticated user to hold a `permission` claim with that exact value (e.g. `perm:oropos.sales.read`). No wildcards. |
 | `[Authorize]` (default) | `/api/dashboard/stats` | Any authenticated user |
 
 ### OpenIddict Connect Endpoints
@@ -474,7 +476,7 @@ These are the OAuth2 / OpenID Connect protocol endpoints:
 | `GET/POST` | `/connect/authorize` | Authorization endpoint. Triggers consent flow for external clients, issues authorization codes. |
 | `POST` | `/connect/token` | Token exchange. Handles `authorization_code`, `refresh_token`, `client_credentials`, and `password` grants. |
 | `GET/POST` | `/connect/logout` | End-session. Redirects to `/Account/Logout` for confirmation before signing out. |
-| `GET` | `/connect/userinfo` | Returns user claims (subject, email, name, roles, tenant_id). Requires a valid bearer token. |
+| `GET` | `/connect/userinfo` | Returns user claims (subject, email, name, roles, tenant_id, and `permission` when the `permissions` scope is granted). Requires a valid bearer token. |
 | `POST` | `/connect/introspect` | Token introspection. Validates a token's validity and metadata. |
 | `POST` | `/connect/revoke` | Token revocation. Invalidates an access or refresh token. |
 
@@ -513,8 +515,13 @@ These are the OAuth2 / OpenID Connect protocol endpoints:
 | `PUT` | `/api/roles/{id}` | Update a role |
 | `DELETE` | `/api/roles/{id}` | Soft-delete (deactivate) a role |
 | `POST` | `/api/roles/{id}/activate` | Activate a deactivated role |
+| `PUT` | `/api/roles/{id}/permissions` | Replace the domain permissions assigned to a role (body: `{ "permissionIds": ["<guid>", ...] }`) |
 
 ### Permissions — `/api/permissions` (AdminOnly)
+
+The **domain user-permission catalogue** (`provider.resource.action`). Assign them to roles via
+`PUT /api/roles/{id}/permissions`; they are emitted as `permission` claims. Not to be confused
+with OpenIddict **client** permissions, which are managed on the application itself.
 
 | Method | Route | Description |
 |--------|-------|-------------|

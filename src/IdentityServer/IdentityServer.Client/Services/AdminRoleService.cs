@@ -33,4 +33,7 @@ public class AdminRoleService(HttpClient client) : IAdminRoleService
 
     public Task<HttpResponseMessage> ActivateRoleAsync(Guid id, CancellationToken ct = default)
         => client.PostAsync($"api/roles/{id}/activate", null, ct);
+
+    public Task<HttpResponseMessage> SetRolePermissionsAsync(Guid id, SetRolePermissionsRequest request, CancellationToken ct = default)
+        => client.PutAsJsonAsync($"api/roles/{id}/permissions", request, ClientJsonOptions.Default, ct);
 }

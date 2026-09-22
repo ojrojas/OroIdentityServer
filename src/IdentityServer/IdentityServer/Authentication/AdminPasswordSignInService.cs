@@ -11,6 +11,7 @@ using OroIdentityServer.Core.Modules.Tenants.Repositories;
 using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 using OroIdentityServer.Core.Modules.Users.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Repositories;
+using OroIdentityServer.Core.Modules.Permissions.Repositories;
 using OroIdentityServer.Infraestructure;
 using OroIdentityServer.Infraestructure.Interfaces;
 using OroIdentityServer.Shared.Authorization;
@@ -39,6 +40,7 @@ public sealed class AdminPasswordSignInService
     private readonly IPasswordHasher _passwordHasher;
     private readonly IConfiguration _configuration;
     private readonly OroIdentityAppContext? _appContext;
+    private readonly IPermissionRepository? _permissionRepository;
 
     public AdminPasswordSignInService(
         ILogger<AdminPasswordSignInService> logger,
@@ -47,7 +49,8 @@ public sealed class AdminPasswordSignInService
         ITenantRepository tenantRepository,
         IPasswordHasher passwordHasher,
         IConfiguration configuration,
-        OroIdentityAppContext? appContext = null)
+        OroIdentityAppContext? appContext = null,
+        IPermissionRepository? permissionRepository = null)
     {
         _logger = logger;
         _userRepository = userRepository;
@@ -56,6 +59,7 @@ public sealed class AdminPasswordSignInService
         _passwordHasher = passwordHasher;
         _configuration = configuration;
         _appContext = appContext;
+        _permissionRepository = permissionRepository;
     }
 
     public const string MustChangePasswordClaimType = "must_change_password";
@@ -173,8 +177,27 @@ public sealed class AdminPasswordSignInService
             _logger.LogWarning(ex, "Failed to add hierarchy claims for user {UserId}", user.Id.Value);
         }
 
+        // Domain user permissions, one "permission" claim per granted permission name.
+        await AddPermissionClaimsAsync(claims, user, ct);
+
         var identity = new ClaimsIdentity(claims, CookieAuthHandlerSetup.AdminScheme);
         return new ClaimsPrincipal(identity);
+    }
+
+    private async Task AddPermissionClaimsAsync(List<Claim> claims, User user, CancellationToken ct)
+    {
+        if (_permissionRepository is null) return;
+
+        try
+        {
+            var names = await _permissionRepository.GetPermissionNamesByUserIdAsync(user.Id, ct);
+            foreach (var name in names)
+                claims.Add(new Claim(AuthorizationClaimTypes.Permission, name));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to add permission claims for user {UserId}", user.Id.Value);
+        }
     }
 
     private async Task AddHierarchyClaimsAsync(List<Claim> claims, User user, CancellationToken ct)

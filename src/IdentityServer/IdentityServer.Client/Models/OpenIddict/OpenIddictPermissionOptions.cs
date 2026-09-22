@@ -41,6 +41,7 @@ public static class OpenIddictPermissionOptions
         new("scp:profile", "profile"),
         new("scp:email", "email"),
         new("scp:roles", "roles"),
+        new("scp:permissions", "permissions"),
         new("scp:offline_access", "offline_access"),
         new("scp:admin", "admin"),
     ];

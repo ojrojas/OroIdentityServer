@@ -29,7 +29,29 @@ public class UpdateApplicationCommandHandler(
                 return Result.Success();
             }
 
+            // Hydrate a descriptor with the values currently persisted (including the hashed
+            // client secret, which is never exposed to callers) so unset fields are preserved.
+            var existingDescriptor = new OpenIddictApplicationDescriptor();
+            await applicationManager.PopulateAsync(existingDescriptor, existingApplication, cancellationToken);
+
             var descriptor = command.Descriptor.ToOpenIddict();
+
+            descriptor.ClientType ??= existingDescriptor.ClientType;
+            descriptor.ApplicationType ??= existingDescriptor.ApplicationType;
+            descriptor.ConsentType ??= existingDescriptor.ConsentType;
+            descriptor.JsonWebKeySet ??= existingDescriptor.JsonWebKeySet;
+
+            // OpenIddict replaces the stored secret with the descriptor value, so the existing
+            // hashed secret must be carried over when no new secret is supplied. Confidential
+            // applications cannot be saved with a null secret unless they use client assertions.
+            if (string.Equals(descriptor.ClientType, "public", StringComparison.OrdinalIgnoreCase))
+            {
+                descriptor.ClientSecret = null;
+            }
+            else if (string.IsNullOrWhiteSpace(descriptor.ClientSecret))
+            {
+                descriptor.ClientSecret = existingDescriptor.ClientSecret;
+            }
 
             await applicationManager.UpdateAsync(existingApplication, descriptor, cancellationToken);
 

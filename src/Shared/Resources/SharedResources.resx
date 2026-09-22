@@ -358,4 +358,6 @@
   <data name="ConsentRememberNotice"><value>Approving will allow this application to access the listed permissions. You can revoke access at any time.</value></data>
   <data name="Accept"><value>Approve</value></data>
   <data name="Deny"><value>Deny</value></data>
+  <data name="RolePermissionsLabel"><value>Permissions</value></data>
+  <data name="RolePermissionsHint"><value>Select the domain permissions granted to this role.</value></data>
 </root>

@@ -73,4 +73,10 @@ public interface IRoleRepository
     /// Returns whether the role has any associated role permissions.
     /// </summary>
     Task<bool> HasPermissionsAsync(RoleId roleId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Loads a role together with its role-permission links. Returns null when the role does
+    /// not exist or is deactivated (the <see cref="Role"/> query filter applies).
+    /// </summary>
+    Task<Role?> GetWithPermissionsAsync(RoleId roleId, CancellationToken cancellationToken);
 }

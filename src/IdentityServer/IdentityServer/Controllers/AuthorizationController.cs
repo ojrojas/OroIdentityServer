@@ -14,6 +14,7 @@ using BuildingBlocks.CQRS.Abstractions;
 using OroIdentityServer.Application.Modules.Users.Queries;
 using OroIdentityServer.Application.Modules.Tenants.Queries;
 using OroIdentityServer.Application.Modules.Roles.Queries;
+using OroIdentityServer.Application.Modules.Permissions.Queries;
 using OroIdentityServer.Application.Modules.Diagnostics.Commands;
 using OroIdentityServer.Core.Modules.Diagnostics.Enums;
 using System.Collections.Immutable;
@@ -52,6 +53,19 @@ public class AuthorizationController : Controller
             await _commandDispatcher.SendAsync(new LogAuthValidationCommand(eventType, succeeded, userId, clientId, scopes, HttpContext.Connection.RemoteIpAddress?.ToString(), failureReason), ct);
         }
         catch { /* auditing must never break the auth flow */ }
+    }
+
+    /// <summary>
+    /// Adds one <c>permission</c> claim per domain permission granted to the user through their
+    /// active roles. The claim type/value follows standard IdentityModel behavior; destinations
+    /// are decided by <see cref="GetDestination"/>.
+    /// </summary>
+    private async Task AddPermissionClaimsAsync(ClaimsIdentity identity, Guid userId, CancellationToken ct)
+    {
+        var result = await _queryDispatcher.SendAsync(new GetPermissionNamesByUserIdQuery(userId), ct);
+        var names = result.Data ?? [];
+        if (names.Count > 0)
+            identity.SetClaims(AuthorizationClaimTypes.Permission, [.. names]);
     }
 
     [HttpGet("~/connect/authorize")]
@@ -161,6 +175,8 @@ public class AuthorizationController : Controller
                         .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
                         .SetClaims(Claims.Role, [.. roles.Data.Select(x => x.Name.Value)]);
 
+                await AddPermissionClaimsAsync(identity, user.Data.Id.Value, cancellationToken);
+
                 // Note: in this sample, the granted scopes match the requested scope
                 // but you may want to allow the user to uncheck specific scopes.
                 // For that, simply restrict the list of scopes before calling SetScopes.
@@ -253,6 +269,8 @@ public class AuthorizationController : Controller
                 .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
                 .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
                 .SetClaims(Claims.Role, [.. roles.Data.Select(x => x.Name.Value)]);
+
+        await AddPermissionClaimsAsync(identity, user.Data.Id.Value, cancellationToken);
 
         // Note: in this sample, the granted scopes match the requested scope
         // but you may want to allow the user to uncheck specific scopes.
@@ -421,6 +439,12 @@ public class AuthorizationController : Controller
             claims[Claims.Role] = roles.Data.Select(x => x.Name.Value).ToArray();
         }
 
+        if (User.HasScope(AuthorizationScopes.Permissions))
+        {
+            var permissions = await _queryDispatcher.SendAsync(new GetPermissionNamesByUserIdQuery(user.Data.Id.Value), cancellationToken);
+            claims[AuthorizationClaimTypes.Permission] = (permissions.Data ?? []).ToArray();
+        }
+
         return Ok(claims);
     }
 
@@ -479,6 +503,8 @@ public class AuthorizationController : Controller
                     .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
                     .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
                     .SetClaims(Claims.Role, [.. roles.Data.Select(x => x.Name.Value)]);
+
+            await AddPermissionClaimsAsync(identity, user.Data.Id.Value, cancellationToken);
 
             var principal = new ClaimsPrincipal(identity);
             foreach (var claim in identity.Claims)

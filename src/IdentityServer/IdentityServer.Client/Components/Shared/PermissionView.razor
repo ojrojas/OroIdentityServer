@@ -1,0 +1,30 @@
+@* Renders its child content only when the signed-in user holds the given domain permission. *@
+@using OroIdentityServer.Shared.Authorization
+
+@if (isAllowed)
+{
+    @ChildContent
+}
+
+@code {
+    /// <summary>Permission name (Provider.Resource.Action) required to render the content.</summary>
+    [Parameter] public string Permission { get; set; } = string.Empty;
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private bool isAllowed;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (AuthenticationStateTask is null || string.IsNullOrWhiteSpace(Permission))
+        {
+            isAllowed = false;
+            return;
+        }
+
+        var state = await AuthenticationStateTask;
+        isAllowed = state.User.HasClaim(AuthorizationClaimTypes.Permission, Permission);
+    }
+}

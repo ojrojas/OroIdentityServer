@@ -135,6 +135,10 @@ public static class CookieAuthHandlerSetup
 
         services.AddScoped<IAuthorizationHandler, HierarchyAuthorizationHandler>();
 
+        // Domain user permissions: exact-match policies named "perm:<permission-name>".
+        services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+
         return services;
     }
 }

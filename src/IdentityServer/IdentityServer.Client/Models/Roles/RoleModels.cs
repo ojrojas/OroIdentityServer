@@ -7,3 +7,6 @@ public sealed record RolePermissionModel(Guid RoleId, Guid PermissionId);
 public sealed record CreateRoleRequest(string RoleName, int Level = 10, Guid? ParentRoleId = null);
 
 public sealed record UpdateRoleRequest(string RoleName, int Level, Guid? ParentRoleId);
+
+/// <summary>Replaces the complete set of domain permissions assigned to a role.</summary>
+public sealed record SetRolePermissionsRequest(IReadOnlyCollection<Guid> PermissionIds);

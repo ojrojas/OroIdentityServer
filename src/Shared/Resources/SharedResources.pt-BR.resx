@@ -346,4 +346,6 @@
   <data name="ConsentRememberNotice"><value>Ao aprovar, este aplicativo poderá acessar as permissões listadas. Você pode revogar o acesso a qualquer momento.</value></data>
   <data name="Accept"><value>Aprovar</value></data>
   <data name="Deny"><value>Negar</value></data>
+  <data name="RolePermissionsLabel"><value>Permissões</value></data>
+  <data name="RolePermissionsHint"><value>Selecione as permissões de domínio concedidas a esta função.</value></data>
 </root>

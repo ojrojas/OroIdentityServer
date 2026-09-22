@@ -346,4 +346,6 @@
   <data name="ConsentRememberNotice"><value>承認すると、このアプリケーションはリストされた権限にアクセスできます。いつでもアクセスを無効にできます。</value></data>
   <data name="Accept"><value>承認</value></data>
   <data name="Deny"><value>拒否</value></data>
+  <data name="RolePermissionsLabel"><value>アクセス許可</value></data>
+  <data name="RolePermissionsHint"><value>このロールに付与するドメイン アクセス許可を選択します。</value></data>
 </root>

@@ -66,6 +66,12 @@ public class ServerAdminRoleService(IQueryDispatcher queryDispatcher, ICommandDi
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }
 
+    public async Task<HttpResponseMessage> SetRolePermissionsAsync(Guid id, SetRolePermissionsRequest request, CancellationToken ct = default)
+    {
+        var result = await commandDispatcher.SendAsync(new SetRolePermissionsCommand(id, request.PermissionIds), ct);
+        return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
+    }
+
     private static RoleModel MapRole(RoleDto role) => new(
         role.Id,
         role.IsActive,

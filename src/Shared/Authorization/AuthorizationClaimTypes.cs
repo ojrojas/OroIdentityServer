@@ -22,4 +22,20 @@ public static class AuthorizationClaimTypes
     /// applications can scope their data by tenant without calling userinfo.
     /// </summary>
     public const string TenantId = "tenant_id";
+
+    /// <summary>
+    /// A domain user permission granted to the signed-in user through their active roles.
+    /// One claim is emitted per permission and its value is the permission name
+    /// (<c>Provider.Resource.Action</c>, e.g. <c>oropos.sales.read</c>).
+    /// </summary>
+    /// <remarks>
+    /// This follows the standard IdentityModel claim behavior (a fixed claim type with one
+    /// value per grant), so <c>RequireClaim("permission", "oropos.sales.read")</c> and
+    /// <c>User.HasClaim("permission", "oropos.sales.read")</c> work as expected.
+    /// Do NOT confuse this with an OpenIddict <b>client</b> permission
+    /// (<c>ept:</c>, <c>gt:</c>, <c>rst:</c>, <c>scp:</c>, <c>ft:</c>), which is stored on the
+    /// client application and describes what the client may do, not what the user may do.
+    /// Matching is exact; no wildcards.
+    /// </remarks>
+    public const string Permission = "permission";
 }

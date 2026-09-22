@@ -346,4 +346,6 @@
   <data name="ConsentRememberNotice"><value>Approvando, questa applicazione potrà accedere alle autorizzazioni elencate. Puoi revocare l'accesso in qualsiasi momento.</value></data>
   <data name="Accept"><value>Approva</value></data>
   <data name="Deny"><value>Nega</value></data>
+  <data name="RolePermissionsLabel"><value>Autorizzazioni</value></data>
+  <data name="RolePermissionsHint"><value>Seleziona le autorizzazioni di dominio concesse a questo ruolo.</value></data>
 </root>

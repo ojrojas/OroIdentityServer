@@ -51,7 +51,8 @@ public static class OpenIddictServerConfiguration
                     Scopes.Email,
                     Scopes.Roles,
                     Scopes.OfflineAccess,
-                    AuthorizationClaimTypes.TenantId
+                    AuthorizationClaimTypes.TenantId,
+                    AuthorizationScopes.Permissions
                     );
 
                 if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName.Equals("Testing"))

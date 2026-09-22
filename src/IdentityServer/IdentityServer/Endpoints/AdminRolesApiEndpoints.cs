@@ -35,5 +35,8 @@ public static partial class AdminApiEndpoints
 
         g.MapPost("/{id:guid}/activate", async (Guid id, [FromServices] IAdminRoleService service, CancellationToken ct)
             => await ToResultAsync(await service.ActivateRoleAsync(id, ct), ct));
+
+        g.MapPut("/{id:guid}/permissions", async (Guid id, [FromBody] SetRolePermissionsRequest request, [FromServices] IAdminRoleService service, CancellationToken ct)
+            => await ToResultAsync(await service.SetRolePermissionsAsync(id, request, ct), ct));
     }
 }

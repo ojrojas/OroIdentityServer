@@ -7,7 +7,8 @@ namespace OroIdentityServer.Infraestructure.Repositories;
 public class RoleRepository(
     ILogger<RoleRepository> logger,
     IRepository<Role> repository,
-    IUserRolesRepository userRolesRepository) : IRoleRepository
+    IUserRolesRepository userRolesRepository,
+    OroIdentityAppContext? context = null) : IRoleRepository
 {
     public async Task AddAsync(Role role, CancellationToken cancellationToken)
     {
@@ -71,12 +72,16 @@ public class RoleRepository(
     {
         logger.LogInformation("Getting roles by user id with value: {userId}", userId);
         var userRoles = await userRolesRepository.GetRolesByUserIdAsync(userId, cancellationToken);
-        var roleIds = userRoles.Select(ur => ur.RoleId).ToList();
+        var roleIds = userRoles
+            .Select(ur => ur.RoleId)
+            .Where(id => id is not null)
+            .Select(id => id!)
+            .ToList();
 
         if (roleIds.Count == 0)
             return [];
 
-        var roles = await repository.FindAsync(r => roleIds.Contains(r.Id), cancellationToken);
+        var roles = await repository.ListAsync(new GetRolesByUserIdSpecification(roleIds), cancellationToken);
         logger.LogInformation("Exiting GetRolesByUserIdAsync");
         return roles;
     }
@@ -92,5 +97,24 @@ public class RoleRepository(
         logger.LogInformation("Checking permissions for role: {RoleId}", roleId);
         var role = await repository.FirstOrDefaultAsync(new GetRoleWithPermissionsSpecification(roleId), cancellationToken);
         return role?.RolePermissions.Count > 0;
+    }
+
+    public async Task<Role?> GetWithPermissionsAsync(RoleId roleId, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Getting role with permissions for role: {RoleId}", roleId);
+
+        // The context is globally configured with QueryTrackingBehavior.NoTracking (see
+        // InfraestructureExtensions), so an update path must opt back into tracking. Otherwise
+        // Repository.UpdateAsync receives a detached graph and marks keyed RolePermission
+        // children as Modified instead of Added, so new assignments are never inserted.
+        if (context is not null)
+        {
+            return await context.Roles
+                .AsTracking()
+                .Include(r => r.RolePermissions)
+                .FirstOrDefaultAsync(r => r.Id == roleId, cancellationToken);
+        }
+
+        return await repository.FirstOrDefaultAsync(new GetRoleWithPermissionsSpecification(roleId), cancellationToken);
     }
 }

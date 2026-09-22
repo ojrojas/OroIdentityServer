@@ -11,4 +11,10 @@ public interface IPermissionRepository
     Task DeletePermissionAsync(PermissionId id, CancellationToken cancellationToken);
     Task<Permission?> GetPermissionByIdAsync(PermissionId id, CancellationToken cancellationToken);
     Task<IEnumerable<Permission>> GetAllPermissionsAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Returns the distinct names (<c>Provider.Resource.Action</c>) of every domain permission
+    /// granted to <paramref name="userId"/> through their active roles.
+    /// </summary>
+    Task<IReadOnlyCollection<string>> GetPermissionNamesByUserIdAsync(UserId userId, CancellationToken cancellationToken);
 }

@@ -11,4 +11,5 @@ public interface IAdminRoleService
     Task<HttpResponseMessage> UpdateRoleAsync(Guid id, UpdateRoleRequest request, CancellationToken ct = default);
     Task<HttpResponseMessage> DeleteRoleAsync(Guid id, CancellationToken ct = default);
     Task<HttpResponseMessage> ActivateRoleAsync(Guid id, CancellationToken ct = default);
+    Task<HttpResponseMessage> SetRolePermissionsAsync(Guid id, SetRolePermissionsRequest request, CancellationToken ct = default);
 }
