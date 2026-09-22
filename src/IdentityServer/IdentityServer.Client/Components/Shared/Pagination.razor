@@ -8,7 +8,7 @@
 
     <div class="pagination-info">
         <span>@L["Show"]</span>
-        <select @bind="SelectedPageSize" @bind:after="OnPageSizeChanged">
+        <select value="@PageSize" @onchange="OnPageSizeSelected">
             @foreach (var size in PageSizes)
             {
                 <option value="@size">@size</option>
@@ -34,12 +34,6 @@
     [Parameter] public EventCallback<int> PageNumberChanged { get; set; }
     [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
 
-    private int SelectedPageSize
-    {
-        get => PageSize;
-        set => _ = PageSizeChanged.InvokeAsync(value);
-    }
-
     private static readonly int[] PageSizes = [10, 20, 50, 100];
 
     private async Task OnPrevious()
@@ -54,8 +48,9 @@
             await PageNumberChanged.InvokeAsync(PageNumber + 1);
     }
 
-    private async Task OnPageSizeChanged()
+    private async Task OnPageSizeSelected(ChangeEventArgs e)
     {
-        await PageSizeChanged.InvokeAsync(SelectedPageSize);
+        if (int.TryParse(e.Value?.ToString(), out var size) && size != PageSize)
+            await PageSizeChanged.InvokeAsync(size);
     }
 }

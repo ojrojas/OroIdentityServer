@@ -42,7 +42,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in items)
+                    @foreach (var item in PagedItems)
                     {
                         <tr>
                             <td class="cell-strong">@item.Name</td>
@@ -74,11 +74,21 @@
                 </tbody>
             </table>
         </div>
+
+        <Pagination PageNumber="@pageNumber" TotalPages="@totalPages" TotalCount="@totalCount"
+                    PageSize="@pageSize" PageNumberChanged="OnPageNumberChanged" PageSizeChanged="OnPageSizeChanged" />
     }
 </section>
 
 @code {
     private List<TenantModel>? items;
+    private int pageNumber = 1;
+    private int pageSize = 20;
+    private int totalCount;
+    private int totalPages;
+
+    private IEnumerable<TenantModel> PagedItems =>
+        items?.Skip((pageNumber - 1) * pageSize).Take(pageSize) ?? [];
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
@@ -86,6 +96,21 @@
     {
         var response = await TenantService.GetTenantsAsync();
         items = response?.Data?.ToList() ?? [];
+        totalCount = items.Count;
+        totalPages = Math.Max(1, (int)Math.Ceiling((double)totalCount / pageSize));
+        if (pageNumber > totalPages)
+            pageNumber = totalPages;
+    }
+
+    private void OnPageNumberChanged(int page)
+    {
+        pageNumber = page;
+    }
+
+    private void OnPageSizeChanged(int size)
+    {
+        pageSize = size;
+        pageNumber = 1;
     }
 
     private void CreateAsync() => Nav.NavigateTo("/tenants/create");

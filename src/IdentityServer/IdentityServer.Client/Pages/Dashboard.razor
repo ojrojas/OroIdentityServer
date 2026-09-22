@@ -39,10 +39,14 @@
                                   DeltaText="@DeltaText(stats?.TenantsCreatedToday ?? 0)"
                                   OnClick="@((e) => NavigationStat("/tenants"))" />
                     }
-                    <StatCard Title="@L["StatUsers"]" Value="@userCount" IconName="users" Featured="true"
-                              Note="@L["StatUsersNote"]" Delta="@(stats?.UsersCreatedToday ?? 0)"
-                              DeltaText="@DeltaText(stats?.UsersCreatedToday ?? 0)"
-                              OnClick="@((e) => NavigationStat("/users"))" />
+                        <StatCard Title="@L["StatUsers"]" Value="@userCount" IconName="users" Featured="true"
+                            Note="@L["StatUsersNote"]" Delta="@(stats?.UsersCreatedToday ?? 0)"
+                            DeltaText="@DeltaText(stats?.UsersCreatedToday ?? 0)"
+                            OnClick="@((e) => NavigationStat("/users"))" />
+                        <StatCard Featured="true" Title="@L["StatRoles"]" Value="@roleCount" IconName="shield"
+                            Note="@L["StatRolesNote"]" Delta="@(stats?.RolesCreatedToday ?? 0)"
+                            DeltaText="@DeltaText(stats?.RolesCreatedToday ?? 0)"
+                            OnClick="@(() => NavigationStat("/roles"))" />
 
                 </div>
 
@@ -52,10 +56,7 @@
                               OnClick="@((e) => NavigationStat("/sessions"))" />
                     @if (isAdmin)
                     {
-                        <StatCard Featured="true" Title="@L["StatRoles"]" Value="@roleCount" IconName="shield"
-                                  Note="@L["StatRolesNote"]" Delta="@(stats?.RolesCreatedToday ?? 0)"
-                                  DeltaText="@DeltaText(stats?.RolesCreatedToday ?? 0)"
-                                  OnClick="@(() => NavigationStat("/roles"))" />
+                       
                         <StatCard Featured="true" Title="@L["StatApplications"]" Value="@applicationCount" IconName="apps"
                                   Note="@L["StatApplicationsNote"]"
                                   OnClick="@(() => NavigationStat("/applications"))" />
