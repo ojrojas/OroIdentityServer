@@ -348,4 +348,34 @@
   <data name="Deny"><value>拒绝</value></data>
   <data name="RolePermissionsLabel"><value>权限</value></data>
   <data name="RolePermissionsHint"><value>选择授予此角色的域权限。</value></data>
+
+  <!-- Permissions catalogue + direct user permissions -->
+  <data name="NavPermissions"><value>权限</value></data>
+  <data name="PermissionsTitle"><value>权限</value></data>
+  <data name="NewPermissionTitle"><value>新建权限</value></data>
+  <data name="PermissionDetailTitle"><value>权限</value></data>
+  <data name="PermissionName"><value>名称</value></data>
+  <data name="PermissionNamePreview"><value>名称: {0}</value></data>
+  <data name="Provider"><value>提供程序</value></data>
+  <data name="Resource"><value>资源</value></data>
+  <data name="Action"><value>操作</value></data>
+  <data name="Description"><value>说明</value></data>
+  <data name="IsSystem"><value>系统</value></data>
+  <data name="IsSystemHint"><value>系统权限无法修改或删除。</value></data>
+  <data name="SystemPermissionReadOnly"><value>这是系统权限，为只读。</value></data>
+  <data name="DeletePermissionConfirm"><value>删除权限“{0}”?</value></data>
+  <data name="PermissionCreatedToast"><value>权限已创建。</value></data>
+  <data name="PermissionCreateFailedToast"><value>无法创建权限 ({0})。</value></data>
+  <data name="PermissionDeletedToast"><value>权限已删除。</value></data>
+  <data name="PermissionDeleteFailedToast"><value>无法删除权限 ({0})。</value></data>
+  <data name="StatPermissions"><value>权限</value></data>
+  <data name="StatPermissionsNote"><value>用户授权</value></data>
+  <data name="DirectPermissionsSection"><value>直接权限</value></data>
+  <data name="SelectPermissionsForUser"><value>除角色外，直接向该用户授予权限。</value></data>
+  <data name="NoPermissionsAvailable"><value>目录中没有权限。</value></data>
+  <data name="NoPermissionsEffective"><value>没有有效权限。</value></data>
+  <data name="EffectivePermissionsLabel"><value>有效权限</value></data>
+  <data name="EffectivePermissionsHint"><value>从角色继承和直接授予的权限的并集。</value></data>
+  <data name="PermissionsSavedToast"><value>权限已保存。</value></data>
+  <data name="PermissionsSaveFailedToast"><value>无法保存权限 ({0})。</value></data>
 </root>

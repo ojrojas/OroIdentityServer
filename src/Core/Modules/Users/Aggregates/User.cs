@@ -28,6 +28,9 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
     private readonly IList<UserRole> _roles = [];
     public IReadOnlyCollection<UserRole> Roles => _roles.AsReadOnly();
 
+    private readonly IList<UserPermission> _permissions = [];
+    public IReadOnlyCollection<UserPermission> Permissions => _permissions.AsReadOnly();
+
     public User(
         UserId? id,
         string name,
@@ -90,6 +93,23 @@ public class User : AggregateRoot<UserId>, IAuditableEntity
             throw new InvalidOperationException("Role not found.");
 
         _roles.Remove(existing);
+    }
+
+    public void AddPermission(UserPermission permission)
+    {
+        if (_permissions.Any(p => p.PermissionId == permission.PermissionId))
+            throw new InvalidOperationException("Permission already assigned to user.");
+
+        _permissions.Add(permission);
+    }
+
+    public void RemovePermission(UserPermission permission)
+    {
+        var existing = _permissions.FirstOrDefault(p => p.PermissionId == permission.PermissionId);
+        if (existing is null)
+            throw new InvalidOperationException("Permission not found.");
+
+        _permissions.Remove(existing);
     }
 
     public void Deactivate()

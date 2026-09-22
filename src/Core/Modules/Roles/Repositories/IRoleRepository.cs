@@ -79,4 +79,11 @@ public interface IRoleRepository
     /// not exist or is deactivated (the <see cref="Role"/> query filter applies).
     /// </summary>
     Task<Role?> GetWithPermissionsAsync(RoleId roleId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Read-only variant of <see cref="GetWithPermissionsAsync"/>: loads the role and its
+    /// role-permission links without tracking, so it never conflicts with entities already
+    /// tracked in the same scoped context (e.g. while another command updates a user graph).
+    /// </summary>
+    Task<Role?> GetWithPermissionsNoTrackingAsync(RoleId roleId, CancellationToken cancellationToken);
 }

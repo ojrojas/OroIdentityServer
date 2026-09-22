@@ -17,20 +17,10 @@ if (enableRabbitMq)
         .WithLifetime(ContainerLifetime.Persistent);
 }
 
-var enableDataVolume = builder.Configuration.GetValue("Resources:PostgresDataVolume", true);
-
-IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("postgres")
-.WithImageTag("17");
-
-if (enableDataVolume)
-{
-    postgres.WithDataVolume("oro-postgres-data");
-}
-
-if (enablePgAdmin)
-{
-    postgres.WithPgAdmin(container => container.WithImageTag("latest"));
-}
+var postgres = builder.AddPostgres("postgres")
+        .WithLifetime(ContainerLifetime.Persistent)
+        .WithDataVolume("oro-postgres-data")
+        .WithPgAdmin(c => c.WithLifetime(ContainerLifetime.Persistent));
 
 IResourceBuilder<PostgresDatabaseResource> identityDb = postgres.AddDatabase("identitydb");
 

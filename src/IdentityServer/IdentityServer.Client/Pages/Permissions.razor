@@ -1,0 +1,109 @@
+@page "/permissions"
+@attribute [Authorize(Roles = "Admin,Administrator")]
+@inject IAdminPermissionService PermissionService
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["PermissionsTitle"]</PageTitle>
+
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["PermissionsTitle"]</h2>
+        <button type="button" class="btn btn-primary btn-sm" @onclick="CreateAsync">
+            <Icon Name="plus" Size="15" Stroke="2.2" /> @L["New"]
+        </button>
+    </div>
+
+    @if (items is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else if (items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">@L["NoData"]</p>
+            <p>@L["NoDataHint"]</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@L["PermissionName"]</th>
+                        <th>@L["Description"]</th>
+                        <th>@L["IsSystem"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in items)
+                    {
+                        <tr>
+                            <td class="cell-strong"><code>@Name(item)</code></td>
+                            <td class="cell-muted">@item.Description</td>
+                            <td>
+                                @if (item.IsSystem)
+                                {
+                                    <span class="badge badge-gray">@L["IsSystem"]</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    <button type="button" class="btn-row" title="@L["Edit"]" @onclick="@(() => Nav.NavigateTo($"/permissions/{item.PermissionId}"))">
+                                        <Icon Name="edit" Size="15" />
+                                    </button>
+                                    @if (!item.IsSystem)
+                                    {
+                                        <button type="button" class="btn-row is-danger" title="@L["Delete"]" @onclick="@(() => DeleteAsync(item))">
+                                            <Icon Name="trash" Size="15" />
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@code {
+    private List<PermissionModel>? items;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var response = await PermissionService.GetPermissionsAsync();
+        items = response?.Data?.OrderBy(p => p.Provider).ThenBy(p => p.Resource).ThenBy(p => p.Action).ToList() ?? [];
+    }
+
+    private void CreateAsync() => Nav.NavigateTo("/permissions/create");
+
+    private static string Name(PermissionModel permission) =>
+        $"{permission.Provider}.{permission.Resource}.{permission.Action}".ToLowerInvariant();
+
+    private async Task DeleteAsync(PermissionModel item)
+    {
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmDeletionTitle"], L["DeletePermissionConfirm", Name(item)],
+            L["Delete"], L["Cancel"], danger: true);
+        if (!ok) return;
+
+        var response = await PermissionService.DeletePermissionAsync(item.PermissionId);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["PermissionDeletedToast"]);
+            await LoadAsync();
+        }
+        else
+        {
+            ToastService.ShowError(L["PermissionDeleteFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

@@ -45,6 +45,17 @@ public static partial class AdminApiEndpoints
             [FromServices] IAdminUserService service,
             CancellationToken ct) => await ToResultAsync(await service.AssignRolesToUserAsync(id, request, ct), ct));
 
+        g.MapPut("/{id:guid}/permissions", async (
+            Guid id,
+            [FromBody] AssignPermissionsRequest request,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) => await ToResultAsync(await service.AssignPermissionsToUserAsync(id, request, ct), ct));
+
+        g.MapGet("/{id:guid}/effective-permissions", async (
+            Guid id,
+            [FromServices] IAdminUserService service,
+            CancellationToken ct) => Results.Ok(await service.GetEffectivePermissionsAsync(id, ct)));
+
         g.MapPost("/{id:guid}/lock", async (
             Guid id,
             [FromServices] IAdminUserService service,

@@ -20,6 +20,9 @@ public sealed class Permission : AggregateRoot<PermissionId>, IAuditableEntity
     /// </summary>
     public bool IsSystem { get; private set; }
 
+    /// <summary>UTC timestamp of when the permission was created.</summary>
+    public DateTime CreatedAtUtc { get; private set; } = DateTime.UtcNow;
+
     private Permission()
     {
         Id = null!;

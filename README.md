@@ -12,7 +12,7 @@ OroIdentityServer is an identity and authentication management system built on *
 - Login form rejects invalid credentials in place and shows an error, instead of silently redirecting
 - Forced password change on first login for every user except the seeded admin account, enforced via a `must_change_password` claim and a redirect middleware that locks the UI to `/Account/ChangePassword` until cleared
 - Relying-party-initiated logout (`~/connect/logout`) shows an IdentityServer-owned confirmation page (`/Account/Logout`) before ending the session, so signing out of a client app doesn't silently sign the admin out of IdentityServer itself
-- **User authorization permissions** (domain `Permission`, name `provider.resource.action`) are assigned to roles and emitted as `Claim("permission", <name>)`: the access token always carries them, and the id token / `userinfo` carry them only with the `permissions` scope. Enforced with exact-match policies named `perm:<name>`. See [docs/authorization.md](docs/authorization.md). Do not confuse them with OpenIddict **client** permissions (`ept:`/`gt:`/`rst:`/`scp:`/`ft:`).
+- **User authorization permissions** (domain `Permission`, name `provider.resource.action`) are granted to roles and/or directly to users, and emitted as `Claim("permission", <name>)`: the access token always carries them, and the id token / `userinfo` carry them only with the `permissions` scope. Enforced with exact-match policies named `perm:<name>`. Managed in the console at `/permissions` (catalogue) and in the role/user detail pages; a dashboard card shows the count. See [docs/authorization.md](docs/authorization.md). Do not confuse them with OpenIddict **client** permissions (`ept:`/`gt:`/`rst:`/`scp:`/`ft:`).
 
 ### 2. Blazor Admin UI
 - Admin panel (list, detail/edit, create, delete-with-confirmation) for Users, Roles, Applications, Scopes, Identification Types and Tenants — lists use search, pagination and configurable page size (10/20/50/100) via `QUERY` (`HttpMethod.Query`) with `PagedRequest`/`PagedResponse<T>` (server-side filtering), tables show real `IsActive` state
@@ -501,6 +501,8 @@ These are the OAuth2 / OpenID Connect protocol endpoints:
 | `POST` | `/api/users/{id}/deactivate` | Deactivate user |
 | `POST` | `/api/users/{id}/activate` | Activate user (bypasses query filter) |
 | `PUT` | `/api/users/{id}/roles` | Assign roles to a user |
+| `PUT` | `/api/users/{id}/permissions` | Replace the domain permissions granted directly to a user (body: `{ "permissionIds": ["<guid>", ...] }`) |
+| `GET` | `/api/users/{id}/effective-permissions` | List a user's effective permission names (role-derived ∪ direct) |
 | `POST` | `/api/users/{id}/lock` | Lock a user account (blocks login, distinct from deactivation) |
 | `POST` | `/api/users/{id}/unlock` | Unlock a user account |
 | `GET` | `/api/users/{role}/by-role` | Get users by role name. Query param: `tenantId` (optional) |
@@ -520,8 +522,10 @@ These are the OAuth2 / OpenID Connect protocol endpoints:
 ### Permissions — `/api/permissions` (AdminOnly)
 
 The **domain user-permission catalogue** (`provider.resource.action`). Assign them to roles via
-`PUT /api/roles/{id}/permissions`; they are emitted as `permission` claims. Not to be confused
-with OpenIddict **client** permissions, which are managed on the application itself.
+`PUT /api/roles/{id}/permissions` or directly to a user via `PUT /api/users/{id}/permissions`
+(a user's effective permissions are the union of both). They are emitted as `permission` claims.
+Not to be confused with OpenIddict **client** permissions, which are managed on the application
+itself. The console exposes the catalogue at `/permissions` (Admin/Administrator).
 
 | Method | Route | Description |
 |--------|-------|-------------|

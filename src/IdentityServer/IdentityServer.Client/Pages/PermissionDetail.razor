@@ -1,0 +1,126 @@
+@page "/permissions/{Id:guid}"
+@attribute [Authorize(Roles = "Admin,Administrator")]
+@inject IAdminPermissionService PermissionService
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["PermissionDetailTitle"]</PageTitle>
+
+<Breadcrumb Items="@([new BreadcrumbItem(L["NavPermissions"], "/permissions"), new BreadcrumbItem(string.IsNullOrWhiteSpace(previewName) ? L["PermissionDetailTitle"] : previewName)])" />
+
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["PermissionDetailTitle"]</h2>
+    </div>
+
+    @if (item is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else
+    {
+        <div class="form">
+            @if (item.IsSystem)
+            {
+                <span class="field-hint">@L["SystemPermissionReadOnly"]</span>
+            }
+
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="provider">@L["Provider"] <span class="req">*</span></label>
+                    <input id="provider" class="input" disabled="@item.IsSystem" @bind="provider" @bind:event="oninput" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="resource">@L["Resource"] <span class="req">*</span></label>
+                    <input id="resource" class="input" disabled="@item.IsSystem" @bind="resource" @bind:event="oninput" />
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="action">@L["Action"] <span class="req">*</span></label>
+                    <input id="action" class="input" disabled="@item.IsSystem" @bind="action" @bind:event="oninput" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="description">@L["Description"]</label>
+                    <input id="description" class="input" disabled="@item.IsSystem" @bind="description" @bind:event="oninput" />
+                </div>
+            </div>
+
+            <span class="field-hint">@L["PermissionNamePreview", previewName]</span>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" disabled="@(saving || item.IsSystem)" @onclick="SaveAsync">@L["Save"]</button>
+                <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/permissions")'>@L["Back"]</button>
+                @if (!item.IsSystem)
+                {
+                    <div class="spacer"></div>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteAsync">
+                        <Icon Name="trash" Size="15" /> @L["Delete"]
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private PermissionModel? item;
+    private string provider = string.Empty;
+    private string resource = string.Empty;
+    private string action = string.Empty;
+    private string description = string.Empty;
+    private bool saving;
+
+    private string previewName => $"{provider}.{resource}.{action}".ToLowerInvariant();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await PermissionService.GetPermissionByIdAsync(Id);
+        item = response?.Data;
+        if (item is not null)
+        {
+            provider = item.Provider;
+            resource = item.Resource;
+            action = item.Action;
+            description = item.Description ?? string.Empty;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        var request = new UpdatePermissionRequest(Id, provider, description, action, resource, item?.IsSystem ?? false);
+        var response = await PermissionService.UpdatePermissionAsync(Id, request);
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+            ToastService.ShowSuccess(L["SavedToast"]);
+        else
+            ToastService.ShowError(L["SaveFailedToast", (int)response.StatusCode]);
+    }
+
+    private async Task DeleteAsync()
+    {
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmDeletionTitle"], L["DeletePermissionConfirm", previewName],
+            L["Delete"], L["Cancel"], danger: true);
+        if (!ok) return;
+
+        var response = await PermissionService.DeletePermissionAsync(Id);
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["PermissionDeletedToast"]);
+            Nav.NavigateTo("/permissions");
+        }
+        else
+        {
+            ToastService.ShowError(L["PermissionDeleteFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

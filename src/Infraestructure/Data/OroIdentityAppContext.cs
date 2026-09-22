@@ -17,6 +17,7 @@ public class OroIdentityAppContext(
     public DbSet<TenantPreferenceConfig> TenantPreferenceConfigs { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
+    public DbSet<UserPermission> UserPermissions { get; set; }
     public DbSet<Session> Sessions { get; set; }
     public DbSet<UserSession> UserSessions { get; set; }
     public DbSet<AuthValidationLog> AuthValidationLogs { get; set; }
@@ -42,6 +43,7 @@ public class OroIdentityAppContext(
         builder.ApplyConfiguration(new UserCompanyPreferenceConfiguration());
         builder.ApplyConfiguration(new UserEntityConfiguration());
         builder.ApplyConfiguration(new UserPreferenceConfiguration());
+        builder.ApplyConfiguration(new UserPermissionEntityConfiguration());
         builder.ApplyConfiguration(new UserRoleEntityConfiguration());
         builder.ApplyConfiguration(new UserSessionEntityConfiguration());
         builder.ApplyConfiguration(new UserReportingRelationshipEntityConfiguration());

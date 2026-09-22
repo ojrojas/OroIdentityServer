@@ -12,6 +12,8 @@ public interface IAdminUserService
     Task<HttpResponseMessage> UpdateUserAsync(Guid id, UpdateUserRequest request, CancellationToken ct = default);
     Task<HttpResponseMessage> DeleteUserAsync(Guid id, CancellationToken ct = default);
     Task<HttpResponseMessage> AssignRolesToUserAsync(Guid userId, AssignRolesRequest request, CancellationToken ct = default);
+    Task<HttpResponseMessage> AssignPermissionsToUserAsync(Guid userId, AssignPermissionsRequest request, CancellationToken ct = default);
+    Task<ApiResponse<IEnumerable<string>>?> GetEffectivePermissionsAsync(Guid userId, CancellationToken ct = default);
     Task<HttpResponseMessage> LockUserAsync(Guid userId, CancellationToken ct = default);
     Task<HttpResponseMessage> UnlockUserAsync(Guid userId, CancellationToken ct = default);
     Task<HttpResponseMessage> DeactivateUserAsync(Guid userId, CancellationToken ct = default);

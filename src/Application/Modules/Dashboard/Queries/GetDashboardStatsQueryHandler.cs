@@ -110,6 +110,17 @@ public class GetDashboardStatsQueryHandler(IDbContextFactory<OroIdentityAppConte
                 identificationType.CreatedAtUtc));
         }
 
+        var permissions = await context.Permissions.AsNoTracking().ToListAsync(cancellationToken);
+        foreach (var permission in permissions)
+        {
+            entries.Add(new RecentEntityDto(
+                permission.Name,
+                "StatPermissions",
+                $"/permissions/{permission.Id.Value}",
+                permission.Name,
+                permission.CreatedAtUtc));
+        }
+
         var today = DateTime.UtcNow.Date;
         var createdToday = entries.Where(e => e.CreatedAtUtc.Date == today).ToList();
 

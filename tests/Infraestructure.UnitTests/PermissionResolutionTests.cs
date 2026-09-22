@@ -90,4 +90,62 @@ public class PermissionResolutionTests
 
         Assert.Empty(names);
     }
+
+    [Fact]
+    public async Task IncludesDirectUserPermissions()
+    {
+        var (repository, context) = CreateSut();
+        var rolePermission = Permission.Create("oropos", "Read sales", "read", "sales", false);
+        var directPermission = Permission.Create("oropos", "Write orders", "write", "orders", false);
+        context.Permissions.Add(rolePermission);
+        context.Permissions.Add(directPermission);
+
+        var role = SeedRoleWithPermission(context, rolePermission);
+        var user = SeedUser(context);
+        context.UserRoles.Add(new UserRole(user.Id, role.Id));
+        context.UserPermissions.Add(new UserPermission(user.Id, directPermission.Id));
+        await context.SaveChangesAsync();
+
+        var names = await repository.GetPermissionNamesByUserIdAsync(user.Id, CancellationToken.None);
+
+        Assert.Equal(["oropos.orders.write", "oropos.sales.read"], names);
+    }
+
+    [Fact]
+    public async Task DirectPermissionAppliesWhenRoleDeactivated()
+    {
+        var (repository, context) = CreateSut();
+        var rolePermission = Permission.Create("oropos", "Read sales", "read", "sales", false);
+        var directPermission = Permission.Create("oropos", "Write orders", "write", "orders", false);
+        context.Permissions.Add(rolePermission);
+        context.Permissions.Add(directPermission);
+
+        var role = SeedRoleWithPermission(context, rolePermission, active: false);
+        var user = SeedUser(context);
+        context.UserRoles.Add(new UserRole(user.Id, role.Id));
+        context.UserPermissions.Add(new UserPermission(user.Id, directPermission.Id));
+        await context.SaveChangesAsync();
+
+        var names = await repository.GetPermissionNamesByUserIdAsync(user.Id, CancellationToken.None);
+
+        Assert.Equal(["oropos.orders.write"], names);
+    }
+
+    [Fact]
+    public async Task DirectPermissionDuplicatingRolePermissionAppearsOnce()
+    {
+        var (repository, context) = CreateSut();
+        var permission = Permission.Create("oropos", "Read sales", "read", "sales", false);
+        context.Permissions.Add(permission);
+
+        var role = SeedRoleWithPermission(context, permission);
+        var user = SeedUser(context);
+        context.UserRoles.Add(new UserRole(user.Id, role.Id));
+        context.UserPermissions.Add(new UserPermission(user.Id, permission.Id));
+        await context.SaveChangesAsync();
+
+        var names = await repository.GetPermissionNamesByUserIdAsync(user.Id, CancellationToken.None);
+
+        Assert.Equal(["oropos.sales.read"], names);
+    }
 }

@@ -544,6 +544,10 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAtUtc");
+
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
@@ -1118,6 +1122,19 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.ToTable("SecurityUsers", (string)null);
                 });
 
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Entities.UserPermission", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UserId", "PermissionId");
+
+                    b.ToTable("UserPermissions", (string)null);
+                });
+
             modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Entities.UserRole", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -1293,6 +1310,15 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Entities.UserPermission", b =>
+                {
+                    b.HasOne("OroIdentityServer.Core.Modules.Users.Aggregates.User", null)
+                        .WithMany("Permissions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Entities.UserRole", b =>
                 {
                     b.HasOne("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", "Role")
@@ -1343,6 +1369,8 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
 
             modelBuilder.Entity("OroIdentityServer.Core.Modules.Users.Aggregates.User", b =>
                 {
+                    b.Navigation("Permissions");
+
                     b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618

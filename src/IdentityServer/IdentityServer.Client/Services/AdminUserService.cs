@@ -34,6 +34,12 @@ public class AdminUserService(HttpClient client) : IAdminUserService
     public Task<HttpResponseMessage> AssignRolesToUserAsync(Guid userId, AssignRolesRequest request, CancellationToken ct = default)
         => client.PutAsJsonAsync($"api/users/{userId}/roles", request, ClientJsonOptions.Default, ct);
 
+    public Task<HttpResponseMessage> AssignPermissionsToUserAsync(Guid userId, AssignPermissionsRequest request, CancellationToken ct = default)
+        => client.PutAsJsonAsync($"api/users/{userId}/permissions", request, ClientJsonOptions.Default, ct);
+
+    public Task<ApiResponse<IEnumerable<string>>?> GetEffectivePermissionsAsync(Guid userId, CancellationToken ct = default)
+        => client.GetFromJsonAsync<ApiResponse<IEnumerable<string>>>($"api/users/{userId}/effective-permissions", ClientJsonOptions.Default, ct);
+
     public Task<HttpResponseMessage> LockUserAsync(Guid userId, CancellationToken ct = default)
         => client.PostAsync($"api/users/{userId}/lock", null, ct);
 

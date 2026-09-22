@@ -348,4 +348,34 @@
   <data name="Deny"><value>Refuser</value></data>
   <data name="RolePermissionsLabel"><value>Autorisations</value></data>
   <data name="RolePermissionsHint"><value>Sélectionnez les autorisations de domaine accordées à ce rôle.</value></data>
+
+  <!-- Permissions catalogue + direct user permissions -->
+  <data name="NavPermissions"><value>Autorisations</value></data>
+  <data name="PermissionsTitle"><value>Autorisations</value></data>
+  <data name="NewPermissionTitle"><value>Nouvelle autorisation</value></data>
+  <data name="PermissionDetailTitle"><value>Autorisation</value></data>
+  <data name="PermissionName"><value>Nom</value></data>
+  <data name="PermissionNamePreview"><value>Nom : {0}</value></data>
+  <data name="Provider"><value>Fournisseur</value></data>
+  <data name="Resource"><value>Ressource</value></data>
+  <data name="Action"><value>Action</value></data>
+  <data name="Description"><value>Description</value></data>
+  <data name="IsSystem"><value>Système</value></data>
+  <data name="IsSystemHint"><value>Les autorisations système ne peuvent pas être modifiées ni supprimées.</value></data>
+  <data name="SystemPermissionReadOnly"><value>Il s'agit d'une autorisation système en lecture seule.</value></data>
+  <data name="DeletePermissionConfirm"><value>Supprimer l'autorisation « {0} » ?</value></data>
+  <data name="PermissionCreatedToast"><value>Autorisation créée.</value></data>
+  <data name="PermissionCreateFailedToast"><value>Impossible de créer l'autorisation ({0}).</value></data>
+  <data name="PermissionDeletedToast"><value>Autorisation supprimée.</value></data>
+  <data name="PermissionDeleteFailedToast"><value>Impossible de supprimer l'autorisation ({0}).</value></data>
+  <data name="StatPermissions"><value>Autorisations</value></data>
+  <data name="StatPermissionsNote"><value>Autorisations utilisateur</value></data>
+  <data name="DirectPermissionsSection"><value>Autorisations directes</value></data>
+  <data name="SelectPermissionsForUser"><value>Accordez des autorisations directement à cet utilisateur, en plus de ses rôles.</value></data>
+  <data name="NoPermissionsAvailable"><value>Aucune autorisation dans le catalogue.</value></data>
+  <data name="NoPermissionsEffective"><value>Aucune autorisation effective.</value></data>
+  <data name="EffectivePermissionsLabel"><value>Autorisations effectives</value></data>
+  <data name="EffectivePermissionsHint"><value>Union des autorisations héritées des rôles et accordées directement.</value></data>
+  <data name="PermissionsSavedToast"><value>Autorisations enregistrées.</value></data>
+  <data name="PermissionsSaveFailedToast"><value>Impossible d'enregistrer les autorisations ({0}).</value></data>
 </root>

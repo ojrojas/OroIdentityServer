@@ -4,6 +4,7 @@
 @inject IAdminIdentificationTypeService IdentificationTypeService
 @inject IAdminTenantService TenantService
 @inject IAdminRoleService RoleService
+@inject IAdminPermissionService PermissionService
 @inject ICurrentTenantContext TenantContext
 @inject NavigationManager Nav
 @inject IDialogService DialogService
@@ -132,6 +133,54 @@
                 }
             </div>
 
+            <div class="field">
+                <label class="field-label">@L["DirectPermissionsSection"]</label>
+                <span class="field-hint">@L["SelectPermissionsForUser"]</span>
+
+                @if (allPermissions is null)
+                {
+                    <div class="spinner spinner-sm"></div>
+                }
+                else if (allPermissions.Count == 0)
+                {
+                    <p class="field-hint">@L["NoPermissionsAvailable"]</p>
+                }
+                else
+                {
+                    <div class="checklist">
+                        @foreach (var permission in allPermissions)
+                        {
+                            <label class="checklist-item">
+                                <input type="checkbox" checked="@directPermissions.Contains(permission.PermissionId)"
+                                       disabled="@savingPermissions"
+                                       @onchange="args => ToggleDirectPermissionAsync(permission.PermissionId, (bool)args.Value!)" />
+                                <span class="checklist-label">@permission.Description</span>
+                                <code class="checklist-code">@PermissionName(permission)</code>
+                            </label>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="field">
+                <label class="field-label">@L["EffectivePermissionsLabel"]</label>
+                <span class="field-hint">@L["EffectivePermissionsHint"]</span>
+
+                @if (effectivePermissions is null || effectivePermissions.Count == 0)
+                {
+                    <p class="field-hint">@L["NoPermissionsEffective"]</p>
+                }
+                else
+                {
+                    <div class="tags">
+                        @foreach (var name in effectivePermissions)
+                        {
+                            <span class="tag"><span>@name</span></span>
+                        }
+                    </div>
+                }
+            </div>
+
             <div class="form-actions">
                 <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SaveAsync">@L["Save"]</button>
                 <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/users")'>@L["Back"]</button>
@@ -158,6 +207,11 @@
 
     private string roleIdToAdd = string.Empty;
     private bool savingRoles;
+
+    private List<PermissionModel>? allPermissions;
+    private readonly HashSet<Guid> directPermissions = [];
+    private List<string>? effectivePermissions;
+    private bool savingPermissions;
 
     private string name = string.Empty;
     private string middleName = string.Empty;
@@ -213,6 +267,19 @@
             role => (Guid?)role.Id,
             userRole => userRole.RoleId,
             (role, _) => role)];
+
+        directPermissions.Clear();
+        foreach (var permission in item.Permissions)
+        {
+            if (permission.PermissionId is { } permissionId)
+                directPermissions.Add(permissionId);
+        }
+
+        var permissionsResponse = await PermissionService.GetPermissionsAsync();
+        allPermissions = permissionsResponse?.Data?
+            .OrderBy(p => p.Provider).ThenBy(p => p.Resource).ThenBy(p => p.Action).ToList() ?? [];
+
+        await LoadEffectivePermissionsAsync();
 
         name = item.Name ?? string.Empty;
         middleName = item.MiddleName ?? string.Empty;
@@ -301,6 +368,7 @@
                     (role, _) => role)];
             }
             savingRoles = false;
+            await LoadEffectivePermissionsAsync();
         }
         else
         {
@@ -308,6 +376,58 @@
             ToastService.ShowError(L["RolesSaveFailedToast", (int)response.StatusCode]);
         }
     }
+
+    private Task ToggleDirectPermissionAsync(Guid permissionId, bool isChecked)
+    {
+        if (isChecked) directPermissions.Add(permissionId);
+        else directPermissions.Remove(permissionId);
+
+        return SyncPermissionsAsync(directPermissions);
+    }
+
+    /// <summary>
+    /// AssignPermissionsToUserCommand replaces the user's full direct-permission set, so every
+    /// toggle sends the complete desired list, then reloads to reflect what was saved.
+    /// </summary>
+    private async Task SyncPermissionsAsync(IEnumerable<Guid> permissionIds)
+    {
+        savingPermissions = true;
+
+        var response = await UserService.AssignPermissionsToUserAsync(Id, new AssignPermissionsRequest([.. permissionIds]));
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["PermissionsSavedToast"]);
+            var r = await UserService.GetUserByIdAsync(Id);
+            if (r?.Data is not null)
+            {
+                item = r.Data;
+                directPermissions.Clear();
+                foreach (var permission in item.Permissions)
+                {
+                    if (permission.PermissionId is { } permissionId)
+                        directPermissions.Add(permissionId);
+                }
+            }
+
+            await LoadEffectivePermissionsAsync();
+            savingPermissions = false;
+        }
+        else
+        {
+            savingPermissions = false;
+            ToastService.ShowError(L["PermissionsSaveFailedToast", (int)response.StatusCode]);
+        }
+    }
+
+    private async Task LoadEffectivePermissionsAsync()
+    {
+        var response = await UserService.GetEffectivePermissionsAsync(Id);
+        effectivePermissions = response?.Data?.ToList() ?? [];
+    }
+
+    private static string PermissionName(PermissionModel permission) =>
+        $"{permission.Provider}.{permission.Resource}.{permission.Action}".ToLowerInvariant();
 
     private async Task DeleteAsync()
     {

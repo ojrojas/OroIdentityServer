@@ -49,16 +49,20 @@ the domain side, or `GetPermissionNamesByUserId`, it is the **user** kind.
   (lowercased, `src/Core/Modules/Permissions/Aggregates/Permission.cs:78`).
 - Permissions are assigned to **roles** via `RolePermission` (`Role.AddPermission` /
   `Role.RemovePermission`). Users get permissions transitively through `UserRole`.
-- `Role` and `Permission` are **global catalogue** entities (no tenant column). Tenant scoping is
-  handled by roles/claims such as `tenant_id`, not by permissions.
+- Permissions can **also be granted directly to a user** via `UserPermission`
+  (`User.AddPermission` / `User.RemovePermission`), independently of roles.
+- `Role`, `Permission` and `UserPermission` are **global catalogue** entities (no tenant column).
+  Tenant scoping is handled by roles/claims such as `tenant_id`, not by permissions.
 - The seeded bootstrap permission is `system.*.*` (a **literal** name). Matching is exact, so
   assigning it grants nothing by itself unless a policy asks for exactly `perm:system.*.*`.
   Operators decide which permissions to assign.
 
-The resolution query is `GetPermissionNamesByUserIdQuery`
-(`src/Application/Modules/Permissions/Queries/`) backed by
-`IPermissionRepository.GetPermissionNamesByUserIdAsync`, which returns the distinct names of the
-user's **active** roles (deactivated roles are excluded by the `Role` query filter).
+A user's **effective permissions** are the distinct union of the permissions inherited from their
+**active** roles and the permissions granted **directly** to the user. The resolution query is
+`GetPermissionNamesByUserIdQuery` (`src/Application/Modules/Permissions/Queries/`) backed by
+`IPermissionRepository.GetPermissionNamesByUserIdAsync`. Because it is the single resolution point,
+every emission path (admin cookie, access token, id token, `userinfo`) automatically reflects both
+sources.
 
 ---
 
@@ -198,14 +202,23 @@ if (![].concat(perms).includes('oropos.sales.read')) return res.status(403).end(
 
 ---
 
-## 8. Managing role↔permission assignments
+## 8. Managing role↔permission and user↔permission assignments
 
-- API: `PUT /api/roles/{id}/permissions` (AdminOnly) with body `{ "permissionIds": ["<guid>", ...] }`.
-  The request **replaces** the role's complete permission set.
-- Command: `SetRolePermissionsCommand` (`src/Application/Modules/Roles/Commands/`). Unknown role →
-  `404`; unknown permission id → validation error (`400`), and nothing changes.
-- Console: `RoleDetail.razor` shows a checklist of all permissions and saves the selection.
-- Creating/editing the permission catalogue itself: `POST/PUT/DELETE /api/permissions` (AdminOnly).
+- **Role** permissions: `PUT /api/roles/{id}/permissions` (AdminOnly) with body
+  `{ "permissionIds": ["<guid>", ...] }`. The request **replaces** the role's complete permission
+  set. Command: `SetRolePermissionsCommand` (`src/Application/Modules/Roles/Commands/`). Unknown
+  role → `404`; unknown permission id → validation error (`400`), and nothing changes.
+  Console: `RoleDetail.razor` shows a checklist of all permissions and saves the selection.
+- **Direct user** permissions: `PUT /api/users/{id}/permissions` (Admin/Administrator) with body
+  `{ "permissionIds": ["<guid>", ...] }`. The request **replaces** the user's direct permission
+  set. Command: `AssignPermissionsToUserCommand` (`src/Application/Modules/Users/Commands/`).
+  Unknown user → `404`; unknown permission id → validation error (`400`). Console:
+  `UserDetail.razor` shows a direct-permission checklist plus a read-only **effective
+  permissions** panel (roles ∪ direct).
+- Read a user's effective permission names: `GET /api/users/{id}/effective-permissions`.
+- Creating/editing the permission catalogue itself: `POST/PUT/DELETE /api/permissions` (AdminOnly);
+  the console page is `/permissions` (Admin/Administrator). System permissions (`IsSystem`) are
+  read-only and cannot be deleted.
 
 ---
 
@@ -248,4 +261,6 @@ The exact registration payload, flows, and endpoint list live in the repository 
       after the permission, and not as an OAuth scope.
 - [ ] Access token always; id token and userinfo only with the `permissions` scope.
 - [ ] Server policies are `perm:<exact-permission-name>`; matching is exact, no wildcards.
-- [ ] Assignments are managed per role, not per user.
+- [ ] Effective permissions are the union of role-derived and directly-granted (`UserPermission`)
+      permissions; assignments can be managed per role (`PUT /api/roles/{id}/permissions`) and per
+      user (`PUT /api/users/{id}/permissions`).

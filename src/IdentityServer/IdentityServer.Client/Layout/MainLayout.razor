@@ -48,6 +48,14 @@
                         </a>
                     </Authorized>
                 </AuthorizeView>
+                <AuthorizeView Roles="Admin,Administrator">
+                    <Authorized>
+                        <a class="nav-item @Active("/permissions")" href="/permissions" @onclick="CloseSidebar">
+                            <Icon Name="lock" Size="19" />
+                            @L["NavPermissions"]
+                        </a>
+                    </Authorized>
+                </AuthorizeView>
                 <a class="nav-item @Active("/identification-types")" href="/identification-types" @onclick="CloseSidebar">
                     <Icon Name="document" Size="19" />
                     @L["NavIdentificationTypes"]
@@ -57,7 +65,7 @@
                    The page-level [Authorize] on the corresponding pages is enough to keep
                    non-master-admins out, but we hide the links too so the nav doesn't tease
                    pages that would 403 on entry. *@
-                @if (isMasterAdmin)
+                @if (isAdmin)
                 {
                     <div class="nav-section">@L["NavApplications"]</div>
                     <a class="nav-item @Active("/applications")" href="/applications" @onclick="CloseSidebar">
@@ -147,7 +155,7 @@
     private string brandingAppName = "OroIdentity";
     private string? brandingLogoUrl = "/img/logo.png";
     private PersistingComponentStateSubscription? persistingSubscription;
-    private sealed record PersistedLayoutState(bool IsMasterAdmin, string BrandingAppName, string? BrandingLogoUrl);
+    private sealed record PersistedLayoutState(bool IsAdmin, string BrandingAppName, string? BrandingLogoUrl);
 
     /// <summary>Set by pages through <c>CascadingValue</c>-free convention: derived from the route.</summary>
     private string PageTitle => Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0].TrimEnd('/') switch
@@ -155,6 +163,7 @@
         "" => L["NavDashboard"],
         var p when p.StartsWith("users") => L["NavUsers"],
         var p when p.StartsWith("roles") => L["NavRoles"],
+        var p when p.StartsWith("permissions") => L["NavPermissions"],
         var p when p.StartsWith("identification-types") => L["NavIdentificationTypes"],
         var p when p.StartsWith("applications") => L["NavApplications"],
         var p when p.StartsWith("scopes") => L["NavScopes"],
@@ -169,17 +178,17 @@
     // It is set in OnInitializedAsync from the is_master_admin claim that
     // AdminPasswordSignInService writes into the cookie, so it is available on
     // both the server prerender and the interactive WASM pass.
-    private bool isMasterAdmin;
+    private bool isAdmin;
 
     protected override async Task OnInitializedAsync()
     {
         // Restore persisted state from server prerender (avoids 2nd flash after WASM hydration / culture change)
         if (ApplicationState.TryTakeFromJson<PersistedLayoutState>("layout", out var persisted))
         {
-            isMasterAdmin = persisted.IsMasterAdmin;
+            isAdmin = persisted.IsAdmin;
             brandingAppName = persisted.BrandingAppName;
             brandingLogoUrl = persisted.BrandingLogoUrl;
-            TenantContext.SetMasterAdmin(isMasterAdmin);
+            TenantContext.SetMasterAdmin(isAdmin);
             Nav.LocationChanged += HandleLocationChanged;
             return;
         }
@@ -189,8 +198,8 @@
         // and Role claims (AddAuthenticationStateDeserialization drops custom claims like
         // is_master_admin), so the master admin must be detected via the "Admin" role claim,
         // which AdminPasswordSignInService issues only to the master admin.
-        isMasterAdmin = authState.User.IsInRole("Admin") || authState.User.IsInRole("Administrator");
-        TenantContext.SetMasterAdmin(isMasterAdmin);
+        isAdmin = authState.User.IsInRole("Admin") || authState.User.IsInRole("Administrator");
+        TenantContext.SetMasterAdmin(isAdmin);
 
         Nav.LocationChanged += HandleLocationChanged;
 
@@ -229,7 +238,7 @@
 
         persistingSubscription = ApplicationState.RegisterOnPersisting(() =>
         {
-            ApplicationState.PersistAsJson("layout", new PersistedLayoutState(isMasterAdmin, brandingAppName, brandingLogoUrl));
+            ApplicationState.PersistAsJson("layout", new PersistedLayoutState(isAdmin, brandingAppName, brandingLogoUrl));
             return Task.CompletedTask;
         });
     }

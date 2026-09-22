@@ -22,5 +22,6 @@ public class PermissionEntityConfiguration : IEntityTypeConfiguration<Permission
         builder.Property(p => p.Resource).HasMaxLength(200).IsRequired();
         builder.Property(p => p.Scope).HasMaxLength(200).IsRequired();
         builder.Property(p => p.IsSystem).IsRequired();
+        builder.Property(p => p.CreatedAtUtc).HasColumnName("CreatedAtUtc").IsRequired();
     }
 }

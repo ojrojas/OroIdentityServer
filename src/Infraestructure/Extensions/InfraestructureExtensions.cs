@@ -37,6 +37,7 @@ public static class InfraestructureExtensions
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IRoleRepository, RoleRepository>();
         builder.Services.AddScoped<IUserRolesRepository, UserRolesRepository>();
+        builder.Services.AddScoped<IUserPermissionsRepository, UserPermissionsRepository>();
         builder.Services.AddScoped<IIdentificationTypeRepository, IdentificationTypeRepository>();
         builder.Services.AddScoped<ISecurityUserRepository, SecurityUserRepository>();
         builder.Services.AddScoped<IApplicationTenantRepository, ApplicationTenantRepository>();

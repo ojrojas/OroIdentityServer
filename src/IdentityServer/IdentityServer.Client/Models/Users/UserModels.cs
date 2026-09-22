@@ -17,9 +17,12 @@ public sealed record UserModel(
     bool IsLocked,
     DateTime? LockoutEnd,
     IReadOnlyCollection<UserRoleModel> Roles,
+    IReadOnlyCollection<UserPermissionModel> Permissions,
     DateTime CreatedAtUtc);
 
 public sealed record UserRoleModel(Guid? UserId, Guid? RoleId);
+
+public sealed record UserPermissionModel(Guid? UserId, Guid? PermissionId);
 
 public sealed record CreateUserRequest(
     string Name,
@@ -44,3 +47,5 @@ public sealed record UpdateUserRequest(
     Guid TenantId);
 
 public sealed record AssignRolesRequest(List<Guid> RoleIds);
+
+public sealed record AssignPermissionsRequest(List<Guid> PermissionIds);

@@ -15,7 +15,11 @@ public class GetRoleByIdQueryHandler(
 
         try
         {
-            var role = await roleRepository.GetByIdAsync(new(query.Id), cancellationToken);
+            // Load with the role-permission links so the detail page can show the assigned
+            // permissions (the default GetByIdAsync does not include the collection). Use the
+            // no-tracking read: this query must never attach entities that could conflict with
+            // a graph already tracked in the same scoped context.
+            var role = await roleRepository.GetWithPermissionsNoTrackingAsync(new(query.Id), cancellationToken);
 
             if (role == null)
             {

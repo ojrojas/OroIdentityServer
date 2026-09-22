@@ -12,6 +12,7 @@ public sealed class GetUserByIdSpecification : Specification<User>
         // Catalogue role is required to translate a user's roles into claim names
         // (Admin/Administrator/Manager/Member) at sign-in and in the master-admin check.
         AddInclude("Roles.Role");
+        AddInclude(x => x.Permissions);
         AddInclude(x => x.SecurityUser!);
     }
 }

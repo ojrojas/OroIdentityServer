@@ -349,4 +349,34 @@
   <data name="Deny"><value>Denegar</value></data>
   <data name="RolePermissionsLabel"><value>Permisos</value></data>
   <data name="RolePermissionsHint"><value>Seleccione los permisos de dominio otorgados a este rol.</value></data>
+
+  <!-- Permissions catalogue + direct user permissions -->
+  <data name="NavPermissions"><value>Permisos</value></data>
+  <data name="PermissionsTitle"><value>Permisos</value></data>
+  <data name="NewPermissionTitle"><value>Nuevo permiso</value></data>
+  <data name="PermissionDetailTitle"><value>Permiso</value></data>
+  <data name="PermissionName"><value>Nombre</value></data>
+  <data name="PermissionNamePreview"><value>Nombre: {0}</value></data>
+  <data name="Provider"><value>Proveedor</value></data>
+  <data name="Resource"><value>Recurso</value></data>
+  <data name="Action"><value>Acción</value></data>
+  <data name="Description"><value>Descripción</value></data>
+  <data name="IsSystem"><value>Sistema</value></data>
+  <data name="IsSystemHint"><value>Los permisos de sistema no se pueden modificar ni eliminar.</value></data>
+  <data name="SystemPermissionReadOnly"><value>Este es un permiso de sistema y es de solo lectura.</value></data>
+  <data name="DeletePermissionConfirm"><value>¿Eliminar el permiso "{0}"?</value></data>
+  <data name="PermissionCreatedToast"><value>Permiso creado.</value></data>
+  <data name="PermissionCreateFailedToast"><value>No se pudo crear el permiso ({0}).</value></data>
+  <data name="PermissionDeletedToast"><value>Permiso eliminado.</value></data>
+  <data name="PermissionDeleteFailedToast"><value>No se pudo eliminar el permiso ({0}).</value></data>
+  <data name="StatPermissions"><value>Permisos</value></data>
+  <data name="StatPermissionsNote"><value>Concesiones de autorización de usuario</value></data>
+  <data name="DirectPermissionsSection"><value>Permisos directos</value></data>
+  <data name="SelectPermissionsForUser"><value>Conceda permisos directamente a este usuario, además de sus roles.</value></data>
+  <data name="NoPermissionsAvailable"><value>No hay permisos en el catálogo.</value></data>
+  <data name="NoPermissionsEffective"><value>Sin permisos efectivos.</value></data>
+  <data name="EffectivePermissionsLabel"><value>Permisos efectivos</value></data>
+  <data name="EffectivePermissionsHint"><value>Unión de los permisos heredados de roles y concedidos directamente.</value></data>
+  <data name="PermissionsSavedToast"><value>Permisos guardados.</value></data>
+  <data name="PermissionsSaveFailedToast"><value>No se pudieron guardar los permisos ({0}).</value></data>
 </root>

@@ -1,0 +1,90 @@
+@page "/permissions/create"
+@attribute [Authorize(Roles = "Admin,Administrator")]
+@inject IAdminPermissionService PermissionService
+@inject IToastService ToastService
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["NewPermissionTitle"]</PageTitle>
+
+<Breadcrumb Items="@([new BreadcrumbItem(L["NavPermissions"], "/permissions"), new BreadcrumbItem(L["New"])])" />
+
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["NewPermissionTitle"]</h2>
+    </div>
+
+    <div class="form">
+        <div class="form-grid">
+            <div class="field">
+                <label class="field-label" for="provider">@L["Provider"] <span class="req">*</span></label>
+                <input id="provider" class="input" placeholder="oropos" @bind="provider" @bind:event="oninput" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="resource">@L["Resource"] <span class="req">*</span></label>
+                <input id="resource" class="input" placeholder="sales" @bind="resource" @bind:event="oninput" />
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="field">
+                <label class="field-label" for="action">@L["Action"] <span class="req">*</span></label>
+                <input id="action" class="input" placeholder="read" @bind="action" @bind:event="oninput" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="description">@L["Description"]</label>
+                <input id="description" class="input" @bind="description" @bind:event="oninput" />
+            </div>
+        </div>
+
+        <span class="field-hint">@L["PermissionNamePreview", PreviewName]</span>
+
+        <label class="switch-row" for="isSystem">
+            <span class="switch-row-text">
+                <span class="switch-row-label">@L["IsSystem"]</span>
+                <span class="switch-row-sub">@L["IsSystemHint"]</span>
+            </span>
+            <input id="isSystem" type="checkbox" class="switch" @bind="isSystem" />
+        </label>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@(!CanSubmit || saving)" @onclick="SubmitAsync">@L["Create"]</button>
+            <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/permissions")'>@L["Cancel"]</button>
+        </div>
+    </div>
+</section>
+
+@code {
+    private string provider = string.Empty;
+    private string resource = string.Empty;
+    private string action = string.Empty;
+    private string description = string.Empty;
+    private bool isSystem;
+    private bool saving;
+
+    private bool CanSubmit =>
+        !string.IsNullOrWhiteSpace(provider) &&
+        !string.IsNullOrWhiteSpace(resource) &&
+        !string.IsNullOrWhiteSpace(action);
+
+    private string PreviewName =>
+        $"{provider}.{resource}.{action}".ToLowerInvariant();
+
+    private async Task SubmitAsync()
+    {
+        saving = true;
+        var request = new CreatePermissionRequest(Guid.Empty, provider, description, action, resource, isSystem);
+        var response = await PermissionService.CreatePermissionAsync(request);
+        saving = false;
+
+        if (response.IsSuccessStatusCode)
+        {
+            ToastService.ShowSuccess(L["PermissionCreatedToast"]);
+            Nav.NavigateTo("/permissions");
+        }
+        else
+        {
+            ToastService.ShowError(L["PermissionCreateFailedToast", (int)response.StatusCode]);
+        }
+    }
+}

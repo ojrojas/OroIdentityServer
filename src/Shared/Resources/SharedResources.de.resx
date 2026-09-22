@@ -348,4 +348,34 @@
   <data name="Deny"><value>Ablehnen</value></data>
   <data name="RolePermissionsLabel"><value>Berechtigungen</value></data>
   <data name="RolePermissionsHint"><value>Wählen Sie die dieser Rolle zugewiesenen Domänenberechtigungen aus.</value></data>
+
+  <!-- Permissions catalogue + direct user permissions -->
+  <data name="NavPermissions"><value>Berechtigungen</value></data>
+  <data name="PermissionsTitle"><value>Berechtigungen</value></data>
+  <data name="NewPermissionTitle"><value>Neue Berechtigung</value></data>
+  <data name="PermissionDetailTitle"><value>Berechtigung</value></data>
+  <data name="PermissionName"><value>Name</value></data>
+  <data name="PermissionNamePreview"><value>Name: {0}</value></data>
+  <data name="Provider"><value>Anbieter</value></data>
+  <data name="Resource"><value>Ressource</value></data>
+  <data name="Action"><value>Aktion</value></data>
+  <data name="Description"><value>Beschreibung</value></data>
+  <data name="IsSystem"><value>System</value></data>
+  <data name="IsSystemHint"><value>Systemberechtigungen können nicht geändert oder gelöscht werden.</value></data>
+  <data name="SystemPermissionReadOnly"><value>Dies ist eine Systemberechtigung und schreibgeschützt.</value></data>
+  <data name="DeletePermissionConfirm"><value>Berechtigung "{0}" löschen?</value></data>
+  <data name="PermissionCreatedToast"><value>Berechtigung erstellt.</value></data>
+  <data name="PermissionCreateFailedToast"><value>Berechtigung konnte nicht erstellt werden ({0}).</value></data>
+  <data name="PermissionDeletedToast"><value>Berechtigung gelöscht.</value></data>
+  <data name="PermissionDeleteFailedToast"><value>Berechtigung konnte nicht gelöscht werden ({0}).</value></data>
+  <data name="StatPermissions"><value>Berechtigungen</value></data>
+  <data name="StatPermissionsNote"><value>Benutzerautorisierungen</value></data>
+  <data name="DirectPermissionsSection"><value>Direkte Berechtigungen</value></data>
+  <data name="SelectPermissionsForUser"><value>Weisen Sie diesem Benutzer zusätzlich zu seinen Rollen direkt Berechtigungen zu.</value></data>
+  <data name="NoPermissionsAvailable"><value>Keine Berechtigungen im Katalog.</value></data>
+  <data name="NoPermissionsEffective"><value>Keine effektiven Berechtigungen.</value></data>
+  <data name="EffectivePermissionsLabel"><value>Effektive Berechtigungen</value></data>
+  <data name="EffectivePermissionsHint"><value>Vereinigung der von Rollen geerbten und direkt zugewiesenen Berechtigungen.</value></data>
+  <data name="PermissionsSavedToast"><value>Berechtigungen gespeichert.</value></data>
+  <data name="PermissionsSaveFailedToast"><value>Berechtigungen konnten nicht gespeichert werden ({0}).</value></data>
 </root>

@@ -117,4 +117,13 @@ public class RoleRepository(
 
         return await repository.FirstOrDefaultAsync(new GetRoleWithPermissionsSpecification(roleId), cancellationToken);
     }
+
+    public async Task<Role?> GetWithPermissionsNoTrackingAsync(RoleId roleId, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Getting role with permissions (no tracking) for role: {RoleId}", roleId);
+
+        // The context is globally NoTracking, so the specification-based read is already
+        // detached; this is the read path used by queries (never mutates the graph).
+        return await repository.FirstOrDefaultAsync(new GetRoleWithPermissionsSpecification(roleId), cancellationToken);
+    }
 }

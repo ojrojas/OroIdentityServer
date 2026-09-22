@@ -6,6 +6,7 @@ using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.Users;
 using IdentityServer.Client.Services;
 using OroIdentityServer.Application.Modules.Roles.Queries;
+using OroIdentityServer.Application.Modules.Permissions.Queries;
 using OroIdentityServer.Application.Modules.Users.Commands;
 using OroIdentityServer.Application.Modules.Users.Queries;
 using OroIdentityServer.Core.Modules.Tenants.Repositories;
@@ -156,6 +157,53 @@ public class ServerAdminUserService(
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.OK);
     }
 
+    public async Task<HttpResponseMessage> AssignPermissionsToUserAsync(Guid userId, AssignPermissionsRequest request, CancellationToken ct = default)
+    {
+        var caller = httpContextAccessor.HttpContext?.User;
+        var callerIsMasterAdmin = caller?.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true") == true;
+        var callerIsAdmin = caller?.IsInRole(TenantRole.Admin) == true || caller?.IsInRole(TenantRole.Administrator) == true;
+
+        if (!callerIsAdmin)
+        {
+            return new HttpResponseMessage(HttpStatusCode.Forbidden);
+        }
+
+        // Verify target user exists and check tenant access
+        var target = await queryDispatcher.SendAsync(new GetUserByIdQuery(userId), ct);
+        if (target.Data is null)
+        {
+            return new HttpResponseMessage(HttpStatusCode.NotFound);
+        }
+
+        if (!callerIsMasterAdmin)
+        {
+            // Tenant admin: can only act on users in the caller's home tenant.
+            var callerId = new UserId(Guid.Parse(caller!.FindFirstValue(ClaimTypes.NameIdentifier)!));
+            var callerUser = await queryDispatcher.SendAsync(new GetUserByIdQuery(callerId.Value), ct);
+            if (callerUser.Data?.TenantId is null ||
+                target.Data.TenantId is null ||
+                callerUser.Data.TenantId.Value != target.Data.TenantId.Value)
+            {
+                return new HttpResponseMessage(HttpStatusCode.Forbidden);
+            }
+        }
+
+        var result = await commandDispatcher.SendAsync(new AssignPermissionsToUserCommand(userId, request.PermissionIds), ct);
+        return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.OK);
+    }
+
+    public async Task<ApiResponse<IEnumerable<string>>?> GetEffectivePermissionsAsync(Guid userId, CancellationToken ct = default)
+    {
+        var result = await queryDispatcher.SendAsync(new GetPermissionNamesByUserIdQuery(userId), ct);
+        return new ApiResponse<IEnumerable<string>>
+        {
+            Data = result.Data ?? [],
+            StatusCode = result.StatusCode,
+            Message = result.Message,
+            Errors = result.Errors
+        };
+    }
+
     public async Task<HttpResponseMessage> LockUserAsync(Guid userId, CancellationToken ct = default)
     {
         var result = await commandDispatcher.SendAsync(new LockUserCommand(userId), ct);
@@ -211,9 +259,12 @@ public class ServerAdminUserService(
         user.SecurityUser?.IsLockedOut() ?? false,
         user.SecurityUser?.LockoutEnd,
         user.Roles.Select(MapUserRole).ToList(),
+        user.Permissions.Select(MapUserPermission).ToList(),
         user.CreatedAtUtc);
 
     private static UserRoleModel MapUserRole(UserRole role) => new(role.UserId?.Value, role.RoleId?.Value);
+
+    private static UserPermissionModel MapUserPermission(UserPermission permission) => new(permission.UserId?.Value, permission.PermissionId?.Value);
 
     public async Task<ApiResponse<UserModel>?> GetUserByIdAsync(Guid Id, CancellationToken ct = default)
     {

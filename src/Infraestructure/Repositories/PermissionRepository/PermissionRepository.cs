@@ -54,27 +54,36 @@ public class PermissionRepository(
     {
         logger.LogInformation("Entering GetPermissionNamesByUserIdAsync for userId: {UserId}", userId.Value);
 
+        // Effective permissions = union of role-derived permissions and direct user grants.
+
         // Roles carry a global query filter (IsActive), so deactivated roles are excluded here.
         var roleIds = await context.UserRoles
             .Where(ur => ur.UserId == userId)
             .Select(ur => ur.RoleId!)
             .ToListAsync(cancellationToken);
 
-        if (roleIds.Count == 0)
-        {
-            logger.LogInformation("Exiting GetPermissionNamesByUserIdAsync: user has no roles");
-            return [];
-        }
+        var rolePermissionIds = roleIds.Count == 0
+            ? []
+            : await context.Roles
+                .Where(r => roleIds.Contains(r.Id))
+                .SelectMany(r => r.RolePermissions.Select(rp => rp.PermissionId))
+                .Distinct()
+                .ToListAsync(cancellationToken);
 
-        var permissionIds = await context.Roles
-            .Where(r => roleIds.Contains(r.Id))
-            .SelectMany(r => r.RolePermissions.Select(rp => rp.PermissionId))
+        var directPermissionIds = await context.UserPermissions
+            .Where(up => up.UserId == userId)
+            .Select(up => up.PermissionId)
             .Distinct()
             .ToListAsync(cancellationToken);
 
+        var permissionIds = rolePermissionIds
+            .Concat(directPermissionIds)
+            .Distinct()
+            .ToList();
+
         if (permissionIds.Count == 0)
         {
-            logger.LogInformation("Exiting GetPermissionNamesByUserIdAsync: roles have no permissions");
+            logger.LogInformation("Exiting GetPermissionNamesByUserIdAsync: no role or direct permissions");
             return [];
         }
 
