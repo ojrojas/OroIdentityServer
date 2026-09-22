@@ -10,16 +10,17 @@ var enableRabbitMq = builder.Configuration.GetValue("Resources:RabbitMQ", true);
 var enablePgAdmin = builder.Configuration.GetValue("Resources:PgAdmin", true);
 var enableIdentityAdmin = builder.Configuration.GetValue("Resources:IdentityAdmin", true);
 
-IResourceBuilder<RabbitMQServerResource>? rabbitMq = null;
+IResourceBuilder<RabbitMQServerResource> rabbitMq = null;
 if (enableRabbitMq)
 {
-    rabbitMq = builder.AddRabbitMQ("oroeventdrivenexchange")
+    rabbitMq = builder.AddRabbitMQ("oroeventdrivenexchange").WithImageTag("latest")
         .WithLifetime(ContainerLifetime.Persistent);
 }
 
 var enableDataVolume = builder.Configuration.GetValue("Resources:PostgresDataVolume", true);
 
-IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("postgres");
+IResourceBuilder<PostgresServerResource> postgres = builder.AddPostgres("postgres")
+.WithImageTag("17");
 
 if (enableDataVolume)
 {

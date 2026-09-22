@@ -137,7 +137,12 @@ public class AuthorizationController : Controller
             throw new InvalidOperationException("Details concerning the calling client application cannot be found.");
 
         // Retrieve the permanent authorizations associated with the user and the calling client application.
-        var authorizations = await _authorizationManager.FindAsync(subject: user.Data.Id.Value.ToString(), client: await _applicationManager.GetIdAsync(application, cancellationToken), status: Statuses.Valid, type: AuthorizationTypes.Permanent, scopes: request.GetScopes(), cancellationToken: cancellationToken).ToListAsync(cancellationToken: cancellationToken);
+        var authorizations = await _authorizationManager.FindAsync(
+              query: (Subject: user.Data.Id.Value.ToString(),
+             ApplicationId: await _applicationManager.GetIdAsync(application, cancellationToken),
+             Status: Statuses.Valid,
+             Type: AuthorizationTypes.Permanent, RequiredScopes: request.GetScopes()),
+             cancellationToken: cancellationToken).ToListAsync(cancellationToken);
 
         switch (await _applicationManager.GetConsentTypeAsync(application, cancellationToken))
         {
@@ -186,10 +191,24 @@ public class AuthorizationController : Controller
                 // Automatically create a permanent authorization to avoid requiring explicit consent
                 // for future authorization or token requests containing the same scopes.
                 var authorization = authorizations.LastOrDefault();
-                authorization ??= await _authorizationManager.CreateAsync(identity: identity, subject: user.Data.Id.Value.ToString(), client: (await _applicationManager.GetIdAsync(application, cancellationToken))!, type: AuthorizationTypes.Permanent, scopes: identity.GetScopes(), cancellationToken: cancellationToken);
+                var principal = new ClaimsPrincipal(identity);
+
+                // The authorization must exist before its id can be attached to the identity.
+                authorization ??= await _authorizationManager.CreateAsync(
+                    new OpenIddictAuthorizationDescriptor
+                    {
+                        Subject = user.Data.Id.Value.ToString(),
+                        ApplicationId = await _applicationManager.GetIdAsync(application, cancellationToken),
+                        Principal = principal,
+                        CreationDate = DateTime.UtcNow,
+                        Scopes = [.. identity.GetScopes()],
+                        Status = Statuses.Valid,
+                        Type = AuthorizationTypes.Permanent
+                    },
+                    cancellationToken);
 
                 identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization, cancellationToken));
-                var principal = new ClaimsPrincipal(identity);
+
                 foreach (var claim in identity.Claims)
                     claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
@@ -237,7 +256,13 @@ public class AuthorizationController : Controller
             throw new InvalidOperationException("Details concerning the calling client application cannot be found.");
 
         // Retrieve the permanent authorizations associated with the user and the calling client application.
-        var authorizations = await _authorizationManager.FindAsync(subject: user.Data.Id.Value.ToString(), client: await _applicationManager.GetIdAsync(application, cancellationToken), status: Statuses.Valid, type: AuthorizationTypes.Permanent, scopes: request.GetScopes(), cancellationToken: cancellationToken).ToListAsync(cancellationToken: cancellationToken);
+        var authorizations = await _authorizationManager.FindAsync(
+          query: (Subject: user.Data.Id.Value.ToString(),
+         ApplicationId: await _applicationManager.GetIdAsync(application, cancellationToken),
+         Status: Statuses.Valid,
+         Type: AuthorizationTypes.Permanent, RequiredScopes: request.GetScopes()),
+         cancellationToken: cancellationToken).ToListAsync(cancellationToken);
+
 
         // Note: the same check is already made in the other action but is repeated
         // here to ensure a malicious user can't abuse this POST-only endpoint and
@@ -281,10 +306,24 @@ public class AuthorizationController : Controller
         // Automatically create a permanent authorization to avoid requiring explicit consent
         // for future authorization or token requests containing the same scopes.
         var authorization = authorizations.LastOrDefault();
-        authorization ??= await _authorizationManager.CreateAsync(identity: identity, subject: user.Data.Id.Value.ToString(), client: (await _applicationManager.GetIdAsync(application, cancellationToken))!, type: AuthorizationTypes.Permanent, scopes: identity.GetScopes(), cancellationToken: cancellationToken);
+        var principal = new ClaimsPrincipal(identity);
+
+        // The authorization must exist before its id can be attached to the identity.
+        authorization ??= await _authorizationManager.CreateAsync(
+                    new OpenIddictAuthorizationDescriptor
+                    {
+                        Subject = user.Data.Id.Value.ToString(),
+                        ApplicationId = await _applicationManager.GetIdAsync(application, cancellationToken),
+                        Principal = principal,
+                        CreationDate = DateTime.UtcNow,
+                        Scopes = [.. identity.GetScopes()],
+                        Status = Statuses.Valid,
+                        Type = AuthorizationTypes.Permanent
+                    },
+                    cancellationToken);
 
         identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization, cancellationToken));
-        var principal = new ClaimsPrincipal(identity);
+
         foreach (var claim in identity.Claims)
             claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
