@@ -23,7 +23,7 @@ var postgres = builder.AddPostgres("postgres")
         .WithLifetime(isTesting ? ContainerLifetime.Session : ContainerLifetime.Persistent);
 
 if (usePostgresDataVolume && !isTesting)
-    postgres = postgres.WithDataVolume("oro-postgres-data");
+    postgres = postgres.WithDataVolume("oro-postgres-identity-data");
 
 if (enablePgAdmin)
     postgres = postgres.WithPgAdmin(c => c.WithLifetime(isTesting ? ContainerLifetime.Session : ContainerLifetime.Persistent));
