@@ -532,6 +532,14 @@ public class AuthorizationController : Controller
                 nameType: Claims.Name,
                 roleType: Claims.Role);
 
+            // ClaimsIdentity(IEnumerable<Claim>) copies claims but not OpenIddict's identity properties.
+            // Preserve these properties so access tokens keep their authorized scopes, resources/audience,
+            // authorization link, and presenter when the authorization code is exchanged.
+            identity.SetScopes(result.Principal.GetScopes());
+            identity.SetResources(result.Principal.GetResources());
+            identity.SetAuthorizationId(result.Principal.GetAuthorizationId());
+            identity.SetPresenters(result.Principal.GetPresenters());
+
             var roles = await _queryDispatcher.SendAsync(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
 
             // Override the user claims present in the principal in case they

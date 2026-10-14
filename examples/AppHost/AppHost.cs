@@ -9,6 +9,8 @@ var environment = builder.Environment;
 var enableRabbitMq = builder.Configuration.GetValue("Resources:RabbitMQ", true);
 var enablePgAdmin = builder.Configuration.GetValue("Resources:PgAdmin", true);
 var enableIdentityAdmin = builder.Configuration.GetValue("Resources:IdentityAdmin", true);
+var usePostgresDataVolume = builder.Configuration.GetValue("Resources:PostgresDataVolume", true);
+var isTesting = string.Equals(environment.EnvironmentName, "Testing", StringComparison.OrdinalIgnoreCase);
 
 IResourceBuilder<RabbitMQServerResource> rabbitMq = null;
 if (enableRabbitMq)
@@ -18,9 +20,13 @@ if (enableRabbitMq)
 }
 
 var postgres = builder.AddPostgres("postgres")
-        .WithLifetime(ContainerLifetime.Persistent)
-        .WithDataVolume("oro-postgres-data")
-        .WithPgAdmin(c => c.WithLifetime(ContainerLifetime.Persistent));
+        .WithLifetime(isTesting ? ContainerLifetime.Session : ContainerLifetime.Persistent);
+
+if (usePostgresDataVolume && !isTesting)
+    postgres = postgres.WithDataVolume("oro-postgres-data");
+
+if (enablePgAdmin)
+    postgres = postgres.WithPgAdmin(c => c.WithLifetime(isTesting ? ContainerLifetime.Session : ContainerLifetime.Persistent));
 
 IResourceBuilder<PostgresDatabaseResource> identityDb = postgres.AddDatabase("identitydb");
 
@@ -65,7 +71,7 @@ var eventBusMode = builder.Configuration["EventBus:Mode"] ?? "RabbitMQ";
 // `aspire run` both execute the current code; `aspire publish` builds the
 // container image from this project.
 IResourceBuilder<ProjectResource> identityServer = builder.AddProject<Projects.IdentityServer>("identity-api")
-    .WithHttpEndpoint(port: 5080, name: "http")
+    .WithHttpEndpoint(name: "http")
     .WithReference(identityDb).WaitFor(identityDb)
     .WithEnvironment("SEED_TENANT_NAME", "OroMasterTenant")
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", environment.EnvironmentName)

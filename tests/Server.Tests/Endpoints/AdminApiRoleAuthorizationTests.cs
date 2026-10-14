@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for details.
 using System.Net;
 using System.Net.Http.Json;
+using IdentityServer.Client.Models;
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 using OroIdentityServer.Core.Modules.Roles.Aggregates;
 using OroIdentityServer.Core.Modules.Tenants.Aggregates;
@@ -164,7 +165,11 @@ public sealed class AdminApiRoleAuthorizationTests(AspireIdentityServerApp app)
         Assert.Equal(HttpStatusCode.OK, usersResponse.StatusCode);
 
         // /api/roles is under AdminOnly → Manager is denied.
-        var rolesResponse = await mgrClient.GetAsync("/api/roles");
+        using var rolesRequest = new HttpRequestMessage(HttpMethod.Query, "/api/roles")
+        {
+            Content = JsonContent.Create(new PagedRequest())
+        };
+        var rolesResponse = await mgrClient.SendAsync(rolesRequest);
         Assert.Equal(HttpStatusCode.Forbidden, rolesResponse.StatusCode);
     }
 
@@ -219,7 +224,11 @@ public sealed class AdminApiRoleAuthorizationTests(AspireIdentityServerApp app)
     {
         var client = await LoginInOtherTenantAsync(CatalogueAdministrator);
 
-        var appsResponse = await client.GetAsync("/api/applications");
+        using var appsRequest = new HttpRequestMessage(HttpMethod.Query, "/api/applications")
+        {
+            Content = JsonContent.Create(new PagedRequest())
+        };
+        var appsResponse = await client.SendAsync(appsRequest);
         Assert.Equal(HttpStatusCode.Forbidden, appsResponse.StatusCode);
 
         var scopesResponse = await client.GetAsync("/api/scopes");

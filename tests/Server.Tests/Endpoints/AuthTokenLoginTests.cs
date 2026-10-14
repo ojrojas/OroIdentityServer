@@ -27,21 +27,48 @@ public sealed class AuthTokenLoginTests(AspireIdentityServerApp app)
     private const string Scope = "openid profile email roles";
 
     [Fact]
-    public async Task TokenLogin_WithAuthorizationCodeAndPkce_IssuesTokens()
+    public async Task TokenLogin_WithAuthorizationCodeAndPkce_IssuesIntrospectableApiToken()
     {
         var client = await CreateLoggedInClientAsync();
-        var clientId = await CreatePublicClientAsync(client);
+        var scopeResponse = await client.PostAsJsonAsync("/api/scopes", new
+        {
+            name = "orotrading.api",
+            resources = new[] { "orotrading.api" }
+        });
+        Assert.Equal(HttpStatusCode.Created, scopeResponse.StatusCode);
+
+        var clientId = await CreatePublicClientAsync(client, includeApiScope: true);
         var (verifier, challenge) = CreatePkce();
-
-        var code = await RequestAuthorizationCodeAsync(client, clientId, challenge);
-
+        var code = await RequestAuthorizationCodeAsync(client, clientId, challenge, $"{Scope} orotrading.api");
         var tokenResponse = await ExchangeCodeAsync(client, clientId, code, verifier);
 
         Assert.Equal(HttpStatusCode.OK, tokenResponse.StatusCode);
-        using var payload = JsonDocument.Parse(await tokenResponse.Content.ReadAsStringAsync());
-        Assert.False(string.IsNullOrWhiteSpace(payload.RootElement.GetProperty("access_token").GetString()));
-        Assert.False(string.IsNullOrWhiteSpace(payload.RootElement.GetProperty("id_token").GetString()));
-        Assert.Equal("Bearer", payload.RootElement.GetProperty("token_type").GetString());
+        using var tokenPayload = JsonDocument.Parse(await tokenResponse.Content.ReadAsStringAsync());
+        var accessToken = tokenPayload.RootElement.GetProperty("access_token").GetString();
+        Assert.False(string.IsNullOrWhiteSpace(accessToken));
+        Assert.False(string.IsNullOrWhiteSpace(tokenPayload.RootElement.GetProperty("id_token").GetString()));
+        Assert.Equal("Bearer", tokenPayload.RootElement.GetProperty("token_type").GetString());
+        Assert.Contains("orotrading.api", tokenPayload.RootElement.GetProperty("scope").GetString()!.Split(' '));
+
+        var (introspectionClientId, introspectionSecret) = await CreateIntrospectionClientAsync(client);
+        var introspectionResponse = await client.PostAsync("/connect/introspect", new FormUrlEncodedContent(
+            new Dictionary<string, string>
+            {
+                ["client_id"] = introspectionClientId,
+                ["client_secret"] = introspectionSecret,
+                ["token"] = accessToken!,
+                ["token_type_hint"] = "access_token"
+            }));
+        Assert.Equal(HttpStatusCode.OK, introspectionResponse.StatusCode);
+        using var introspectionPayload = JsonDocument.Parse(await introspectionResponse.Content.ReadAsStringAsync());
+        Assert.True(introspectionPayload.RootElement.GetProperty("active").GetBoolean(),
+            $"The authorization-code access token for orotrading.api must be accepted by introspection. Response: {introspectionPayload.RootElement}");
+        Assert.Contains("orotrading.api", introspectionPayload.RootElement.GetProperty("scope").GetString()!.Split(' '));
+        var audience = introspectionPayload.RootElement.GetProperty("aud");
+        var audiences = audience.ValueKind == JsonValueKind.Array
+            ? audience.EnumerateArray().Select(value => value.GetString())
+            : [audience.GetString()];
+        Assert.Contains("orotrading.api", audiences);
     }
 
     [Fact]
@@ -82,9 +109,17 @@ public sealed class AuthTokenLoginTests(AspireIdentityServerApp app)
     /// Registers a public OIDC application with implicit consent through the admin API,
     /// so the authorize step redirects straight back with a code (no consent screen).
     /// </summary>
-    private static async Task<string> CreatePublicClientAsync(HttpClient client)
+    private static async Task<string> CreatePublicClientAsync(HttpClient client, bool includeApiScope = false)
     {
         var clientId = $"token-login-{Guid.NewGuid():N}";
+        var permissions = new List<string>
+        {
+            "ept:authorization", "ept:token", "ept:end_session", "ept:userinfo",
+            "gt:authorization_code", "gt:refresh_token", "rst:code",
+            "scp:openid", "scp:profile", "scp:email", "scp:roles"
+        };
+        if (includeApiScope) permissions.Add("scp:orotrading.api");
+
         var payload = new
         {
             clientId,
@@ -93,20 +128,7 @@ public sealed class AuthTokenLoginTests(AspireIdentityServerApp app)
             clientType = ClientTypes.Public,
             applicationType = ApplicationTypes.Web,
             consentType = ConsentTypes.Implicit,
-            permissions = new[]
-            {
-                "ept:authorization",
-                "ept:token",
-                "ept:end_session",
-                "ept:userinfo",
-                "gt:authorization_code",
-                "gt:refresh_token",
-                "rst:code",
-                "scp:openid",
-                "scp:profile",
-                "scp:email",
-                "scp:roles"
-            },
+            permissions,
             requirements = new[] { "ft:pkce" },
             redirectUris = new[] { RedirectUri },
             postLogoutRedirectUris = new[] { "https://localhost/token-login-test" }
@@ -117,14 +139,36 @@ public sealed class AuthTokenLoginTests(AspireIdentityServerApp app)
         return clientId;
     }
 
-    private static async Task<string> RequestAuthorizationCodeAsync(HttpClient client, string clientId, string challenge)
+    private static async Task<(string ClientId, string ClientSecret)> CreateIntrospectionClientAsync(HttpClient client)
+    {
+        const string clientId = "orotrading.api";
+        var clientSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+        var response = await client.PostAsJsonAsync("/api/applications", new
+        {
+            clientId,
+            clientSecret,
+            displayName = "Token Introspection Test Client",
+            clientType = ClientTypes.Confidential,
+            applicationType = ApplicationTypes.Web,
+            consentType = ConsentTypes.Implicit,
+            permissions = new[] { "ept:introspection" },
+            requirements = Array.Empty<string>(),
+            redirectUris = Array.Empty<string>(),
+            postLogoutRedirectUris = Array.Empty<string>()
+        });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        return (clientId, clientSecret);
+    }
+
+    private static async Task<string> RequestAuthorizationCodeAsync(
+        HttpClient client, string clientId, string challenge, string? scope = null)
     {
         var parameters = new Dictionary<string, string?>
         {
             ["client_id"] = clientId,
             ["redirect_uri"] = RedirectUri,
             ["response_type"] = "code",
-            ["scope"] = Scope,
+            ["scope"] = scope ?? Scope,
             ["code_challenge"] = challenge,
             ["code_challenge_method"] = "S256",
             ["state"] = $"state-{Guid.NewGuid():N}"

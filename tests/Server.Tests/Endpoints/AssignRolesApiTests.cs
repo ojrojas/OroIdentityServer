@@ -155,6 +155,9 @@ public sealed class AssignRolesApiTests(AspireIdentityServerApp app)
         var user = User.Create(
             $"edit-{Guid.NewGuid():N}", $"{Guid.NewGuid():N}@example.com", "Edit", "", "User",
             Guid.NewGuid().ToString("N"), identificationType.Id, tenant.Id);
+        var securityUser = SecurityUser.Create(await app.PasswordHasher.HashPassword("Abc123456#"));
+        user.AssignSecurityUser(securityUser);
+        context.SecurityUsers.Add(securityUser);
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
@@ -180,8 +183,14 @@ public sealed class AssignRolesApiTests(AspireIdentityServerApp app)
         var deleteResponse = await client.DeleteAsync($"/api/roles/{role.Id.Value}");
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
 
-        var listResponse = await client.GetFromJsonAsync<ApiResponse<List<RoleModel>>>("/api/roles");
-        Assert.NotNull(listResponse);
-        Assert.DoesNotContain(listResponse.Data ?? [], r => r.Id == role.Id.Value);
+        using var listRequest = new HttpRequestMessage(HttpMethod.Query, "/api/roles")
+        {
+            Content = JsonContent.Create(new PagedRequest())
+        };
+        var listResponse = await client.SendAsync(listRequest);
+        Assert.Equal(HttpStatusCode.OK, listResponse.StatusCode);
+        var listPayload = await listResponse.Content.ReadFromJsonAsync<ApiResponse<PagedResponse<RoleModel>>>();
+        Assert.NotNull(listPayload);
+        Assert.DoesNotContain(listPayload.Data?.Items ?? [], r => r.Id == role.Id.Value);
     }
 }
