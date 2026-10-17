@@ -2,12 +2,15 @@
 // Copyright (C) 2026 Oscar Rojas
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
+using System.Globalization;
 using System.Security.Claims;
 using BuildingBlocks.CQRS.Abstractions;
 using IdentityServer.Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
+using OroIdentityServer.Application.Modules.Mfa.Commands;
+using OroIdentityServer.Application.Modules.Mfa.Queries;
 using OroIdentityServer.Application.Modules.UserSessions.Commands;
 using OroIdentityServer.Application.Modules.UserSessions.Queries;
 using OroIdentityServer.Core.Interfaces;
@@ -23,6 +26,7 @@ public static class AuthEndpoints
 
     public sealed record LoginRequest(string LoginIdentifier, string Password, string? ReturnUrl);
     public sealed record ChangePasswordInputModel(string NewPassword, string ConfirmPassword, string? ReturnUrl);
+    public sealed record MfaCodeInputModel(string Code);
 
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
@@ -32,6 +36,7 @@ public static class AuthEndpoints
             HttpContext http,
             [FromForm] LoginInputModel loginInput,
             [FromServices] AdminPasswordSignInService signInService,
+            [FromServices] IQueryDispatcher queryDispatcher,
             [FromServices] ICommandDispatcher commandDispatcher,
             CancellationToken ct) =>
         {
@@ -42,43 +47,136 @@ public static class AuthEndpoints
                 return Results.Redirect($"/Account/Login?error=invalid&ReturnUrl={errorReturnUrl}");
             }
 
-            var sessionToken = Guid.NewGuid().ToString("N");
-            principal.Identities.First().AddClaim(new Claim(SessionTokenClaimType, sessionToken));
-
-            await http.SignInAsync(CookieAuthHandlerSetup.AdminScheme, principal);
-
             var userIdClaim = principal.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim is not null && Guid.TryParse(userIdClaim, out var userId))
-            {
-                var userAgent = http.Request.Headers.UserAgent.ToString();
-                var device = ParseDeviceFromUserAgent(userAgent);
-                var ipAddress = http.Connection.RemoteIpAddress?.ToString();
+            if (userIdClaim is null || !Guid.TryParse(userIdClaim, out var userId))
+                return Results.Redirect("/Account/Login?error=invalid");
 
-                try
-                {
-                    await commandDispatcher.SendAsync(new CreateUserSessionCommand(
-                        userId, device, sessionToken,
-                        DateTime.UtcNow.AddHours(8),
-                        ipAddress, userAgent, null), ct);
-                }
-                catch (Exception ex)
-                {
-                    var logger = http.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("AuthEndpoints");
-                    logger.LogError(ex, "Failed to create user session for user {UserId}", userId);
-                }
+            // The password is only half of the story: once MFA is due, no session is created and
+            // no admin cookie is written. The pending challenge cookie is the only thing that
+            // survives, and it cannot sign anyone in.
+            var requirement = await queryDispatcher.SendAsync(new IsMfaRequiredQuery(userId), ct);
+            if (requirement.IsRequired)
+            {
+                if (requirement.RequiresEnrollment)
+                    await commandDispatcher.SendAsync(new StartMfaEnrollmentCommand(userId), ct);
+
+                var issued = await commandDispatcher.SendAsync(new CreateMfaLoginChallengeCommand(
+                    userId,
+                    requirement.RequiresEnrollment,
+                    loginInput.ReturnUrl,
+                    http.Connection.RemoteIpAddress?.ToString(),
+                    http.Request.Headers.UserAgent.ToString()), ct);
+
+                await CookieAuthHandlerSetup.StartMfaChallengeAsync(http, issued.Token);
+
+                return Results.Redirect(requirement.RequiresEnrollment ? "/Account/MfaSetup" : "/Account/Mfa");
             }
 
-            if (principal.HasClaim(c => c.Type == AdminPasswordSignInService.MustChangePasswordClaimType))
-            {
-                if (string.IsNullOrWhiteSpace(loginInput.ReturnUrl))
-                    return Results.Redirect("/Account/ChangePassword");
+            return await CompleteSignInAsync(http, principal, userId, loginInput.ReturnUrl, commandDispatcher, ct);
+        }).DisableAntiforgery();
 
-                var changePasswordReturnUrl = Uri.EscapeDataString(loginInput.ReturnUrl);
-                return Results.Redirect($"/Account/ChangePassword?ReturnUrl={changePasswordReturnUrl}");
+        // Second step of the login: the password already checked out, the authenticator must now
+        // confirm. Only on success is the admin cookie issued and the UserSession created.
+        group.MapPost("/mfa", async (
+            HttpContext http,
+            [FromForm] MfaCodeInputModel input,
+            [FromServices] AdminPasswordSignInService signInService,
+            [FromServices] ICommandDispatcher commandDispatcher,
+            CancellationToken ct) =>
+        {
+            var challengeToken = await CookieAuthHandlerSetup.GetPendingMfaChallengeTokenAsync(http);
+            if (string.IsNullOrEmpty(challengeToken) || string.IsNullOrWhiteSpace(input.Code))
+                return Results.Redirect("/Account/Login?error=mfa");
+
+            var verification = await commandDispatcher.SendAsync(
+                new VerifyMfaChallengeCommand(challengeToken, input.Code), ct);
+
+            if (!verification.Succeeded)
+            {
+                var reason = verification.IsLocked ? "locked" : "invalid";
+                return Results.Redirect($"/Account/Mfa?error={reason}&attempts={verification.AttemptsRemaining}");
             }
 
-            var target = string.IsNullOrWhiteSpace(loginInput.ReturnUrl) ? "/" : loginInput.ReturnUrl;
-            return Results.Redirect(target);
+            await CookieAuthHandlerSetup.ClearMfaChallengeAsync(http);
+
+            var principal = await signInService.BuildPrincipalForSignedInUserAsync(verification.UserId, ct);
+            if (principal is null)
+                return Results.Redirect("/Account/Login?error=invalid");
+
+            return await CompleteSignInAsync(http, principal, verification.UserId, verification.ReturnUrl, commandDispatcher, ct);
+        }).DisableAntiforgery();
+
+        // Enrolment path (tenant policy): confirm the first code against the freshly issued
+        // secret, which is also what consumes the time step so the enrolment code cannot be
+        // replayed as a login code.
+        group.MapPost("/mfa/enroll", async (
+            HttpContext http,
+            [FromForm] MfaCodeInputModel input,
+            [FromServices] AdminPasswordSignInService signInService,
+            [FromServices] IQueryDispatcher queryDispatcher,
+            [FromServices] ICommandDispatcher commandDispatcher,
+            CancellationToken ct) =>
+        {
+            var challengeToken = await CookieAuthHandlerSetup.GetPendingMfaChallengeTokenAsync(http);
+            if (string.IsNullOrEmpty(challengeToken) || string.IsNullOrWhiteSpace(input.Code))
+                return Results.Redirect("/Account/Login?error=mfa");
+
+            // The user id comes from the challenge, never from the form, so a submission cannot
+            // confirm a credential belonging to somebody else.
+            var challenge = await queryDispatcher.SendAsync(new GetMfaChallengeQuery(challengeToken), ct);
+            if (!challenge.Found || !challenge.IsUsable)
+                return Results.Redirect("/Account/MfaSetup?error=expired");
+
+            try
+            {
+                await commandDispatcher.SendAsync(new ConfirmMfaEnrollmentCommand(challenge.UserId, input.Code), ct);
+            }
+            catch (InvalidOperationException)
+            {
+                return Results.Redirect("/Account/MfaSetup?error=invalid");
+            }
+
+            var completion = await commandDispatcher.SendAsync(
+                new CompleteMfaEnrollmentChallengeCommand(challengeToken), ct);
+            if (!completion.Succeeded)
+                return Results.Redirect("/Account/MfaSetup?error=expired");
+
+            await CookieAuthHandlerSetup.ClearMfaChallengeAsync(http);
+
+            var principal = await signInService.BuildPrincipalForSignedInUserAsync(challenge.UserId, ct);
+            if (principal is null)
+                return Results.Redirect("/Account/Login?error=invalid");
+
+            return await CompleteSignInAsync(http, principal, challenge.UserId, challenge.ReturnUrl, commandDispatcher, ct);
+        }).DisableAntiforgery();
+
+        // Second factor still pending: the QR, served as PNG so the statically rendered page does
+        // not need JavaScript. Only reachable while holding the pending challenge cookie.
+        group.MapGet("/mfa/qr", async (
+            HttpContext http,
+            [FromServices] IQueryDispatcher queryDispatcher,
+            [FromServices] IQrCodeGenerator qrCodeGenerator,
+            CancellationToken ct) =>
+        {
+            var challengeToken = await CookieAuthHandlerSetup.GetPendingMfaChallengeTokenAsync(http);
+            if (string.IsNullOrEmpty(challengeToken))
+                return Results.NotFound();
+
+            var challenge = await queryDispatcher.SendAsync(new GetMfaChallengeQuery(challengeToken), ct);
+            if (!challenge.Found)
+                return Results.NotFound();
+
+            try
+            {
+                var payload = await queryDispatcher.SendAsync(
+                    new GetMfaEnrollmentSecretQuery(challenge.UserId), ct);
+
+                return Results.File(qrCodeGenerator.GeneratePng(payload.ProvisioningUri), "image/png");
+            }
+            catch (InvalidOperationException)
+            {
+                return Results.NotFound();
+            }
         }).DisableAntiforgery();
 
         group.MapMethods("/logout", [HttpMethod.Get.Method, HttpMethod.Post.Method], async (
@@ -129,6 +227,7 @@ public static class AuthEndpoints
             }
 
             await http.SignOutAsync(CookieAuthHandlerSetup.AdminScheme);
+            await http.SignOutAsync(CookieAuthHandlerSetup.MfaPendingScheme);
             return Results.Redirect("/Account/Login");
         }).DisableAntiforgery();
 
@@ -174,6 +273,75 @@ public static class AuthEndpoints
         }).DisableAntiforgery();
 
         return app;
+    }
+
+    /// <summary>
+    /// The single place that turns a verified identity into a signed-in session: writes the admin
+    /// cookie, opens the <c>UserSession</c> row and decides where to send the user next. Shared by
+    /// the password step and by both second-factor steps so they cannot drift apart.
+    /// </summary>
+    internal static async Task<IResult> CompleteSignInAsync(
+        HttpContext http,
+        ClaimsPrincipal principal,
+        Guid userId,
+        string? returnUrl,
+        ICommandDispatcher commandDispatcher,
+        CancellationToken ct)
+    {
+        var sessionToken = Guid.NewGuid().ToString("N");
+        principal.Identities.First().AddClaim(new Claim(SessionTokenClaimType, sessionToken));
+
+        await http.SignInAsync(CookieAuthHandlerSetup.AdminScheme, principal);
+
+        var userAgent = http.Request.Headers.UserAgent.ToString();
+        var device = ParseDeviceFromUserAgent(userAgent);
+        var ipAddress = http.Connection.RemoteIpAddress?.ToString();
+
+        try
+        {
+            await commandDispatcher.SendAsync(new CreateUserSessionCommand(
+                userId, device, sessionToken,
+                DateTime.UtcNow.Add(CookieAuthHandlerSetup.SessionLifetime),
+                ipAddress, userAgent, null,
+                CurrentCulture()), ct);
+        }
+        catch (Exception ex)
+        {
+            var logger = http.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("AuthEndpoints");
+            logger.LogError(ex, "Failed to create user session for user {UserId}", userId);
+        }
+
+        var safeReturnUrl = SanitizeReturnUrl(returnUrl);
+
+        if (principal.HasClaim(c => c.Type == AdminPasswordSignInService.MustChangePasswordClaimType))
+        {
+            if (string.IsNullOrEmpty(safeReturnUrl))
+                return Results.Redirect("/Account/ChangePassword");
+
+            return Results.Redirect($"/Account/ChangePassword?ReturnUrl={Uri.EscapeDataString(safeReturnUrl)}");
+        }
+
+        return Results.Redirect(string.IsNullOrEmpty(safeReturnUrl) ? "/" : safeReturnUrl);
+    }
+
+    /// <summary>
+    /// Only same-origin relative paths are accepted as a return target; anything else (an
+    /// absolute URL to another host) would turn the login form into an open redirect.
+    /// </summary>
+    internal static string? SanitizeReturnUrl(string? returnUrl)
+    {
+        if (string.IsNullOrWhiteSpace(returnUrl)) return null;
+
+        if (!returnUrl.StartsWith('/') || returnUrl.StartsWith("//", StringComparison.Ordinal) || returnUrl.StartsWith("/\\", StringComparison.Ordinal))
+            return null;
+
+        return returnUrl;
+    }
+
+    private static string? CurrentCulture()
+    {
+        var culture = CultureInfo.CurrentUICulture;
+        return string.IsNullOrWhiteSpace(culture.Name) ? null : culture.Name;
     }
 
     internal static string ParseDeviceFromUserAgent(string? userAgent)

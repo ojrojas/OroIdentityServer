@@ -49,6 +49,9 @@ public class AdminUserService(HttpClient client) : IAdminUserService
     public Task<HttpResponseMessage> DeactivateUserAsync(Guid userId, CancellationToken ct = default)
         => client.PostAsync($"api/users/{userId}/deactivate", null, ct);
 
+    public Task<HttpResponseMessage> ResetMfaAsync(Guid userId, CancellationToken ct = default)
+        => client.PostAsync($"api/users/{userId}/mfa/reset", null, ct);
+
     public Task<HttpResponseMessage> ActivateUserAsync(Guid userId, CancellationToken ct = default)
         => client.PostAsync($"api/users/{userId}/activate", null, ct);
 

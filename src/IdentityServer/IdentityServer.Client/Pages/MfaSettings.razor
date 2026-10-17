@@ -1,0 +1,281 @@
+@page "/account/security/mfa"
+@inject IAdminMfaService MfaService
+@inject IToastService ToastService
+@inject IStringLocalizer<SharedResources> L
+
+<PageTitle>@L["MfaSettingsTitle"]</PageTitle>
+
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@L["MfaSettingsTitle"]</h2>
+    </div>
+
+    @if (status is null)
+    {
+        <div class="spinner spinner-lg spinner-center"></div>
+    }
+    else
+    {
+        @if (status.TenantRequiresMfa)
+        {
+            <div class="alert alert-info">@L["MfaTenantPolicyNotice"]</div>
+        }
+
+        @if (status.IsEnabled)
+        {
+            <div class="empty">
+                <p class="empty-title">@L["MfaEnabled"]</p>
+                <p>@L["MfaEnabledSince", status.ConfirmedAtUtc?.ToString("g") ?? "-"]</p>
+                <p>@L["MfaRecoveryCodesLeft", status.UnusedRecoveryCodes]</p>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn" disabled="@busy" @onclick="RegenerateRecoveryCodesAsync">
+                    @L["MfaRegenerateCodes"]
+                </button>
+                <button type="button" class="btn btn-danger" disabled="@busy" @onclick="StartDisableAsync">
+                    @L["MfaDisable"]
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="empty">
+                <p class="empty-title">@L["MfaDisabled"]</p>
+                <p>@L["MfaDisabledHint"]</p>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="StartEnrollmentAsync">
+                    @L["MfaEnable"]
+                </button>
+            </div>
+        }
+    }
+</section>
+
+@if (enrollment is not null)
+{
+    <section class="card">
+        <div class="card-head">
+            <h2 class="card-title">@L["MfaSetupTitle"]</h2>
+        </div>
+
+        <ol class="auth-steps">
+            <li>@L["MfaSetupStep1"]</li>
+            <li>@L["MfaSetupStep2"]</li>
+            <li>@L["MfaSetupStep3"]</li>
+        </ol>
+
+        <div class="auth-qr">
+            <img src="@enrollment.QrCodeDataUri" alt="@L["MfaQrAlt"]" width="220" height="220" />
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="manualKey">@L["MfaManualKey"]</label>
+            <input id="manualKey" class="input" readonly value="@enrollment.ManualKey" />
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="enrollCode">@L["MfaCodeLabel"]</label>
+            <input id="enrollCode"
+                   class="input"
+                   type="text"
+                   inputmode="numeric"
+                   maxlength="10"
+                   placeholder="000000"
+                   @bind="enrollmentCode" />
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ConfirmEnrollmentAsync">
+                @L["MfaConfirmButton"]
+            </button>
+            <button type="button" class="btn" disabled="@busy" @onclick="CancelEnrollmentAsync">
+                @L["Cancel"]
+            </button>
+        </div>
+    </section>
+}
+
+@if (recoveryCodes is { Count: > 0 })
+{
+    <section class="card">
+        <div class="card-head">
+            <h2 class="card-title">@L["MfaRecoveryCodesTitle"]</h2>
+        </div>
+
+        <div class="alert alert-info">@L["MfaRecoveryCodesWarning"]</div>
+
+        <div class="table-wrap">
+            <table class="table">
+                <tbody>
+                    @foreach (var recoveryCode in recoveryCodes)
+                    {
+                        <tr>
+                            <td class="cell-strong">@recoveryCode</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+@if (showDisableForm)
+{
+    <section class="card">
+        <div class="card-head">
+            <h2 class="card-title">@L["MfaDisable"]</h2>
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="disablePassword">@L["Password"]</label>
+            <input id="disablePassword" class="input" type="password" autocomplete="current-password" @bind="disablePassword" />
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="disableCode">@L["MfaCodeLabel"]</label>
+            <input id="disableCode" class="input" type="text" inputmode="numeric" maxlength="10" @bind="disableCode" />
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn btn-danger" disabled="@busy" @onclick="DisableAsync">
+                @L["MfaDisable"]
+            </button>
+            <button type="button" class="btn" disabled="@busy" @onclick="@(() => showDisableForm = false)">
+                @L["Cancel"]
+            </button>
+        </div>
+    </section>
+}
+
+@code {
+    private Models.Mfa.MfaStatusModel? status;
+    private Models.Mfa.MfaEnrollmentModel? enrollment;
+    private IReadOnlyList<string>? recoveryCodes;
+    private string enrollmentCode = string.Empty;
+    private string disablePassword = string.Empty;
+    private string disableCode = string.Empty;
+    private bool showDisableForm;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync() => await LoadStatusAsync();
+
+    private async Task LoadStatusAsync()
+    {
+        var response = await MfaService.GetStatusAsync();
+        status = response?.Data;
+    }
+
+    private async Task StartEnrollmentAsync()
+    {
+        busy = true;
+        try
+        {
+            var response = await MfaService.StartEnrollmentAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                ToastService.ShowError(L["UnexpectedError"]);
+                return;
+            }
+
+            enrollment = await response.Content.ReadFromJsonAsync<Models.Mfa.MfaEnrollmentModel>(ClientJsonOptions.Default);
+            enrollmentCode = string.Empty;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task ConfirmEnrollmentAsync()
+    {
+        busy = true;
+        try
+        {
+            var response = await MfaService.ConfirmEnrollmentAsync(enrollmentCode);
+            if (!response.IsSuccessStatusCode)
+            {
+                ToastService.ShowError(L["MfaInvalidCode"]);
+                return;
+            }
+
+            var codes = await response.Content.ReadFromJsonAsync<Models.Mfa.RecoveryCodesModel>(ClientJsonOptions.Default);
+            recoveryCodes = codes?.RecoveryCodes;
+            enrollment = null;
+            enrollmentCode = string.Empty;
+
+            ToastService.ShowSuccess(L["MfaEnabled"]);
+            await LoadStatusAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task CancelEnrollmentAsync()
+    {
+        enrollment = null;
+        enrollmentCode = string.Empty;
+        await Task.CompletedTask;
+    }
+
+    private async Task RegenerateRecoveryCodesAsync()
+    {
+        busy = true;
+        try
+        {
+            var response = await MfaService.RegenerateRecoveryCodesAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                ToastService.ShowError(L["UnexpectedError"]);
+                return;
+            }
+
+            var codes = await response.Content.ReadFromJsonAsync<Models.Mfa.RecoveryCodesModel>(ClientJsonOptions.Default);
+            recoveryCodes = codes?.RecoveryCodes;
+
+            await LoadStatusAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void StartDisableAsync()
+    {
+        showDisableForm = true;
+        disablePassword = string.Empty;
+        disableCode = string.Empty;
+    }
+
+    private async Task DisableAsync()
+    {
+        busy = true;
+        try
+        {
+            var response = await MfaService.DisableAsync(
+                new Models.Mfa.MfaDisableRequest(disablePassword, disableCode));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ToastService.ShowError(L["MfaInvalidCode"]);
+                return;
+            }
+
+            showDisableForm = false;
+            disablePassword = string.Empty;
+            disableCode = string.Empty;
+
+            ToastService.ShowSuccess(L["MfaDisabled"]);
+            await LoadStatusAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

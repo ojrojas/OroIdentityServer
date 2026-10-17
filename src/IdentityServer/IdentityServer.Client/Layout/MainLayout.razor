@@ -85,6 +85,10 @@
                     <Icon Name="plug" Size="19" />
                     @L["NavSessions"]
                 </a>
+                <a class="nav-item @Active("/account/security/mfa")" href="/account/security/mfa" @onclick="CloseSidebar">
+                    <Icon Name="shield" Size="19" />
+                    @L["NavMfa"]
+                </a>
                 <AuthorizeView Roles="Admin,Administrator,Manager">
                     <Authorized>
                         <a class="nav-item @Active("/hierarchy/manage")" href="/hierarchy/manage" @onclick="CloseSidebar">
@@ -170,6 +174,7 @@
         var p when p.StartsWith("tenants/create") => L["NewTenantTitle"],
         var p when p.StartsWith("tenants") => L["NavTenants"],
         var p when p.StartsWith("sessions") => L["NavSessions"],
+        var p when p.StartsWith("account/security/mfa") => L["MfaSettingsTitle"],
         var p when p.StartsWith("hierarchy") => L["NavHierarchy"],
         _ => L["NavDashboard"]
     };

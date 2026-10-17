@@ -19,6 +19,7 @@ public sealed class UpdateTenantCommandHandler(
                 ?? throw new InvalidOperationException($"Tenant '{command.TenantId}' not found.");
 
             tenant.UpdateName(new TenantName(command.Name));
+            tenant.UpdateMfaPolicy(command.RequireMfa);
 
             await tenantRepository.UpdateAsync(tenant, ct);
 

@@ -19,6 +19,10 @@ public class TenantEntityConfiguration : IEntityTypeConfiguration<Tenant>
             .HasColumnName("IsActive")
             .IsRequired();
 
+        builder.Property(it => it.RequireMfa)
+            .HasColumnName("RequireMfa")
+            .IsRequired();
+
         builder.Property(it => it.Name)
             .HasConversion(
                 name => name.Value,

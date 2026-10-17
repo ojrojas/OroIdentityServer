@@ -4,7 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Application.Modules.Tenants.Commands;
 
-public record UpdateTenantCommand(Guid TenantId, string Name) : ICommand
+public record UpdateTenantCommand(Guid TenantId, string Name, bool RequireMfa = false) : ICommand
 {
     public Guid CorrelationId { get; init; } = Guid.NewGuid();
 }

@@ -185,6 +185,9 @@
                 <button type="button" class="btn btn-primary" disabled="@saving" @onclick="SaveAsync">@L["Save"]</button>
                 <button type="button" class="btn btn-ghost" @onclick='() => Nav.NavigateTo("/users")'>@L["Back"]</button>
                 <div class="spacer"></div>
+                <button type="button" class="btn" disabled="@saving" @onclick="ResetMfaAsync" title="@L["MfaResetHint"]">
+                    <Icon Name="shield" Size="15" /> @L["MfaReset"]
+                </button>
                 <button type="button" class="btn btn-danger" @onclick="DeleteAsync">
                     <Icon Name="trash" Size="15" /> @L["Delete"]
                 </button>
@@ -428,6 +431,24 @@
 
     private static string PermissionName(PermissionModel permission) =>
         $"{permission.Provider}.{permission.Resource}.{permission.Action}".ToLowerInvariant();
+
+    /// <summary>
+    /// Support path for a user who lost their phone: drops the factor so the next login sends
+    /// them through enrolment again. No code is required from the operator.
+    /// </summary>
+    private async Task ResetMfaAsync()
+    {
+        var ok = await DialogService.ConfirmAsync(
+            L["ConfirmActionTitle"], L["MfaResetConfirm", item?.UserName ?? Id.ToString()],
+            L["MfaReset"], L["Cancel"]);
+        if (!ok) return;
+
+        var response = await UserService.ResetMfaAsync(Id);
+        if (response.IsSuccessStatusCode)
+            ToastService.ShowSuccess(L["MfaResetDone"]);
+        else
+            ToastService.ShowError(L["MfaResetFailed", (int)response.StatusCode]);
+    }
 
     private async Task DeleteAsync()
     {

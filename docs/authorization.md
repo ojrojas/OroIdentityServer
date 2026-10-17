@@ -240,6 +240,35 @@ The exact registration payload, flows, and endpoint list live in the repository 
 
 ---
 
+## 9.1 What a client sees when the user has MFA enabled
+
+MFA lives **entirely inside the interactive login**, so a client application does not have to
+implement anything — but it does have to tolerate one extra user-facing step:
+
+1. The browser posts to `/auth/login`. With a second factor enabled, no token is issued and no
+   `UserSession` is created; the server stores a short-lived, single-use challenge and redirects
+   the browser to its own `/Account/Mfa` page.
+2. The user enters the authenticator code (or a recovery code) there, and only then is the
+   `oro.identity.admin` cookie issued — the same cookie an RP-initiated `connect/authorize`
+   accepts. From that point on the flow is unchanged.
+3. If the user has no factor yet and the tenant requires one, the login is routed through
+   `/Account/MfaSetup` (QR + manual key) instead.
+
+Consequences worth knowing:
+
+- No new parameter, claim or scope is involved; the token contents are identical whether MFA was
+  used or not. Tokens do **not** currently carry `amr`/`acr`.
+- `prompt=none` still answers `login_required` for an unauthenticated browser; a silent renew
+  cannot cross the MFA step, by design.
+- Clients must treat "redirect to an IdentityServer-owned page" as normal. Do not hard-code
+  assumptions about the number of redirects during a login.
+- An expired admin session now redirects to `/Account/Login?reason=expired&ReturnUrl=...` instead
+  of a bare login URL, and `401` responses from `/api/*` carry a `Location` header pointing at the
+  same page. Web clients can use that header to send the user back to the login page; the bundled
+  admin console does it through a `DelegatingHandler`.
+
+---
+
 ## 10. Troubleshooting
 
 | Symptom | Likely cause |
@@ -250,6 +279,9 @@ The exact registration payload, flows, and endpoint list live in the repository 
 | Token too large | Many permissions produce many claims. Request `permissions` only when needed; the access token always carries them, so consider trimming role assignments. |
 | `invalid_client` / `unauthorized_client` at the token endpoint | This is an OpenIddict **client** permission/grant issue (`gt:`), unrelated to user permissions. |
 | `permissionIds` request returns 400 | One or more permission ids do not exist. |
+| Login redirects to `/Account/Mfa` instead of the application | The user has MFA enabled; the second factor is cleared in the browser, not by the client. |
+| A freshly enrolled code is rejected right after confirming enrolment | Confirming burns that 30-second time step (anti-replay). Use the next code the app shows. |
+| `Unprotect` of a TOTP secret fails at runtime | The Data Protection key ring (`data-protection-keys/`) changed or was not persisted; without it every enrolled authenticator is unusable. |
 
 ---
 

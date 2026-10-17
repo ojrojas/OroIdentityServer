@@ -5,6 +5,7 @@ using IdentityServer.Client.Interfaces;
 using IdentityServer.Client.Models;
 using IdentityServer.Client.Models.Users;
 using IdentityServer.Client.Services;
+using OroIdentityServer.Application.Modules.Mfa.Commands;
 using OroIdentityServer.Application.Modules.Roles.Queries;
 using OroIdentityServer.Application.Modules.Permissions.Queries;
 using OroIdentityServer.Application.Modules.Users.Commands;
@@ -225,6 +226,12 @@ public class ServerAdminUserService(
     public async Task<HttpResponseMessage> ActivateUserAsync(Guid userId, CancellationToken ct = default)
     {
         var result = await commandDispatcher.SendAsync(new ActivateUserCommand(userId), ct);
+        return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
+    }
+
+    public async Task<HttpResponseMessage> ResetMfaAsync(Guid userId, CancellationToken ct = default)
+    {
+        var result = await commandDispatcher.SendAsync(new ResetMfaCommand(userId), ct);
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }
 

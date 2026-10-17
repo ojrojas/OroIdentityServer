@@ -26,5 +26,10 @@ public class UserSessionEntityConfiguration : IEntityTypeConfiguration<UserSessi
         builder.Property(s => s.IpAddress).HasMaxLength(100);
         builder.Property(s => s.UserAgent).HasMaxLength(1000);
         builder.Property(s => s.Location).HasMaxLength(300);
+        builder.Property(s => s.Culture).HasMaxLength(10);
+
+        // The expiry sweep scans "still open but past due" rows, so index that pair.
+        builder.HasIndex(s => new { s.EndReason, s.ExpiresAt })
+            .HasDatabaseName("IX_UserSessions_EndReason_ExpiresAt");
     }
 }

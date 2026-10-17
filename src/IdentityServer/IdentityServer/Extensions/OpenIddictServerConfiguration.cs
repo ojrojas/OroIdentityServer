@@ -5,6 +5,7 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using OroIdentityServer.Infraestructure;
+using OroIdentityServer.Server.Jobs;
 using OroIdentityServer.Shared.Authorization;
 using Quartz;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -19,6 +20,18 @@ public static class OpenIddictServerConfiguration
         {
             options.UseSimpleTypeLoader();
             options.UseInMemoryStore();
+
+            // Sweep for sessions that timed out and owe their owner a notification.
+            options.AddJob<ExpiredSessionNotificationJob>(job =>
+                job.WithIdentity(ExpiredSessionNotificationJob.JobName).StoreDurably());
+
+            options.AddTrigger(trigger => trigger
+                .ForJob(ExpiredSessionNotificationJob.JobName)
+                .WithIdentity($"{ExpiredSessionNotificationJob.JobName}-trigger")
+                .StartNow()
+                .WithSimpleSchedule(schedule => schedule
+                    .WithInterval(TimeSpan.FromMinutes(5))
+                    .RepeatForever()));
         });
 
         builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);

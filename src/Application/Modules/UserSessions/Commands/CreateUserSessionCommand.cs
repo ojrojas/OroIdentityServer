@@ -11,7 +11,8 @@ public record CreateUserSessionCommand(
     DateTime ExpiresAt,
     string? IpAddress,
     string? UserAgent,
-    string? Location
+    string? Location,
+    string? Culture = null
 ) : ICommand
 {
     public Guid CorrelationId { get; init; } = Guid.NewGuid();

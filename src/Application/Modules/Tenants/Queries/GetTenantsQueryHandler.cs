@@ -23,7 +23,8 @@ public sealed class GetTenantsQueryHandler(
                 t.Slug.Value,
                 t.IsActive,
                 t.CreatedAtUtc,
-                t.TenantUsers.Count));
+                t.TenantUsers.Count,
+                t.RequireMfa));
 
             logger.LogInformation("Successfully retrieved tenants");
 

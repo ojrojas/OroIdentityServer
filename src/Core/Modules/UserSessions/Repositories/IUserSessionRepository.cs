@@ -15,7 +15,29 @@ public interface IUserSessionRepository
     Task<IEnumerable<UserSession>> GetActiveSessionsAsync(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Sessions that ran past <paramref name="asOf"/> while still open and that have not been
+    /// notified yet, with just enough user data to write the notification. Probes the index on
+    /// (EndReason, ExpiresAt) and returns at most <paramref name="maxCount"/> rows so one sweep
+    /// cannot pull the whole table into memory.
+    /// </summary>
+    Task<IReadOnlyList<ExpiredSessionInfo>> GetExpiredPendingNotificationAsync(
+        DateTime asOf,
+        int maxCount,
+        CancellationToken cancellationToken);
+
+    /// <summary>
     /// Counts distinct users that currently have at least one active (non-expired) session.
     /// </summary>
     Task<int> CountActiveUsersAsync(CancellationToken cancellationToken);
 }
+
+/// <summary>Projection used by the expiry notification sweep.</summary>
+public sealed record ExpiredSessionInfo(
+    Guid SessionId,
+    Guid UserId,
+    string? UserName,
+    string? Email,
+    string? Device,
+    string? Location,
+    string? Culture,
+    DateTime ExpiresAt);

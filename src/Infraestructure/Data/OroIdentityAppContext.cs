@@ -25,6 +25,9 @@ public class OroIdentityAppContext(
     public DbSet<UserCompanyPreference> UserCompanyPreferences { get; set; }
     public DbSet<UserReportingRelationship> UserReportingRelationships { get; set; }
     public DbSet<RelationshipAuditLog> RelationshipAuditLogs { get; set; }
+    public DbSet<MfaCredential> MfaCredentials { get; set; }
+    public DbSet<MfaRecoveryCode> MfaRecoveryCodes { get; set; }
+    public DbSet<MfaLoginChallenge> MfaLoginChallenges { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -32,6 +35,9 @@ public class OroIdentityAppContext(
         builder.ApplyConfiguration(new ApplicationTenantEntityConfiguration());
         builder.ApplyConfiguration(new AuthValidationLogEntityConfiguration());
         builder.ApplyConfiguration(new IdentificationTypeEntityConfiguration());
+        builder.ApplyConfiguration(new MfaCredentialEntityConfiguration());
+        builder.ApplyConfiguration(new MfaLoginChallengeEntityConfiguration());
+        builder.ApplyConfiguration(new MfaRecoveryCodeEntityConfiguration());
         builder.ApplyConfiguration(new PermissionEntityConfiguration());
         builder.ApplyConfiguration(new RoleEntityConfiguration());
         builder.ApplyConfiguration(new RolePermissionEntityConfiguration());

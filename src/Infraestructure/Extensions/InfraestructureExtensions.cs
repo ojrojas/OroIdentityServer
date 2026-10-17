@@ -46,6 +46,17 @@ public static class InfraestructureExtensions
         builder.Services.AddScoped<ISessionRepository, SessionRepository>();
         builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         builder.Services.AddScoped<IAuthValidationLogRepository, AuthValidationLogRepository>();
+        builder.Services.AddScoped<IMfaCredentialRepository, MfaCredentialRepository>();
+        builder.Services.AddScoped<IMfaRecoveryCodeRepository, MfaRecoveryCodeRepository>();
+        builder.Services.AddScoped<IMfaLoginChallengeRepository, MfaLoginChallengeRepository>();
+
+        // Second-factor primitives and outbound email.
+        builder.Services.AddSingleton<ITotpService, OroIdentityServer.Infraestructure.Services.TotpService>();
+        builder.Services.AddSingleton<IRecoveryCodeGenerator, OroIdentityServer.Core.Services.RecoveryCodeGenerator>();
+        builder.Services.AddSingleton<IQrCodeGenerator, OroIdentityServer.Infraestructure.Services.QrCodeGenerator>();
+        builder.Services.Configure<OroIdentityServer.Core.Modules.Notifications.Options.EmailOptions>(
+            configuration.GetSection(OroIdentityServer.Core.Modules.Notifications.Options.EmailOptions.SectionName));
+        builder.Services.AddScoped<IEmailSender, OroIdentityServer.Infraestructure.Services.FileSystemEmailSender>();
 
         builder.Services.AddMemoryCache();
         builder.Services.Configure<OroIdentityServer.Core.Modules.Hierarchy.Services.HierarchyOptions>(

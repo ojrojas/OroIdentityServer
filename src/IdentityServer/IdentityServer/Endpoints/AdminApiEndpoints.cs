@@ -13,6 +13,7 @@ public static partial class AdminApiEndpoints
             .WithTags("Admin API");
 
         api.MapUsers();
+        api.MapUserMfa();
         api.MapRoles();
         api.MapPermissions();
         api.MapTenants();
@@ -25,6 +26,9 @@ public static partial class AdminApiEndpoints
         api.MapOpenIddictApplications();
         api.MapOpenIddictScopes();
 
+        // Self-service MFA (/api/me/*) is registered on the app, not on the ManagerOrAdmin group.
+        app.MapSelfServiceMfa();
+
         return app;
     }
 
@@ -35,11 +39,15 @@ public static partial class AdminApiEndpoints
     /// </summary>
     private static async Task<IResult> ToResultAsync(HttpResponseMessage response, CancellationToken ct)
     {
-        if (response.Content is { Headers.ContentLength: > 0 })
-        {
-            var body = await response.Content.ReadAsStringAsync(ct);
+        // Read the body unconditionally instead of trusting ContentLength: JsonContent is sent
+        // with chunked transfer encoding, so the header is absent and the payload would be
+        // replaced by the status-only fallback below.
+        var body = response.Content is null
+            ? string.Empty
+            : await response.Content.ReadAsStringAsync(ct);
+
+        if (!string.IsNullOrEmpty(body))
             return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
-        }
 
         // Write a JSON body so the status code pages middleware does not re-execute the request
         // against /not-found (which only handles GET) - that re-execution turns POST/DELETE failures

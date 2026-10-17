@@ -24,9 +24,18 @@
             <p class="auth-sub">@L["SignInSubtitle"]</p>
         </div>
 
-        @if (!string.IsNullOrEmpty(Error))
+        @if (Error == "invalid")
         {
             <div class="alert alert-error">@L["InvalidCredentials"]</div>
+        }
+        else if (Error == "mfa")
+        {
+            <div class="alert alert-error">@L["MfaFailed"]</div>
+        }
+
+        @if (Reason == "expired")
+        {
+            <div class="alert alert-info">@L["SessionExpiredMessage"]</div>
         }
 
         <form action="/auth/login" method="post" class="auth-form">
@@ -65,4 +74,7 @@
 @code {
     [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
     [SupplyParameterFromQuery] public string? Error { get; set; }
+
+    /// <summary>Why the user landed here (e.g. <c>expired</c> after a session timeout).</summary>
+    [SupplyParameterFromQuery] public string? Reason { get; set; }
 }

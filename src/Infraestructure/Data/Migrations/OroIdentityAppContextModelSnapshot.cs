@@ -17,7 +17,7 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -533,6 +533,169 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.ToTable("IdentificationTypes", (string)null);
                 });
 
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Mfa.Aggregates.MfaCredential", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<DateTime?>("ConfirmedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ConfirmedAtUtc");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAtUtc");
+
+                    b.Property<string>("EncryptedSecret")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("EncryptedSecret");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsEnabled");
+
+                    b.Property<long>("LastUsedTimeStep")
+                        .HasColumnType("bigint")
+                        .HasColumnName("LastUsedTimeStep");
+
+                    b.Property<DateTime?>("LastVerifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("LastVerifiedAtUtc");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserId");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_MfaCredentials_UserId");
+
+                    b.ToTable("MfaCredentials", (string)null);
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Mfa.Aggregates.MfaLoginChallenge", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("Attempts");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CompletedAtUtc");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAtUtc");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ExpiresAtUtc");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("IpAddress");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("integer")
+                        .HasColumnName("Purpose");
+
+                    b.Property<string>("ReturnUrl")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)")
+                        .HasColumnName("ReturnUrl");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("Status");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("Token");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("UserAgent");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserId");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique()
+                        .HasDatabaseName("IX_MfaLoginChallenges_Token");
+
+                    b.HasIndex("UserId", "Status")
+                        .HasDatabaseName("IX_MfaLoginChallenges_UserId_Status");
+
+                    b.ToTable("MfaLoginChallenges", (string)null);
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Mfa.Aggregates.MfaRecoveryCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("CodeHash");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAtUtc");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsUsed");
+
+                    b.Property<Guid>("MfaCredentialId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("MfaCredentialId");
+
+                    b.Property<DateTime?>("UsedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UsedAtUtc");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserId");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MfaCredentialId");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_MfaRecoveryCodes_UserId");
+
+                    b.ToTable("MfaRecoveryCodes", (string)null);
+                });
+
             modelBuilder.Entity("OroIdentityServer.Core.Modules.Permissions.Aggregates.Permission", b =>
                 {
                     b.Property<Guid>("Id")
@@ -661,6 +824,10 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("Name");
+
+                    b.Property<bool>("RequireMfa")
+                        .HasColumnType("boolean")
+                        .HasColumnName("RequireMfa");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -924,11 +1091,24 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Culture")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
                     b.Property<string>("Device")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<int>("EndReason")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("EndedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ExpiryNotifiedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("IpAddress")
@@ -961,6 +1141,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
 
                     b.HasIndex("SessionToken")
                         .IsUnique();
+
+                    b.HasIndex("EndReason", "ExpiresAt")
+                        .HasDatabaseName("IX_UserSessions_EndReason_ExpiresAt");
 
                     b.ToTable("UserSessions", (string)null);
                 });
@@ -1239,6 +1422,39 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                     b.Navigation("Tenant");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Mfa.Aggregates.MfaCredential", b =>
+                {
+                    b.HasOne("OroIdentityServer.Core.Modules.Users.Aggregates.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Mfa.Aggregates.MfaLoginChallenge", b =>
+                {
+                    b.HasOne("OroIdentityServer.Core.Modules.Users.Aggregates.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OroIdentityServer.Core.Modules.Mfa.Aggregates.MfaRecoveryCode", b =>
+                {
+                    b.HasOne("OroIdentityServer.Core.Modules.Mfa.Aggregates.MfaCredential", null)
+                        .WithMany()
+                        .HasForeignKey("MfaCredentialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OroIdentityServer.Core.Modules.Users.Aggregates.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("OroIdentityServer.Core.Modules.Roles.Aggregates.Role", b =>

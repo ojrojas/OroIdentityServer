@@ -25,6 +25,10 @@ global using OroIdentityServer.Core.Modules.UserSessions.Aggregates;
 global using OroIdentityServer.Core.Modules.UserSessions.DomainEvents;
 global using OroIdentityServer.Core.Modules.UserSessions.Entities;
 global using OroIdentityServer.Core.Modules.UserSessions.ValueObjects;
+global using OroIdentityServer.Core.Modules.Mfa.Aggregates;
+global using OroIdentityServer.Core.Modules.Mfa.DomainEvents;
+global using OroIdentityServer.Core.Modules.Mfa.Repositories;
+global using OroIdentityServer.Core.Modules.Mfa.ValueObjects;
 global using OroIdentityServer.Core.Services;
 global using OroIdentityServer.Core.Shared;
 

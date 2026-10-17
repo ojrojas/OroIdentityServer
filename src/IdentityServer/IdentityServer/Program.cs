@@ -5,6 +5,7 @@ using System.Security.Claims;
 using IdentityServer.Components;
 using IdentityServer.Server.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -35,9 +36,13 @@ if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName.E
     builder.WebHost.UseStaticWebAssets();
 }
 
-// builder.Services.AddDataProtection()
-//     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "data-protection-keys")))
-//     .SetApplicationName("OroIdentityServer");
+// A stable key ring is a requirement, not an optimisation: it is what keeps the admin cookie and
+// the pending-MFA cookie readable across restarts and across replicas, and what makes the
+// encrypted TOTP secrets in the database recoverable. The docker-compose/AppHost setups mount
+// "data-protection-keys" as a volume.
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "data-protection-keys")))
+    .SetApplicationName("OroIdentityServer");
 
 // Add services to the container.
 builder.Services.AddRazorComponents(options =>
@@ -159,17 +164,23 @@ app.Use(async (context, next) =>
 
         if (session is null || session.ExpiresAt <= DateTime.UtcNow)
         {
+            // Keep the user where they were and say why: a bare redirect to a bare login page
+            // looks like a broken app, and it is also what the "session expired" email refers to.
+            var returnUrl = Uri.EscapeDataString(context.Request.Path + context.Request.QueryString);
             await context.SignOutAsync(OroIdentityServer.Server.Authentication.CookieAuthHandlerSetup.AdminScheme);
-            context.Response.Redirect("/Account/Login");
+            context.Response.Redirect($"/Account/Login?reason=expired&ReturnUrl={returnUrl}");
             return;
         }
 
-        // Sliding expiration: refresh activity if more than half the session has elapsed
+        // Sliding expiration: refresh activity if more than half the session has elapsed, and
+        // push the database expiry forward by the same lifetime as the cookie. Without the
+        // second half the row would keep dying at a fixed wall-clock hour while the browser
+        // cookie was still valid.
         var halfLife = session.ExpiresAt.Subtract(session.CreatedAt).TotalSeconds / 2;
         var elapsed = (DateTime.UtcNow - session.CreatedAt).TotalSeconds;
         if (elapsed >= halfLife)
         {
-            session.UpdateLastActivity();
+            session.ExtendExpiry(DateTime.UtcNow.Add(OroIdentityServer.Server.Authentication.CookieAuthHandlerSetup.SessionLifetime));
             await userSessionRepo.UpdateUserSessionAsync(session, context.RequestAborted);
         }
     }

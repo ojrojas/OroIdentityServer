@@ -18,5 +18,6 @@ public interface IAdminUserService
     Task<HttpResponseMessage> UnlockUserAsync(Guid userId, CancellationToken ct = default);
     Task<HttpResponseMessage> DeactivateUserAsync(Guid userId, CancellationToken ct = default);
     Task<HttpResponseMessage> ActivateUserAsync(Guid userId, CancellationToken ct = default);
+    Task<HttpResponseMessage> ResetMfaAsync(Guid userId, CancellationToken ct = default);
     Task<ApiResponse<IEnumerable<UserModel>>?> GetUsersByRoleAndTenantAsync(string role, Guid? tenantId = null, CancellationToken ct = default);
 }

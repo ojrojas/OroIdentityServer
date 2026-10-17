@@ -38,7 +38,8 @@ public sealed class GetTenantByIdQueryHandler(
                     u.UserId.Value,
                     u.IsActive,
                     u.JoinedAtUtc)).ToList(),
-                null);
+                null,
+                tenant.RequireMfa);
 
             logger.LogInformation("Successfully retrieved tenant {TenantId}", query.TenantId);
 

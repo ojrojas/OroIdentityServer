@@ -41,6 +41,14 @@
                 <input id="isActive" type="checkbox" class="switch" @bind="isActive" />
             </label>
 
+            <label class="switch-row" for="requireMfa">
+                <span class="switch-row-text">
+                    <span class="switch-row-label">@L["MfaTenantPolicy"]</span>
+                    <span class="switch-row-sub">@L["MfaTenantPolicyHint"]</span>
+                </span>
+                <input id="requireMfa" type="checkbox" class="switch" @bind="requireMfa" />
+            </label>
+
             @if (item.CurrentSubscription is not null)
             {
                 <div class="field">
@@ -130,6 +138,7 @@
     private string name = string.Empty;
     private string slug = string.Empty;
     private bool isActive;
+    private bool requireMfa;
     private bool saving;
 
     protected override async Task OnInitializedAsync()
@@ -141,13 +150,14 @@
             name = item.Name;
             slug = item.Slug;
             isActive = item.IsActive;
+            requireMfa = item.RequireMfa;
         }
     }
 
     private async Task SaveAsync()
     {
         saving = true;
-        var response = await TenantService.UpdateTenantAsync(Id, new UpdateTenantRequest(name));
+        var response = await TenantService.UpdateTenantAsync(Id, new UpdateTenantRequest(name, requireMfa));
         saving = false;
 
         if (response.IsSuccessStatusCode)

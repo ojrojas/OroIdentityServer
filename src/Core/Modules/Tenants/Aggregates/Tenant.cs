@@ -11,6 +11,9 @@ public class Tenant : AggregateRoot<TenantId>, IAuditableEntity
     public TenantSlug Slug { get; private set; }
     public DateTime CreatedAtUtc { get; private set; }
 
+    /// <summary>Tenant-wide policy: members must pass the authenticator challenge at login.</summary>
+    public bool RequireMfa { get; private set; }
+
     private readonly List<TenantUser> _tenantUsers = [];
     public IReadOnlyCollection<TenantUser> TenantUsers => _tenantUsers;
 
@@ -104,5 +107,17 @@ public class Tenant : AggregateRoot<TenantId>, IAuditableEntity
         RaiseDomainEvent(new TenantUserAddedEvent(Id, userId));
 
         return tenantUser;
+    }
+
+    /// <summary>
+    /// When set, every user of this tenant must clear the authenticator-app challenge at login.
+    /// Users without a credential are pushed through enrolment instead of being locked out.
+    /// </summary>
+    public void UpdateMfaPolicy(bool requireMfa)
+    {
+        if (RequireMfa == requireMfa) return;
+
+        RequireMfa = requireMfa;
+        RaiseDomainEvent(new TenantUpdatedEvent(Id, Name));
     }
 }

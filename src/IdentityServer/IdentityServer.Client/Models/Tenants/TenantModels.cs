@@ -6,7 +6,8 @@ public sealed record TenantModel(
     string Slug,
     bool IsActive,
     DateTime CreatedAtUtc,
-    int UserCount);
+    int UserCount,
+    bool RequireMfa = false);
 
 public sealed record TenantDetailModel(
     Guid Id,
@@ -16,7 +17,8 @@ public sealed record TenantDetailModel(
     DateTime CreatedAtUtc,
     int UserCount,
     List<TenantUserModel> Users,
-    SubscriptionModel? CurrentSubscription);
+    SubscriptionModel? CurrentSubscription,
+    bool RequireMfa = false);
 
 public sealed record TenantUserModel(Guid UserId, bool IsActive, DateTime JoinedAtUtc);
 
@@ -31,6 +33,6 @@ public sealed record SubscriptionModel(
 
 public sealed record CreateTenantRequest(string Name, string Slug, Guid OwnerId);
 
-public sealed record UpdateTenantRequest(string Name);
+public sealed record UpdateTenantRequest(string Name, bool RequireMfa = false);
 
 public sealed record AddTenantUserRequest(Guid UserId);

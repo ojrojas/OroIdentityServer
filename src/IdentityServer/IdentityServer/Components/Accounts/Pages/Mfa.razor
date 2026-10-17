@@ -1,0 +1,75 @@
+@page "/Account/Mfa"
+@layout LoginLayout
+@attribute [AllowAnonymous]
+@inject IStringLocalizer<SharedResources> L
+@inject Microsoft.Extensions.Options.IOptions<OroIdentityServer.Shared.Options.BrandingOptions> Branding
+
+<div class="auth">
+    <div class="auth-card">
+        <div class="auth-head">
+            @if (!string.IsNullOrWhiteSpace(Branding.Value.EffectiveLogoUrl))
+            {
+                <img src="@Branding.Value.EffectiveLogoUrl" alt="@Branding.Value.AppName" class="auth-logo" />
+            }
+            else
+            {
+                <span class="auth-mark">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3l7 3v6c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z" />
+                        <path d="M9 12l2 2 4-4" />
+                    </svg>
+                </span>
+            }
+            <h1 class="auth-title">@Branding.Value.FullName</h1>
+            <p class="auth-sub">@L["MfaTitle"]</p>
+        </div>
+
+        @if (Error == "invalid")
+        {
+            <div class="alert alert-error">
+                @L["MfaInvalidCode"]
+                @if (Attempts > 0)
+                {
+                    <span>@L["MfaAttemptsRemaining", Attempts]</span>
+                }
+            </div>
+        }
+        else if (Error == "locked")
+        {
+            <div class="alert alert-error">@L["MfaLocked"]</div>
+        }
+        else if (Error == "expired")
+        {
+            <div class="alert alert-error">@L["MfaExpired"]</div>
+        }
+
+        <form action="/auth/mfa" method="post" class="auth-form">
+            <div class="field">
+                <label class="field-label" for="code">@L["MfaCodeLabel"]</label>
+                <input id="code"
+                       name="Code"
+                       class="input"
+                       type="text"
+                       inputmode="numeric"
+                       autocomplete="one-time-code"
+                       pattern="[0-9]*"
+                       maxlength="10"
+                       placeholder="000000"
+                       required
+                       autofocus />
+                <span class="field-hint">@L["MfaCodeHint"]</span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" disabled="@(Error is "expired")">
+                @L["MfaVerifyButton"]
+            </button>
+        </form>
+
+        <p class="auth-foot">@L["MfaRecoveryHint"]</p>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+    [SupplyParameterFromQuery] public int Attempts { get; set; }
+}

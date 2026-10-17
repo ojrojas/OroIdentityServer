@@ -86,7 +86,7 @@ public class ServerAdminTenantService(
 
     public async Task<HttpResponseMessage> UpdateTenantAsync(Guid id, UpdateTenantRequest request, CancellationToken ct = default)
     {
-        var result = await commandDispatcher.SendAsync(new UpdateTenantCommand(id, request.Name), ct);
+        var result = await commandDispatcher.SendAsync(new UpdateTenantCommand(id, request.Name, request.RequireMfa), ct);
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }
 
@@ -109,7 +109,7 @@ public class ServerAdminTenantService(
         return HttpResponseMessageFactory.FromResult(result, HttpStatusCode.NoContent);
     }
 
-    private static TenantModel MapTenant(TenantDto tenant) => new(tenant.Id, tenant.Name, tenant.Slug, tenant.IsActive, tenant.CreatedAtUtc, tenant.UserCount);
+    private static TenantModel MapTenant(TenantDto tenant) => new(tenant.Id, tenant.Name, tenant.Slug, tenant.IsActive, tenant.CreatedAtUtc, tenant.UserCount, tenant.RequireMfa);
 
     private static TenantDetailModel MapTenantDetail(TenantDetailDto tenant) => new(
         tenant.Id, tenant.Name, tenant.Slug, tenant.IsActive, tenant.CreatedAtUtc, tenant.UserCount,
@@ -117,5 +117,6 @@ public class ServerAdminTenantService(
         tenant.CurrentSubscription is null ? null : new SubscriptionModel(
             tenant.CurrentSubscription.Id, tenant.CurrentSubscription.Plan, tenant.CurrentSubscription.StartDate,
             tenant.CurrentSubscription.EndDate, tenant.CurrentSubscription.IsActive,
-            tenant.CurrentSubscription.MaxCompanies, tenant.CurrentSubscription.MaxUsersPerCompany));
+            tenant.CurrentSubscription.MaxCompanies, tenant.CurrentSubscription.MaxUsersPerCompany),
+        tenant.RequireMfa);
 }

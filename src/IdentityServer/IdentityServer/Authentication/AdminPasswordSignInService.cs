@@ -121,6 +121,22 @@ public sealed class AdminPasswordSignInService
         return await BuildPrincipalAsync(user, mustChangePassword: false, user.UserName ?? user.Email ?? string.Empty, ct);
     }
 
+    /// <summary>
+    /// Rebuilds the principal for a user that just cleared the second factor. Same principal as a
+    /// password sign-in, including the must-change-password claim, so the two entry points cannot
+    /// end up with different entitlements.
+    /// </summary>
+    public async Task<ClaimsPrincipal?> BuildPrincipalForSignedInUserAsync(Guid userId, CancellationToken ct)
+    {
+        var user = await _userRepository.GetUserByIdAsync(new(userId), ct);
+        if (user is null || user.SecurityUserId is null) return null;
+
+        var securityUser = await _securityUserRepository.GetSecurityUserAsync(user.SecurityUserId.Value, ct);
+        if (securityUser is null) return null;
+
+        return await BuildPrincipalAsync(user, securityUser.MustChangePassword, user.UserName ?? user.Email ?? string.Empty, ct);
+    }
+
     private async Task<ClaimsPrincipal> BuildPrincipalAsync(User user, bool mustChangePassword, string loginIdentifier, CancellationToken ct)
     {
         // The user's "role" lives in the catalogue (UserRole -> Role.Name), not in any

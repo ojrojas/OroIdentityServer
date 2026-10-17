@@ -1,0 +1,117 @@
+@page "/Account/MfaSetup"
+@layout LoginLayout
+@attribute [AllowAnonymous]
+@inject IStringLocalizer<SharedResources> L
+@inject Microsoft.Extensions.Options.IOptions<OroIdentityServer.Shared.Options.BrandingOptions> Branding
+@inject BuildingBlocks.CQRS.Abstractions.IQueryDispatcher QueryDispatcher
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+<div class="auth">
+    <div class="auth-card">
+        <div class="auth-head">
+            @if (!string.IsNullOrWhiteSpace(Branding.Value.EffectiveLogoUrl))
+            {
+                <img src="@Branding.Value.EffectiveLogoUrl" alt="@Branding.Value.AppName" class="auth-logo" />
+            }
+            else
+            {
+                <span class="auth-mark">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3l7 3v6c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z" />
+                        <path d="M9 12l2 2 4-4" />
+                    </svg>
+                </span>
+            }
+            <h1 class="auth-title">@L["MfaSetupTitle"]</h1>
+            <p class="auth-sub">@L["MfaSetupSubtitle"]</p>
+        </div>
+
+        @if (Error == "invalid")
+        {
+            <div class="alert alert-error">@L["MfaInvalidCode"]</div>
+        }
+        else if (Error == "expired")
+        {
+            <div class="alert alert-error">@L["MfaExpired"]</div>
+        }
+
+        <ol class="auth-steps">
+            <li>@L["MfaSetupStep1"]</li>
+            <li>@L["MfaSetupStep2"]</li>
+            <li>@L["MfaSetupStep3"]</li>
+        </ol>
+
+        @if (manualKey is null)
+        {
+            <div class="spinner spinner-center"></div>
+        }
+        else
+        {
+            <div class="auth-qr">
+                <img src="/auth/mfa/qr" alt="@L["MfaQrAlt"]" width="220" height="220" />
+            </div>
+
+            <div class="field">
+                <label class="field-label">@L["MfaManualKey"]</label>
+                <code class="manual-key" data-manual-key="@manualKey">@manualKey</code>
+                <span class="field-hint">@L["MfaManualKeyHint"]</span>
+            </div>
+        }
+
+        <form action="/auth/mfa/enroll" method="post" class="auth-form">
+            <div class="field">
+                <label class="field-label" for="code">@L["MfaCodeLabel"]</label>
+                <input id="code"
+                       name="Code"
+                       class="input"
+                       type="text"
+                       inputmode="numeric"
+                       autocomplete="one-time-code"
+                       pattern="[0-9]*"
+                       maxlength="10"
+                       placeholder="000000"
+                       required
+                       autofocus />
+                <span class="field-hint">@L["MfaSetupCodeHint"]</span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">@L["MfaConfirmButton"]</button>
+        </form>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+
+    /// <summary>
+    /// The manual key is resolved server-side during the static render, from the pending
+    /// challenge cookie: the page is not interactive, and the secret must never travel through
+    /// the query string.
+    /// </summary>
+    private string? manualKey;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpContext = HttpContextAccessor.HttpContext;
+        if (httpContext is null) return;
+
+        var challengeToken = await OroIdentityServer.Server.Authentication.CookieAuthHandlerSetup.GetPendingMfaChallengeTokenAsync(httpContext);
+        if (string.IsNullOrEmpty(challengeToken)) return;
+
+        var challenge = await QueryDispatcher.SendAsync(
+            new OroIdentityServer.Application.Modules.Mfa.Queries.GetMfaChallengeQuery(challengeToken));
+
+        if (!challenge.Found) return;
+
+        try
+        {
+            var payload = await QueryDispatcher.SendAsync(
+                new OroIdentityServer.Application.Modules.Mfa.Queries.GetMfaEnrollmentSecretQuery(challenge.UserId));
+            manualKey = payload.Secret;
+        }
+        catch (InvalidOperationException)
+        {
+            // No pending enrolment secret: the QR endpoint answers 404 too.
+        }
+    }
+}

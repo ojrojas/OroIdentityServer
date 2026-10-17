@@ -1,5 +1,7 @@
 using IdentityServer.Client.Interfaces;
+using OroIdentityServer.Server.Authentication;
 using IdentityServer.Services;
+using OroIdentityServer.Core.Interfaces;
 namespace IdentityServer.Server.Extensions;
 
 /// <summary>
@@ -25,7 +27,12 @@ public static class ServerAdminServiceCollectionExtensions
         services.AddScoped<IAdminDashboardService, ServerAdminDashboardService>();
         services.AddScoped<IAdminHierarchyService, ServerAdminHierarchyService>();
         services.AddScoped<IAdminBrandingService, ServerBrandingService>();
+        services.AddScoped<IAdminMfaService, ServerAdminMfaService>();
 
+        // Second-factor support services. MfaSecretProtector lives here because Data Protection
+        // is an ASP.NET Core facility, while the interface it implements lives in Core.
+        services.AddScoped<IMfaSecretProtector, MfaSecretProtector>();
+        services.AddScoped<ISessionExpiryEmailComposer, SessionExpiryEmailComposer>();
 
         return services;
     }

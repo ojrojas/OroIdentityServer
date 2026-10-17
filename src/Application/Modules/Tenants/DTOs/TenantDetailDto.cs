@@ -12,4 +12,5 @@ public record TenantDetailDto(
     DateTime CreatedAtUtc,
     int UserCount,
     List<TenantUserDto> Users,
-    SubscriptionDto? CurrentSubscription);
+    SubscriptionDto? CurrentSubscription,
+    bool RequireMfa = false);

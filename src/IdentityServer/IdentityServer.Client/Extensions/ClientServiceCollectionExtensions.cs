@@ -14,6 +14,7 @@ public static class ClientServiceCollectionExtensions
     {
         services.AddScoped<ICurrentTenantContext, CurrentTenantContext>();
         services.AddTransient<TenantHeaderHandler>();
+        services.AddTransient<UnauthorizedRedirectHandler>();
 
         services.AddHttpClient<IAdminUserService, AdminUserService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
         services.AddHttpClient<IAdminRoleService, AdminRoleService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
@@ -28,6 +29,7 @@ public static class ClientServiceCollectionExtensions
         services.AddHttpClient<IAdminDashboardService, AdminDashboardService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
         services.AddHttpClient<IAdminHierarchyService, AdminHierarchyService>(httpClient => httpClient.BaseAddress = baseAddress).AddHttpMessageHandler<TenantHeaderHandler>();
         services.AddHttpClient<IAdminBrandingService, AdminBrandingService>(httpClient => httpClient.BaseAddress = baseAddress );
+        services.AddHttpClient<IAdminMfaService, AdminMfaService>(httpClient => httpClient.BaseAddress = baseAddress);
 
         return services;
     }

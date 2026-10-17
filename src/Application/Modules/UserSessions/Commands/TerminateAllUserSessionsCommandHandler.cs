@@ -30,7 +30,7 @@ public sealed class TerminateAllUserSessionsCommandHandler(
             var sessions = await userSessionRepository.GetSessionsByUserIdAsync(new(command.UserId), cancellationToken);
             foreach (var session in sessions)
             {
-                session.DeactivateSession();
+                session.DeactivateSession(SessionEndReason.RevokedByAdmin);
                 await userSessionRepository.UpdateUserSessionAsync(session, cancellationToken);
             }
 

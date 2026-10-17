@@ -10,4 +10,5 @@ public record TenantDto(
     string Slug,
     bool IsActive,
     DateTime CreatedAtUtc,
-    int UserCount);
+    int UserCount,
+    bool RequireMfa = false);
