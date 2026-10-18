@@ -83,7 +83,10 @@ IResourceBuilder<ProjectResource> identityServer = builder.AddProject<Projects.I
     // .WithEnvironment("Branding__LogoUrl", "https://huggingface.co/front/assets/huggingface_logo-noborder.svg")
     // .WithEnvironment("Branding__FullLogoUrl", "null")
 
-    .WithEnvironment("IDENTITY_ADMIN_HTTP", "http://localhost:4200");
+    // Persisted outside bin/ so a rebuild does not orphan the admin cookie and every enrolled
+    // TOTP secret. See DataProtectionKeyRingPath in the IdentityServer project.
+    .WithEnvironment("DATA_PROTECTION_KEYS_PATH",
+            System.IO.Path.GetFullPath(System.IO.Path.Combine(builder.AppHostDirectory, "../../src/data-protection-keys")));
 
 if (rabbitMq is not null)
 {
@@ -108,6 +111,14 @@ if (enableIdentityAdmin)
        .WithEnvironment("CLIENT_ID", clientId)
        .WithEnvironment("IDENTITY_API_HTTPS", identityServer.GetEndpoint("https"))
        .WithEnvironment("IDENTITY_API_HTTP", identityServer.GetEndpoint("http"));
+
+    // The SPA derives its OIDC redirect_uri from window.location.origin, so the server has to
+    // register the *published* origin - 30645, the DCP proxy port - and not the 4200 the dev
+    // server listens on. Hardcoding 4200 here is what produced invalid_redirect_uri.
+    identityServer
+        .WithEnvironment("IDENTITY_ADMIN_HTTP", identityAdmin.GetEndpoint("http"))
+        // Seeds the OIDC client registration with the same id the SPA asks for.
+        .WithEnvironment("SEED_APP_CLIENT_ID", clientId);
 
     identityServer.WithReference(identityAdmin);
 }

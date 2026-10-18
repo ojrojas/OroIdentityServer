@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
-import { ApplicationDto } from '../../core/models';
+import { ApplicationDto, PagedResult } from '../../core/models';
 
 interface ApplicationsState {
   applications: ApplicationDto[];
@@ -14,8 +14,9 @@ export const ApplicationsStore = signalStore(
   withMethods((store, http = inject(HttpClient)) => ({
     load(): void {
       patchState(store, { loading: true });
-      http.get<ApplicationDto[]>('/api/applications').subscribe({
-        next: apps => patchState(store, { applications: apps ?? [] }),
+      // PagedResult<ApplicationDto>: the endpoint returns { items, totalCount, ... }, not a bare array.
+      http.get<PagedResult<ApplicationDto>>('/api/applications').subscribe({
+        next: page => patchState(store, { applications: page?.items ?? [] }),
         complete: () => patchState(store, { loading: false }),
       });
     },

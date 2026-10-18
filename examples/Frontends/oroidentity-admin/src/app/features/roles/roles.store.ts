@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
-import { RoleDto, CreateRoleCommand, ApiEnvelope } from '../../core/models';
+import { RoleDto, CreateRoleCommand, ApiEnvelope, PagedResult } from '../../core/models';
 
 interface RolesState {
   roles: RoleDto[];
@@ -14,8 +14,9 @@ export const RolesStore = signalStore(
   withMethods((store, http = inject(HttpClient)) => ({
     load(): void {
       patchState(store, { loading: true });
-      http.get<ApiEnvelope<RoleDto[]>>('/api/roles').subscribe({
-        next: res => patchState(store, { roles: res.data ?? [] }),
+      // The server answers with ApiEnvelope<PagedResult<RoleDto>>; res.data is the page, not the list.
+      http.get<ApiEnvelope<PagedResult<RoleDto>>>('/api/roles').subscribe({
+        next: res => patchState(store, { roles: res.data?.items ?? [] }),
         complete: () => patchState(store, { loading: false }),
       });
     },

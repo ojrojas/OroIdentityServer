@@ -495,3 +495,9 @@ pnpm-lock.yaml
 pnpm-workspace.yaml
 
 orodientityserver-admin.db
+
+# Data Protection key ring. These files ARE the master key for the admin cookie, the pending-MFA
+# cookie and every encrypted TOTP secret: committing one leaks it, and losing one makes all
+# enrolled authenticators unusable. See DataProtectionKeyRingPath.
+data-protection-keys/
+**/data-protection-keys/

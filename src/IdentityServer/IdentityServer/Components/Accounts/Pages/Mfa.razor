@@ -1,7 +1,9 @@
 @page "/Account/Mfa"
 @layout LoginLayout
 @attribute [AllowAnonymous]
+@implements IDisposable
 @inject IStringLocalizer<SharedResources> L
+@using System.Threading
 @inject Microsoft.Extensions.Options.IOptions<OroIdentityServer.Shared.Options.BrandingOptions> Branding
 
 <div class="auth">
@@ -34,6 +36,16 @@
                 }
             </div>
         }
+        else if (Error == "lockedout")
+        {
+            <div class="alert alert-error">
+                @L["MfaLockedOut"]
+                @if (SecondsRemaining > 0)
+                {
+                    <span>@L["MfaLockedOutRetryIn", FormatRemaining(SecondsRemaining)]</span>
+                }
+            </div>
+        }
         else if (Error == "locked")
         {
             <div class="alert alert-error">@L["MfaLocked"]</div>
@@ -56,11 +68,12 @@
                        maxlength="10"
                        placeholder="000000"
                        required
-                       autofocus />
+                       autofocus
+                       disabled="@IsSubmitDisabled" />
                 <span class="field-hint">@L["MfaCodeHint"]</span>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block" disabled="@(Error is "expired")">
+            <button type="submit" class="btn btn-primary btn-block" disabled="@IsSubmitDisabled">
                 @L["MfaVerifyButton"]
             </button>
         </form>
@@ -72,4 +85,50 @@
 @code {
     [SupplyParameterFromQuery] public string? Error { get; set; }
     [SupplyParameterFromQuery] public int Attempts { get; set; }
+
+    /// <summary>
+    /// Seconds the time-based lockout still has to run, as handed over by /auth/mfa. It travels in
+    /// the query string so reloading the page cannot restart the countdown from scratch.
+    /// </summary>
+    [SupplyParameterFromQuery] public int RetryAfter { get; set; }
+
+    private int _secondsRemaining;
+    private Timer? _timer;
+
+    private int SecondsRemaining => _secondsRemaining;
+
+    private bool IsSubmitDisabled => Error is "expired" || _secondsRemaining > 0;
+
+    private static string FormatRemaining(int seconds)
+    {
+        var span = TimeSpan.FromSeconds(seconds);
+        return span.TotalHours >= 1
+            ? $"{(int)span.TotalHours}h {span.Minutes:00}m"
+            : span.TotalMinutes >= 1
+                ? $"{(int)span.TotalMinutes}m {span.Seconds:00}s"
+                : $"{span.Seconds}s";
+    }
+
+    protected override void OnInitialized()
+    {
+        _secondsRemaining = Math.Max(0, RetryAfter);
+        if (_secondsRemaining == 0)
+        {
+            return;
+        }
+
+        // The server's LockedUntilUtc is the authoritative gate; this countdown only stops the user
+        // from typing into a form that is about to be rejected anyway.
+        _timer = new Timer(_ => InvokeAsync(() =>
+        {
+            if (_secondsRemaining > 0)
+            {
+                _secondsRemaining--;
+            }
+
+            StateHasChanged();
+        }), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+    }
+
+    public void Dispose() => _timer?.Dispose();
 }

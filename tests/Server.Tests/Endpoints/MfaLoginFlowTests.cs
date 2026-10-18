@@ -156,14 +156,55 @@ public sealed class MfaLoginFlowTests(AspireIdentityServerApp app)
                 Assert.StartsWith("/Account/Mfa?error=invalid", response.Headers.Location?.OriginalString);
             }
 
+            // The fifth wrong code spends both budgets at once. The per-credential lockout wins
+            // because it is the stronger one: it does not clear by retyping the password.
             var locked = await SubmitCodeAsync(client, "000001");
-            Assert.StartsWith("/Account/Mfa?error=locked", locked.Headers.Location?.OriginalString);
+            Assert.StartsWith("/Account/Mfa?error=lockedout", locked.Headers.Location?.OriginalString);
+            Assert.Contains("retryAfter=", locked.Headers.Location?.OriginalString);
 
-            // The correct code no longer helps: the challenge is spent, and the user has to go
-            // through the password step again to get a fresh attempt budget.
+            // The correct code no longer helps: the challenge is spent, and the credential is
+            // serving a lockout.
             var afterLock = await SubmitCodeAsync(client, await NextWindowCodeAsync(factor.ManualKey));
             Assert.StartsWith("/Account/Mfa?error=locked", afterLock.Headers.Location?.OriginalString);
             Assert.DoesNotContain("oro.identity.admin", SetCookies(afterLock));
+            Assert.Empty(await NewSessionsSinceAsync(before));
+        }
+        finally
+        {
+            await ResetMfaAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Mfa_Lockout_SurvivesRepeatedFreshPasswordAttempts()
+    {
+        using var enrolClient = app.CreateClient();
+        var factor = await EnrollAsync(enrolClient);
+
+        try
+        {
+            // Each round is a brand new client: a new password step, a new challenge, a fresh
+            // per-challenge counter. That is exactly the loop a brute forcer runs, and the reason a
+            // per-challenge budget on its own is not a real defence.
+            for (var round = 1; round <= MfaLoginChallengeMaxAttempts; round++)
+            {
+                using var attacker = app.CreateClient();
+                Assert.Equal("/Account/Mfa", (await LoginAsync(attacker)).Headers.Location?.OriginalString);
+                await SubmitCodeAsync(attacker, "000001");
+            }
+
+            // One more, completely fresh login: the correct code is now refused because the
+            // credential itself is serving a lockout, not because a challenge is spent.
+            using var blocked = app.CreateClient();
+            Assert.Equal("/Account/Mfa", (await LoginAsync(blocked)).Headers.Location?.OriginalString);
+
+            var before = await ActiveSessionTokensAsync();
+            var response = await SubmitCodeAsync(blocked, await NextWindowCodeAsync(factor.ManualKey));
+
+            Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+            Assert.StartsWith("/Account/Mfa?error=lockedout", response.Headers.Location?.OriginalString);
+            Assert.Contains("retryAfter=", response.Headers.Location?.OriginalString);
+            Assert.DoesNotContain("oro.identity.admin", SetCookies(response));
             Assert.Empty(await NewSessionsSinceAsync(before));
         }
         finally

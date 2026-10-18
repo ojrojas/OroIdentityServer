@@ -397,6 +397,9 @@
   <data name="MfaInvalidCode"><value>That code is not valid.</value></data>
   <data name="MfaAttemptsRemaining"><value>Attempts remaining: {0}.</value></data>
   <data name="MfaLocked"><value>Too many attempts. Sign in again to continue.</value></data>
+  <data name="MfaLockedOut"><value>Too many incorrect codes. Second-factor verification is paused for a while.</value></data>
+  <data name="MfaLockedOutRetryIn"><value>Try again in {0}.</value></data>
+  <data name="MfaSecretLost"><value>The authenticator secret could not be recovered. Set up your authenticator again.</value></data>
   <data name="MfaExpired"><value>This verification timed out. Sign in again.</value></data>
   <data name="MfaFailed"><value>Two-factor verification failed. Sign in again.</value></data>
   <data name="MfaRecoveryHint"><value>Lost your phone? Sign in again and ask an administrator to reset your authenticator.</value></data>

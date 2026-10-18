@@ -385,6 +385,9 @@
   <data name="MfaInvalidCode"><value>Dieser Code ist ungültig.</value></data>
   <data name="MfaAttemptsRemaining"><value>Verbleibende Versuche: {0}.</value></data>
   <data name="MfaLocked"><value>Zu viele Versuche. Bitte melde dich erneut an.</value></data>
+  <data name="MfaLockedOut"><value>Zu viele falsche Codes. Die Bestätigung des zweiten Faktors ist pausiert.</value></data>
+  <data name="MfaLockedOutRetryIn"><value>Versuche es in {0} erneut.</value></data>
+  <data name="MfaSecretLost"><value>The authenticator secret could not be recovered. Set up your authenticator again.</value></data>
   <data name="MfaExpired"><value>Die Bestätigung ist abgelaufen. Bitte erneut anmelden.</value></data>
   <data name="MfaFailed"><value>Die Zwei-Faktor-Bestätigung ist fehlgeschlagen. Bitte erneut anmelden.</value></data>
   <data name="MfaRecoveryHint"><value>Telefon verloren? Melde dich erneut an und bitte einen Administrator, deinen Authenticator zurückzusetzen.</value></data>

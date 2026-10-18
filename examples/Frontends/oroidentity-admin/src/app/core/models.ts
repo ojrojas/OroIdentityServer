@@ -47,6 +47,22 @@ export interface KpiData {
   route?: string;
 }
 
+/** Response of GET /api/dashboard/stats. */
+export interface DashboardStats {
+  usersCreatedToday: number;
+  rolesCreatedToday: number;
+  tenantsCreatedToday: number;
+  identificationTypesCreatedToday: number;
+  connectedUsers: number;
+  recentlyCreated: {
+    name: string;
+    typeKey: string;
+    href: string;
+    avatarSeed: string;
+    createdAtUtc: string;
+  }[];
+}
+
 export interface AuditEvent {
   id: string;
   entityName: string;
@@ -304,4 +320,17 @@ export interface ApiEnvelope<T> {
   statusCode: number;
   message: string;
   errors: string[];
+}
+
+/**
+ * Server shape of the paged list endpoints (`/api/roles`, `/api/applications`). They wrap the
+ * items in `ApiEnvelope<PagedResult<T>>` - reading `res.data` as a plain array silently yields
+ * `undefined` and an empty list.
+ */
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
 }

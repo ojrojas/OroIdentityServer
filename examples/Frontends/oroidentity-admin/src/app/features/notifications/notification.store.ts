@@ -20,22 +20,32 @@ export const NotificationStore = signalStore(
     const http = inject(HttpClient);
     return {
       load(): void {
-        http.get<Notification[]>('/api/notifications').subscribe(notifications => {
-          (store as any)._notifications.set(notifications);
+        // The identity server exposes no /api/notifications today, so this legitimately 404s.
+        // Swallowing it keeps the header bell empty instead of throwing an unhandled observable
+        // error on every render of the shell.
+        http.get<Notification[]>('/api/notifications').subscribe({
+          next: notifications => (store as any)._notifications.set(notifications ?? []),
+          error: () => (store as any)._notifications.set([]),
         });
       },
       markAsRead(id: string): void {
-        http.patch(`/api/notifications/${id}/read`, {}).subscribe(() => {
-          (store as any)._notifications.update((ns: Notification[]) =>
-            ns.map(n => n.id === id ? { ...n, isRead: true } : n)
-          );
+        http.patch(`/api/notifications/${id}/read`, {}).subscribe({
+          next: () => {
+            (store as any)._notifications.update((ns: Notification[]) =>
+              ns.map(n => n.id === id ? { ...n, isRead: true } : n)
+            );
+          },
+          error: () => undefined,
         });
       },
       markAllAsRead(): void {
-        http.patch('/api/notifications/read-all', {}).subscribe(() => {
-          (store as any)._notifications.update((ns: Notification[]) =>
-            ns.map(n => ({ ...n, isRead: true }))
-          );
+        http.patch('/api/notifications/read-all', {}).subscribe({
+          next: () => {
+            (store as any)._notifications.update((ns: Notification[]) =>
+              ns.map(n => ({ ...n, isRead: true }))
+            );
+          },
+          error: () => undefined,
         });
       },
       addNotification(notification: Notification): void {

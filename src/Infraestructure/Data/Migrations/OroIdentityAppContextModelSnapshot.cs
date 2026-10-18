@@ -553,9 +553,17 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("EncryptedSecret");
 
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("FailedAttempts");
+
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("boolean")
                         .HasColumnName("IsEnabled");
+
+                    b.Property<DateTime?>("LastFailedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("LastFailedAtUtc");
 
                     b.Property<long>("LastUsedTimeStep")
                         .HasColumnType("bigint")
@@ -565,6 +573,10 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("LastVerifiedAtUtc");
 
+                    b.Property<DateTime?>("LockedUntilUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("LockedUntilUtc");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("UserId");
@@ -573,6 +585,9 @@ namespace OroIdentityServer.Infraestructure.Data.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LockedUntilUtc")
+                        .HasDatabaseName("IX_MfaCredentials_LockedUntilUtc");
 
                     b.HasIndex("UserId")
                         .IsUnique()

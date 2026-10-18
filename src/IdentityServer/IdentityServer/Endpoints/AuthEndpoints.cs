@@ -93,8 +93,7 @@ public static class AuthEndpoints
 
             if (!verification.Succeeded)
             {
-                var reason = verification.IsLocked ? "locked" : "invalid";
-                return Results.Redirect($"/Account/Mfa?error={reason}&attempts={verification.AttemptsRemaining}");
+                return Results.Redirect(BuildMfaFailureRedirect(verification));
             }
 
             await CookieAuthHandlerSetup.ClearMfaChallengeAsync(http);
@@ -273,6 +272,37 @@ public static class AuthEndpoints
         }).DisableAntiforgery();
 
         return app;
+    }
+
+    /// <summary>
+    /// Turns a failed code submission into the query string the <c>/Account/Mfa</c> page knows how
+    /// to render. Keeping the mapping here means the page never has to understand
+    /// <see cref="MfaFailureReason"/>.
+    /// </summary>
+    internal static string BuildMfaFailureRedirect(MfaChallengeVerification verification)
+    {
+        if (verification.RequiresEnrollment
+            || verification.FailureReason == MfaFailureReason.SecretUnavailable)
+        {
+            return "/Account/MfaSetup?error=secret";
+        }
+
+        if (verification.FailureReason == MfaFailureReason.ChallengeExpired)
+        {
+            return "/Account/Mfa?error=expired";
+        }
+
+        // Two different locks, two different pages: "lockedout" carries a countdown the page
+        // renders, "locked" tells the user to start over with the password step.
+        var reason = verification.FailureReason switch
+        {
+            MfaFailureReason.LockedOut => "lockedout",
+            MfaFailureReason.ChallengeLocked => "locked",
+            _ => "invalid"
+        };
+
+        return $"/Account/Mfa?error={reason}&attempts={verification.AttemptsRemaining}"
+             + $"&retryAfter={Math.Max(0, verification.RetryAfterSeconds)}";
     }
 
     /// <summary>

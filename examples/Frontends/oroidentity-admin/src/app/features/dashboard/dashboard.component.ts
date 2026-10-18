@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { KpiData } from '../../core/models';
+import { DashboardStats, KpiData } from '../../core/models';
 import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card.component';
 import { CompanyStore } from '../company/company.store';
 import { DashboardLayoutStore } from './dashboard-layout.store';
@@ -71,21 +71,23 @@ export class DashboardComponent implements OnInit {
   readonly alerts = signal<{ type: string; message: string; route: string }[]>([]);
 
   ngOnInit(): void {
-    const companyId = this.store.activeCompany()?.id;
-    if (!companyId) { this.loading.set(false); return; }
-    this.http.get<{ kpis: KpiData[]; alerts: { type: string; message: string; route: string }[] }>(
-      `/api/dashboard/${companyId}`
-    ).subscribe({
-      next: data => { this.kpis.set(data.kpis); this.alerts.set(data.alerts); },
-      error: () => {
-        this.kpis.set([
-          { label: 'Documentos Pendientes', value: 0, icon: '📄', route: '/documents' },
-          { label: 'Asientos por Revisar', value: 0, icon: '📖', route: '/journal-entries' },
-          { label: 'Tareas en Inbox', value: 0, icon: '📥', route: '/inbox' },
-        ]);
-      },
+    // The server exposes a single /api/dashboard/stats endpoint (it is tenant-scoped by the
+    // X-Tenant-Id header, not by a company id in the path); the old /api/dashboard/{companyId}
+    // route never existed and 404'd.
+    this.http.get<DashboardStats>(`/api/dashboard/stats`).subscribe({
+      next: data => this.applyStats(data),
+      error: () => this.loading.set(false),
       complete: () => this.loading.set(false),
     });
+  }
+
+  private applyStats(stats: DashboardStats): void {
+    this.kpis.set([
+      { label: 'Usuarios creados hoy', value: stats.usersCreatedToday, icon: '👥', route: '/users' },
+      { label: 'Roles creados hoy', value: stats.rolesCreatedToday, icon: '🛡️', route: '/roles' },
+      { label: 'Tenants creados hoy', value: stats.tenantsCreatedToday, icon: '🏢', route: '/admin/settings' },
+      { label: 'Usuarios conectados', value: stats.connectedUsers, icon: '🔌', route: '/users' },
+    ]);
   }
 
   onDrop(event: CdkDragDrop<KpiData[]>): void {

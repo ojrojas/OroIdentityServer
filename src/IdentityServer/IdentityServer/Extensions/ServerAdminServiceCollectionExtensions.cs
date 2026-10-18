@@ -2,6 +2,7 @@ using IdentityServer.Client.Interfaces;
 using OroIdentityServer.Server.Authentication;
 using IdentityServer.Services;
 using OroIdentityServer.Core.Interfaces;
+using OroIdentityServer.Core.Modules.Mfa;
 namespace IdentityServer.Server.Extensions;
 
 /// <summary>
@@ -12,8 +13,13 @@ namespace IdentityServer.Server.Extensions;
 /// </summary>
 public static class ServerAdminServiceCollectionExtensions
 {
-    public static IServiceCollection AddServerAdminServices(this IServiceCollection services)
+    public static IServiceCollection AddServerAdminServices(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
+        services.Configure<MfaLockoutPolicy>(
+            configuration.GetSection(MfaLockoutPolicy.SectionName));
+
         services.AddScoped<IAdminUserService, ServerAdminUserService>();
         services.AddScoped<IAdminRoleService,ServerAdminRoleService>();
         services.AddScoped<IAdminPermissionService,ServerAdminPermissionService>();

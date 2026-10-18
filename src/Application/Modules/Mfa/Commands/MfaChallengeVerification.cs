@@ -13,7 +13,8 @@ public sealed record MfaChallengeVerification(
     bool RequiresEnrollment,
     int AttemptsRemaining,
     string? ReturnUrl,
-    int FailureReason);
+    int FailureReason,
+    int RetryAfterSeconds = 0);
 
 public static class MfaFailureReason
 {
@@ -23,4 +24,17 @@ public static class MfaFailureReason
     public const int ChallengeLocked = 3;
     public const int InvalidCode = 4;
     public const int NotEnrolled = 5;
+
+    /// <summary>
+    /// The per-credential budget was spent: the second factor is refused for
+    /// <see cref="MfaChallengeVerification.RetryAfterSeconds"/>. Unlike
+    /// <see cref="ChallengeLocked"/>, this does not clear by retyping the password.
+    /// </summary>
+    public const int LockedOut = 6;
+
+    /// <summary>
+    /// The stored secret could not be decrypted (the Data Protection key ring was rotated or
+    /// lost). The credential has been demoted and the user must enrol a new authenticator.
+    /// </summary>
+    public const int SecretUnavailable = 7;
 }

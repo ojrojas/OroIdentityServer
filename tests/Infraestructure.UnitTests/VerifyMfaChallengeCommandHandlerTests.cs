@@ -10,6 +10,7 @@ using OroIdentityServer.Application.Modules.Mfa.Commands;
 using OroIdentityServer.Application.Modules.UserSessions.Commands;
 using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Modules.Mfa.Aggregates;
+using OroIdentityServer.Core.Modules.Mfa;
 using OroIdentityServer.Core.Modules.Mfa.Enums;
 using OroIdentityServer.Core.Modules.Mfa.Repositories;
 using OroIdentityServer.Core.Modules.UserSessions.Repositories;
@@ -45,8 +46,20 @@ public class VerifyMfaChallengeCommandHandlerTests
             _totp,
             _protector,
             _recoveryGenerator,
-            _passwordHasher);
+            _passwordHasher,
+            Microsoft.Extensions.Options.Options.Create(_policy));
     }
+
+    /// <summary>
+    /// Deliberately generous so the per-challenge tests keep exercising the challenge budget:
+    /// the credential-level lockout has its own tests below with a tight budget.
+    /// </summary>
+    private readonly MfaLockoutPolicy _policy = new()
+    {
+        MaxAttemptsPerWindow = 100,
+        AttemptWindow = TimeSpan.FromMinutes(15),
+        LockoutDuration = TimeSpan.FromMinutes(15)
+    };
 
     /// <summary>
     /// Stubs the TOTP verification, including the out parameter: the handler stores the matched
@@ -262,6 +275,121 @@ public class VerifyMfaChallengeCommandHandlerTests
 
         Assert.False(result.Succeeded);
         Assert.Equal(MfaFailureReason.UnknownChallenge, result.FailureReason);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Time-based lockout: the per-challenge budget is defeated by retyping the password, so a
+    // second, per-credential budget is what actually bounds the search space.
+    // ---------------------------------------------------------------------------
+
+    [Fact]
+    public async Task WrongCodesAcrossFreshChallenges_LockTheCredentialOut()
+    {
+        _policy.MaxAttemptsPerWindow = 3;
+        var userId = Guid.NewGuid();
+        var credential = ConfirmedCredential(userId);
+        TotpReturns(valid: false);
+
+        MfaChallengeVerification result = default!;
+        for (var i = 0; i < _policy.MaxAttemptsPerWindow; i++)
+        {
+            // A brand new challenge each time, exactly what retyping the password produces: the
+            // per-challenge counter is back to zero every round, but the credential one is not.
+            var challenge = NewChallenge(userId, credential);
+            result = await _handler.HandleAsync(
+                new VerifyMfaChallengeCommand(challenge.Token, "000000"), CancellationToken.None);
+        }
+
+        Assert.False(result.Succeeded);
+        Assert.True(result.IsLocked);
+        Assert.Equal(MfaFailureReason.LockedOut, result.FailureReason);
+        Assert.Equal((int)TimeSpan.FromMinutes(15).TotalSeconds, result.RetryAfterSeconds);
+        Assert.True(credential.IsLockedOut(DateTime.UtcNow));
+        Assert.Equal(userId, result.UserId);
+    }
+
+    [Fact]
+    public async Task WhileLockedOut_NotEvenAValidCodeIsEvaluated()
+    {
+        _policy.MaxAttemptsPerWindow = 1;
+        var userId = Guid.NewGuid();
+        var credential = ConfirmedCredential(userId);
+        TotpReturns(valid: false);
+
+        var first = NewChallenge(userId, credential);
+        await _handler.HandleAsync(new VerifyMfaChallengeCommand(first.Token, "000000"), CancellationToken.None);
+
+        TotpReturns(valid: true);
+        var second = NewChallenge(userId, credential);
+        var result = await _handler.HandleAsync(
+            new VerifyMfaChallengeCommand(second.Token, "123456"), CancellationToken.None);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(MfaFailureReason.LockedOut, result.FailureReason);
+        Assert.NotEqual(MfaChallengeStatus.Completed, second.Status);
+    }
+
+    [Fact]
+    public async Task ASuccessfulCode_ClearsTheFailureCounters()
+    {
+        _policy.MaxAttemptsPerWindow = 5;
+        var userId = Guid.NewGuid();
+        var credential = ConfirmedCredential(userId);
+        TotpReturns(valid: false);
+
+        var first = NewChallenge(userId, credential);
+        await _handler.HandleAsync(new VerifyMfaChallengeCommand(first.Token, "000000"), CancellationToken.None);
+        Assert.Equal(1, credential.FailedAttempts);
+
+        TotpReturns(valid: true);
+        var second = NewChallenge(userId, credential);
+        await _handler.HandleAsync(new VerifyMfaChallengeCommand(second.Token, "123456"), CancellationToken.None);
+
+        Assert.Equal(0, credential.FailedAttempts);
+        Assert.Null(credential.LastFailedAtUtc);
+        Assert.False(credential.IsLockedOut(DateTime.UtcNow));
+    }
+
+    private static MfaCredential ConfirmedCredential(Guid userId)
+    {
+        var credential = new MfaCredential(new(userId), "protected-secret");
+        credential.Confirm(DateTime.UtcNow, timeStep: 1_000);
+        return credential;
+    }
+
+    /// <summary>Same user and credential, fresh challenge: one round of password + second factor.</summary>
+    private MfaLoginChallenge NewChallenge(Guid userId, MfaCredential credential)
+    {
+        var challenge = new MfaLoginChallenge(
+            new(userId), MfaChallengePurpose.Verify, DateTime.UtcNow.AddMinutes(5), "/users");
+
+        _credentials.GetByUserIdAsync(Arg.Any<UserId>(), Arg.Any<CancellationToken>()).Returns(credential);
+        _challenges.GetByTokenAsync(challenge.Token, Arg.Any<CancellationToken>()).Returns(challenge);
+
+        return challenge;
+    }
+
+    [Fact]
+    public async Task AnUndecryptableSecret_RequestsReenrolmentInsteadOfThrowing()
+    {
+        // The Data Protection key ring was rotated after enrolment: the raw CryptographicException
+        // used to escape and surface as a 500 on the MFA page.
+        _protector.Unprotect(Arg.Any<string>())
+            .Returns(_ => throw new OroIdentityServer.Core.Modules.Mfa.Exceptions.MfaSecretUnavailableException("key not found"));
+
+        var (challenge, credential, userId) = Arrange(MfaChallengePurpose.Verify);
+
+        var result = await _handler.HandleAsync(
+            new VerifyMfaChallengeCommand(challenge.Token, "123456"), CancellationToken.None);
+
+        Assert.False(result.Succeeded);
+        Assert.Equal(MfaFailureReason.SecretUnavailable, result.FailureReason);
+        Assert.True(result.RequiresEnrollment);
+        Assert.Equal(userId, result.UserId);
+        // Demoted, so the next login is routed to enrolment instead of a prompt that can never pass.
+        Assert.False(credential.IsEnabled);
+        Assert.Equal(0, challenge.Attempts);
+        await _credentials.Received(1).UpdateAsync(credential, Arg.Any<CancellationToken>());
     }
 
     private (MfaLoginChallenge Challenge, MfaCredential Credential, Guid UserId) Arrange(MfaChallengePurpose purpose)

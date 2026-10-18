@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Application.Modules.Mfa.Commands;
 
+using OroIdentityServer.Core.Modules.Mfa.Exceptions;
 using OroIdentityServer.Core.Modules.Users.Repositories;
 
 /// <summary>
@@ -38,7 +39,27 @@ public sealed class DisableMfaCommandHandler(
             if (credential is null)
                 return Result.Failure(Error.NotFound("MfaNotEnrolled", "This user has no MFA credential."));
 
-            var secret = secretProtector.Unprotect(credential.EncryptedSecret);
+            string secret;
+            try
+            {
+                secret = secretProtector.Unprotect(credential.EncryptedSecret);
+            }
+            catch (MfaSecretUnavailableException ex)
+            {
+                // Nothing to prove: the factor cannot be verified because its secret is gone. Turn
+                // it off and say so, instead of 500-ing on a page the user reached deliberately.
+                logger.LogError(ex, "MFA secret for user {UserId} is undecryptable; disabling the factor", command.UserId);
+                credential.RequireReenrollment();
+                await credentialRepository.UpdateAsync(credential, cancellationToken);
+
+                foreach (var stale in await recoveryCodeRepository.GetByCredentialIdAsync(credential.Id, cancellationToken))
+                    await recoveryCodeRepository.DeleteAsync(stale, cancellationToken);
+
+                return Result.Failure(Error.Conflict(
+                    "MfaSecretUnavailable",
+                    "The authenticator secret is no longer recoverable. MFA has been turned off; enrol a new authenticator."));
+            }
+
             if (!totpService.TryVerifyCode(secret, command.Code, DateTime.UtcNow, out _))
                 return Result.Failure(Error.Unauthorized("InvalidMfaCode", "The authentication code is not valid."));
 

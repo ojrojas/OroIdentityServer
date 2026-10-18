@@ -34,6 +34,13 @@ public class MfaCredentialEntityConfiguration : IEntityTypeConfiguration<MfaCred
         builder.Property(c => c.LastVerifiedAtUtc).HasColumnName("LastVerifiedAtUtc");
         builder.Property(c => c.LastUsedTimeStep).HasColumnName("LastUsedTimeStep").IsRequired();
 
+        // Brute-force state. Indexed on LockedUntilUtc so the login path can cheaply ask "is this
+        // credential serving a lockout right now" without loading every credential's history.
+        builder.Property(c => c.FailedAttempts).HasColumnName("FailedAttempts").IsRequired();
+        builder.Property(c => c.LastFailedAtUtc).HasColumnName("LastFailedAtUtc");
+        builder.Property(c => c.LockedUntilUtc).HasColumnName("LockedUntilUtc");
+        builder.HasIndex(c => c.LockedUntilUtc).HasDatabaseName("IX_MfaCredentials_LockedUntilUtc");
+
         builder.HasOne<User>()
             .WithMany()
             .HasForeignKey(c => c.UserId)

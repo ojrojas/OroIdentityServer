@@ -22,13 +22,16 @@ export const CompanyStore = signalStore(
     return {
       loadCompanies(): void {
         (store as any)._loading?.set(true);
+        // No /api/companies on the identity server yet; a 404 must leave the switcher empty
+        // rather than bubble an unhandled observable error.
         http.get<Company[]>('/api/companies').subscribe({
           next: companies => {
-            (store as any)._companies.set(companies);
-            if (companies.length && !store.activeCompany()) {
+            (store as any)._companies.set(companies ?? []);
+            if (companies?.length && !store.activeCompany()) {
               (store as any)._activeCompany.set(companies[0]);
             }
           },
+          error: () => (store as any)._companies.set([]),
           complete: () => (store as any)._loading?.set(false),
         });
       },

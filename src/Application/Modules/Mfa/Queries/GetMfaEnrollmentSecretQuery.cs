@@ -5,6 +5,7 @@
 namespace OroIdentityServer.Application.Modules.Mfa.Queries;
 
 using Microsoft.Extensions.Configuration;
+using OroIdentityServer.Core.Modules.Mfa.Exceptions;
 
 /// <summary>Plaintext secret plus the provisioning URI to render; only valid mid-enrolment.</summary>
 public sealed record MfaSecretPayload(string ProvisioningUri, string Secret);
@@ -34,7 +35,20 @@ public sealed class GetMfaEnrollmentSecretQueryHandler(
             var credential = await credentialRepository.GetByUserIdAsync(new(query.UserId), cancellationToken)
                 ?? throw new InvalidOperationException("MFA enrolment was never started for this user.");
 
-            var secret = secretProtector.Unprotect(credential.EncryptedSecret);
+            string secret;
+            try
+            {
+                secret = secretProtector.Unprotect(credential.EncryptedSecret);
+            }
+            catch (MfaSecretUnavailableException ex)
+            {
+                // The QR cannot be rebuilt from a secret nobody can read. Report it as a plain
+                // "never started" condition so the caller re-runs StartMfaEnrollment, which issues
+                // a fresh secret.
+                logger.LogError(ex, "MFA enrolment secret for user {UserId} is undecryptable; enrolment must restart", query.UserId);
+                throw new InvalidOperationException("MFA enrolment was never started for this user.", ex);
+            }
+
             var issuer = configuration["Branding:FullName"] ?? "OroIdentityServer";
 
             return new MfaSecretPayload(

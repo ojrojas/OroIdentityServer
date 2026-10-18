@@ -43,7 +43,18 @@ public static class CookieAuthHandlerSetup
 
     public static IServiceCollection AddAdminAuthentication(this IServiceCollection services)
     {
-        services.AddAuthentication(AdminScheme)
+        services.AddAuthentication(options =>
+        {
+            // The selector fronts both handlers; see AdminOrBearerSchemeSelector for why a single
+            // scheme cannot serve the cookie console and the token-authenticated SPA at once.
+            options.DefaultScheme = AdminOrBearerSchemeSelector.SchemeName;
+            options.DefaultChallengeScheme = AdminOrBearerSchemeSelector.SchemeName;
+            options.DefaultForbidScheme = AdminOrBearerSchemeSelector.SchemeName;
+        })
+            .AddPolicyScheme(
+                AdminOrBearerSchemeSelector.SchemeName,
+                "Admin cookie or OIDC bearer token",
+                options => options.ForwardDefaultSelector = AdminOrBearerSchemeSelector.Select)
             .AddCookie(MfaPendingScheme, options =>
             {
                 options.Cookie.Name = "oro.identity.mfa.pending";
@@ -113,6 +124,9 @@ public static class CookieAuthHandlerSetup
         services.AddOptions<CookieAuthenticationOptions>(MfaPendingScheme)
             .Configure<Microsoft.AspNetCore.DataProtection.IDataProtectionProvider>((options, provider) =>
                 options.DataProtectionProvider = new PurposeDataProtectionProvider(provider, MfaPendingKeyPurpose));
+
+        // Lets a bearer-authenticated request read claims the same way a cookie session does.
+        services.AddTransient<Microsoft.AspNetCore.Authentication.IClaimsTransformation, BearerClaimAliasTransformation>();
 
         return services;
     }

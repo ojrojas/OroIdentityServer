@@ -4,6 +4,7 @@
 // See the LICENSE file in the project root for details.
 namespace OroIdentityServer.Application.Modules.Mfa.Commands;
 
+using OroIdentityServer.Core.Modules.Mfa.Exceptions;
 using OroIdentityServer.Core.Shared;
 
 /// <summary>
@@ -28,7 +29,22 @@ public sealed class ConfirmMfaEnrollmentCommandHandler(
             var credential = await credentialRepository.GetByUserIdAsync(new(command.UserId), cancellationToken)
                 ?? throw new InvalidOperationException("MFA enrolment was never started for this user.");
 
-            var secret = secretProtector.Unprotect(credential.EncryptedSecret);
+            string secret;
+            try
+            {
+                secret = secretProtector.Unprotect(credential.EncryptedSecret);
+            }
+            catch (MfaSecretUnavailableException ex)
+            {
+                // The secret issued at enrolment is unreadable, so no code the user's authenticator
+                // can produce will ever confirm it. Drop back to "not enrolled" so the next login
+                // issues a fresh secret.
+                logger.LogError(ex, "MFA enrolment secret for user {UserId} is undecryptable; restarting enrolment", command.UserId);
+                credential.RequireReenrollment();
+                await credentialRepository.UpdateAsync(credential, cancellationToken);
+                throw new InvalidOperationException("The MFA enrolment secret is no longer recoverable. Start enrolment again.", ex);
+            }
+
             var now = DateTime.UtcNow;
 
             if (!totpService.TryVerifyCode(secret, command.Code, now, out var timeStep))

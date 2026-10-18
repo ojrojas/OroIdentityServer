@@ -29,6 +29,7 @@ public class AuthorizationController : Controller
     private readonly IOpenIddictScopeManager _scopeManager;
     private readonly IQueryDispatcher _queryDispatcher;
     private readonly ICommandDispatcher _commandDispatcher;
+    private readonly AdminPasswordSignInService _signInService;
 
     public AuthorizationController(
         IOpenIddictApplicationManager applicationManager,
@@ -36,7 +37,8 @@ public class AuthorizationController : Controller
         IOpenIddictTokenManager tokenManager,
         IOpenIddictScopeManager scopeManager,
         IQueryDispatcher queryDispatcher,
-        ICommandDispatcher commandDispatcher)
+        ICommandDispatcher commandDispatcher,
+        AdminPasswordSignInService signInService)
     {
         _applicationManager = applicationManager;
         _authorizationManager = authorizationManager;
@@ -44,6 +46,7 @@ public class AuthorizationController : Controller
         _scopeManager = scopeManager;
         _queryDispatcher = queryDispatcher;
         _commandDispatcher = commandDispatcher;
+        _signInService = signInService;
     }
 
     private async Task LogValidationAsync(AuthValidationEventType eventType, bool succeeded, Guid? userId, string? clientId, string? scopes, string? failureReason, CancellationToken ct)
@@ -56,16 +59,68 @@ public class AuthorizationController : Controller
     }
 
     /// <summary>
-    /// Adds one <c>permission</c> claim per domain permission granted to the user through their
-    /// active roles. The claim type/value follows standard IdentityModel behavior; destinations
-    /// are decided by <see cref="GetDestination"/>.
+    /// Builds the claims identity that OpenIddict turns into tokens.
     /// </summary>
-    private async Task AddPermissionClaimsAsync(ClaimsIdentity identity, Guid userId, CancellationToken ct)
+    /// <remarks>
+    /// The claim set comes from <see cref="AdminPasswordSignInService"/> - the same builder that
+    /// produces the admin cookie - rather than being assembled again here. That is what makes the
+    /// two entry points equivalent: a relying party that presents the access token to /api gets
+    /// exactly the entitlements the browser console would have, including
+    /// <see cref="AuthorizationClaimTypes.IsMasterAdmin"/> and the hierarchy claims that
+    /// <c>MasterAdminOnly</c> / <c>CanManageHierarchy</c> evaluate. Assembling the identity here
+    /// from scratch - as this controller used to - silently dropped them, which is why every
+    /// token-authenticated request to those endpoints came back 403.
+    /// Claim types are remapped to their OpenIddict short names (<c>sub</c>, <c>name</c>,
+    /// <c>email</c>, <c>role</c>) because that is what the OIDC clients expect to read.
+    /// </remarks>
+    private async Task<ClaimsIdentity> BuildTokenIdentityAsync(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await _queryDispatcher.SendAsync(new GetPermissionNamesByUserIdQuery(userId), ct);
-        var names = result.Data ?? [];
-        if (names.Count > 0)
-            identity.SetClaims(AuthorizationClaimTypes.Permission, [.. names]);
+        var principal = await _signInService.BuildPrincipalForSignedInUserAsync(userId, cancellationToken)
+            ?? throw new InvalidOperationException("The user details cannot be retrieved.");
+
+        var identity = new ClaimsIdentity(
+            authenticationType: TokenValidationParameters.DefaultAuthenticationType,
+            nameType: Claims.Name,
+            roleType: Claims.Role);
+
+        foreach (var claim in principal.Claims)
+        {
+            identity.AddClaim(MapClaim(claim));
+        }
+
+        // sub is mandatory in an OIDC response and the cookie principal's NameIdentifier is the
+        // one place the subject is guaranteed to be.
+        identity.SetClaim(Claims.Subject, userId.ToString());
+
+        return identity;
+    }
+
+    private static Claim MapClaim(Claim claim) => claim.Type switch
+    {
+        // The cookie uses the long ClaimTypes names; tokens must use the short OIDC ones.
+        System.Security.Claims.ClaimTypes.NameIdentifier => new Claim(Claims.Subject, claim.Value),
+        System.Security.Claims.ClaimTypes.Name => new Claim(Claims.Name, claim.Value),
+        System.Security.Claims.ClaimTypes.Email => new Claim(Claims.Email, claim.Value),
+        System.Security.Claims.ClaimTypes.Role => new Claim(Claims.Role, claim.Value),
+        _ => claim
+    };
+
+    /// <summary>
+    /// Applies the scopes, the resource list and the destination rules that decide which claim
+    /// reaches the access token and which reaches the id token.
+    /// </summary>
+    private async Task CompleteTokenIdentityAsync(ClaimsIdentity identity, IEnumerable<string> requestedScopes, CancellationToken cancellationToken)
+    {
+        identity.SetScopes(requestedScopes);
+        identity.SetResources(await _scopeManager
+            .ListResourcesAsync(identity.GetScopes(), cancellationToken)
+            .ToListAsync(cancellationToken: cancellationToken));
+
+        var principal = new ClaimsPrincipal(identity);
+        foreach (var claim in identity.Claims)
+        {
+            claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
+        }
     }
 
     [HttpGet("~/connect/authorize")]
@@ -164,29 +219,18 @@ public class AuthorizationController : Controller
             case ConsentTypes.Implicit:
             case ConsentTypes.External when authorizations.Count is not 0:
             case ConsentTypes.Explicit when authorizations.Count is not 0 && !request.HasPromptValue(PromptValues.Consent):
-                // Create the claims-based identity that will be used by OpenIddict to generate tokens.
-                var identity = new ClaimsIdentity(
-                    authenticationType: TokenValidationParameters.DefaultAuthenticationType,
-                    nameType: Claims.Name,
-                    roleType: Claims.Role);
+                // Same claims the admin cookie would carry, so the access token is a faithful
+                // stand-in for the browser session on /api.
+                var identity = await BuildTokenIdentityAsync(user.Data.Id.Value, cancellationToken);
 
-                var roles = await _queryDispatcher.SendAsync(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
-
-                // Add the claims that will be persisted in the tokens.
-                identity.SetClaim(Claims.Subject, user.Data.Id.Value.ToString())
-                        .SetClaim(Claims.Email, user.Data.Email)
-                        .SetClaim(Claims.Name, $"{user.Data.Name} {user.Data.LastName}")
-                        .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
-                        .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
-                        .SetClaims(Claims.Role, [.. roles.Data.Select(x => x.Name.Value)]);
-
-                await AddPermissionClaimsAsync(identity, user.Data.Id.Value, cancellationToken);
+                // The cookie principal carries the user name as a single claim; OIDC clients also
+                // expect preferred_username next to it.
+                identity.SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}");
 
                 // Note: in this sample, the granted scopes match the requested scope
                 // but you may want to allow the user to uncheck specific scopes.
                 // For that, simply restrict the list of scopes before calling SetScopes.
-                identity.SetScopes(request.GetScopes());
-                identity.SetResources(await _scopeManager.ListResourcesAsync(identity.GetScopes(), cancellationToken).ToListAsync(cancellationToken: cancellationToken));
+                await CompleteTokenIdentityAsync(identity, request.GetScopes(), cancellationToken);
 
                 // Automatically create a permanent authorization to avoid requiring explicit consent
                 // for future authorization or token requests containing the same scopes.
@@ -208,9 +252,6 @@ public class AuthorizationController : Controller
                     cancellationToken);
 
                 identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization, cancellationToken));
-
-                foreach (var claim in identity.Claims)
-                    claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
 
                 await LogValidationAsync(AuthValidationEventType.AuthorizeSucceeded, true, user.Data.Id.Value, request.ClientId, string.Join(" ", request.GetScopes()), null, cancellationToken);
                 return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
@@ -280,28 +321,13 @@ public class AuthorizationController : Controller
         }
 
         // Create the claims-based identity that will be used by OpenIddict to generate tokens.
-        var identity = new ClaimsIdentity(
-            authenticationType: TokenValidationParameters.DefaultAuthenticationType,
-            nameType: Claims.Name,
-            roleType: Claims.Role);
-
-        var roles = await _queryDispatcher.SendAsync(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
-
-        // Add the claims that will be persisted in the tokens.
-        identity.SetClaim(Claims.Subject, user.Data.Id.Value.ToString())
-                .SetClaim(Claims.Email, user.Data.Email)
-                .SetClaim(Claims.Name, $"{user.Data.Name} {user.Data.LastName}")
-                .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
-                .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
-                .SetClaims(Claims.Role, [.. roles.Data.Select(x => x.Name.Value)]);
-
-        await AddPermissionClaimsAsync(identity, user.Data.Id.Value, cancellationToken);
+        var identity = await BuildTokenIdentityAsync(user.Data.Id.Value, cancellationToken);
+        identity.SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}");
 
         // Note: in this sample, the granted scopes match the requested scope
         // but you may want to allow the user to uncheck specific scopes.
         // For that, simply restrict the list of scopes before calling SetScopes.
-        identity.SetScopes(request.GetScopes());
-        identity.SetResources(await _scopeManager.ListResourcesAsync(identity.GetScopes(), cancellationToken).ToListAsync(cancellationToken: cancellationToken));
+        await CompleteTokenIdentityAsync(identity, request.GetScopes(), cancellationToken);
 
         // Automatically create a permanent authorization to avoid requiring explicit consent
         // for future authorization or token requests containing the same scopes.
@@ -527,31 +553,19 @@ public class AuthorizationController : Controller
                     }));
             }
 
-            var identity = new ClaimsIdentity(result.Principal!.Claims,
-                authenticationType: TokenValidationParameters.DefaultAuthenticationType,
-                nameType: Claims.Name,
-                roleType: Claims.Role);
+            // The claims are rebuilt from the current user, not carried over from the code/refresh token:
+            // a refresh must reflect a role change, a deactivation or a new permission grant made
+            // since the original authorization.
+            var identity = await BuildTokenIdentityAsync(user.Data.Id.Value, cancellationToken);
+            identity.SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}");
 
             // ClaimsIdentity(IEnumerable<Claim>) copies claims but not OpenIddict's identity properties.
-            // Preserve these properties so access tokens keep their authorized scopes, resources/audience,
-            // authorization link, and presenter when the authorization code is exchanged.
+            // Carry the protocol properties over from the code/refresh token so access tokens keep
+            // their authorized scopes, resources/audience, authorization link and presenter.
             identity.SetScopes(result.Principal.GetScopes());
             identity.SetResources(result.Principal.GetResources());
             identity.SetAuthorizationId(result.Principal.GetAuthorizationId());
             identity.SetPresenters(result.Principal.GetPresenters());
-
-            var roles = await _queryDispatcher.SendAsync(new GetRolesByUserIdQuery(user.Data.Id.Value), cancellationToken);
-
-            // Override the user claims present in the principal in case they
-            // changed since the authorization code/refresh token was issued.
-            identity.SetClaim(Claims.Subject, user.Data.Id.Value.ToString())
-                    .SetClaim(Claims.Email, user.Data.Email)
-                    .SetClaim(Claims.Name, $"{user.Data.Name} {user.Data.LastName}")
-                    .SetClaim(Claims.PreferredUsername, $"{user.Data.Name} {user.Data.LastName}")
-                    .SetClaim(AuthorizationClaimTypes.TenantId, user.Data.TenantId?.Value.ToString() ?? string.Empty)
-                    .SetClaims(Claims.Role, [.. roles.Data.Select(x => x.Name.Value)]);
-
-            await AddPermissionClaimsAsync(identity, user.Data.Id.Value, cancellationToken);
 
             var principal = new ClaimsPrincipal(identity);
             foreach (var claim in identity.Claims)

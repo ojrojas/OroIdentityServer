@@ -1,4 +1,4 @@
-using IdentityServer.Client.Extensions;
+﻿using IdentityServer.Client.Extensions;
 using IdentityServer.Client.Services;
 using System.Globalization;
 using System.Security.Claims;
@@ -38,11 +38,27 @@ if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName.E
 
 // A stable key ring is a requirement, not an optimisation: it is what keeps the admin cookie and
 // the pending-MFA cookie readable across restarts and across replicas, and what makes the
-// encrypted TOTP secrets in the database recoverable. The docker-compose/AppHost setups mount
-// "data-protection-keys" as a volume.
+// encrypted TOTP secrets in the database recoverable. The docker-compose setup mounts
+// "data-protection-keys" as a volume; when running from source there is no volume, so the path
+// has to escape bin/ on its own - see DataProtectionKeyRingPath for why that is not optional.
+var dataProtectionOptions = builder.Configuration
+    .GetSection(OroDataProtectionOptions.SectionName)
+    .Get<OroDataProtectionOptions>() ?? new OroDataProtectionOptions();
+
+var keyRingPath = DataProtectionKeyRingPath.Resolve(builder.Configuration, AppContext.BaseDirectory);
+Directory.CreateDirectory(keyRingPath);
+Log.Information("Data Protection key ring: {KeyRingPath}", keyRingPath);
+
+builder.Services.AddOptions<OroDataProtectionOptions>()
+    .Configure(options =>
+    {
+        options.KeysPath = dataProtectionOptions.KeysPath;
+        options.KeyLifetimeDays = dataProtectionOptions.KeyLifetimeDays;
+    });
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "data-protection-keys")))
-    .SetApplicationName("OroIdentityServer");
+    .PersistKeysToFileSystem(new DirectoryInfo(keyRingPath))
+    .SetApplicationName("OroIdentityServer")
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(dataProtectionOptions.KeyLifetimeDays));
 
 // Add services to the container.
 builder.Services.AddRazorComponents(options =>
@@ -62,7 +78,7 @@ builder.Services.AddControllersWithViews();
 builder.AddInfraestructureExtensions(builder.Configuration);
 builder.Services.AddApplicationHandlers();
 builder.AddApplicationExtensions(builder.Configuration);
-builder.Services.AddServerAdminServices();
+builder.Services.AddServerAdminServices(builder.Configuration);
 
 
 builder.AddIdentityServerOpenIddict();

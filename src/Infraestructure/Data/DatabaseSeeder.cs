@@ -104,70 +104,118 @@ public static class DatabaseSeeder
         IConfiguration configuration,
         CancellationToken cancellationToken)
     {
-        var defaultClientId = configuration["SEED_APP_CLIENT_ID"] ?? "oroidentity-admin-spa";
-        var defaultDisplayName = configuration["SEED_APP_DISPLAY_NAME"] ?? configuration["Branding:DisplayName"] ?? "OroIdentity Admin SPA";
-        var defaultRedirectUri = configuration["SEED_APP_REDIRECT_URI"] ?? "https://localhost:5001/authentication/login-callback";
-        var defaultPostLogoutUri = configuration["SEED_APP_POST_LOGOUT_URI"] ?? "https://localhost:5001/authentication/logout-callback";
+        var clientId = configuration["SEED_APP_CLIENT_ID"] ?? DefaultSpaClientId;
+        var displayName = configuration["SEED_APP_DISPLAY_NAME"]
+            ?? configuration["Branding:DisplayName"]
+            ?? "OroIdentity Admin SPA";
 
-        var existing = await applicationManager.FindByClientIdAsync(defaultClientId, cancellationToken);
-        if (existing is not null)
+        // The SPA builds its redirect URI from window.location.origin, so what has to be
+        // registered is "<origin>/auth/callback" for whatever origin the dev server is actually
+        // published on - not a hardcoded pair that silently drifts from the AppHost.
+        var origin = ResolveSpaOrigin(configuration);
+        var redirectUris = new List<string>
         {
-            var descriptor = new OpenIddictApplicationDescriptor();
-            await applicationManager.PopulateAsync(descriptor, existing, cancellationToken);
-
-            var permissionsUpdated = false;
-            if (!descriptor.Permissions.Contains("ept:introspection"))
-            {
-                descriptor.Permissions.Add("ept:introspection");
-                permissionsUpdated = true;
-            }
-            if (!descriptor.Permissions.Contains("ept:revocation"))
-            {
-                descriptor.Permissions.Add("ept:revocation");
-                permissionsUpdated = true;
-            }
-            if (!descriptor.Permissions.Contains("scp:permissions"))
-            {
-                descriptor.Permissions.Add("scp:permissions");
-                permissionsUpdated = true;
-            }
-            if (permissionsUpdated)
-            {
-                await applicationManager.UpdateAsync(existing, descriptor, cancellationToken);
-            }
-            return;
-        }
-
-        var appDescriptor = new OpenIddictApplicationDescriptor
+            configuration["SEED_APP_REDIRECT_URI"] ?? $"{origin}{SpaCallbackPath}"
+        };
+        var postLogoutUris = new List<string>
         {
-            ClientId = defaultClientId,
-            DisplayName = defaultDisplayName,
-            ConsentType = ConsentTypes.Implicit,
-            ApplicationType = ApplicationTypes.Web
+            configuration["SEED_APP_POST_LOGOUT_URI"] ?? origin
         };
 
-        appDescriptor.Permissions.Add("ept:authorization");
-        appDescriptor.Permissions.Add("ept:token");
-        appDescriptor.Permissions.Add("ept:end_session");
-        appDescriptor.Permissions.Add("ept:introspection");
-        appDescriptor.Permissions.Add("ept:revocation");
-        appDescriptor.Permissions.Add("ept:userinfo");
+        foreach (var extra in SplitCsv(configuration["SEED_APP_EXTRA_ORIGINS"]))
+        {
+            if (!redirectUris.Contains($"{extra}{SpaCallbackPath}"))
+                redirectUris.Add($"{extra}{SpaCallbackPath}");
+            if (!postLogoutUris.Contains(extra))
+                postLogoutUris.Add(extra);
+        }
 
-        appDescriptor.Permissions.Add("gt:authorization_code");
-        appDescriptor.Permissions.Add("gt:refresh_token");
+        await EnsureApplicationAsync(applicationManager, BuildSpaDescriptor(clientId, displayName, redirectUris, postLogoutUris), cancellationToken);
+    }
 
-        appDescriptor.Permissions.Add("scp:openid");
-        appDescriptor.Permissions.Add("scp:profile");
-        appDescriptor.Permissions.Add("scp:email");
-        appDescriptor.Permissions.Add("scp:roles");
-        appDescriptor.Permissions.Add("scp:permissions");
+    /// <summary>Path the Angular SPA listens on for the OIDC redirect (<c>redirectUrl</c>).</summary>
+    private const string SpaCallbackPath = "/auth/callback";
 
-        appDescriptor.Requirements.Add("ft:pkce");
+    /// <summary>
+    /// Client id the <c>oroidentity-admin</c> Angular example asks for. Kept in sync with the
+    /// AppHost's <c>ClientId</c> parameter through <c>SEED_APP_CLIENT_ID</c>.
+    /// </summary>
+    private const string DefaultSpaClientId = "OroIdentityServer.Admin";
 
-        appDescriptor.RedirectUris.Add(new Uri(defaultRedirectUri));
-        appDescriptor.PostLogoutRedirectUris.Add(new Uri(defaultPostLogoutUri));
+    private static IEnumerable<string> SplitCsv(string? value) =>
+        (value ?? string.Empty)
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        await applicationManager.CreateAsync(appDescriptor, cancellationToken);
+    /// <summary>
+    /// Where the SPA is served from. <c>IDENTITY_ADMIN_HTTP</c> is what the AppHost injects and
+    /// what the admin UI itself advertises; the AppHost's own dev-server port is accepted as a
+    /// fallback so a mismatch there cannot lock the seeded client out of its own callback.
+    /// </summary>
+    private static string ResolveSpaOrigin(IConfiguration configuration)
+    {
+        var configured = configuration["SEED_APP_ORIGIN"]
+            ?? configuration["IDENTITY_ADMIN_HTTP"]
+            ?? configuration["IDENTITY_ADMIN_HTTPS"];
+
+        if (!string.IsNullOrWhiteSpace(configured))
+        {
+            return configured.TrimEnd('/');
+        }
+
+        return "http://localhost:4200";
+    }
+
+    /// <summary>
+    /// A public, PKCE-only SPA client. Two details are not optional and were the reason the
+    /// example app could not complete a login: <c>rst:code</c> (without the matching
+    /// <c>rst:*</c> permission OpenIddict rejects <c>response_type=code</c> outright), and
+    /// <c>ClientType = Public</c> (a confidential client makes the token endpoint demand a
+    /// secret, which a browser SPA cannot have).
+    /// </summary>
+    private static OpenIddictApplicationDescriptor BuildSpaDescriptor(
+        string clientId,
+        string displayName,
+        IEnumerable<string> redirectUris,
+        IEnumerable<string> postLogoutUris)
+    {
+        var descriptor = new OpenIddictApplicationDescriptor
+        {
+            ClientId = clientId,
+            DisplayName = displayName,
+            ConsentType = ConsentTypes.Implicit,
+            ApplicationType = ApplicationTypes.Web,
+            ClientType = ClientTypes.Public
+        };
+
+        descriptor.Permissions.Add(Permissions.Endpoints.Authorization);
+        descriptor.Permissions.Add(Permissions.Endpoints.Token);
+        descriptor.Permissions.Add(Permissions.Endpoints.EndSession);
+        descriptor.Permissions.Add(Permissions.Endpoints.Introspection);
+        descriptor.Permissions.Add(Permissions.Endpoints.Revocation);
+        descriptor.Permissions.Add("ept:userinfo");
+
+        descriptor.Permissions.Add(Permissions.GrantTypes.AuthorizationCode);
+        descriptor.Permissions.Add(Permissions.GrantTypes.RefreshToken);
+
+        descriptor.Permissions.Add(Permissions.ResponseTypes.Code);
+        descriptor.Permissions.Add(Permissions.ResponseTypes.IdToken);
+        descriptor.Permissions.Add(Permissions.ResponseTypes.IdToken + " " + Permissions.ResponseTypes.Token);
+
+        descriptor.Permissions.Add(Permissions.Scopes.Email);
+        descriptor.Permissions.Add("scp:offline_access");
+        descriptor.Permissions.Add("scp:openid");
+        descriptor.Permissions.Add(Permissions.Scopes.Profile);
+        descriptor.Permissions.Add(Permissions.Scopes.Roles);
+
+        descriptor.Permissions.Add("scp:permissions");
+        descriptor.Permissions.Add("scp:tenant_id");
+
+        descriptor.Requirements.Add(Requirements.Features.ProofKeyForCodeExchange);
+
+        foreach (var uri in redirectUris) descriptor.RedirectUris.Add(new Uri(uri));
+        foreach (var uri in postLogoutUris) descriptor.PostLogoutRedirectUris.Add(new Uri(uri));
+
+        return descriptor;
     }
 
     /// <summary>
@@ -239,37 +287,42 @@ public static class DatabaseSeeder
         }
     }
 
+    /// <summary>
+    /// Creates the client, or reconciles an existing one so a config change actually reaches the
+    /// database. Reconciling the full descriptor (not just the permissions) is what makes
+    /// <c>SEED_APP_REDIRECT_URI</c> / <c>rst:code</c> edits take effect without deleting the row.
+    /// A masked secret is never written back: the manager's populate step is skipped for it.
+    /// </summary>
     private static async Task EnsureApplicationAsync(
         IOpenIddictApplicationManager applicationManager,
-        OpenIddictApplicationDescriptor descriptor)
+        OpenIddictApplicationDescriptor descriptor,
+        CancellationToken cancellationToken)
     {
-        var application = await applicationManager.FindByClientIdAsync(descriptor.ClientId);
+        var application = await applicationManager.FindByClientIdAsync(descriptor.ClientId, cancellationToken);
         if (application is null)
         {
-            await applicationManager.CreateAsync(descriptor);
+            await applicationManager.CreateAsync(descriptor, cancellationToken);
             return;
         }
 
         var existing = new OpenIddictApplicationDescriptor();
-        await applicationManager.PopulateAsync(existing, application);
+        await applicationManager.PopulateAsync(existing, application, cancellationToken);
+
+        // A masked secret ("sk-****xyz") in the request must never overwrite the real one, or the
+        // client silently stops authenticating.
+        var keepSecret = string.IsNullOrEmpty(descriptor.ClientSecret) || IsMaskedSecret(descriptor.ClientSecret)
+            ? existing.ClientSecret
+            : descriptor.ClientSecret;
+
         existing.ClientId = descriptor.ClientId;
+        existing.ClientSecret = keepSecret;
         existing.DisplayName = descriptor.DisplayName;
-        existing.ClientSecret = descriptor.ClientSecret;
         existing.ClientType = descriptor.ClientType;
         existing.ApplicationType = descriptor.ApplicationType;
         existing.ConsentType = descriptor.ConsentType;
 
-        existing.Permissions.Clear();
-        foreach (var permission in descriptor.Permissions)
-        {
-            existing.Permissions.Add(permission);
-        }
-
-        existing.Requirements.Clear();
-        foreach (var requirement in descriptor.Requirements)
-        {
-            existing.Requirements.Add(requirement);
-        }
+        CopyAll(descriptor.Permissions, existing.Permissions);
+        CopyAll(descriptor.Requirements, existing.Requirements);
 
         existing.RedirectUris.Clear();
         foreach (var redirectUri in descriptor.RedirectUris)
@@ -283,7 +336,19 @@ public static class DatabaseSeeder
             existing.PostLogoutRedirectUris.Add(redirectUri);
         }
 
-        await applicationManager.UpdateAsync(application, existing);
+        await applicationManager.UpdateAsync(application, existing, cancellationToken);
+    }
+
+    /// <summary>Secrets are shown as "sk-****xyz" once created; that is not a usable credential.</summary>
+    private static bool IsMaskedSecret(string secret) => secret.Contains("****", StringComparison.Ordinal);
+
+    private static void CopyAll(ISet<string> source, ISet<string> destination)
+    {
+        destination.Clear();
+        foreach (var value in source)
+        {
+            destination.Add(value);
+        }
     }
 
     private static async Task EnsureHierarchyRolesAsync(OroIdentityAppContext context, CancellationToken cancellationToken)
