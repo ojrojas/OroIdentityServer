@@ -182,9 +182,31 @@ Validate the access token, then read the `permission` claims:
 - **JWT validation (recommended):** validate signature against the issuer JWKS
   (`/.well-known/openid-configuration` → `jwks_uri`), verify `iss`/`aud`/expiry, then check the
   `permission` claim values.
-- **Introspection:** `POST /connect/introspect` with the access token; the response includes the
-  token's claims, including `permission` (requires the client to have `ept:introspection`). See
-  `examples/NodeJsApiExample/`.
+- **Introspection:** `POST /connect/introspect` with the access token; the response mirrors the
+  token, including `role`, `permission` and `tenant_id` (requires the client to have
+  `ept:introspection`). See `examples/NodeJsApiExample/`.
+
+  **`ept:introspection` is the whole trust boundary.** A client granted that permission sees the
+  token's claims, so grant it only to confidential, server-side clients. OpenIddict withholds the
+  application claims from anyone who is not an explicit audience of the token; this server
+  deliberately re-adds them (see `IntrospectionClaimsContributor`), because the documented pattern -
+  introspect, then read `permission` - would otherwise require registering every resource server as
+  a resource of every scope the frontend requests.
+
+  Two behaviours are inherited from OpenIddict and worth knowing:
+
+  | Situation | Response |
+  |---|---|
+  | Caller lacks `ept:introspection`, token resolves | `400 unauthorized_client` |
+  | Caller lacks `ept:introspection`, token does **not** resolve | `200 {"active": false}` |
+  | Caller has `ept:introspection`, token resolves | `200` with the token's claims |
+  | Caller has `ept:introspection`, token revoked/expired/unknown | `200 {"active": false}` |
+
+  The third row of the second and third lines is the odd one: an unauthorised client learns that a
+  token is unusable. It leaks nothing (the caller already holds the token), and it is OpenIddict
+  resolving the token during request extraction, before any validation runs - this version exposes no
+  introspection passthrough to intercept it. `IntrospectionClaimsTests` in
+  `tests/Server.Tests/Endpoints/` pins the rows that matter.
 
 ```csharp
 // .NET resource server
@@ -240,6 +262,34 @@ The exact registration payload, flows, and endpoint list live in the repository 
 
 ---
 
+## 9.0 Machine-to-machine clients (`client_credentials`)
+
+For a service that acts on its own behalf there is no user and therefore no browser step:
+
+```bash
+curl -X POST https://identity.example.com/connect/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials&client_id=my-service&client_secret=…&scope=oropos.api"
+```
+
+Register the client as **confidential**, with `ept:token`, `gt:client_credentials` and
+`scp:<scope>` for every scope it may request. `consentType` is irrelevant to this grant: consent is
+an authorization-endpoint concept and there is nobody to approve anything, so `implicit`,
+`explicit` and `external` behave identically (`ClientCredentialsGrantTests` covers all three).
+
+What a machine token is and is not:
+
+- `sub` is the **client id**, not a user id. There is no `id_token` and no `refresh_token` (the
+  service can mint a new token from its own credentials at any time).
+- It carries **no** `role`, `permission`, `tenant_id` or `is_master_admin`: those come from a user's
+  catalogue membership. It therefore cannot reach the admin API, whose policies are role-based
+  (`403`), and `/connect/userinfo` answers with an error rather than inventing a profile.
+- Authorise it on **scopes and audience** (`scp` claims / `aud`), which is what an external
+  resource server should check. See §7.3 for the introspection audience requirement, which applies
+  to these tokens too.
+
+---
+
 ## 9.1 What a client sees when the user has MFA enabled
 
 MFA lives **entirely inside the interactive login**, so a client application does not have to
@@ -269,6 +319,39 @@ Consequences worth knowing:
 
 ---
 
+## 9.2 The two bundled `oroidentity-admin` examples (implicit vs explicit consent)
+
+The repository seeds the **same** Angular SPA twice, differing only in `consentType`, so the two
+behaviours can be compared side by side:
+
+| Client id | `consentType` | Dev server | What `/connect/authorize` does after login |
+|---|---|---|---|
+| `OroIdentityServer.Admin` | `implicit` | `http://localhost:4200` (Aspire publishes `30645`) | Returns the `code` immediately. |
+| `OroIdentityServer.Admin.Explicit` | `explicit` | `http://localhost:4201` (Aspire publishes `30646`) | Redirects to `/Account/Consent`, then returns the `code` once approved. |
+
+`aspire run` starts both; each has its own generated environment file and build configuration
+(`development-explicit`) because two dev servers sharing one generated file would race on
+`CLIENT_ID`. Outside Aspire, `pnpm start:explicit` runs the second one on its own.
+
+**Which one to use.** `implicit` is right for a first-party SPA: a consent screen would interrupt
+the silent renew flow on every fresh authorization and the SPA is already trusted. `explicit` is
+what you want when a resource has to be brought *under the identity server's control* rather than
+trusted by default: the user approves which scopes the client may use, and that approval becomes a
+permanent authorization recorded against the user and the client, so it is asked for once and then
+remembered (`ConsentFlowTests` covers approve, deny, re-prompt with `prompt=consent`, and
+`consent_required` for `prompt=none`).
+
+Three things are easy to get wrong here:
+
+- `consentType` is a property of the **client**, not of the request. An implicit client never shows
+  the screen even if the user has never approved anything.
+- `external` is a third value: it never shows a screen and instead requires a permanent
+  authorization to already exist (granted out of band). It is not a synonym for `explicit`.
+- Consent is an **authorization-endpoint** concept, so it is irrelevant to `client_credentials`
+  (§9.0): all three values behave identically for that grant.
+
+---
+
 ## 10. Troubleshooting
 
 | Symptom | Likely cause |
@@ -282,6 +365,11 @@ Consequences worth knowing:
 | Login redirects to `/Account/Mfa` instead of the application | The user has MFA enabled; the second factor is cleared in the browser, not by the client. |
 | A freshly enrolled code is rejected right after confirming enrolment | Confirming burns that 30-second time step (anti-replay). Use the next code the app shows. |
 | `Unprotect` of a TOTP secret fails at runtime | The Data Protection key ring (`data-protection-keys/`) changed or was not persisted; without it every enrolled authenticator is unusable. |
+| An access token still works after logout / "sign out everywhere" | Should not happen: validation runs with `EnableTokenEntryValidation()`, so `/api` re-checks the token entry and returns 401 once it is revoked. Introspection agrees. If a resource server accepts it, that server is validating offline (JWKS) and can only bound the window by the token's `exp`. |
+| Introspection returns `active: false` for a token the caller was just issued | The caller is neither the token's client nor one of its audiences and lacks `ept:introspection`. See §7.3. |
+| Introspection returns `active: true` but no `permission` claim | The caller is not an explicit audience of the token and this server's contributor did not run: check that `IntrospectionClaimsContributor` is registered (`IIntrospectionClaimsContributor`) and that the token actually carries the claim (the access token always does). |
+| A `client_credentials` token is refused by `/api` with 403 | Expected. A machine token carries no user roles, and the admin API authorises on roles. Use scopes/`aud` in the resource server instead. |
+| `/connect/userinfo` returns an error for a `client_credentials` token | Expected: there is no end user to describe, so the endpoint refuses rather than inventing an identity. |
 
 ---
 

@@ -95,9 +95,17 @@ public static class DatabaseSeeder
     }
 
     /// <summary>
-    /// Seeds a default web application with the permissions required for remote logout detection
-    /// via token introspection. The application is idempotent: if a client with the same ClientId
-    /// already exists, its permissions are updated.
+    /// Seeds the two example applications the repository ships with. Both are the same SPA; they
+    /// differ only in how consent is handled, so the difference can be observed side by side:
+    /// <list type="bullet">
+    /// <item><c>implicit</c> (the default) hands out the authorization code as soon as the user is
+    /// signed in - what an SPA wants, because a consent screen would break silent renew.</item>
+    /// <item><c>explicit</c> detours through <c>/Account/Consent</c> on the first authorization, so
+    /// the user approves which scopes the client may use and a permanent authorization is recorded
+    /// for the next ones. This is the case to reach for when a resource must be brought under the
+    /// identity server's control rather than trusted by default.</item>
+    /// </list>
+    /// Idempotent: an application with the same ClientId is reconciled instead of duplicated.
     /// </summary>
     private static async Task SeedOpenIddictApplicationsAsync(
         IOpenIddictApplicationManager applicationManager,
@@ -130,7 +138,25 @@ public static class DatabaseSeeder
                 postLogoutUris.Add(extra);
         }
 
-        await EnsureApplicationAsync(applicationManager, BuildSpaDescriptor(clientId, displayName, redirectUris, postLogoutUris), cancellationToken);
+        await EnsureApplicationAsync(
+            applicationManager,
+            BuildSpaDescriptor(clientId, displayName, ConsentTypes.Implicit, redirectUris, postLogoutUris),
+            cancellationToken);
+
+        // The explicit-consent twin. It gets its own origin because it runs as a second dev server
+        // so both examples can be open at once; sharing the implicit one would make each client
+        // accept the other's callback.
+        var explicitOrigin = ResolveExplicitSpaOrigin(configuration);
+        await EnsureApplicationAsync(
+            applicationManager,
+            BuildSpaDescriptor(
+                configuration["SEED_APP_EXPLICIT_CLIENT_ID"] ?? DefaultExplicitSpaClientId,
+                configuration["SEED_APP_EXPLICIT_DISPLAY_NAME"]
+                    ?? $"{displayName} (explicit consent)",
+                ConsentTypes.Explicit,
+                [configuration["SEED_APP_EXPLICIT_REDIRECT_URI"] ?? $"{explicitOrigin}{SpaCallbackPath}"],
+                [configuration["SEED_APP_EXPLICIT_POST_LOGOUT_URI"] ?? explicitOrigin]),
+            cancellationToken);
     }
 
     /// <summary>Path the Angular SPA listens on for the OIDC redirect (<c>redirectUrl</c>).</summary>
@@ -141,6 +167,22 @@ public static class DatabaseSeeder
     /// AppHost's <c>ClientId</c> parameter through <c>SEED_APP_CLIENT_ID</c>.
     /// </summary>
     private const string DefaultSpaClientId = "OroIdentityServer.Admin";
+
+    /// <summary>
+    /// Client id of the explicit-consent example, i.e. the same SPA run against
+    /// <c>OroIdentityServer.Admin.Explicit</c> so both consent behaviours can be compared.
+    /// </summary>
+    private const string DefaultExplicitSpaClientId = "OroIdentityServer.Admin.Explicit";
+
+    /// <summary>
+    /// The second dev server's origin. Defaults to the conventional <c>4201</c> so the example works
+    /// even when the AppHost is not driving it (tests, a plain <c>pnpm start:explicit</c>).
+    /// </summary>
+    private static string ResolveExplicitSpaOrigin(IConfiguration configuration)
+    {
+        var configured = configuration["SEED_APP_EXPLICIT_ORIGIN"];
+        return string.IsNullOrWhiteSpace(configured) ? "http://localhost:4201" : configured.TrimEnd('/');
+    }
 
     private static IEnumerable<string> SplitCsv(string? value) =>
         (value ?? string.Empty)
@@ -171,10 +213,13 @@ public static class DatabaseSeeder
     /// <c>rst:*</c> permission OpenIddict rejects <c>response_type=code</c> outright), and
     /// <c>ClientType = Public</c> (a confidential client makes the token endpoint demand a
     /// secret, which a browser SPA cannot have).
+    /// <paramref name="consentType"/> is what tells the two examples apart: <c>implicit</c> returns
+    /// the code straight away, <c>explicit</c> routes the user through <c>/Account/Consent</c>.
     /// </summary>
     private static OpenIddictApplicationDescriptor BuildSpaDescriptor(
         string clientId,
         string displayName,
+        string consentType,
         IEnumerable<string> redirectUris,
         IEnumerable<string> postLogoutUris)
     {
@@ -182,7 +227,7 @@ public static class DatabaseSeeder
         {
             ClientId = clientId,
             DisplayName = displayName,
-            ConsentType = ConsentTypes.Implicit,
+            ConsentType = consentType,
             ApplicationType = ApplicationTypes.Web,
             ClientType = ClientTypes.Public
         };

@@ -27,27 +27,27 @@ public class AuthorizationController : Controller
     private readonly IOpenIddictApplicationManager _applicationManager;
     private readonly IOpenIddictAuthorizationManager _authorizationManager;
     private readonly IOpenIddictTokenManager _tokenManager;
-    private readonly IOpenIddictScopeManager _scopeManager;
     private readonly IQueryDispatcher _queryDispatcher;
     private readonly ICommandDispatcher _commandDispatcher;
     private readonly IAdminPasswordSignInService _signInService;
+    private readonly ITokenPrincipalFactory _tokenPrincipalFactory;
 
     public AuthorizationController(
         IOpenIddictApplicationManager applicationManager,
         IOpenIddictAuthorizationManager authorizationManager,
         IOpenIddictTokenManager tokenManager,
-        IOpenIddictScopeManager scopeManager,
         IQueryDispatcher queryDispatcher,
         ICommandDispatcher commandDispatcher,
-        IAdminPasswordSignInService signInService)
+        IAdminPasswordSignInService signInService,
+        ITokenPrincipalFactory tokenPrincipalFactory)
     {
         _applicationManager = applicationManager;
         _authorizationManager = authorizationManager;
         _tokenManager = tokenManager;
-        _scopeManager = scopeManager;
         _queryDispatcher = queryDispatcher;
         _commandDispatcher = commandDispatcher;
         _signInService = signInService;
+        _tokenPrincipalFactory = tokenPrincipalFactory;
     }
 
     private async Task LogValidationAsync(AuthValidationEventType eventType, bool succeeded, Guid? userId, string? clientId, string? scopes, string? failureReason, CancellationToken ct)
@@ -110,19 +110,8 @@ public class AuthorizationController : Controller
     /// Applies the scopes, the resource list and the destination rules that decide which claim
     /// reaches the access token and which reaches the id token.
     /// </summary>
-    private async Task CompleteTokenIdentityAsync(ClaimsIdentity identity, IEnumerable<string> requestedScopes, CancellationToken cancellationToken)
-    {
-        identity.SetScopes(requestedScopes);
-        identity.SetResources(await _scopeManager
-            .ListResourcesAsync(identity.GetScopes(), cancellationToken)
-            .ToListAsync(cancellationToken: cancellationToken));
-
-        var principal = new ClaimsPrincipal(identity);
-        foreach (var claim in identity.Claims)
-        {
-            claim.SetDestinations(GetDestination.GetDestinations(principal, claim).ToArray());
-        }
-    }
+    private Task CompleteTokenIdentityAsync(ClaimsIdentity identity, IEnumerable<string> requestedScopes, CancellationToken cancellationToken)
+        => _tokenPrincipalFactory.ApplyScopesAndDestinationsAsync(identity, requestedScopes, cancellationToken);
 
     [HttpGet("~/connect/authorize")]
     [HttpPost("~/connect/authorize")]
@@ -464,8 +453,33 @@ public class AuthorizationController : Controller
         var subject = User.GetClaim(Claims.Subject) ??
             throw new InvalidOperationException("The subject claim cannot be retrieved.");
 
-        var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(Guid.Parse(subject)), cancellationToken) ??
-            throw new InvalidOperationException("The user details cannot be retrieved.");
+        // A client_credentials token authenticates a machine, not a person: its subject is the
+        // client id, so there is no user profile this endpoint could return. Answering with an
+        // error is the only correct outcome - parsing it as a user id used to surface a 500.
+        if (!Guid.TryParse(subject, out var userId))
+        {
+            return Forbid(
+                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                properties: new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidToken,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                        "The access token does not identify a user."
+                }));
+        }
+
+        var user = await _queryDispatcher.SendAsync(new GetUserByIdQuery(userId), cancellationToken);
+        if (user.Data is null)
+        {
+            return Forbid(
+                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                properties: new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidToken,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                        "The user details cannot be retrieved."
+                }));
+        }
 
         var claims = new Dictionary<string, object>(StringComparer.Ordinal)
         {
@@ -578,6 +592,18 @@ public class AuthorizationController : Controller
             return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
-        throw new InvalidOperationException("The specified grant type is not supported.");
+        // The client exchanges its own credentials for a token: there is no resource owner, so no
+        // user claim is added and consent (an authorization-endpoint concern) plays no part.
+        if (request.IsClientCredentialsGrantType())
+        {
+            var clientIdentity = _tokenPrincipalFactory.CreateClientCredentialsIdentity(request.ClientId!);
+            await CompleteTokenIdentityAsync(clientIdentity, request.GetScopes(), cancellationToken);
+
+            await LogValidationAsync(AuthValidationEventType.TokenIssued, true, null, request.ClientId, string.Join(" ", clientIdentity.GetScopes()), null, cancellationToken);
+
+            return SignIn(new ClaimsPrincipal(clientIdentity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+
+        throw new InvalidOperationException($"The specified grant type is not supported: '{request.GrantType}'.");
     }
 }

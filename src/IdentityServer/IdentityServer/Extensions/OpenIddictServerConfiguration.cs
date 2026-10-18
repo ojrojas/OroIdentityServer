@@ -4,9 +4,11 @@
 // See the LICENSE file in the project root for details.
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using IdentityServer.Services;
 using OroIdentityServer.Infraestructure;
 using OroIdentityServer.Server.Jobs;
 using OroIdentityServer.Shared.Authorization;
+using OpenIddict.Server;
 using Quartz;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -85,11 +87,27 @@ public static class OpenIddictServerConfiguration
                     .EnableUserInfoEndpointPassthrough()
                     .EnableStatusCodePagesIntegration()
                     .DisableTransportSecurityRequirement();
+
+                // Introspection is answered by OpenIddict's own pipeline (this version exposes no
+                // passthrough for it), but its built-in claim attachment withholds the application
+                // claims from anyone who is not an audience of the token. This contributor re-adds
+                // them, so an authorised introspector sees what the token actually says. See
+                // IntrospectionClaimsContributor.
+                options.AddEventHandler<OpenIddictServerEvents.HandleIntrospectionRequestContext>(builder =>
+                    builder.UseScopedHandler<IntrospectionClaimsOpenIddictHandler>());
             })
             .AddValidation(options =>
             {
                 options.UseLocalServer();
                 options.UseAspNetCore();
+
+                // Without this, validation only checks the token's signature/expiry: a token that
+                // was revoked in the database (logout, "sign out everywhere", remote logout) keeps
+                // authorising /api calls until it expires. Introspection already consults the store,
+                // so leaving this off made the two paths disagree - introspection said
+                // "active: false" while /api happily served the same token. Costs one token lookup
+                // per request, which is the price of honouring revocation.
+                options.EnableTokenEntryValidation();
             });
 
         return builder;

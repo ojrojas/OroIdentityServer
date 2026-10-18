@@ -90,6 +90,8 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<OroIdentityServer.Core.Interfaces.IPasswordHasher, OroIdentityServer.Core.Services.PasswordHasher>();
 builder.Services.AddScoped<IAdminPasswordSignInService, AdminPasswordSignInService>();
+builder.Services.AddScoped<ITokenPrincipalFactory, TokenPrincipalFactory>();
+builder.Services.AddScoped<IIntrospectionClaimsContributor, IntrospectionClaimsContributor>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {

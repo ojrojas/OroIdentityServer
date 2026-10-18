@@ -101,26 +101,48 @@ if (rabbitMq is not null)
 
 if (enableIdentityAdmin)
 {
-    // example oroidentity-admin login angular client
+    // Two instances of the same Angular example, differing only in how consent is handled, so both
+    // behaviours can be open in the browser at once. Each one owns its generated environment file
+    // (ENV_TARGET) and its build configuration; sharing them would let the two dev servers race and
+    // end up asking for each other's client id.
     var clientId = builder.AddParameter("ClientId", "OroIdentityServer.Admin");
+    var explicitClientId = builder.AddParameter("ExplicitClientId", "OroIdentityServer.Admin.Explicit");
 
     var identityAdmin = builder.AddPnpmApp("oroidentity-admin", "../Frontends/oroidentity-admin")
         .WithPnpmPackageInstallation();
 
     identityAdmin.WithHttpEndpoint(port: 30645, targetPort: 4200)
        .WithEnvironment("CLIENT_ID", clientId)
+       .WithEnvironment("ENV_TARGET", "environment.development.ts")
+       .WithEnvironment("NG_CONFIG", "development")
+       .WithEnvironment("NG_PORT", "4200")
+       .WithEnvironment("CONSENT_TYPE", "implicit")
+       .WithEnvironment("IDENTITY_API_HTTPS", identityServer.GetEndpoint("https"))
+       .WithEnvironment("IDENTITY_API_HTTP", identityServer.GetEndpoint("http"));
+
+    var identityAdminExplicit = builder.AddPnpmApp("oroidentity-admin-explicit", "../Frontends/oroidentity-admin")
+        .WithPnpmPackageInstallation();
+
+    identityAdminExplicit.WithHttpEndpoint(port: 30646, targetPort: 4201)
+       .WithEnvironment("CLIENT_ID", explicitClientId)
+       .WithEnvironment("ENV_TARGET", "environment.development.explicit.ts")
+       .WithEnvironment("NG_CONFIG", "development-explicit")
+       .WithEnvironment("NG_PORT", "4201")
+       .WithEnvironment("CONSENT_TYPE", "explicit")
        .WithEnvironment("IDENTITY_API_HTTPS", identityServer.GetEndpoint("https"))
        .WithEnvironment("IDENTITY_API_HTTP", identityServer.GetEndpoint("http"));
 
     // The SPA derives its OIDC redirect_uri from window.location.origin, so the server has to
-    // register the *published* origin - 30645, the DCP proxy port - and not the 4200 the dev
-    // server listens on. Hardcoding 4200 here is what produced invalid_redirect_uri.
+    // register the *published* origins - the DCP proxy ports - and not the 4200/4201 the dev
+    // servers listen on. Hardcoding either one is what produced invalid_redirect_uri.
     identityServer
         .WithEnvironment("IDENTITY_ADMIN_HTTP", identityAdmin.GetEndpoint("http"))
-        // Seeds the OIDC client registration with the same id the SPA asks for.
-        .WithEnvironment("SEED_APP_CLIENT_ID", clientId);
+        .WithEnvironment("SEED_APP_EXPLICIT_ORIGIN", identityAdminExplicit.GetEndpoint("http"))
+        // Seeds the OIDC client registrations with the same ids the SPAs ask for.
+        .WithEnvironment("SEED_APP_CLIENT_ID", clientId)
+        .WithEnvironment("SEED_APP_EXPLICIT_CLIENT_ID", explicitClientId);
 
-    identityServer.WithReference(identityAdmin);
+    identityServer.WithReference(identityAdmin).WithReference(identityAdminExplicit);
 }
 
 builder.Build().Run();

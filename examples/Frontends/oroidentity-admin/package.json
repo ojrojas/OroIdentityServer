@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "node change_environment.js && ng serve",
+    "start": "node change_environment.js && ng serve --configuration ${NG_CONFIG:-development} --port ${NG_PORT:-4200}",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "start:explicit": "ENV_TARGET=environment.development.explicit.ts NG_CONFIG=development-explicit NG_PORT=4201 CLIENT_ID=OroIdentityServer.Admin.Explicit node change_environment.js && ng serve --configuration development-explicit --port 4201"
   },
   "private": true,
   "dependencies": {

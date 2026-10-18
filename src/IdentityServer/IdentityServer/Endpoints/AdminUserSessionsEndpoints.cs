@@ -10,7 +10,14 @@ public static partial class AdminApiEndpoints
     {
         var g = api.MapGroup("/user-sessions");
 
-        g.MapMethods("/by-user", [HttpMethods.Query], async (Guid userId, [FromServices] IAdminUserSessionService service, CancellationToken ct)
+        // QUERY is what the Blazor console sends; GET is what everything else can actually issue.
+        // A browser SPA or a plain HttpClient has no way to send the QUERY verb, so this endpoint
+        // was unreachable outside the console. The user id binds from the query string either way,
+        // so both verbs can share the same handler.
+        g.MapMethods("/by-user", [HttpMethods.Query, HttpMethods.Get], async (
+            [FromQuery] Guid userId,
+            [FromServices] IAdminUserSessionService service,
+            CancellationToken ct)
             => Results.Ok(await service.GetByUserAsync(userId, ct)));
 
         g.MapGet("/active", async ([FromServices] IAdminUserSessionService service, CancellationToken ct)
