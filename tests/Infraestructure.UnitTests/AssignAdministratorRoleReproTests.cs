@@ -3,14 +3,23 @@
 // Licensed under the GNU AGPL v3.0 or later.
 // See the LICENSE file in the project root for details.
 using System.Security.Claims;
+using BuildingBlocks.CQRS.Abstractions;
+using BuildingBlocks.CQRS.DependencyInjection;
+using IdentityServer.Services;
 using Microsoft.Extensions.Configuration;
-using NSubstitute;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
+using OroIdentityServer.Core.Modules.Hierarchy.Services;
 using OroIdentityServer.Core.Modules.IdentificationTypes.Aggregates;
 using OroIdentityServer.Core.Modules.Roles.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Entities;
+using OroIdentityServer.Application.Extensions;
+using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Services;
+using BuildingBlocks.Kernel.Persistence;
 using OroIdentityServer.Infraestructure.Interfaces;
-using OroIdentityServer.Server.Authentication;
+using OroIdentityServer.Infraestructure.Services.Hierarchy;
+using OroIdentityServer.Shared.Authorization;
 
 namespace OroIdentityServer.Infraestructure.UnitTests;
 
@@ -43,27 +52,33 @@ public class AssignAdministratorRoleReproTests
     private static (AdminPasswordSignInService signIn, OroIdentityAppContext context) CreateSignInService()
     {
         var context = TestDbContextFactory.CreateSqlite();
+        var configuration = BuildConfiguration();
 
-        var userRepo = new UserRepository(
-            NullLogger<UserRepository>.Instance,
-            new Repository<User>(NullLogger<Repository<User>>.Instance, context),
-            Substitute.For<ISecurityUserRepository>(),
-            context);
-        var securityUserRepo = new SecurityUserRepository(
-            NullLogger<SecurityUserRepository>.Instance,
-            new Repository<SecurityUser>(NullLogger<Repository<SecurityUser>>.Instance, context));
-        var tenantRepo = new TenantRepository(
-            NullLogger<TenantRepository>.Instance,
-            new Repository<Tenant>(NullLogger<Repository<Tenant>>.Instance, context));
-        var hasher = new PasswordHasher();
+        // The service under test only talks to IQueryDispatcher: the providers below are the
+        // same registrations production uses (repositories, handlers, hierarchy service), so
+        // these tests keep covering the real query path instead of a mocked dispatcher.
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddMemoryCache();
+        services.AddSingleton<IConfiguration>(configuration);
+        services.AddSingleton(context);
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ISecurityUserRepository, SecurityUserRepository>();
+        services.AddScoped<ITenantRepository, TenantRepository>();
+        services.AddScoped<IPermissionRepository, PermissionRepository>();
+        services.AddScoped<IHierarchyService, HierarchyService>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.Configure<HierarchyOptions>(_ => { });
+        services.AddBuildingBlocksCqrs(typeof(ApplicationExtensions).Assembly);
 
+        // The scope is intentionally not disposed: the dispatcher (and therefore the scope)
+        // stays alive as long as the service does, which is the whole test.
+        var scope = services.BuildServiceProvider().CreateScope();
         var signIn = new AdminPasswordSignInService(
             NullLogger<AdminPasswordSignInService>.Instance,
-            userRepo,
-            securityUserRepo,
-            tenantRepo,
-            hasher,
-            BuildConfiguration());
+            scope.ServiceProvider.GetRequiredService<IQueryDispatcher>(),
+            configuration);
 
         return (signIn, context);
     }
@@ -101,7 +116,7 @@ public class AssignAdministratorRoleReproTests
         Assert.Contains("Admin", roleClaims);
         Assert.Contains("Administrator", roleClaims);
         Assert.DoesNotContain("Member", roleClaims);
-        Assert.True(principal.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true"));
+        Assert.True(principal.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true"));
 
         // Password-change refresh must keep the same identity.
         var refreshed = await signIn.RefreshPrincipalAsync(userId, CancellationToken.None);
@@ -109,7 +124,7 @@ public class AssignAdministratorRoleReproTests
         var refreshedRoles = refreshed!.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
         Assert.Contains("Admin", refreshedRoles);
         Assert.Contains("Administrator", refreshedRoles);
-        Assert.True(refreshed.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true"));
+        Assert.True(refreshed.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true"));
     }
 
     [Fact]
@@ -151,7 +166,7 @@ public class AssignAdministratorRoleReproTests
         var roles = principal!.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
         Assert.Contains("Administrator", roles);
         Assert.DoesNotContain("Admin", roles);
-        Assert.False(principal.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true"));
+        Assert.False(principal.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true"));
     }
 
     [Fact]
@@ -192,7 +207,7 @@ public class AssignAdministratorRoleReproTests
         Assert.Contains("Manager", roles);
         Assert.DoesNotContain("Administrator", roles);
         Assert.DoesNotContain("Admin", roles);
-        Assert.False(principal.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true"));
+        Assert.False(principal.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true"));
     }
 
     [Fact]
@@ -225,7 +240,7 @@ public class AssignAdministratorRoleReproTests
         Assert.Contains("Member", roles);
         Assert.DoesNotContain("Administrator", roles);
         Assert.DoesNotContain("Admin", roles);
-        Assert.False(principal.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true"));
+        Assert.False(principal.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true"));
     }
 
     private static async Task<Guid> SeedMasterTenantAdminWithCatalogueRoleAsync(

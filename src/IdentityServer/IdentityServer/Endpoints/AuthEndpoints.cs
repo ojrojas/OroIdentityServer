@@ -16,6 +16,7 @@ using OroIdentityServer.Application.Modules.UserSessions.Queries;
 using OroIdentityServer.Core.Interfaces;
 using OroIdentityServer.Core.Modules.Users.Repositories;
 using OroIdentityServer.Infraestructure.Interfaces;
+using IdentityServer.Services;
 using OroIdentityServer.Server.Authentication;
 
 namespace OroIdentityServer.Server.Endpoints;
@@ -35,7 +36,7 @@ public static class AuthEndpoints
         group.MapPost("/login", async (
             HttpContext http,
             [FromForm] LoginInputModel loginInput,
-            [FromServices] AdminPasswordSignInService signInService,
+            [FromServices] IAdminPasswordSignInService signInService,
             [FromServices] IQueryDispatcher queryDispatcher,
             [FromServices] ICommandDispatcher commandDispatcher,
             CancellationToken ct) =>
@@ -80,7 +81,7 @@ public static class AuthEndpoints
         group.MapPost("/mfa", async (
             HttpContext http,
             [FromForm] MfaCodeInputModel input,
-            [FromServices] AdminPasswordSignInService signInService,
+            [FromServices] IAdminPasswordSignInService signInService,
             [FromServices] ICommandDispatcher commandDispatcher,
             CancellationToken ct) =>
         {
@@ -111,7 +112,7 @@ public static class AuthEndpoints
         group.MapPost("/mfa/enroll", async (
             HttpContext http,
             [FromForm] MfaCodeInputModel input,
-            [FromServices] AdminPasswordSignInService signInService,
+            [FromServices] IAdminPasswordSignInService signInService,
             [FromServices] IQueryDispatcher queryDispatcher,
             [FromServices] ICommandDispatcher commandDispatcher,
             CancellationToken ct) =>
@@ -236,7 +237,7 @@ public static class AuthEndpoints
             [FromServices] IUserRepository userRepository,
             [FromServices] ISecurityUserRepository securityUserRepository,
             [FromServices] IPasswordHasher passwordHasher,
-            [FromServices] AdminPasswordSignInService signInService,
+            [FromServices] IAdminPasswordSignInService signInService,
             CancellationToken ct) =>
         {
             if (http.User.Identity?.IsAuthenticated != true)

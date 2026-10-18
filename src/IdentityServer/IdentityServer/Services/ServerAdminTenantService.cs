@@ -7,7 +7,7 @@ using IdentityServer.Client.Models.Tenants;
 using OroIdentityServer.Application.Modules.Tenants.Commands;
 using OroIdentityServer.Application.Modules.Tenants.DTOs;
 using OroIdentityServer.Application.Modules.Tenants.Queries;
-using OroIdentityServer.Server.Authentication;
+using OroIdentityServer.Shared.Authorization;
 
 namespace IdentityServer.Services;
 
@@ -44,7 +44,7 @@ public class ServerAdminTenantService(
         }
 
         var user = httpContextAccessor.HttpContext?.User;
-        var isMasterAdmin = user?.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true") == true;
+        var isMasterAdmin = user?.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true") == true;
         if (isMasterAdmin)
         {
             return await GetTenantsAsync(ct);

@@ -222,7 +222,7 @@ public static class DatabaseSeeder
     /// Makes sure the bootstrap admin user always ends up with everything required by the
     /// post-multi-tenant authorization checks: a TenantUser membership in the master tenant
     /// (so <c>GetTenantsByUserId</c> can resolve the user's home tenant) and the
-    /// Administrator catalogue role, which is what <c>IsMasterAdminAsync</c> looks for in
+    /// Administrator catalogue role, which is what <c>IsMasterAdminQuery</c> looks for in
     /// combination with the master tenant id to grant the <c>is_master_admin</c> claim.
     /// </summary>
     private static async Task EnsureSeedAdminCanNavigateAsync(
@@ -259,7 +259,7 @@ public static class DatabaseSeeder
                 Guid.CreateVersion7(), masterTenant.Id.Value, seedUser.Id.Value, true, DateTime.UtcNow);
         }
 
-        // 2. Home tenant must be the master tenant. IsMasterAdminAsync requires
+        // 2. Home tenant must be the master tenant. IsMasterAdminQuery requires
         //    User.TenantId == masterTenant.Id, so we sync it here for pre-existing rows
         //    via a direct UPDATE to avoid going through User.UpdateDetails (which would
         //    require a non-null IdentificationTypeId that older seed rows might not have).
@@ -270,7 +270,7 @@ public static class DatabaseSeeder
                 masterTenant.Id.Value, seedUser.Id.Value);
         }
 
-        // 3. Administrator catalogue role. This is what flips IsMasterAdminAsync to true
+        // 3. Administrator catalogue role. This is what flips IsMasterAdminQuery to true
         //    and what causes BuildPrincipalAsync to issue the "Admin" and "Administrator"
         //    claim pair. Idempotent: pre-existing rows are detected and skipped.
         var adminRole = context.Roles.IgnoreQueryFilters()

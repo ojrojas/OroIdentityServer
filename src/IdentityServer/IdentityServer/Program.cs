@@ -1,5 +1,6 @@
 ﻿using IdentityServer.Client.Extensions;
 using IdentityServer.Client.Services;
+using IdentityServer.Services;
 using System.Globalization;
 using System.Security.Claims;
 using IdentityServer.Components;
@@ -88,7 +89,7 @@ builder.Services.AddAdminAuthorization();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<OroIdentityServer.Core.Interfaces.IPasswordHasher, OroIdentityServer.Core.Services.PasswordHasher>();
-builder.Services.AddScoped<AdminPasswordSignInService>();
+builder.Services.AddScoped<IAdminPasswordSignInService, AdminPasswordSignInService>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -226,7 +227,7 @@ app.Use(async (context, next) =>
     // round-trips, so the data layer can scope queries to the current user's accessible tenants
     // without re-querying TenantUser memberships on every request.
     var isMasterAdmin = context.User?.Identity?.IsAuthenticated == true
-        && context.User.HasClaim(OroIdentityServer.Server.Authentication.AdminPasswordSignInService.IsMasterAdminClaimType, "true");
+        && context.User.HasClaim(OroIdentityServer.Shared.Authorization.AuthorizationClaimTypes.IsMasterAdmin, "true");
 
     var tenantContext = context.RequestServices.GetRequiredService<ICurrentTenantContext>();
     if (tenantId is { } id)

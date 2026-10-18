@@ -15,7 +15,7 @@ using OroIdentityServer.Core.Modules.Tenants.ValueObjects;
 using OroIdentityServer.Core.Modules.Users.Aggregates;
 using OroIdentityServer.Core.Modules.Users.Entities;
 using OroIdentityServer.Core.Shared;
-using OroIdentityServer.Server.Authentication;
+using OroIdentityServer.Shared.Authorization;
 
 namespace IdentityServer.Services;
 
@@ -66,7 +66,7 @@ public class ServerAdminUserService(
     public async Task<HttpResponseMessage> CreateUserAsync(CreateUserRequest request, CancellationToken ct = default)
     {
         var caller = httpContextAccessor.HttpContext?.User;
-        var callerIsMasterAdmin = caller?.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true") == true;
+        var callerIsMasterAdmin = caller?.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true") == true;
         if (!callerIsMasterAdmin)
         {
             if (!await IsAccessibleTenantAsync(caller, request.TenantId, ct))
@@ -84,7 +84,7 @@ public class ServerAdminUserService(
     public async Task<HttpResponseMessage> UpdateUserAsync(Guid id, UpdateUserRequest request, CancellationToken ct = default)
     {
         var caller = httpContextAccessor.HttpContext?.User;
-        var callerIsMasterAdmin = caller?.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true") == true;
+        var callerIsMasterAdmin = caller?.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true") == true;
         if (!callerIsMasterAdmin)
         {
             if (!await IsAccessibleTenantAsync(caller, request.TenantId, ct))
@@ -108,7 +108,7 @@ public class ServerAdminUserService(
     public async Task<HttpResponseMessage> AssignRolesToUserAsync(Guid userId, AssignRolesRequest request, CancellationToken ct = default)
     {
         var caller = httpContextAccessor.HttpContext?.User;
-        var callerIsMasterAdmin = caller?.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true") == true;
+        var callerIsMasterAdmin = caller?.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true") == true;
         var callerIsAdmin = caller?.IsInRole(TenantRole.Admin) == true || caller?.IsInRole(TenantRole.Administrator) == true;
 
         if (!callerIsAdmin)
@@ -161,7 +161,7 @@ public class ServerAdminUserService(
     public async Task<HttpResponseMessage> AssignPermissionsToUserAsync(Guid userId, AssignPermissionsRequest request, CancellationToken ct = default)
     {
         var caller = httpContextAccessor.HttpContext?.User;
-        var callerIsMasterAdmin = caller?.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true") == true;
+        var callerIsMasterAdmin = caller?.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true") == true;
         var callerIsAdmin = caller?.IsInRole(TenantRole.Admin) == true || caller?.IsInRole(TenantRole.Administrator) == true;
 
         if (!callerIsAdmin)
@@ -240,7 +240,7 @@ public class ServerAdminUserService(
         if (caller?.Identity?.IsAuthenticated != true) return false;
 
         // Master admin can touch any tenant; everyone else can only touch their own home tenant.
-        if (caller.HasClaim(AdminPasswordSignInService.IsMasterAdminClaimType, "true")) return true;
+        if (caller.HasClaim(AuthorizationClaimTypes.IsMasterAdmin, "true")) return true;
 
         var callerIdClaim = caller.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(callerIdClaim, out var callerGuid)) return false;

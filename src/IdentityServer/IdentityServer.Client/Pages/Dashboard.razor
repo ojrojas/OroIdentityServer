@@ -288,7 +288,7 @@
         // The WASM client's serialized AuthenticationState only carries the identity's Name
         // and Role claims (AddAuthenticationStateDeserialization drops custom claims like
         // is_master_admin), so the master admin must be detected via the "Admin" role claim,
-        // which AdminPasswordSignInService issues only to the master admin.
+        // which the sign-in service issues only to the master admin.
         isAdmin = authState.User.IsInRole("Admin") || authState.User.IsInRole("Administrator");
         TenantContext.SetMasterAdmin(isAdmin);
 

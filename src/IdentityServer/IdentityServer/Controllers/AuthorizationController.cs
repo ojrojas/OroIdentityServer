@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
+using IdentityServer.Services;
 using OroIdentityServer.Server.Authentication;
 using OroIdentityServer.Server.Helpers;
 using OroIdentityServer.Shared.Authorization;
@@ -29,7 +30,7 @@ public class AuthorizationController : Controller
     private readonly IOpenIddictScopeManager _scopeManager;
     private readonly IQueryDispatcher _queryDispatcher;
     private readonly ICommandDispatcher _commandDispatcher;
-    private readonly AdminPasswordSignInService _signInService;
+    private readonly IAdminPasswordSignInService _signInService;
 
     public AuthorizationController(
         IOpenIddictApplicationManager applicationManager,
@@ -38,7 +39,7 @@ public class AuthorizationController : Controller
         IOpenIddictScopeManager scopeManager,
         IQueryDispatcher queryDispatcher,
         ICommandDispatcher commandDispatcher,
-        AdminPasswordSignInService signInService)
+        IAdminPasswordSignInService signInService)
     {
         _applicationManager = applicationManager;
         _authorizationManager = authorizationManager;

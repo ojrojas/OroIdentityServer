@@ -173,7 +173,7 @@ public static class CookieAuthHandlerSetup
                 // SEED_TENANT_NAME. Tenant admins must not see or modify these resources.
                 policy.RequireAuthenticatedUser();
                 policy.RequireAssertion(ctx => ctx.User.HasClaim(
-                    AdminPasswordSignInService.IsMasterAdminClaimType, "true"));
+                    AuthorizationClaimTypes.IsMasterAdmin, "true"));
             })
             .AddPolicy("CanManageHierarchy", policy =>
             {
